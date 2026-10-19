@@ -38,6 +38,36 @@ input,select{width:100%;padding:10px;border:1px solid var(--bd);border-radius:8p
 th,td{padding:8px 6px;border-bottom:1px solid var(--bd);text-align:left;white-space:nowrap}th{color:var(--muted);font-weight:600}
 img.pv{max-width:100%;max-height:240px;border-radius:8px;margin-top:10px;display:none}
 pre{white-space:pre-wrap;font:inherit;margin:0}
+/* --- RAITHU MITRA CHATBOT STYLES --- */
+.chat-wrap{display:flex;flex-direction:column;min-height:440px;max-height:640px}
+.chat-feed{flex:1;overflow-y:auto;padding:8px 2px;display:flex;flex-direction:column;gap:12px;-webkit-overflow-scrolling:touch}
+.chat-bubble{max-width:88%;padding:10px 14px;border-radius:14px;font-size:14px;line-height:1.5;word-break:break-word}
+.chat-bubble.bot{align-self:flex-start;background:var(--card);border:1px solid var(--bd);border-bottom-left-radius:3px}
+.chat-bubble.user{align-self:flex-end;background:var(--pri);color:var(--pri-t);border-bottom-right-radius:3px}
+.chat-bubble pre{white-space:pre-wrap;font-family:inherit;font-size:inherit;margin:0}
+.chat-avatar{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:12px;margin-bottom:4px;color:var(--pri)}
+:root[data-theme="dark"] .chat-avatar, @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .chat-avatar{color:var(--pri)}}
+.chat-sources{margin-top:8px;padding-top:6px;border-top:1px dashed var(--bd);font-size:11px}
+.chat-sources a{color:var(--pri);text-decoration:underline;margin-right:8px;display:inline-block}
+.chat-actions{display:flex;gap:8px;margin-top:6px}
+.chat-action-btn{background:rgba(0,0,0,0.06);border:0;border-radius:12px;padding:3px 9px;font-size:11px;cursor:pointer;color:var(--text);display:inline-flex;align-items:center;gap:4px;transition:all .15s}
+:root[data-theme="dark"] .chat-action-btn, @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .chat-action-btn{background:rgba(255,255,255,0.12)}}
+.chat-chips{display:flex;gap:6px;overflow-x:auto;padding:4px 0 10px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.chat-chips::-webkit-scrollbar{display:none}
+.chat-chip{flex:0 0 auto;background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:6px 12px;font-size:12px;cursor:pointer;color:var(--text);white-space:nowrap;transition:all .15s}
+.chat-chip:hover{border-color:var(--pri);color:var(--pri)}
+.chat-input-bar{display:flex;align-items:flex-end;gap:6px;padding-top:8px;border-top:1px solid var(--bd)}
+.chat-input-bar textarea{flex:1;resize:none;padding:9px 12px;border:1px solid var(--bd);border-radius:20px;background:var(--bg);color:var(--text);font:inherit;font-size:14px;max-height:110px;min-height:40px;line-height:20px}
+.chat-btn-icon{width:40px;height:40px;border-radius:50%;border:1px solid var(--bd);background:var(--card);color:var(--text);font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .15s}
+.chat-btn-icon.active{background:#b71c1c;color:#fff;border-color:#b71c1c;animation:pulseRed 1.2s infinite}
+.chat-btn-send{width:40px;height:40px;border-radius:50%;border:0;background:var(--pri);color:var(--pri-t);font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.chat-btn-send:disabled{opacity:0.4;cursor:not-allowed}
+.chat-preview-bar{display:flex;align-items:center;gap:8px;padding:4px 0 6px;font-size:12px}
+.chat-preview-item{display:inline-flex;align-items:center;gap:6px;background:var(--ok);padding:3px 8px;border-radius:12px}
+.chat-preview-del{cursor:pointer;font-weight:bold;color:#b71c1c}
+#float_chat_btn{position:fixed;bottom:24px;right:20px;width:54px;height:54px;border-radius:50%;background:var(--pri);color:var(--pri-t);border:2px solid #fff;box-shadow:0 4px 16px rgba(0,0,0,0.25);font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:90;transition:transform .15s,box-shadow .15s}
+#float_chat_btn:hover{transform:scale(1.08);box-shadow:0 6px 20px rgba(0,0,0,0.3)}
+@keyframes pulseRed{0%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.08)}100%{opacity:1;transform:scale(1)}}
 </style></head><body>
 <header>
 <div class="hdr-top">
@@ -54,8 +84,9 @@ pre{white-space:pre-wrap;font:inherit;margin:0}
  </div>
 </div>
 <nav id="nav">
-<button data-t="reg" class="on" data-i18n="tab_reg">Register</button><button data-t="wx" data-i18n="tab_wx">Weather</button><button data-t="fert" data-i18n="tab_fert">Fertilizer</button><button data-t="dis" data-i18n="tab_dis">Disease check</button><button data-t="mandi" data-i18n="tab_mandi">Mandi prices</button><button data-t="field" data-i18n="tab_field">Field control</button>
+<button data-t="reg" class="on" data-i18n="tab_reg">Register</button><button data-t="wx" data-i18n="tab_wx">Weather</button><button data-t="fert" data-i18n="tab_fert">Fertilizer</button><button data-t="dis" data-i18n="tab_dis">Disease check</button><button data-t="chat" data-i18n="tab_chat">Ask Raithu Mitra 🌾</button><button data-t="mandi" data-i18n="tab_mandi">Mandi prices</button><button data-t="field" data-i18n="tab_field">Field control</button>
 </nav></header>
+<button id="float_chat_btn" aria-label="Ask Raithu Mitra" title="Ask Raithu Mitra / రైతు మిత్ర" onclick="openChatTab()">🌾💬</button>
 <main>
 
 <section id="reg" class="on"><div class="card"><h2 data-i18n="reg_title">Farmer registration</h2>
@@ -164,6 +195,89 @@ pre{white-space:pre-wrap;font:inherit;margin:0}
 </div>
 </section>
 
+<section id="chat">
+<div class="card" style="padding:14px">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:8px">
+    <div>
+      <h2 style="margin:0;display:flex;align-items:center;gap:6px">
+        <span>🌾</span> <span data-i18n="chat_title">Raithu Mitra (రైతు మిత్ర)</span>
+      </h2>
+      <p class="muted" style="margin:2px 0 0;font-size:12px" data-i18n="chat_sub">AI Agriculture Assistant · PJTSAU Aligned · Voice & Grounded Search</p>
+    </div>
+    <div id="chat_context_badge" style="font-size:11px;font-weight:600;padding:3px 9px;background:var(--ok);color:var(--pri);border-radius:12px;border:1px solid var(--bd);display:inline-flex;align-items:center;gap:4px">
+      🌱 <span id="chat_context_crop">Paddy</span>
+    </div>
+  </div>
+
+  <!-- Tappable Starter Questions -->
+  <div class="chat-chips" id="chat_chips">
+    <button class="chat-chip" data-q="paddy" data-i18n="chip_paddy">🌾 Paddy stem borer remedy?</button>
+    <button class="chat-chip" data-q="rain" data-i18n="chip_rain">🌦️ Will it rain this week?</button>
+    <button class="chat-chip" data-q="mandi" data-i18n="chip_mandi">💰 Today's cotton mandi rates?</button>
+    <button class="chat-chip" data-q="fert" data-i18n="chip_fert">🌱 Recommended fertilizer for maize?</button>
+  </div>
+
+  <!-- Chat conversation stream -->
+  <div class="chat-wrap">
+    <div class="chat-feed" id="chat_feed">
+      <div class="chat-bubble bot">
+        <div class="chat-avatar">🌾 Raithu Mitra (రైతు మిత్ర)</div>
+        <div class="chat-text" data-i18n="chat_welcome">నమస్కారం రైతన్నా! నేను రైతు మిత్రను. తెగుళ్లు, వాతావరణం, ఎరువులు, మార్కెట్ ధరలు లేదా పంటల సాగు విధానాలపై మీ సందేహాలను తెలుగు లేదా ఇంగ్లీషులో అడగండి. వాయిస్ మెసేజ్ లేదా ఆకుల ఫోటోలు కూడా పంపవచ్చు!</div>
+        <div class="chat-actions">
+          <button class="chat-action-btn" onclick="speakText(this.parentElement.previousElementSibling.innerText, this)">
+            🔊 <span data-i18n="chat_read">Read aloud</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Attachment preview pill -->
+    <div id="c_preview_bar" class="chat-preview-bar" style="display:none">
+      <div id="c_img_preview" class="chat-preview-item" style="display:none">
+        <span>📷 <span data-i18n="chat_photo_attached">Photo attached</span></span>
+        <span class="chat-preview-del" onclick="clearAttachedImage()" title="Remove photo">✕</span>
+      </div>
+      <div id="c_audio_preview" class="chat-preview-item" style="display:none">
+        <span>🎤 <span data-i18n="chat_audio_attached">Voice message ready</span></span>
+        <span class="chat-preview-del" onclick="clearAttachedAudio()" title="Remove audio">✕</span>
+      </div>
+    </div>
+
+    <!-- Audio recording in progress bar -->
+    <div id="c_rec_bar" style="display:none;background:#ffebee;border:1px solid #ffcdd2;border-radius:10px;padding:8px 12px;margin:6px 0;align-items:center;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#b71c1c;font-weight:600">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#b71c1c;animation:pulseRed 1s infinite"></span>
+        <span data-i18n="chat_recording">Recording voice message...</span>
+        <span id="c_rec_timer" style="font-family:monospace;font-weight:700">00:00</span>
+      </div>
+      <button class="chat-action-btn" style="background:#fff;color:#b71c1c;border:1px solid #ffcdd2" onclick="cancelAudioRecording()" data-i18n="chat_rec_cancel">
+        Cancel
+      </button>
+    </div>
+
+    <!-- Chat input controls -->
+    <div class="chat-input-bar">
+      <label for="c_file" class="chat-btn-icon" title="Attach crop photo" aria-label="Attach crop photo">
+        📷
+        <input id="c_file" type="file" accept="image/*" style="display:none" onchange="handleChatPhoto(this)">
+      </label>
+      <button id="c_mic" class="chat-btn-icon" title="Record voice message (tap to start/stop)" aria-label="Record voice message" onclick="toggleAudioRecording()">
+        🎤
+      </button>
+      <textarea id="c_text" rows="1" maxlength="1000" placeholder="Ask your farming doubt in Telugu or English..." onkeydown="handleChatKey(event)" oninput="autoGrowTextarea(this)"></textarea>
+      <button id="c_send" class="chat-btn-send" title="Send message" aria-label="Send message" onclick="sendChatMessage()">
+        ➤
+      </button>
+    </div>
+  </div>
+
+  <!-- Safety Disclaimer -->
+  <p class="muted" style="margin:10px 0 0;font-size:11px;line-height:1.4" data-i18n="chat_disclaimer">
+    ⚠️ AI recommendations are for educational guidance. Always check pesticide container labels for exact dosages and consult your Mandal Agricultural Extension Officer (AEO) or PJTSAU scientist before spraying.
+  </p>
+</div>
+</section>
+
 <section id="field"><div class="card"><h2 data-i18n="field_title">Field control (ESP32)</h2>
 <div id="fi_cfg"></div>
 <div id="fi_ui" style="display:none">
@@ -196,8 +310,29 @@ const TRANSLATIONS = {
     tab_wx: "Weather",
     tab_fert: "Fertilizer",
     tab_dis: "Disease check",
+    tab_chat: "Ask Raithu Mitra 🌾",
     tab_mandi: "Mandi prices",
     tab_field: "Field control",
+    // chat
+    chat_title: "Raithu Mitra (రైతు మిత్ర)",
+    chat_sub: "AI Agriculture Assistant · PJTSAU Aligned · Voice & Grounded Search",
+    chat_welcome: "Namaskaram! I am Raithu Mitra. Ask me any farming questions in Telugu, English, or Hindi — about pests, weather, fertilizers, crop practices, or market rates. You can also send voice notes or crop leaf photos!",
+    chat_placeholder: "Ask your farming doubt in Telugu or English...",
+    chat_send: "Send",
+    chat_thinking: "🌾 Raithu Mitra is thinking...",
+    chat_recording: "Recording voice message... (tap mic to stop)",
+    chat_rec_cancel: "Cancel",
+    chat_photo_attached: "Photo attached",
+    chat_audio_attached: "Voice message ready",
+    chat_sources: "Search Sources:",
+    chat_read: "Read aloud",
+    chat_stop_read: "Stop",
+    chat_disclaimer: "⚠️ AI recommendations are for educational guidance. Always check pesticide container labels for exact dosages and consult your Mandal Agricultural Extension Officer (AEO) or PJTSAU scientist before spraying.",
+    chip_paddy: "🌾 Paddy stem borer remedy?",
+    chip_rain: "🌦️ Will it rain this week?",
+    chip_mandi: "💰 Today's cotton mandi rates?",
+    chip_fert: "🌱 Recommended fertilizer for maize?",
+    chat_offline: "Offline demo: Raithu Mitra AI chat requires internet connectivity to answer questions.",
     // register
     reg_title: "Farmer registration",
     reg_name: "Name",
@@ -332,8 +467,29 @@ const TRANSLATIONS = {
     tab_wx: "వాతావరణం",
     tab_fert: "ఎరువులు",
     tab_dis: "తెగుళ్ల నివారణ",
+    tab_chat: "రైతు మిత్ర 🌾",
     tab_mandi: "మార్కెట్ ధరలు",
     tab_field: "పొలం నియంత్రణ",
+    // chat
+    chat_title: "రైతు మిత్ర (Raithu Mitra)",
+    chat_sub: "AI వ్యవసాయ సహాయకుడు · PJTSAU ఆధారితం · వాయిస్ & ఇంటర్నెట్ శోధన",
+    chat_welcome: "నమస్కారం రైతన్నా! నేను రైతు మిత్రను. తెగుళ్లు, వాతావరణం, ఎరువులు, మార్కెట్ ధరలు లేదా పంటల సాగు విధానాలపై మీ సందేహాలను తెలుగు లేదా ఇంగ్లీషులో అడగండి. వాయిస్ మెసేజ్ లేదా ఆకుల ఫోటోలు కూడా పంపవచ్చు!",
+    chat_placeholder: "మీ వ్యవసాయ సందేహాన్ని తెలుగులో అడగండి...",
+    chat_send: "పంపు",
+    chat_thinking: "🌾 రైతు మిత్ర సమాధానం సిద్ధం చేస్తోంది...",
+    chat_recording: "వాయిస్ రికార్డ్ అవుతోంది... (ఆపడానికి మైక్ నొక్కండి)",
+    chat_rec_cancel: "రద్దు",
+    chat_photo_attached: "ఫోటో జతచేయబడింది",
+    chat_audio_attached: "వాయిస్ మెసేజ్ సిద్ధంగా ఉంది",
+    chat_sources: "ఆధారిత లింకులు:",
+    chat_read: "చదవండి",
+    chat_stop_read: "ఆపండి",
+    chat_disclaimer: "⚠️ AI ఇచ్చే సమాచారం సూచన మాత్రమే. రసాయన మందుల మోతాదులను ఉత్పత్తి లేబుల్‌పై సరిచూసుకొని, పిచికారీ చేసే ముందు మీ స్థానిక మండల వ్యవసాయ విస్తరణ అధికారి (AEO) లేదా PJTSAU శాస్త్రవేత్తను సంప్రదించండి.",
+    chip_paddy: "🌾 వరిలో కాండం తొలుచు పురుగు నివారణ ఏమిటి?",
+    chip_rain: "🌦️ ఈ వారం మా ప్రాంతంలో వర్షం పడుతుందా?",
+    chip_mandi: "💰 నేడు మార్కెట్లో పత్తి క్వింటాల్ ధర ఎంత?",
+    chip_fert: "🌱 మొక్కజొన్నకు PJTSAU సిఫారసు చేసిన ఎరువుల మోతాదు ఎంత?",
+    chat_offline: "ఆఫ్‌లైన్ డెమో: రైతు మిత్ర AI చాట్ కోసం ఇంటర్నెట్ కనెక్షన్ అవసరం.",
     // register
     reg_title: "రైతు నమోదు",
     reg_name: "పేరు",
@@ -550,13 +706,15 @@ function setLang(lang){
   showMandi();
   renderCurrentChart();
   if($("d_lang"))$("d_lang").value=(curLang==="te"?"Telugu":"English");
+  if($("c_text"))$("c_text").placeholder=TRANSLATIONS[curLang].chat_placeholder;
+  if(typeof updateChatCropBadge==="function")updateChatCropBadge();
 }
 
 // tabs
 $("nav").onclick=e=>{const t=e.target.dataset.t;if(!t)return;
  document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b===e.target));
  document.querySelectorAll("section").forEach(s=>s.classList.toggle("on",s.id===t));
- if(t==="wx")loadWx();if(t==="mandi")showMandi();window.scrollTo(0,0)};
+ if(t==="wx")loadWx();if(t==="mandi")showMandi();if(t==="chat"&&typeof updateChatCropBadge==="function")updateChatCropBadge();window.scrollTo(0,0)};
 
 // registration
 const KEY="sfa_profile";
@@ -967,6 +1125,352 @@ if(!DB){
     }catch(e){}
   }
   poll();setInterval(poll,5000);
+}
+
+// --- RAITHU MITRA (రైతు మిత్ర) AI CHATBOT LOGIC ---
+let chatHistory = [];
+let pendingImage = null;
+let pendingAudio = null;
+let pendingAudioMime = "audio/webm";
+let mediaRecorder = null;
+let audioStream = null;
+let audioChunks = [];
+let recTimerInterval = null;
+let recSeconds = 0;
+
+function updateChatCropBadge() {
+  const crop = ($("r_crop") && $("r_crop").value) || ($("f_crop") && $("f_crop").value) || "Paddy";
+  const label = (TRANSLATIONS[curLang] && TRANSLATIONS[curLang]["crop_" + crop]) || crop;
+  if ($("chat_context_crop")) $("chat_context_crop").textContent = label;
+}
+
+function openChatTab() {
+  document.querySelectorAll("nav button").forEach(b => b.classList.toggle("on", b.dataset.t === "chat"));
+  document.querySelectorAll("section").forEach(s => s.classList.toggle("on", s.id === "chat"));
+  updateChatCropBadge();
+  window.scrollTo(0, 0);
+  setTimeout(() => { if ($("c_text")) $("c_text").focus(); }, 120);
+}
+
+function autoGrowTextarea(el) {
+  el.style.height = "auto";
+  el.style.height = Math.min(110, Math.max(40, el.scrollHeight)) + "px";
+}
+
+function handleChatKey(e) {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendChatMessage();
+  }
+}
+
+// Attach image handler
+async function handleChatPhoto(input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  try {
+    pendingImage = await shrink(file);
+    if ($("c_preview_bar")) $("c_preview_bar").style.display = "flex";
+    if ($("c_img_preview")) $("c_img_preview").style.display = "inline-flex";
+  } catch (err) {
+    console.warn("Failed to shrink photo:", err);
+  }
+  input.value = "";
+}
+
+function clearAttachedImage() {
+  pendingImage = null;
+  if ($("c_img_preview")) $("c_img_preview").style.display = "none";
+  if (!pendingAudio && $("c_preview_bar")) $("c_preview_bar").style.display = "none";
+}
+
+function clearAttachedAudio() {
+  pendingAudio = null;
+  if ($("c_audio_preview")) $("c_audio_preview").style.display = "none";
+  if (!pendingImage && $("c_preview_bar")) $("c_preview_bar").style.display = "none";
+}
+
+// Audio recording handler
+async function toggleAudioRecording() {
+  if (mediaRecorder && mediaRecorder.state === "recording") {
+    stopAudioRecording();
+  } else {
+    startAudioRecording();
+  }
+}
+
+async function startAudioRecording() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    fallbackSpeechRecognition();
+    return;
+  }
+  try {
+    audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    audioChunks = [];
+
+    let mime = "audio/webm";
+    if (window.MediaRecorder && window.MediaRecorder.isTypeSupported && window.MediaRecorder.isTypeSupported("audio/webm;codecs=opus")) {
+      mime = "audio/webm;codecs=opus";
+    } else if (window.MediaRecorder && window.MediaRecorder.isTypeSupported && window.MediaRecorder.isTypeSupported("audio/mp4")) {
+      mime = "audio/mp4";
+    }
+    pendingAudioMime = mime.split(";")[0];
+
+    mediaRecorder = new MediaRecorder(audioStream, { mimeType: mime });
+    mediaRecorder.ondataavailable = e => {
+      if (e.data && e.data.size > 0) audioChunks.push(e.data);
+    };
+    mediaRecorder.onstop = () => {
+      if (audioChunks.length > 0) {
+        const audioBlob = new Blob(audioChunks, { type: pendingAudioMime });
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          pendingAudio = reader.result;
+          if ($("c_preview_bar")) $("c_preview_bar").style.display = "flex";
+          if ($("c_audio_preview")) $("c_audio_preview").style.display = "inline-flex";
+        };
+        reader.readAsDataURL(audioBlob);
+      }
+      cleanupRecUi();
+    };
+
+    mediaRecorder.start(250);
+    recSeconds = 0;
+    if ($("c_rec_bar")) $("c_rec_bar").style.display = "flex";
+    if ($("c_mic")) $("c_mic").classList.add("active");
+    if ($("c_rec_timer")) $("c_rec_timer").textContent = "00:00";
+
+    clearInterval(recTimerInterval);
+    recTimerInterval = setInterval(() => {
+      recSeconds++;
+      const m = String(Math.floor(recSeconds / 60)).padStart(2, "0");
+      const s = String(recSeconds % 60).padStart(2, "0");
+      if ($("c_rec_timer")) $("c_rec_timer").textContent = `${m}:${s}`;
+      if (recSeconds >= 60) {
+        stopAudioRecording();
+      }
+    }, 1000);
+  } catch (err) {
+    console.warn("Microphone access error:", err);
+    fallbackSpeechRecognition();
+  }
+}
+
+function stopAudioRecording() {
+  if (mediaRecorder && mediaRecorder.state === "recording") {
+    mediaRecorder.stop();
+  }
+  if (audioStream) {
+    audioStream.getTracks().forEach(track => track.stop());
+    audioStream = null;
+  }
+  cleanupRecUi();
+}
+
+function cancelAudioRecording() {
+  audioChunks = [];
+  pendingAudio = null;
+  if (mediaRecorder && mediaRecorder.state === "recording") {
+    mediaRecorder.stop();
+  }
+  if (audioStream) {
+    audioStream.getTracks().forEach(track => track.stop());
+    audioStream = null;
+  }
+  cleanupRecUi();
+}
+
+function cleanupRecUi() {
+  clearInterval(recTimerInterval);
+  if ($("c_rec_bar")) $("c_rec_bar").style.display = "none";
+  if ($("c_mic")) $("c_mic").classList.remove("active");
+}
+
+function fallbackSpeechRecognition() {
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRec) {
+    alert("Microphone permission denied or not supported in this browser. Please type your query.");
+    return;
+  }
+  const recog = new SpeechRec();
+  recog.lang = curLang === "te" ? "te-IN" : "en-IN";
+  recog.interimResults = false;
+  recog.onstart = () => {
+    if ($("c_mic")) $("c_mic").classList.add("active");
+  };
+  recog.onresult = ev => {
+    const transcript = ev.results[0][0].transcript;
+    if ($("c_text")) {
+      $("c_text").value = ($("c_text").value + " " + transcript).trim();
+      autoGrowTextarea($("c_text"));
+    }
+  };
+  recog.onerror = () => cleanupRecUi();
+  recog.onend = () => cleanupRecUi();
+  recog.start();
+}
+
+// Text to Speech (with fallback)
+function speakText(text, btn) {
+  if (!window.speechSynthesis) return;
+  if (window.speechSynthesis.speaking) {
+    window.speechSynthesis.cancel();
+    if (btn) btn.innerHTML = `🔊 <span>${TRANSLATIONS[curLang].chat_read}</span>`;
+    return;
+  }
+  const clean = text.replace(/[*_#`~[\]]/g, "").replace(/https?:\/\/\S+/g, "");
+  const u = new SpeechSynthesisUtterance(clean);
+  const voices = window.speechSynthesis.getVoices();
+  const teVoice = voices.find(v => v.lang.toLowerCase().startsWith("te"));
+  const enVoice = voices.find(v => v.lang.toLowerCase().startsWith("en-in") || v.lang.toLowerCase().startsWith("en"));
+  if (curLang === "te" && teVoice) u.voice = teVoice;
+  else if (enVoice) u.voice = enVoice;
+  u.lang = curLang === "te" ? (teVoice ? "te-IN" : "en-IN") : "en-IN";
+  u.rate = 0.95;
+
+  u.onend = () => { if (btn) btn.innerHTML = `🔊 <span>${TRANSLATIONS[curLang].chat_read}</span>`; };
+  u.onerror = () => { if (btn) btn.innerHTML = `🔊 <span>${TRANSLATIONS[curLang].chat_read}</span>`; };
+
+  if (btn) btn.innerHTML = `⏹️ <span>${TRANSLATIONS[curLang].chat_stop_read}</span>`;
+  window.speechSynthesis.speak(u);
+}
+
+// Starter chips handler
+document.querySelectorAll(".chat-chip").forEach(chip => {
+  chip.onclick = () => {
+    const qKey = chip.dataset.q;
+    const t = TRANSLATIONS[curLang];
+    const questionText = t["chip_" + qKey] || chip.textContent;
+    if ($("c_text")) {
+      $("c_text").value = questionText.replace(/^[^a-zA-Z0-9\u0C00-\u0C7F]+/, "").trim();
+      autoGrowTextarea($("c_text"));
+      sendChatMessage();
+    }
+  };
+});
+
+function formatBotAnswer(raw) {
+  const esc = raw.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return esc.replace(/\*\*(.*?)\*\*/g, "<b>$1</b>");
+}
+
+// Send Message Handler
+async function sendChatMessage() {
+  const textInput = $("c_text");
+  const sendBtn = $("c_send");
+  const feed = $("chat_feed");
+  const t = TRANSLATIONS[curLang];
+
+  const userText = textInput ? textInput.value.trim() : "";
+  const hasImage = !!pendingImage;
+  const hasAudio = !!pendingAudio;
+
+  if (!userText && !hasImage && !hasAudio) return;
+
+  if (isDemoMode || !navigator.onLine) {
+    alert(t.chat_offline);
+    return;
+  }
+
+  if (sendBtn) sendBtn.disabled = true;
+
+  const userBubble = document.createElement("div");
+  userBubble.className = "chat-bubble user";
+  let userHtml = "";
+  if (hasImage) {
+    userHtml += `<div style="font-size:12px;opacity:0.9;margin-bottom:4px">📷 ${t.chat_photo_attached}</div>`;
+  }
+  if (hasAudio) {
+    userHtml += `<div style="font-size:12px;opacity:0.9;margin-bottom:4px">🎤 ${t.chat_audio_attached}</div>`;
+  }
+  if (userText) {
+    userHtml += `<div>${userText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>`;
+  }
+  userBubble.innerHTML = userHtml;
+  feed.appendChild(userBubble);
+
+  if (textInput) {
+    textInput.value = "";
+    textInput.style.height = "40px";
+  }
+  const attachedImgData = pendingImage;
+  const attachedAudioData = pendingAudio;
+  const attachedAudioMimeType = pendingAudioMime;
+  clearAttachedImage();
+  clearAttachedAudio();
+
+  const botBubble = document.createElement("div");
+  botBubble.className = "chat-bubble bot";
+  botBubble.innerHTML = `
+    <div class="chat-avatar">🌾 Raithu Mitra (రైతు మిత్ర)</div>
+    <div class="chat-text muted" style="font-style:italic">${t.chat_thinking}</div>
+  `;
+  feed.appendChild(botBubble);
+  feed.scrollTop = feed.scrollHeight;
+
+  const crop = ($("r_crop") && $("r_crop").value) || ($("f_crop") && $("f_crop").value) || "Paddy";
+  const district = ($("r_dist") && $("r_dist").value) || "Telangana";
+  let weatherSummary = "";
+  if (lastWxData && lastWxData.current) {
+    weatherSummary = `${lastWxData.current.temperature_2m}°C, humidity ${lastWxData.current.relative_humidity_2m}%`;
+  }
+
+  try {
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: userText,
+        history: chatHistory.slice(-6),
+        image: attachedImgData,
+        audio: attachedAudioData,
+        audioMime: attachedAudioMimeType,
+        context: { crop, district, weatherSummary }
+      })
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || `Server error (${res.status})`);
+    }
+
+    const replyText = data.text || "నమస్కారం! (No reply returned)";
+    const sources = Array.isArray(data.sources) ? data.sources : [];
+
+    let sourcesHtml = "";
+    if (sources.length > 0) {
+      sourcesHtml = `
+        <div class="chat-sources">
+          <b>${t.chat_sources}</b><br>
+          ${sources.map(s => `<a href="${s.uri}" target="_blank" rel="noopener noreferrer">🌐 ${s.title} ↗</a>`).join("")}
+        </div>
+      `;
+    }
+
+    botBubble.innerHTML = `
+      <div class="chat-avatar">🌾 Raithu Mitra (రైతు మిత్ర)</div>
+      <div class="chat-text">${formatBotAnswer(replyText)}</div>
+      ${sourcesHtml}
+      <div class="chat-actions">
+        <button class="chat-action-btn" onclick="speakText(this.parentElement.previousElementSibling.innerText, this)">
+          🔊 <span>${t.chat_read}</span>
+        </button>
+      </div>
+    `;
+
+    chatHistory.push({ role: "user", text: userText || "Farmer query" });
+    chatHistory.push({ role: "model", text: replyText });
+    if (chatHistory.length > 8) chatHistory = chatHistory.slice(-6);
+
+  } catch (err) {
+    botBubble.innerHTML = `
+      <div class="chat-avatar">🌾 Raithu Mitra (రైతు మిత్ర)</div>
+      <div class="chat-text" style="color:#b71c1c">⚠️ ${err.message || "Could not connect to Raithu Mitra."}</div>
+    `;
+  } finally {
+    if (sendBtn) sendBtn.disabled = false;
+    feed.scrollTop = feed.scrollHeight;
+  }
 }
 
 // Initialize language and demo states on load
