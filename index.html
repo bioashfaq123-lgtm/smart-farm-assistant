@@ -1,0 +1,694 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Smart Farm Assistant</title>
+<style>
+:root{--bg:#f4f7f2;--card:#fff;--text:#1d2b1f;--muted:#5d6e5f;--pri:#2e7d32;--pri-t:#fff;--bd:#d6e0d3;--warn:#fff4d6;--warn-t:#6b4a00;--ok:#e3f4e4;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121a13;--card:#1c271d;--text:#e6efe6;--muted:#9fb3a1;--pri:#66bb6a;--pri-t:#0d1a0e;--bd:#2f4031;--warn:#3a3012;--warn-t:#f1d98a;--ok:#1f3a21}}
+:root[data-theme="dark"]{--bg:#121a13;--card:#1c271d;--text:#e6efe6;--muted:#9fb3a1;--pri:#66bb6a;--pri-t:#0d1a0e;--bd:#2f4031;--warn:#3a3012;--warn-t:#f1d98a;--ok:#1f3a21}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--pri);z-index:10}
+header{background:var(--pri);color:var(--pri-t);padding:12px 16px 8px;position:sticky;top:env(safe-area-inset-top,0px);z-index:9}
+.hdr-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px}
+header h1{margin:0;font-size:18px}header p{margin:2px 0 6px;font-size:12px;opacity:.9}
+.hdr-ctrls{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.lang-toggle{display:inline-flex;background:rgba(0,0,0,.22);border-radius:18px;padding:2px}
+.lang-btn{background:transparent;border:0;color:var(--pri-t);padding:4px 9px;font:600 12px inherit;border-radius:14px;cursor:pointer;opacity:.8;transition:all .15s}
+.lang-btn.on{background:var(--pri-t);color:var(--pri);opacity:1;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.demo-pill{border:1px solid rgba(255,255,255,.35);border-radius:16px;padding:4px 9px;font:600 11px inherit;cursor:pointer;display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.15);color:var(--pri-t);transition:all .15s}
+.demo-pill.active{background:#ffecb3;color:#6b4a00;border-color:#ffd54f;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+nav{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;-webkit-overflow-scrolling:touch}
+nav button{flex:0 0 auto;border:0;border-radius:18px;padding:7px 13px;font:600 13px inherit;background:rgba(255,255,255,.2);color:var(--pri-t);cursor:pointer}
+nav button.on{background:var(--pri-t);color:var(--pri)}
+main{max-width:720px;margin:0 auto;padding:14px}
+section{display:none}section.on{display:block}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:12px}
+h2{font-size:16px;margin:0 0 10px}label{display:block;font-size:12px;color:var(--muted);margin:10px 0 3px}
+input,select{width:100%;padding:10px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--text);font:inherit}
+.btn{margin-top:12px;width:100%;padding:11px;border:0;border-radius:8px;background:var(--pri);color:var(--pri-t);font:600 15px inherit;cursor:pointer}
+.btn:disabled{opacity:.5}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.note{background:var(--warn);color:var(--warn-t);border-radius:8px;padding:9px 11px;font-size:12px;margin:10px 0}
+.ok{background:var(--ok);border-radius:8px;padding:10px 12px;margin:10px 0}
+.big{font-size:34px;font-weight:700}.muted{color:var(--muted);font-size:12px}
+.scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:8px 6px;border-bottom:1px solid var(--bd);text-align:left;white-space:nowrap}th{color:var(--muted);font-weight:600}
+img.pv{max-width:100%;max-height:240px;border-radius:8px;margin-top:10px;display:none}
+pre{white-space:pre-wrap;font:inherit;margin:0}
+</style></head><body>
+<header>
+<div class="hdr-top">
+ <div>
+  <h1 id="hdr_title" data-i18n="app_title">🌾 Smart Farm Assistant</h1>
+  <p id="hello" data-i18n="app_sub">Demo for ADSAUF-2047, PJTAU</p>
+ </div>
+ <div class="hdr-ctrls">
+  <button id="demo_btn" class="demo-pill" title="Toggle Demo / Live mode"><span id="demo_dot">🟢</span> <span id="demo_txt">Live</span></button>
+  <div class="lang-toggle" role="group" aria-label="Language selection">
+   <button id="lang_en" class="lang-btn on" onclick="setLang('en')">EN</button>
+   <button id="lang_te" class="lang-btn" onclick="setLang('te')">తెలుగు</button>
+  </div>
+ </div>
+</div>
+<nav id="nav">
+<button data-t="reg" class="on" data-i18n="tab_reg">Register</button><button data-t="wx" data-i18n="tab_wx">Weather</button><button data-t="fert" data-i18n="tab_fert">Fertilizer</button><button data-t="dis" data-i18n="tab_dis">Disease check</button><button data-t="mandi" data-i18n="tab_mandi">Mandi prices</button><button data-t="field" data-i18n="tab_field">Field control</button>
+</nav></header>
+<main>
+
+<section id="reg" class="on"><div class="card"><h2 data-i18n="reg_title">Farmer registration</h2>
+<label data-i18n="reg_name">Name</label><input id="r_name" autocomplete="name">
+<label data-i18n="reg_ph">Mobile number (10 digits)</label><input id="r_ph" inputmode="numeric" maxlength="10">
+<div class="row"><div><label data-i18n="reg_vil">Village / mandal</label><input id="r_vil"></div><div><label data-i18n="reg_dist">District</label><select id="r_dist"></select></div></div>
+<div class="row"><div><label data-i18n="reg_crop">Main crop</label><select id="r_crop"></select></div><div><label data-i18n="reg_ac">Land (acres)</label><input id="r_ac" type="number" min="0" step="0.1"></div></div>
+<button class="btn" id="r_save" data-i18n="reg_save">Save my profile</button><div id="r_msg"></div>
+<p class="muted" data-i18n="reg_note">Your profile is kept only in this browser on this device. It sets the default crop, area and location in the other tabs.</p></div></section>
+
+<section id="wx"><div class="card"><h2 data-i18n="wx_title">Weather and rain forecast</h2>
+<label data-i18n="wx_loc">Location</label><select id="w_loc"></select>
+<div id="w_out"><p class="muted" data-i18n="wx_loading">Loading…</p></div></div></section>
+
+<section id="fert"><div class="card"><h2 data-i18n="fert_title">Fertilizer dosage calculator</h2>
+<label data-i18n="fert_crop">Crop</label><select id="f_crop"></select>
+<div class="row"><div><label data-i18n="fert_area">Area</label><input id="f_area" type="number" min="0" step="0.1" value="1"></div>
+<div><label data-i18n="fert_unit">Unit</label><select id="f_unit"></select></div></div>
+<label data-i18n="fert_soil">Soil test rating for phosphorus and potash (optional)</label>
+<select id="f_soil"></select>
+<button class="btn" id="f_go" data-i18n="fert_calc">Calculate</button><div id="f_out"></div>
+<div class="note" data-i18n="fert_disclaimer">Indicative values only. Confirm against the current PJTAU package of practices and a soil test report before applying.</div></div></section>
+
+<section id="dis"><div class="card"><h2 data-i18n="dis_title">Crop disease and pest check</h2>
+<label data-i18n="dis_crop">Crop</label><select id="d_crop"></select>
+<label data-i18n="dis_lang">Answer language</label><select id="d_lang"><option value="English">English</option><option value="Telugu">Telugu</option></select>
+<label data-i18n="dis_photo">Photo of the affected leaf or plant</label><input id="d_file" type="file" accept="image/*" capture="environment">
+<img id="d_img" class="pv" alt="Selected leaf photo">
+<button class="btn" id="d_go" disabled data-i18n="dis_diagnose">Diagnose</button><div id="d_out"></div>
+<div class="note" data-i18n="dis_disclaimer">AI suggestion only. Confirm with your local agriculture or extension officer before spraying anything.</div></div></section>
+
+<section id="mandi"><div class="card"><h2 data-i18n="mandi_title">Mandi prices (Rs. per quintal)</h2>
+<div class="row"><div><label data-i18n="mandi_crop">Crop</label><select id="m_crop"></select></div><div><label data-i18n="mandi_var">Variety</label><select id="m_var"></select></div></div>
+<div class="note" id="m_note" data-i18n="mandi_sample_note">SAMPLE values, not live prices. Live Agmarknet prices appear here once online and connected.</div>
+<div class="scroll"><table><thead><tr><th id="m_th_mkt" data-i18n="mandi_th_market">Market</th><th id="m_th_min" data-i18n="mandi_th_min">Min</th><th id="m_th_max" data-i18n="mandi_th_max">Max</th><th id="m_th_mod" data-i18n="mandi_th_modal">Modal</th></tr></thead><tbody id="m_body"></tbody></table></div></div></section>
+
+<section id="field"><div class="card"><h2 data-i18n="field_title">Field control (ESP32)</h2>
+<div id="fi_cfg"></div>
+<div id="fi_ui" style="display:none">
+<div class="big" id="fi_m">–</div><div class="muted" id="fi_t">Waiting for the device…</div>
+<div class="row"><div><label data-i18n="field_mode">Mode</label><select id="fi_mode"></select></div>
+<div><label data-i18n="field_th">Auto: water below (%)</label><input id="fi_th" type="number" min="5" max="90" value="30"></div></div>
+<button class="btn" id="fi_on" data-i18n="pump_on">Pump ON</button><button class="btn" id="fi_off" style="background:#b71c1c;color:#fff" data-i18n="pump_off">Pump OFF</button>
+<p class="muted" id="fi_p"></p></div></div>
+
+<div class="card"><h2 data-i18n="chart_title">Soil moisture history (last 24 hours)</h2>
+<div id="fi_stats" class="muted" style="margin-bottom:8px;font-size:12px"></div>
+<div id="fi_chart_wrap" style="width:100%;min-height:160px"></div>
+<div id="fi_chart_note" class="muted" style="margin-top:6px;font-size:11px"></div>
+</div></section>
+</main>
+<script src="config.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+
+// --- TRANSLATIONS (English & Telugu) ---
+const TRANSLATIONS = {
+  en: {
+    app_title: "🌾 Smart Farm Assistant",
+    app_sub: "Demo for ADSAUF-2047, PJTAU",
+    welcome: "Welcome",
+    demo_badge: "Demo Mode",
+    live_badge: "Live",
+    // tabs
+    tab_reg: "Register",
+    tab_wx: "Weather",
+    tab_fert: "Fertilizer",
+    tab_dis: "Disease check",
+    tab_mandi: "Mandi prices",
+    tab_field: "Field control",
+    // register
+    reg_title: "Farmer registration",
+    reg_name: "Name",
+    reg_ph: "Mobile number (10 digits)",
+    reg_vil: "Village / mandal",
+    reg_dist: "District",
+    reg_crop: "Main crop",
+    reg_ac: "Land (acres)",
+    reg_save: "Save my profile",
+    reg_note: "Your profile is kept only in this browser on this device. It sets the default crop, area and location in the other tabs.",
+    reg_err: "Please enter your name, a 10-digit mobile number and your village.",
+    reg_ok: "Profile saved. Crop and land area are now pre-filled in the other tabs.",
+    // weather
+    wx_title: "Weather and rain forecast",
+    wx_loc: "Location",
+    wx_loading: "Loading…",
+    wx_hum: "Humidity",
+    wx_rain_now: "Rain now",
+    wx_rain_skip: "Rain likely: skip irrigation for now.",
+    wx_no_rain: "No significant rain expected: irrigate if the soil is dry.",
+    wx_th_day: "Day",
+    wx_th_temp: "Temp",
+    wx_th_prob: "Rain chance",
+    wx_th_rain: "Rain",
+    wx_sample_note: "Showing sample data because live weather could not be loaded (offline / demo mode).",
+    wx_source: "Source: Open-Meteo",
+    // fertilizer
+    fert_title: "Fertilizer dosage calculator",
+    fert_crop: "Crop",
+    fert_area: "Area",
+    fert_unit: "Unit",
+    unit_acre: "Acre",
+    unit_guntha: "Guntha",
+    unit_ha: "Hectare",
+    fert_soil: "Soil test rating for phosphorus and potash (optional)",
+    soil_med: "Not tested / Medium",
+    soil_low: "Low",
+    soil_high: "High",
+    fert_calc: "Calculate",
+    fert_err: "Enter an area greater than zero.",
+    fert_needed: "Nutrients needed (kg):",
+    fert_th_name: "Fertilizer",
+    fert_th_qty: "Quantity",
+    fert_th_bags: "50 kg bags",
+    fert_urea: "Urea (46% N)",
+    fert_dap: "DAP (18-46-0)",
+    fert_mop: "MOP (60% K₂O)",
+    fert_split_note: "Nitrogen from DAP is deducted from the urea. Usually all phosphorus and potash go as basal dose, and urea is split into 2–3 doses.",
+    fert_disclaimer: "Indicative values only. Confirm against the current PJTAU package of practices and a soil test report before applying.",
+    // disease
+    dis_title: "Crop disease and pest check",
+    dis_crop: "Crop",
+    dis_lang: "Answer language",
+    dis_photo: "Photo of the affected leaf or plant",
+    dis_diagnose: "Diagnose",
+    dis_analyzing: "Analysing the photo…",
+    dis_disclaimer: "AI suggestion only. Confirm with your local agriculture or extension officer before spraying anything.",
+    dis_offline: "Offline demo: AI crop disease diagnosis requires internet connectivity. Connect to WiFi or mobile data to analyze photos.",
+    dis_failed: "Diagnosis failed",
+    // mandi
+    mandi_title: "Mandi prices (Rs. per quintal)",
+    mandi_crop: "Crop",
+    mandi_var: "Variety",
+    mandi_all_vars: "All varieties",
+    mandi_th_market: "Market",
+    mandi_th_min: "Min",
+    mandi_th_max: "Max",
+    mandi_th_modal: "Modal",
+    mandi_sample_note: "SAMPLE values, not live prices. Live Agmarknet prices appear here once online and connected.",
+    mandi_no_arrivals: "Reference sample prices: No market arrivals were reported today for this crop in Telangana APMCs on Agmarknet.",
+    mandi_no_rows: "No mandis found for this variety today.",
+    mandi_offline_note: "Offline demo mode: Showing reference Telangana APMC market prices.",
+    // field
+    field_title: "Field control (ESP32)",
+    field_not_connected: "Not connected yet. Put your Firebase Realtime Database URL in config.js (see docs/04-hardware-and-firmware.md).",
+    field_waiting: "Waiting for the device…",
+    field_mode: "Mode",
+    mode_manual: "Manual",
+    mode_auto: "Auto (uses threshold and rain forecast)",
+    field_th: "Auto: water below (%)",
+    pump_on: "Pump ON",
+    pump_off: "Pump OFF",
+    pump_sent_on: "Pump command sent: ON",
+    pump_sent_off: "Pump command sent: OFF",
+    pump_is_on: "Pump is ON",
+    pump_is_off: "Pump is OFF",
+    device_seen: "device last seen",
+    seconds_ago: "s ago",
+    moisture_suffix: "% moisture",
+    // chart
+    chart_title: "Soil moisture history (last 24 hours)",
+    stat_cur: "Current",
+    stat_min: "24h Min",
+    stat_max: "24h Max",
+    stat_avg: "Avg",
+    chart_auto_th: "Auto trigger",
+    chart_now: "Now",
+    chart_sample_note: "Showing sample 24-hour moisture curve. Live sensor readings from /field/history stream here once the ESP32 is powered on.",
+    chart_live_note: "Live sensor readings recorded by ESP32 over the last 24 hours under /field/history.",
+    // crop names
+    crop_Paddy: "Paddy",
+    crop_Maize: "Maize",
+    crop_Cotton: "Cotton",
+    crop_Sesame: "Sesame",
+    crop_Groundnut: "Groundnut",
+    crop_Redgram: "Redgram",
+    crop_Chilli: "Chilli",
+    crop_Soybean: "Soybean"
+  },
+  te: {
+    app_title: "🌾 స్మార్ట్ ఫార్మ్ అసిస్టెంట్",
+    app_sub: "ADSAUF-2047 జాతీయ సదస్సు ప్రదర్శన, PJTAU",
+    welcome: "స్వాగతం",
+    demo_badge: "డెమో మోడ్",
+    live_badge: "లైవ్",
+    // tabs
+    tab_reg: "నమోదు",
+    tab_wx: "వాతావరణం",
+    tab_fert: "ఎరువులు",
+    tab_dis: "తెగుళ్ల నివారణ",
+    tab_mandi: "మార్కెట్ ధరలు",
+    tab_field: "పొలం నియంత్రణ",
+    // register
+    reg_title: "రైతు నమోదు",
+    reg_name: "పేరు",
+    reg_ph: "మొబైల్ నంబర్ (10 అంకెలు)",
+    reg_vil: "గ్రామం / మండలం",
+    reg_dist: "జిల్లా",
+    reg_crop: "ప్రధాన పంట",
+    reg_ac: "వ్యవసాయ భూమి (ఎకరాలు)",
+    reg_save: "ప్రొఫైల్ సేవ్ చేయండి",
+    reg_note: "మీ ప్రొఫైల్ వివరాలు ఈ డివైస్‌లో మాత్రమే భద్రపరచబడతాయి. ఇతర ట్యాబ్‌లలో పంట మరియు భూమి వివరాలు ఆటోమేటిక్‌గా నింపబడతాయి.",
+    reg_err: "దయచేసి మీ పేరు, 10 అంకెల మొబైల్ నంబర్ మరియు గ్రామం పేరు నమోదు చేయండి.",
+    reg_ok: "ప్రొఫైల్ సేవ్ చేయబడింది. పంట మరియు భూమి వివరాలు ఇతర ట్యాబ్‌లలో నింపబడ్డాయి.",
+    // weather
+    wx_title: "వాతావరణం & వర్ష సూచన",
+    wx_loc: "ప్రాంతం",
+    wx_loading: "లోడ్ అవుతోంది…",
+    wx_hum: "గాలిలో తేమ",
+    wx_rain_now: "ప్రస్తుత వర్షం",
+    wx_rain_skip: "వర్షం పడే అవకాశం ఉంది: ప్రస్తుతానికి నీటిపారుదల ఆపండి.",
+    wx_no_rain: "భారీ వర్ష సూచన లేదు: నేల పొడిగా ఉంటే నీరు పెట్టండి.",
+    wx_th_day: "తేదీ / రోజు",
+    wx_th_temp: "ఉష్ణోగ్రత",
+    wx_th_prob: "వర్షం అవకాశం",
+    wx_th_rain: "వర్షపాతం",
+    wx_sample_note: "ఇంటర్నెట్ అందుబాటులో లేనందున నమూనా వాతావరణం చూపబడుతోంది (ఆఫ్‌లైన్ డెమో మోడ్).",
+    wx_source: "మూలం: ఓపెన్-మెటియో (Open-Meteo)",
+    // fertilizer
+    fert_title: "ఎరువుల మోతాదు కాలిక్యులేటర్",
+    fert_crop: "పంట",
+    fert_area: "విస్తీర్ణం",
+    fert_unit: "కొలత ప్రమాణం",
+    unit_acre: "ఎకరం",
+    unit_guntha: "గుంట",
+    unit_ha: "హెక్టార్",
+    fert_soil: "భాస్వరం, పొటాష్ నేల పరీక్ష ఫలితం (ఐచ్ఛికం)",
+    soil_med: "పరీక్షించలేదు / మధ్యస్థం",
+    soil_low: "తక్కువ (Low)",
+    soil_high: "ఎక్కువ (High)",
+    fert_calc: "లెక్కించండి",
+    fert_err: "దయచేసి సున్నా కంటే ఎక్కువ విస్తీర్ణాన్ని నమోదు చేయండి.",
+    fert_needed: "కావలసిన పోషకాలు (కిలోలు):",
+    fert_th_name: "ఎరువు పేరు",
+    fert_th_qty: "పరిమాణం",
+    fert_th_bags: "50 కిలోల బస్తాలు",
+    fert_urea: "యూరియా (46% N)",
+    fert_dap: "డీఏపీ (18-46-0 DAP)",
+    fert_mop: "ఎంఓపీ పొటాష్ (60% K₂O MOP)",
+    fert_split_note: "డీఏపీ ద్వారా లభించే నత్రజని యూరియాలో తగ్గించబడింది. సాధారణంగా భాస్వరం, పొటాష్ పూర్తి మోతాదును ఆఖరి దుక్కిలో, యూరియాను 2–3 దఫాలుగా వేయాలి.",
+    fert_disclaimer: "ఇవి సిఫార్సు చేయబడిన సూచిక ప్రమాణాలు మాత్రమే. ఎరువులు వేసే ముందు PJTSAU వ్యవసాయ పంచాంగం మరియు నేల పరీక్ష నివేదికను సంప్రదించండి.",
+    // disease
+    dis_title: "పంట తెగుళ్లు & చీడపీడల నిర్ధారణ",
+    dis_crop: "పంట",
+    dis_lang: "సమాధానం భాష",
+    dis_photo: "తెగులు సోకిన ఆకు లేదా మొక్క ఫోటో",
+    dis_diagnose: "వ్యాధిని నిర్ధారించండి",
+    dis_analyzing: "ఫోటోను AI విశ్లేషిస్తోంది…",
+    dis_disclaimer: "ఇది AI సూచన మాత్రమే. మందులు పిచికారీ చేసే ముందు మీ మండల వ్యవసాయ విస్తరణ అధికారి (AEO) ని సంప్రదించండి.",
+    dis_offline: "ఆఫ్‌లైన్ డెమో: AI పంట వ్యాధి విశ్లేషణకు ఇంటర్నెట్ అవసరం. ఫోటో నిర్ధారణ కోసం ఇంటర్నెట్ కనెక్ట్ చేయండి.",
+    dis_failed: "నిర్ధారణ విఫలమైంది",
+    // mandi
+    mandi_title: "మార్కెట్ ధరలు (క్వింటాల్‌కు రూ.)",
+    mandi_crop: "పంట",
+    mandi_var: "రకం",
+    mandi_all_vars: "అన్ని రకాలు",
+    mandi_th_market: "మార్కెట్ (APMC)",
+    mandi_th_min: "కనిష్టం",
+    mandi_th_max: "గరిష్టం",
+    mandi_th_modal: "సగటు / మోడల్",
+    mandi_sample_note: "నమూనా ధరలు (లైవ్ కావు). ఆన్‌లైన్‌లో ఉన్నప్పుడు లైవ్ అగ్మార్క్‌నెట్ ధరలు కనిపిస్తాయి.",
+    mandi_no_arrivals: "నమూనా ధరలు: నేడు తెలంగాణ మార్కెట్లలో ఈ పంటకు సంబంధించి క్రయవిక్రయాలు నమోదు కాలేదు.",
+    mandi_no_rows: "నేడు ఈ రకానికి మార్కెట్ ధరలు అందుబాటులో లేవు.",
+    mandi_offline_note: "ఆఫ్‌లైన్ డెమో మోడ్: తెలంగాణ APMC నమూనా మార్కెట్ ధరలు చూపబడుతున్నాయి.",
+    // field
+    field_title: "పొలం మోటార్ నియంత్రణ (ESP32)",
+    field_not_connected: "ఇంకా కనెక్ట్ కాలేదు. config.js లో Firebase Realtime Database URL నమోదు చేయండి (docs/04 చూడండి).",
+    field_waiting: "పరికరం కోసం వేచి చూస్తోంది…",
+    field_mode: "విధానం",
+    mode_manual: "మాన్యువల్",
+    mode_auto: "ఆటో (తేమ మరియు వర్ష సూచన ఆధారంగా)",
+    field_th: "ఆటో: తేమ ఇంతకంటే తగ్గితే నీరు పెట్టు (%)",
+    pump_on: "మోటార్ ఆన్ (ON)",
+    pump_off: "మోటార్ ఆఫ్ (OFF)",
+    pump_sent_on: "పంప్ ఆదేశం పంపబడింది: ON",
+    pump_sent_off: "పంప్ ఆదేశం పంపబడింది: OFF",
+    pump_is_on: "మోటార్ ఆన్‌లో ఉంది",
+    pump_is_off: "మోటార్ ఆఫ్‌లో ఉంది",
+    device_seen: "చివరగా చూసిన సమయం",
+    seconds_ago: "సెకన్ల క్రితం",
+    moisture_suffix: "% తేమ",
+    // chart
+    chart_title: "నేల తేమ చరిత్ర (గత 24 గంటలు)",
+    stat_cur: "ప్రస్తుతం",
+    stat_min: "24గం కనిష్టం",
+    stat_max: "24గం గరిష్టం",
+    stat_avg: "సగటు",
+    chart_auto_th: "ఆటో ట్రిగ్గర్",
+    chart_now: "ఇప్పుడు",
+    chart_sample_note: "నమూనా 24 గంటల తేమ గ్రాఫ్ చూపబడుతోంది. ESP32 ఆన్ అయిన తర్వాత /field/history నుండి లైవ్ డేటా కనిపిస్తుంది.",
+    chart_live_note: "గత 24 గంటల్లో ESP32 సెన్సార్ నమోదు చేసిన లైవ్ రీడింగులు.",
+    // crop names
+    crop_Paddy: "వరి (Paddy)",
+    crop_Maize: "మొక్కజొన్న (Maize)",
+    crop_Cotton: "పత్తి (Cotton)",
+    crop_Sesame: "నువ్వులు (Sesame)",
+    crop_Groundnut: "వేరుశనగ (Groundnut)",
+    crop_Redgram: "కందులు (Redgram)",
+    crop_Chilli: "మిర్చి (Chilli)",
+    crop_Soybean: "సోయాబీన్ (Soybean)"
+  }
+};
+
+let curLang = localStorage.getItem("sfa_lang") || "en";
+let isDemoMode = !navigator.onLine; // default to demo mode if offline
+
+const DIST=["Hyderabad","Jagtial","Karimnagar","Warangal","Nizamabad","Adilabad","Khammam","Nalgonda","Mahabubnagar","Medak"];
+const LOC={"Rajendranagar, Hyderabad":[17.32,78.40],"Jagtial":[18.79,78.91],"Karimnagar":[18.44,79.13],"Warangal":[17.97,79.59],"Nizamabad":[18.67,78.09],"Khammam":[17.25,80.15]};
+// kg/ha of N, P2O5, K2O (PJTSAU practices)
+const CROPS={"Paddy":[120,60,40],"Maize":[180,60,50],"Cotton":[150,60,60],"Sesame":[60,40,30],"Groundnut":[30,40,50],"Redgram":[20,50,0],"Chilli":[150,60,60],"Soybean":[20,60,40]};
+const MANDI={"Paddy":[["Jagtial APMC",2150,2320,2230,"MTU-1010 · FAQ","MTU-1010"],["Nizamabad APMC",2180,2350,2260,"BPT-5204 · FAQ","BPT-5204"],["Warangal APMC",2120,2300,2210,"Common · Grade A","Common"]],
+"Maize":[["Nizamabad APMC",2020,2240,2150,"Yellow Hybrid · FAQ","Yellow Hybrid"],["Jagtial APMC",1990,2200,2100,"Hybrid · Grade A","Hybrid"],["Karimnagar APMC",2000,2210,2120,"Local · FAQ","Local"]],
+"Cotton":[["Warangal APMC",6800,7450,7200,"Medium Staple · FAQ","Medium Staple"],["Adilabad APMC",6900,7500,7250,"Long Staple · FAQ","Long Staple"],["Khammam APMC",6750,7400,7150,"Bt Cotton · Grade A","Bt Cotton"]],
+"Sesame":[["Warangal APMC",8900,10200,9800,"White · FAQ","White"],["Nalgonda APMC",8800,10000,9700,"Black · Grade A","Black"],["Karimnagar APMC",8700,9900,9600,"Brown · FAQ","Brown"]],
+"Groundnut":[["Mahabubnagar APMC",5600,6400,6100,"Pods · FAQ","Pods"],["Warangal APMC",5500,6350,6050,"Bold · FAQ","Bold"],["Karimnagar APMC",5450,6300,6000,"Local · Grade A","Local"]],
+"Redgram":[["Warangal APMC",6900,7500,7300,"Red (Whole) · FAQ","Red (Whole)"],["Adilabad APMC",6850,7450,7250,"Desi · Grade A","Desi"],["Medak APMC",6800,7400,7200,"Local · FAQ","Local"]],
+"Chilli":[["Warangal APMC",12000,16500,14800,"Teja · 1st Sort","Teja"],["Khammam APMC",11800,16200,14500,"341 · Grade A","341"],["Karimnagar APMC",11500,16000,14200,"Local · FAQ","Local"]],
+"Soybean":[["Nizamabad APMC",4300,4750,4600,"JS-335 · FAQ","JS-335"],["Adilabad APMC",4250,4700,4550,"JS-9305 · FAQ","JS-9305"],["Medak APMC",4200,4680,4520,"Yellow · Grade A","Yellow"]]};
+
+const fill=(id,arr)=>{$(id).innerHTML=arr.map(v=>`<option value="${v}">${v}</option>`).join("")};
+fill("r_dist",DIST);fill("w_loc",Object.keys(LOC));
+
+function populateCrops(){
+  const cropKeys=Object.keys(CROPS);
+  ["r_crop","f_crop","d_crop","m_crop"].forEach(id=>{
+    const el=$(id);if(!el)return;
+    const cur=el.value||cropKeys[0];
+    el.innerHTML=cropKeys.map(k=>`<option value="${k}">${TRANSLATIONS[curLang]["crop_"+k]||k}</option>`).join("");
+    el.value=cur;
+  });
+}
+function populateUnits(){
+  const el=$("f_unit");if(!el)return;
+  const cur=el.value||"acre";
+  el.innerHTML=[["acre",TRANSLATIONS[curLang].unit_acre],["guntha",TRANSLATIONS[curLang].unit_guntha],["ha",TRANSLATIONS[curLang].unit_ha]].map(([v,l])=>`<option value="${v}">${l}</option>`).join("");
+  el.value=cur;
+}
+function populateSoil(){
+  const el=$("f_soil");if(!el)return;
+  const cur=el.value||"1";
+  el.innerHTML=[["1",TRANSLATIONS[curLang].soil_med],["1.25",TRANSLATIONS[curLang].soil_low],["0.75",TRANSLATIONS[curLang].soil_high]].map(([v,l])=>`<option value="${v}">${l}</option>`).join("");
+  el.value=cur;
+}
+function populateFiMode(){
+  const el=$("fi_mode");if(!el)return;
+  const cur=el.value||"manual";
+  el.innerHTML=[["manual",TRANSLATIONS[curLang].mode_manual],["auto",TRANSLATIONS[curLang].mode_auto]].map(([v,l])=>`<option value="${v}">${l}</option>`).join("");
+  el.value=cur;
+}
+
+// --- DEMO MODE & UI SYNC ---
+function updateDemoBadge(){
+  const btn=$("demo_btn"),txt=$("demo_txt"),dot=$("demo_dot");
+  if(isDemoMode){
+    btn.classList.add("active");
+    txt.textContent=TRANSLATIONS[curLang].demo_badge;
+    dot.textContent="🟡";
+  }else{
+    btn.classList.remove("active");
+    txt.textContent=TRANSLATIONS[curLang].live_badge;
+    dot.textContent="🟢";
+  }
+}
+$("demo_btn").onclick=()=>{
+  isDemoMode=!isDemoMode;
+  updateDemoBadge();
+  loadWx();
+  showMandi();
+  renderCurrentChart();
+};
+window.addEventListener("online",()=>{isDemoMode=false;updateDemoBadge()});
+window.addEventListener("offline",()=>{isDemoMode=true;updateDemoBadge()});
+
+// --- LANGUAGE SWITCHING ---
+function setLang(lang){
+  curLang=lang||"en";
+  try{localStorage.setItem("sfa_lang",curLang)}catch(e){}
+  $("lang_en").classList.toggle("on",curLang==="en");
+  $("lang_te").classList.toggle("on",curLang==="te");
+  document.querySelectorAll("[data-i18n]").forEach(el=>{
+    const k=el.dataset.i18n;
+    if(TRANSLATIONS[curLang]&&TRANSLATIONS[curLang][k])el.textContent=TRANSLATIONS[curLang][k];
+  });
+  populateCrops();
+  populateUnits();
+  populateSoil();
+  populateFiMode();
+  updateDemoBadge();
+  applyP(getP());
+  if(lastWxData)renderWxData(lastWxData);
+  showMandi();
+  renderCurrentChart();
+  if($("d_lang"))$("d_lang").value=(curLang==="te"?"Telugu":"English");
+}
+
+// tabs
+$("nav").onclick=e=>{const t=e.target.dataset.t;if(!t)return;
+ document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b===e.target));
+ document.querySelectorAll("section").forEach(s=>s.classList.toggle("on",s.id===t));
+ if(t==="wx")loadWx();window.scrollTo(0,0)};
+
+// registration
+const KEY="sfa_profile";
+function getP(){try{return JSON.parse(localStorage.getItem(KEY)||"null")}catch(e){return null}}
+function applyP(p){
+  if(!p){$("hello").textContent=TRANSLATIONS[curLang].app_sub;return;}
+  $("hello").textContent=TRANSLATIONS[curLang].welcome+", "+p.name+" · "+p.village;
+  ["f_crop","d_crop","m_crop"].forEach(i=>{if($(i))$(i).value=p.crop});
+  if(p.acres&&$("f_area"))$("f_area").value=p.acres;
+}
+$("r_save").onclick=()=>{
+  const p={name:$("r_name").value.trim(),phone:$("r_ph").value.trim(),village:$("r_vil").value.trim(),district:$("r_dist").value,crop:$("r_crop").value,acres:$("r_ac").value};
+  const m=$("r_msg");
+  if(!p.name||!/^\d{10}$/.test(p.phone)||!p.village){m.innerHTML=`<div class="note">${TRANSLATIONS[curLang].reg_err}</div>`;return}
+  try{localStorage.setItem(KEY,JSON.stringify(p))}catch(e){}
+  applyP(p);m.innerHTML=`<div class="ok">${TRANSLATIONS[curLang].reg_ok}</div>`;
+};
+(()=>{const p=getP();if(p){$("r_name").value=p.name;$("r_ph").value=p.phone;$("r_vil").value=p.village;$("r_dist").value=p.district;$("r_crop").value=p.crop;$("r_ac").value=p.acres}})();
+
+// weather
+const DEMO_WX={demo:true,current:{temperature_2m:31,relative_humidity_2m:62,precipitation:0},
+daily:{time:[0,1,2,3,4].map(i=>{const d=new Date();d.setDate(d.getDate()+i);return d.toISOString().slice(0,10)}),
+temperature_2m_max:[33,32,31,30,32],temperature_2m_min:[23,23,22,22,23],precipitation_sum:[0,6,12,2,0],precipitation_probability_max:[10,65,80,35,15]}};
+let lastWxData=null;
+
+function renderWxData(d){
+  lastWxData=d;
+  const c=d.current,y=d.daily,t=TRANSLATIONS[curLang];
+  const skip=Math.max(y.precipitation_probability_max[0],y.precipitation_probability_max[1])>=60||y.precipitation_sum[1]>=5;
+  const days=y.time.map((tm,i)=>`<tr><td>${new Date(tm).toLocaleDateString(curLang==="te"?"te-IN":"en-IN",{weekday:"short",day:"numeric",month:"short"})}</td><td>${y.temperature_2m_min[i]}–${y.temperature_2m_max[i]}°C</td><td>${y.precipitation_probability_max[i]}%</td><td>${y.precipitation_sum[i]} mm</td></tr>`).join("");
+  $("w_out").innerHTML=`<div class="big">${c.temperature_2m}°C</div><div class="muted">${t.wx_hum} ${c.relative_humidity_2m}% · ${t.wx_rain_now} ${c.precipitation} mm</div>
+  <div class="${skip?"note":"ok"}"><b>${skip?t.wx_rain_skip:t.wx_no_rain}</b></div>
+  <div class="scroll"><table><thead><tr><th>${t.wx_th_day}</th><th>${t.wx_th_temp}</th><th>${t.wx_th_prob}</th><th>${t.wx_th_rain}</th></tr></thead><tbody>${days}</tbody></table></div>
+  ${(d.demo||isDemoMode)?`<div class="note">${t.wx_sample_note}</div>`:`<p class="muted">${t.wx_source}</p>`}`;
+}
+
+async function loadWx(){
+  const [lat,lon]=LOC[$("w_loc").value];
+  if(isDemoMode){renderWxData(DEMO_WX);return;}
+  $("w_out").innerHTML=`<p class="muted">${TRANSLATIONS[curLang].wx_loading}</p>`;
+  let d;
+  try{
+    const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,precipitation&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max&timezone=Asia%2FKolkata&forecast_days=5`);
+    if(!r.ok)throw 0;d=await r.json();
+  }catch(e){d=DEMO_WX}
+  const skip=Math.max(d.daily.precipitation_probability_max[0],d.daily.precipitation_probability_max[1])>=60||d.daily.precipitation_sum[1]>=5;
+  try{if(DB)put("rain_skip",skip)}catch(e){}
+  renderWxData(d);
+}
+$("w_loc").onchange=loadWx;
+
+// fertilizer
+$("f_go").onclick=()=>{
+  const t=TRANSLATIONS[curLang];
+  const [n,p,k]=CROPS[$("f_crop").value],a=parseFloat($("f_area").value);
+  if(!(a>0)){$("f_out").innerHTML=`<div class="note">${t.fert_err}</div>`;return}
+  const ha=a*{acre:0.4047,guntha:0.010117,ha:1}[$("f_unit").value],f=parseFloat($("f_soil").value);
+  const N=n*ha,P=p*f*ha,K=k*f*ha,dap=P/0.46,urea=Math.max(0,(N-dap*0.18)/0.46),mop=K/0.6,r=x=>Math.round(x*10)/10,bag=x=>(x/50).toFixed(1);
+  $("f_out").innerHTML=`<div class="ok"><b>${t.fert_needed}</b> N ${r(N)} · P₂O₅ ${r(P)} · K₂O ${r(K)}</div>
+  <table><thead><tr><th>${t.fert_th_name}</th><th>${t.fert_th_qty}</th><th>${t.fert_th_bags}</th></tr></thead><tbody>
+  <tr><td>${t.fert_urea}</td><td>${r(urea)} kg</td><td>${bag(urea)}</td></tr>
+  <tr><td>${t.fert_dap}</td><td>${r(dap)} kg</td><td>${bag(dap)}</td></tr>
+  <tr><td>${t.fert_mop}</td><td>${r(mop)} kg</td><td>${bag(mop)}</td></tr></tbody></table>
+  <p class="muted">${t.fert_split_note}</p>`;
+};
+
+// disease diagnosis
+$("d_file").onchange=()=>{const f=$("d_file").files[0];$("d_go").disabled=!f;
+ if(f){$("d_img").src=URL.createObjectURL(f);$("d_img").style.display="block"}};
+function shrink(f){return new Promise((ok,no)=>{const i=new Image();i.onload=()=>{const k=Math.min(1,1024/Math.max(i.width,i.height)),c=document.createElement("canvas");c.width=i.width*k;c.height=i.height*k;c.getContext("2d").drawImage(i,0,0,c.width,c.height);ok(c.toDataURL("image/jpeg",0.8).split(",")[1])};i.onerror=no;i.src=URL.createObjectURL(f)})}
+$("d_go").onclick=async()=>{
+  const out=$("d_out"),f=$("d_file").files[0],t=TRANSLATIONS[curLang];
+  if(!f)return;
+  if(isDemoMode||!navigator.onLine){out.innerHTML=`<div class="note">${t.dis_offline}</div>`;return}
+  $("d_go").disabled=true;out.innerHTML=`<p class="muted">${t.dis_analyzing}</p>`;
+  try{const img=await shrink(f);
+   const r=await fetch("/api/diagnose",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({crop:$("d_crop").value,lang:$("d_lang").value,image:img})});
+   const j=await r.json();if(!r.ok)throw new Error(j.error||"failed");
+   out.innerHTML="<div class='ok'><pre></pre></div>";out.querySelector("pre").textContent=j.text}
+  catch(e){out.innerHTML=`<div class="note">${t.dis_failed} (${e.message||"error"}). Check connection and GEMINI_API_KEY.</div>`}
+  $("d_go").disabled=false;
+};
+
+// mandi
+let live=null,mandiReason="",curMandiRows=[];
+const fmt=x=>isNaN(+x)||x==null||x===""?(x||"–"):(+x).toLocaleString("en-IN");
+function renderMandi(){
+  const v=$("m_var")?$("m_var").value:"all";
+  const rows=(v==="all"||!v)?curMandiRows:curMandiRows.filter(r=>(r[5]||r[4]||"").includes(v));
+  const renderRow=r=>{const meta=r[4]?`<br><span class="muted" style="font-size:11px">${r[4]}</span>`:"";return `<tr><td><b>${r[0]}</b>${meta}</td><td>${fmt(r[1])}</td><td>${fmt(r[2])}</td><td><b>${fmt(r[3])}</b></td></tr>`};
+  $("m_body").innerHTML=rows.length?rows.map(renderRow).join(""):`<tr><td colspan="4" class="muted" style="text-align:center;padding:12px">${TRANSLATIONS[curLang].mandi_no_rows}</td></tr>`;
+}
+async function showMandi(){
+  const c=$("m_crop").value,t=TRANSLATIONS[curLang];live=null;mandiReason="";
+  if(!isDemoMode){
+    try{const r=await fetch("/api/mandi?crop="+encodeURIComponent(c));if(r.ok){const j=await r.json();if(j.rows&&j.rows.length)live=j.rows;mandiReason=j.reason||""}}catch(e){}
+  }
+  if(c!==$("m_crop").value)return;
+  curMandiRows=live||MANDI[c];
+  const varieties=Array.from(new Set(curMandiRows.map(r=>r[5]||(r[4]?r[4].split(" · ")[0]:"")).filter(Boolean)));
+  if($("m_var")){$("m_var").innerHTML=`<option value="all">${t.mandi_all_vars}</option>`+varieties.map(v=>`<option value="${v}">${v}</option>`).join("");$("m_var").value="all"}
+  if(live){$("m_note").style.display="none"}
+  else{
+    $("m_note").style.display="block";
+    if(isDemoMode){
+      $("m_note").innerHTML=t.mandi_offline_note;
+    }else if(mandiReason==="no_arrivals"){
+      $("m_note").innerHTML=`<b>${t.mandi_no_arrivals}</b>`;
+    }else{
+      $("m_note").innerHTML=t.mandi_sample_note;
+    }
+  }
+  renderMandi();
+}
+$("m_crop").onchange=showMandi;if($("m_var"))$("m_var").onchange=renderMandi;
+
+// field control via Firebase Realtime Database REST
+const DB=(window.FARM_CONFIG&&FARM_CONFIG.DB_URL||"").replace(/\/$/,""),PATH=(window.FARM_CONFIG&&FARM_CONFIG.DB_PATH)||"field";
+const put=(k,v)=>fetch(`${DB}/${PATH}/${k}.json`,{method:"PUT",body:JSON.stringify(v)}).catch(e=>console.warn("Firebase put error:",e));
+let simPumpState=false;
+function setPump(on){
+  const t=TRANSLATIONS[curLang];
+  if(DB&&!isDemoMode){put("pump",on)}
+  else{simPumpState=on;if($("fi_t"))$("fi_t").textContent=(on?t.pump_is_on:t.pump_is_off)+" (Demo)";}
+  $("fi_p").textContent=on?t.pump_sent_on:t.pump_sent_off;
+}
+
+// 24-hour moisture history chart generator
+const DEMO_HISTORY=(()=>{
+  const now=Math.floor(Date.now()/1000),pts=[];
+  const curve=[32,31,31,30,30,29,62,58,54,50,47,44,41,38,36,34,33,32,31,31,30,30,29,29];
+  for(let i=0;i<24;i++)pts.push({t:now-(23-i)*3600,m:curve[i]});
+  return pts;
+})();
+
+let lastHistoryData=null,lastThreshold=30;
+function renderCurrentChart(){renderMoistureChart(lastHistoryData,lastThreshold)}
+
+function renderMoistureChart(historyObj,threshold=30){
+  lastHistoryData=historyObj;lastThreshold=threshold;
+  const t=TRANSLATIONS[curLang];
+  let pts=[];
+  if(!isDemoMode&&historyObj&&typeof historyObj==="object"){
+    for(const k of Object.keys(historyObj)){
+      const v=historyObj[k];
+      if(typeof v==="number")pts.push({t:Number(k),m:v});
+      else if(v&&typeof v==="object")pts.push({t:v.t||Number(k),m:v.m!=null?v.m:v.moisture});
+    }
+  }
+  pts=pts.filter(p=>p.t&&p.m!=null&&!isNaN(p.m)&&!isNaN(p.t)).sort((a,b)=>a.t-b.t);
+  const now=Math.floor(Date.now()/1000);
+  const last24=pts.filter(p=>p.t>=now-86400);
+  const data=(last24.length>=2)?last24:DEMO_HISTORY;
+  const isSample=(last24.length<2);
+
+  const ms=data.map(p=>p.m);
+  const cur=ms[ms.length-1],min=Math.min(...ms),max=Math.max(...ms),avg=Math.round(ms.reduce((a,b)=>a+b,0)/ms.length);
+  if($("fi_stats"))$("fi_stats").innerHTML=`<b>${t.stat_cur}:</b> ${cur}% &nbsp;·&nbsp; <b>${t.stat_min}:</b> ${min}% &nbsp;·&nbsp; <b>${t.stat_max}:</b> ${max}% &nbsp;·&nbsp; <b>${t.stat_avg}:</b> ${avg}%`;
+  if($("fi_chart_note"))$("fi_chart_note").innerHTML=isSample?
+    `<span class="note" style="display:inline-block;padding:4px 8px;margin:0">${t.chart_sample_note}</span>`:
+    `${t.chart_live_note}`;
+
+  const W=500,H=160,padL=36,padR=16,padT=16,padB=24;
+  const pW=W-padL-padR,pH=H-padT-padB,y0=padT+pH;
+  const tMin=now-86400,tMax=now;
+  const getX=tm=>padL+Math.max(0,Math.min(pW,((tm-tMin)/(tMax-tMin))*pW));
+  const getY=m=>y0-(Math.max(0,Math.min(100,m))/100)*pH;
+
+  const pathD=data.map((p,i)=>`${i===0?'M':'L'} ${getX(p.t).toFixed(1)} ${getY(p.m).toFixed(1)}`).join(' ');
+  const areaD=`${pathD} L ${getX(data[data.length-1].t).toFixed(1)} ${y0} L ${getX(data[0].t).toFixed(1)} ${y0} Z`;
+  const yTh=getY(threshold).toFixed(1);
+  const lastPt=data[data.length-1];
+
+  if($("fi_chart_wrap"))$("fi_chart_wrap").innerHTML=`
+  <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:160px;overflow:visible;font:11px system-ui,sans-serif">
+   <defs>
+    <linearGradient id="mGrad" x1="0" y1="0" x2="0" y2="1">
+     <stop offset="0%" stop-color="var(--pri,#2e7d32)" stop-opacity="0.32"/>
+     <stop offset="100%" stop-color="var(--pri,#2e7d32)" stop-opacity="0.02"/>
+    </linearGradient>
+   </defs>
+   <line x1="${padL}" y1="${getY(100)}" x2="${W-padR}" y2="${getY(100)}" stroke="var(--bd,#d6e0d3)" stroke-dasharray="3,3" stroke-width="0.8"/>
+   <text x="${padL-6}" y="${getY(100)+4}" font-size="10" fill="var(--muted,#5d6e5f)" text-anchor="end">100%</text>
+   <line x1="${padL}" y1="${getY(50)}" x2="${W-padR}" y2="${getY(50)}" stroke="var(--bd,#d6e0d3)" stroke-dasharray="3,3" stroke-width="0.8"/>
+   <text x="${padL-6}" y="${getY(50)+4}" font-size="10" fill="var(--muted,#5d6e5f)" text-anchor="end">50%</text>
+   <line x1="${padL}" y1="${y0}" x2="${W-padR}" y2="${y0}" stroke="var(--bd,#d6e0d3)" stroke-width="1"/>
+   <text x="${padL-6}" y="${y0+3}" font-size="10" fill="var(--muted,#5d6e5f)" text-anchor="end">0%</text>
+   <line x1="${padL}" y1="${yTh}" x2="${W-padR}" y2="${yTh}" stroke="#e65100" stroke-dasharray="4,4" stroke-width="1.2"/>
+   <text x="${W-padR}" y="${yTh-4}" font-size="9" font-weight="600" fill="#e65100" text-anchor="end">${t.chart_auto_th} (${threshold}%)</text>
+   <path d="${areaD}" fill="url(#mGrad)"/>
+   <path d="${pathD}" fill="none" stroke="var(--pri,#2e7d32)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+   <circle cx="${getX(lastPt.t).toFixed(1)}" cy="${getY(lastPt.m).toFixed(1)}" r="4.5" fill="var(--pri,#2e7d32)" stroke="#fff" stroke-width="2"/>
+   <text x="${padL}" y="${H-6}" font-size="10" fill="var(--muted,#5d6e5f)" text-anchor="start">-24h</text>
+   <text x="${padL+pW*0.25}" y="${H-6}" font-size="10" fill="var(--muted,#5d6e5f)" text-anchor="middle">-18h</text>
+   <text x="${padL+pW*0.5}" y="${H-6}" font-size="10" fill="var(--muted,#5d6e5f)" text-anchor="middle">-12h</text>
+   <text x="${padL+pW*0.75}" y="${H-6}" font-size="10" fill="var(--muted,#5d6e5f)" text-anchor="middle">-6h</text>
+   <text x="${W-padR}" y="${H-6}" font-size="10" font-weight="600" fill="var(--text,#1d2b1f)" text-anchor="end">${t.chart_now}</text>
+  </svg>`;
+}
+
+// Field control setup
+if(!DB){
+  $("fi_cfg").innerHTML=`<div class="note">${TRANSLATIONS[curLang].field_not_connected}</div>`;
+  $("fi_ui").style.display="block";
+  $("fi_m").textContent="29% "+TRANSLATIONS[curLang].moisture_suffix;
+  $("fi_t").textContent=TRANSLATIONS[curLang].pump_is_off+" (Demo)";
+  $("fi_on").onclick=()=>setPump(true);$("fi_off").onclick=()=>setPump(false);
+  $("fi_th").onchange=()=>renderMoistureChart(null,+$("fi_th").value);
+  renderMoistureChart(null,30);
+}else{
+  $("fi_ui").style.display="block";
+  $("fi_on").onclick=()=>setPump(true);$("fi_off").onclick=()=>setPump(false);
+  $("fi_mode").onchange=()=>put("mode",$("fi_mode").value);
+  $("fi_th").onchange=()=>{put("threshold",+$("fi_th").value);renderMoistureChart(curHistory,+$("fi_th").value)};
+  let curHistory=null;
+  async function poll(){
+    if(isDemoMode)return;
+    try{
+      const d=await (await fetch(`${DB}/${PATH}.json`)).json();
+      if(d){
+        const t=TRANSLATIONS[curLang];
+        $("fi_m").textContent=(d.moisture!=null?d.moisture+t.moisture_suffix:"–");
+        $("fi_t").textContent=(d.pump_state?t.pump_is_on:t.pump_is_off)+(d.updated?" · "+t.device_seen+" "+Math.round((Date.now()/1000-d.updated))+" "+t.seconds_ago:"");
+        if(d.mode)$("fi_mode").value=d.mode;
+        if(d.threshold)$("fi_th").value=d.threshold;
+        curHistory=d.history||null;
+        renderMoistureChart(curHistory,d.threshold||30);
+      }
+    }catch(e){}
+  }
+  poll();setInterval(poll,5000);
+}
+
+// Initialize language and demo states on load
+setLang(curLang);
+</script></body></html>
