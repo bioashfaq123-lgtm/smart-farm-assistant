@@ -15,7 +15,7 @@ let cache = {}; // last good copy per crop
 
 module.exports = async (req, res) => {
   const crop = req.query.crop || "Paddy";
-  const key = process.env.DATA_GOV_API_KEY;
+  const key = process.env.DATA_GOV_API_KEY || "579b464db66ec23bdd0000017f522ce4766940ac7adffdacc85d15ab";
   if (!key) return res.status(200).json({ rows: cache[crop] || [], reason: "no_key", note: "DATA_GOV_API_KEY not set" });
 
   const candidates = ALIASES[crop] || [crop];

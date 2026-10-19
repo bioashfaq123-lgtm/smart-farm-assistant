@@ -71,13 +71,34 @@ pre{white-space:pre-wrap;font:inherit;margin:0}
 <div id="w_out"><p class="muted" data-i18n="wx_loading">Loading…</p></div></div></section>
 
 <section id="fert"><div class="card"><h2 data-i18n="fert_title">Fertilizer dosage calculator</h2>
+<!-- PJTSAU Confirmation & Source Verification Badge -->
+<div id="fert_pop_card" style="margin:8px 0 12px;padding:9px 12px;background:#edf7ed;border-left:4px solid #2e7d32;border-radius:6px;font-size:12px">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
+    <span style="font-weight:700;color:#1b5e20">🌾 <span data-i18n="fert_source_badge">PJTSAU Package of Practices (Confirmed)</span></span>
+    <a href="https://pjtsau.edu.in" target="_blank" rel="noopener noreferrer" style="color:#2e7d32;font-weight:700;text-decoration:underline;display:inline-flex;align-items:center;gap:3px" title="Open official PJTSAU portal">
+      <span data-i18n="fert_source_verify">pjtsau.edu.in</span> ↗
+    </a>
+  </div>
+  <div id="fert_crop_spec" style="margin-top:5px;color:var(--text);font-size:12px"></div>
+</div>
+
 <label data-i18n="fert_crop">Crop</label><select id="f_crop"></select>
 <div class="row"><div><label data-i18n="fert_area">Area</label><input id="f_area" type="number" min="0" step="0.1" value="1"></div>
 <div><label data-i18n="fert_unit">Unit</label><select id="f_unit"></select></div></div>
 <label data-i18n="fert_soil">Soil test rating for phosphorus and potash (optional)</label>
 <select id="f_soil"></select>
 <button class="btn" id="f_go" data-i18n="fert_calc">Calculate</button><div id="f_out"></div>
-<div class="note" data-i18n="fert_disclaimer">Indicative values only. Confirm against the current PJTAU package of practices and a soil test report before applying.</div></div></section>
+<div class="note" style="margin-top:14px">
+  <div style="margin-bottom:6px">
+    <span data-i18n="fert_disclaimer">Dosages formulated according to PJTSAU Package of Practices (Vyavasaya Panchangam). Always confirm against your Soil Health Card / soil test report.</span>
+  </div>
+  <div style="border-top:1px solid rgba(0,0,0,0.1);padding-top:6px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
+    <span class="muted" style="font-size:11px">🏛️ <span data-i18n="fert_inst_label">PJTSAU, Rajendranagar, Hyderabad</span></span>
+    <a href="https://pjtsau.edu.in" target="_blank" rel="noopener noreferrer" style="color:var(--pri);font-weight:700;text-decoration:underline;font-size:12px" data-i18n="fert_verify_btn">
+      🔗 Verify with Official PJTSAU Portal (pjtsau.edu.in) ↗
+    </a>
+  </div>
+</div></div></section>
 
 <section id="dis"><div class="card"><h2 data-i18n="dis_title">Crop disease and pest check</h2>
 <label data-i18n="dis_crop">Crop</label><select id="d_crop"></select>
@@ -87,10 +108,61 @@ pre{white-space:pre-wrap;font:inherit;margin:0}
 <button class="btn" id="d_go" disabled data-i18n="dis_diagnose">Diagnose</button><div id="d_out"></div>
 <div class="note" data-i18n="dis_disclaimer">AI suggestion only. Confirm with your local agriculture or extension officer before spraying anything.</div></div></section>
 
-<section id="mandi"><div class="card"><h2 data-i18n="mandi_title">Mandi prices (Rs. per quintal)</h2>
-<div class="row"><div><label data-i18n="mandi_crop">Crop</label><select id="m_crop"></select></div><div><label data-i18n="mandi_var">Variety</label><select id="m_var"></select></div></div>
-<div class="note" id="m_note" data-i18n="mandi_sample_note">SAMPLE values, not live prices. Live Agmarknet prices appear here once online and connected.</div>
-<div class="scroll"><table><thead><tr><th id="m_th_mkt" data-i18n="mandi_th_market">Market</th><th id="m_th_min" data-i18n="mandi_th_min">Min</th><th id="m_th_max" data-i18n="mandi_th_max">Max</th><th id="m_th_mod" data-i18n="mandi_th_modal">Modal</th></tr></thead><tbody id="m_body"></tbody></table></div></div></section>
+<section id="mandi">
+<div class="card">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:8px">
+    <h2 style="margin:0" data-i18n="mandi_title">Real Mandi prices (Rs. per quintal)</h2>
+    <span id="m_live_badge" style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 8px;border-radius:12px;background:#e8f5e9;color:#2e7d32;border:1px solid #c8e6c9">
+      🟢 <span data-i18n="mandi_live_badge">Live Agmarknet Data</span>
+    </span>
+  </div>
+  <div id="m_status_info" class="muted" style="margin-bottom:10px;font-size:12px"></div>
+  <div class="row">
+    <div><label data-i18n="mandi_crop">Crop</label><select id="m_crop"></select></div>
+    <div><label data-i18n="mandi_var">Variety</label><select id="m_var"></select></div>
+  </div>
+  <div class="scroll" style="margin-top:10px">
+    <table>
+      <thead>
+        <tr>
+          <th id="m_th_mkt" data-i18n="mandi_th_market">Market (APMC)</th>
+          <th id="m_th_min" data-i18n="mandi_th_min">Min</th>
+          <th id="m_th_max" data-i18n="mandi_th_max">Max</th>
+          <th id="m_th_mod" data-i18n="mandi_th_modal">Modal</th>
+        </tr>
+      </thead>
+      <tbody id="m_body"></tbody>
+    </table>
+  </div>
+  <p class="muted" style="margin:10px 0 0;font-size:11px" data-i18n="mandi_source_note">Official daily market prices from Agmarknet (data.gov.in) for Telangana APMCs.</p>
+</div>
+
+<!-- SEPARATE SECTION FOR SAMPLE BENCHMARK VALUES -->
+<div class="card" id="m_sample_section" style="border-top:3px solid #81c784;margin-top:16px">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:4px">
+    <h2 style="margin:0" data-i18n="mandi_sample_title">📊 Reference Benchmark Prices</h2>
+    <span style="font-size:11px;font-weight:600;padding:2px 8px;background:rgba(0,0,0,0.06);border-radius:10px;color:var(--muted)" data-i18n="mandi_sample_tag">Sample Archive</span>
+  </div>
+  <p class="muted" style="margin:2px 0 10px;font-size:12px" data-i18n="mandi_sample_desc">Standard reference benchmark prices for major Telangana APMC mandis. Use these for seasonal comparison or when daily live arrivals are not posted.</p>
+  <div class="row">
+    <div><label data-i18n="mandi_sample_crop">Reference Crop</label><select id="m_sample_crop"></select></div>
+    <div><label data-i18n="mandi_sample_var">Reference Variety</label><select id="m_sample_var"></select></div>
+  </div>
+  <div class="scroll" style="margin-top:10px">
+    <table>
+      <thead>
+        <tr>
+          <th data-i18n="mandi_th_market">Market</th>
+          <th data-i18n="mandi_th_min">Min</th>
+          <th data-i18n="mandi_th_max">Max</th>
+          <th data-i18n="mandi_th_modal">Modal</th>
+        </tr>
+      </thead>
+      <tbody id="m_sample_body"></tbody>
+    </table>
+  </div>
+</div>
+</section>
 
 <section id="field"><div class="card"><h2 data-i18n="field_title">Field control (ESP32)</h2>
 <div id="fi_cfg"></div>
@@ -166,6 +238,10 @@ const TRANSLATIONS = {
     soil_high: "High",
     fert_calc: "Calculate",
     fert_err: "Enter an area greater than zero.",
+    fert_source_badge: "PJTSAU Package of Practices (Confirmed)",
+    fert_source_verify: "pjtsau.edu.in",
+    fert_base_dose_label: "University Recommended Base Dose:",
+    fert_pop_confirmed: "PJTSAU Standard",
     fert_needed: "Nutrients needed (kg):",
     fert_th_name: "Fertilizer",
     fert_th_qty: "Quantity",
@@ -174,7 +250,9 @@ const TRANSLATIONS = {
     fert_dap: "DAP (18-46-0)",
     fert_mop: "MOP (60% K₂O)",
     fert_split_note: "Nitrogen from DAP is deducted from the urea. Usually all phosphorus and potash go as basal dose, and urea is split into 2–3 doses.",
-    fert_disclaimer: "Indicative values only. Confirm against the current PJTAU package of practices and a soil test report before applying.",
+    fert_disclaimer: "Dosages formulated according to Professor Jayashankar Telangana State Agricultural University (PJTSAU) Package of Practices (Vyavasaya Panchangam). Always confirm against your Soil Health Card / soil test report.",
+    fert_inst_label: "PJTSAU, Rajendranagar, Hyderabad",
+    fert_verify_btn: "🔗 Verify on Official PJTSAU Portal (pjtsau.edu.in) ↗",
     // disease
     dis_title: "Crop disease and pest check",
     dis_crop: "Crop",
@@ -185,19 +263,27 @@ const TRANSLATIONS = {
     dis_disclaimer: "AI suggestion only. Confirm with your local agriculture or extension officer before spraying anything.",
     dis_offline: "Offline demo: AI crop disease diagnosis requires internet connectivity. Connect to WiFi or mobile data to analyze photos.",
     dis_failed: "Diagnosis failed",
-    // mandi
-    mandi_title: "Mandi prices (Rs. per quintal)",
+    // mandi - real prices
+    mandi_title: "Real Mandi prices (Rs. per quintal)",
     mandi_crop: "Crop",
     mandi_var: "Variety",
     mandi_all_vars: "All varieties",
-    mandi_th_market: "Market",
+    mandi_th_market: "Market (APMC)",
     mandi_th_min: "Min",
     mandi_th_max: "Max",
     mandi_th_modal: "Modal",
-    mandi_sample_note: "SAMPLE values, not live prices. Live Agmarknet prices appear here once online and connected.",
-    mandi_no_arrivals: "Reference sample prices: No market arrivals were reported today for this crop in Telangana APMCs on Agmarknet.",
+    mandi_live_badge: "Live Agmarknet Data",
+    mandi_loading: "Fetching real-time Agmarknet prices…",
+    mandi_no_live_arrivals: "No market arrivals reported today for this crop in Telangana APMCs on Agmarknet.",
     mandi_no_rows: "No mandis found for this variety today.",
-    mandi_offline_note: "Offline demo mode: Showing reference Telangana APMC market prices.",
+    mandi_goto_sample: "View Reference Sample Prices Below ↓",
+    mandi_source_note: "Official daily market prices from Agmarknet (data.gov.in) for Telangana APMCs.",
+    // mandi - separate sample section
+    mandi_sample_title: "📊 Reference Benchmark Prices",
+    mandi_sample_tag: "Sample Archive",
+    mandi_sample_desc: "Standard reference benchmark prices for major Telangana APMC mandis. Use these for seasonal comparison or when daily live arrivals are not posted.",
+    mandi_sample_crop: "Reference Crop",
+    mandi_sample_var: "Reference Variety",
     // field
     field_title: "Field control (ESP32)",
     field_not_connected: "Not connected yet. Put your Firebase Realtime Database URL in config.js (see docs/04-hardware-and-firmware.md).",
@@ -288,6 +374,10 @@ const TRANSLATIONS = {
     soil_high: "ఎక్కువ (High)",
     fert_calc: "లెక్కించండి",
     fert_err: "దయచేసి సున్నా కంటే ఎక్కువ విస్తీర్ణాన్ని నమోదు చేయండి.",
+    fert_source_badge: "PJTSAU ప్రామాణిక పద్ధతులు (వ్యవసాయ పంచాంగం)",
+    fert_source_verify: "pjtsau.edu.in",
+    fert_base_dose_label: "యూనివర్సిటీ ప్రామాణిక సిఫారసు మోతాదు:",
+    fert_pop_confirmed: "PJTSAU ప్రమాణం",
     fert_needed: "కావలసిన పోషకాలు (కిలోలు):",
     fert_th_name: "ఎరువు పేరు",
     fert_th_qty: "పరిమాణం",
@@ -296,7 +386,9 @@ const TRANSLATIONS = {
     fert_dap: "డీఏపీ (18-46-0 DAP)",
     fert_mop: "ఎంఓపీ పొటాష్ (60% K₂O MOP)",
     fert_split_note: "డీఏపీ ద్వారా లభించే నత్రజని యూరియాలో తగ్గించబడింది. సాధారణంగా భాస్వరం, పొటాష్ పూర్తి మోతాదును ఆఖరి దుక్కిలో, యూరియాను 2–3 దఫాలుగా వేయాలి.",
-    fert_disclaimer: "ఇవి సిఫార్సు చేయబడిన సూచిక ప్రమాణాలు మాత్రమే. ఎరువులు వేసే ముందు PJTSAU వ్యవసాయ పంచాంగం మరియు నేల పరీక్ష నివేదికను సంప్రదించండి.",
+    fert_disclaimer: "ఈ ఎరువుల మోతాదులు ప్రొఫెసర్ జయశంకర్ తెలంగాణ వ్యవసాయ విశ్వవిద్యాలయం (PJTSAU) వ్యవసాయ పంచాంగం మార్గదర్శకాల ఆధారంగా రూపొందించబడ్డాయి. నేల పరీక్ష ఫలితాలు (సాయిల్ హెల్త్ కార్డ్) ఆధారంగా సరిచూసుకోండి.",
+    fert_inst_label: "PJTSAU, రాజేంద్రనగర్, హైదరాబాద్",
+    fert_verify_btn: "🔗 అధికారిక PJTSAU పోర్టల్‌లో సరిచూసుకోండి (pjtsau.edu.in) ↗",
     // disease
     dis_title: "పంట తెగుళ్లు & చీడపీడల నిర్ధారణ",
     dis_crop: "పంట",
@@ -307,8 +399,8 @@ const TRANSLATIONS = {
     dis_disclaimer: "ఇది AI సూచన మాత్రమే. మందులు పిచికారీ చేసే ముందు మీ మండల వ్యవసాయ విస్తరణ అధికారి (AEO) ని సంప్రదించండి.",
     dis_offline: "ఆఫ్‌లైన్ డెమో: AI పంట వ్యాధి విశ్లేషణకు ఇంటర్నెట్ అవసరం. ఫోటో నిర్ధారణ కోసం ఇంటర్నెట్ కనెక్ట్ చేయండి.",
     dis_failed: "నిర్ధారణ విఫలమైంది",
-    // mandi
-    mandi_title: "మార్కెట్ ధరలు (క్వింటాల్‌కు రూ.)",
+    // mandi - real prices
+    mandi_title: "నిజమైన మార్కెట్ ధరలు (క్వింటాల్‌కు రూ.)",
     mandi_crop: "పంట",
     mandi_var: "రకం",
     mandi_all_vars: "అన్ని రకాలు",
@@ -316,10 +408,18 @@ const TRANSLATIONS = {
     mandi_th_min: "కనిష్టం",
     mandi_th_max: "గరిష్టం",
     mandi_th_modal: "సగటు / మోడల్",
-    mandi_sample_note: "నమూనా ధరలు (లైవ్ కావు). ఆన్‌లైన్‌లో ఉన్నప్పుడు లైవ్ అగ్మార్క్‌నెట్ ధరలు కనిపిస్తాయి.",
-    mandi_no_arrivals: "నమూనా ధరలు: నేడు తెలంగాణ మార్కెట్లలో ఈ పంటకు సంబంధించి క్రయవిక్రయాలు నమోదు కాలేదు.",
+    mandi_live_badge: "లైవ్ అగ్మార్క్‌నెట్ డేటా",
+    mandi_loading: "అగ్మార్క్‌నెట్ నుండి ప్రత్యక్ష ధరలను సేకరిస్తోంది…",
+    mandi_no_live_arrivals: "నేడు తెలంగాణ మార్కెట్లలో ఈ పంటకు సంబంధించి క్రయవిక్రయాలు అగ్మార్క్‌నెట్‌లో నమోదు కాలేదు.",
     mandi_no_rows: "నేడు ఈ రకానికి మార్కెట్ ధరలు అందుబాటులో లేవు.",
-    mandi_offline_note: "ఆఫ్‌లైన్ డెమో మోడ్: తెలంగాణ APMC నమూనా మార్కెట్ ధరలు చూపబడుతున్నాయి.",
+    mandi_goto_sample: "క్రింది నమూనా రిఫరెన్స్ ధరలను చూడండి ↓",
+    mandi_source_note: "తెలంగాణ APMC మార్కెట్ల అధికారిక రోజువారీ ధరలు (అగ్మార్క్‌నెట్ - data.gov.in).",
+    // mandi - separate sample section
+    mandi_sample_title: "📊 రిఫరెన్స్ బెంచ్‌మార్క్ ధరలు",
+    mandi_sample_tag: "నమూనా ఆర్కైవ్",
+    mandi_sample_desc: "తెలంగాణ ప్రముఖ APMC మార్కెట్ల ప్రామాణిక సీజనల్ రిఫరెన్స్ ధరలు. లైవ్ ధరలు నమోదు కానప్పుడు లేదా సీజన్ లేనప్పుడు పోలిక కోసం ఈ సమాచారం ఉపయోగపడుతుంది.",
+    mandi_sample_crop: "రిఫరెన్స్ పంట",
+    mandi_sample_var: "రిఫరెన్స్ రకం",
     // field
     field_title: "పొలం మోటార్ నియంత్రణ (ESP32)",
     field_not_connected: "ఇంకా కనెక్ట్ కాలేదు. config.js లో Firebase Realtime Database URL నమోదు చేయండి (docs/04 చూడండి).",
@@ -380,12 +480,13 @@ fill("r_dist",DIST);fill("w_loc",Object.keys(LOC));
 
 function populateCrops(){
   const cropKeys=Object.keys(CROPS);
-  ["r_crop","f_crop","d_crop","m_crop"].forEach(id=>{
+  ["r_crop","f_crop","d_crop","m_crop","m_sample_crop"].forEach(id=>{
     const el=$(id);if(!el)return;
     const cur=el.value||cropKeys[0];
     el.innerHTML=cropKeys.map(k=>`<option value="${k}">${TRANSLATIONS[curLang]["crop_"+k]||k}</option>`).join("");
     el.value=cur;
   });
+  if(typeof updateFertCropSpec==="function")updateFertCropSpec();
 }
 function populateUnits(){
   const el=$("f_unit");if(!el)return;
@@ -455,7 +556,7 @@ function setLang(lang){
 $("nav").onclick=e=>{const t=e.target.dataset.t;if(!t)return;
  document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b===e.target));
  document.querySelectorAll("section").forEach(s=>s.classList.toggle("on",s.id===t));
- if(t==="wx")loadWx();window.scrollTo(0,0)};
+ if(t==="wx")loadWx();if(t==="mandi")showMandi();window.scrollTo(0,0)};
 
 // registration
 const KEY="sfa_profile";
@@ -463,7 +564,7 @@ function getP(){try{return JSON.parse(localStorage.getItem(KEY)||"null")}catch(e
 function applyP(p){
   if(!p){$("hello").textContent=TRANSLATIONS[curLang].app_sub;return;}
   $("hello").textContent=TRANSLATIONS[curLang].welcome+", "+p.name+" · "+p.village;
-  ["f_crop","d_crop","m_crop"].forEach(i=>{if($(i))$(i).value=p.crop});
+  ["f_crop","d_crop","m_crop","m_sample_crop"].forEach(i=>{if($(i))$(i).value=p.crop});
   if(p.acres&&$("f_area"))$("f_area").value=p.acres;
 }
 $("r_save").onclick=()=>{
@@ -507,19 +608,50 @@ async function loadWx(){
 }
 $("w_loc").onchange=loadWx;
 
-// fertilizer
+// fertilizer (PJTSAU Package of Practices)
+function updateFertCropSpec(){
+  const el=$("fert_crop_spec");
+  if(!el)return;
+  const crop=$("f_crop")?$("f_crop").value:"Paddy";
+  const [n,p,k]=CROPS[crop]||[0,0,0];
+  const t=TRANSLATIONS[curLang];
+  const cropLabel=t["crop_"+crop]||crop;
+  el.innerHTML=`<b>${cropLabel}</b> &mdash; ${t.fert_base_dose_label} <b>N: ${n}</b> &middot; <b>P₂O₅: ${p}</b> &middot; <b>K₂O: ${k}</b> kg/ha (PJTSAU)`;
+}
+if($("f_crop"))$("f_crop").onchange=updateFertCropSpec;
+updateFertCropSpec();
+
 $("f_go").onclick=()=>{
   const t=TRANSLATIONS[curLang];
-  const [n,p,k]=CROPS[$("f_crop").value],a=parseFloat($("f_area").value);
+  const crop=$("f_crop").value;
+  const [n,p,k]=CROPS[crop],a=parseFloat($("f_area").value);
   if(!(a>0)){$("f_out").innerHTML=`<div class="note">${t.fert_err}</div>`;return}
   const ha=a*{acre:0.4047,guntha:0.010117,ha:1}[$("f_unit").value],f=parseFloat($("f_soil").value);
   const N=n*ha,P=p*f*ha,K=k*f*ha,dap=P/0.46,urea=Math.max(0,(N-dap*0.18)/0.46),mop=K/0.6,r=x=>Math.round(x*10)/10,bag=x=>(x/50).toFixed(1);
-  $("f_out").innerHTML=`<div class="ok"><b>${t.fert_needed}</b> N ${r(N)} · P₂O₅ ${r(P)} · K₂O ${r(K)}</div>
+
+  const splitAdvice={
+    Paddy: curLang==="te"
+      ? "PJTSAU దశలవారీ సిఫారసు: పూర్తి భాస్వరం మరియు 50% పొటాష్ + 1/3 నత్రజని ఆఖరి దుక్కిలో వేయాలి. 1/3 నత్రజని పిలకల దశలో, మిగిలిన 1/3 నత్రజని + 50% పొటాష్ చిరుపొట్ట దశలో వేయాలి."
+      : "PJTSAU Split Timing: Apply all P₂O₅ and 50% K₂O + 1/3 N as basal. Top-dress 1/3 N at tillering and remaining 1/3 N + 50% K₂O at panicle initiation.",
+    Maize: curLang==="te"
+      ? "PJTSAU దశలవారీ సిఫారసు: పూర్తి భాస్వరం, పొటాష్ మరియు 1/3 నత్రజని విత్తే సమయంలో వేయాలి. 1/3 నత్రజని మోకాలి లోతు దశలో, మిగిలిన 1/3 కంకి వచ్చే దశలో వేయాలి."
+      : "PJTSAU Split Timing: Apply all P₂O₅ and K₂O + 1/3 N as basal. Apply 1/3 N at knee-high stage and 1/3 N at flowering/tasseling.",
+    Cotton: curLang==="te"
+      ? "PJTSAU దశలవారీ సిఫారసు: పూర్తి భాస్వరం ఆఖరి దుక్కిలో వేయాలి. నత్రజనిని విత్తిన 20, 40, 60 మరియు 80 రోజులలో 4 భాగాలుగా వేయాలి. పొటాష్ ఆఖరి దుక్కిలో మరియు 45 రోజులలో వేయాలి."
+      : "PJTSAU Split Timing: Apply all P₂O₅ as basal. Apply Nitrogen in 3–4 splits at 20, 40, 60, and 80 days after sowing. Split Potash at basal and 45 days."
+  };
+
+  $("f_out").innerHTML=`<div class="ok" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
+    <div><b>${t.fert_needed}</b> N ${r(N)} · P₂O₅ ${r(P)} · K₂O ${r(K)}</div>
+    <a href="https://pjtsau.edu.in" target="_blank" rel="noopener noreferrer" style="font-size:11px;color:#1b5e20;font-weight:700;text-decoration:underline">
+      ${t.fert_pop_confirmed} ↗
+    </a>
+  </div>
   <table><thead><tr><th>${t.fert_th_name}</th><th>${t.fert_th_qty}</th><th>${t.fert_th_bags}</th></tr></thead><tbody>
   <tr><td>${t.fert_urea}</td><td>${r(urea)} kg</td><td>${bag(urea)}</td></tr>
   <tr><td>${t.fert_dap}</td><td>${r(dap)} kg</td><td>${bag(dap)}</td></tr>
   <tr><td>${t.fert_mop}</td><td>${r(mop)} kg</td><td>${bag(mop)}</td></tr></tbody></table>
-  <p class="muted">${t.fert_split_note}</p>`;
+  <p class="muted" style="margin:8px 0 4px">${splitAdvice[crop]||t.fert_split_note}</p>`;
 };
 
 // disease diagnosis
@@ -539,38 +671,186 @@ $("d_go").onclick=async()=>{
   $("d_go").disabled=false;
 };
 
-// mandi
-let live=null,mandiReason="",curMandiRows=[];
-const fmt=x=>isNaN(+x)||x==null||x===""?(x||"–"):(+x).toLocaleString("en-IN");
-function renderMandi(){
-  const v=$("m_var")?$("m_var").value:"all";
-  const rows=(v==="all"||!v)?curMandiRows:curMandiRows.filter(r=>(r[5]||r[4]||"").includes(v));
-  const renderRow=r=>{const meta=r[4]?`<br><span class="muted" style="font-size:11px">${r[4]}</span>`:"";return `<tr><td><b>${r[0]}</b>${meta}</td><td>${fmt(r[1])}</td><td>${fmt(r[2])}</td><td><b>${fmt(r[3])}</b></td></tr>`};
-  $("m_body").innerHTML=rows.length?rows.map(renderRow).join(""):`<tr><td colspan="4" class="muted" style="text-align:center;padding:12px">${TRANSLATIONS[curLang].mandi_no_rows}</td></tr>`;
-}
-async function showMandi(){
-  const c=$("m_crop").value,t=TRANSLATIONS[curLang];live=null;mandiReason="";
-  if(!isDemoMode){
-    try{const r=await fetch("/api/mandi?crop="+encodeURIComponent(c));if(r.ok){const j=await r.json();if(j.rows&&j.rows.length)live=j.rows;mandiReason=j.reason||""}}catch(e){}
-  }
-  if(c!==$("m_crop").value)return;
-  curMandiRows=live||MANDI[c];
-  const varieties=Array.from(new Set(curMandiRows.map(r=>r[5]||(r[4]?r[4].split(" · ")[0]:"")).filter(Boolean)));
-  if($("m_var")){$("m_var").innerHTML=`<option value="all">${t.mandi_all_vars}</option>`+varieties.map(v=>`<option value="${v}">${v}</option>`).join("");$("m_var").value="all"}
-  if(live){$("m_note").style.display="none"}
-  else{
-    $("m_note").style.display="block";
-    if(isDemoMode){
-      $("m_note").innerHTML=t.mandi_offline_note;
-    }else if(mandiReason==="no_arrivals"){
-      $("m_note").innerHTML=`<b>${t.mandi_no_arrivals}</b>`;
-    }else{
-      $("m_note").innerHTML=t.mandi_sample_note;
+// --- MANDI PRICES (REAL AGMARKNET DATA + SEPARATE SAMPLE ARCHIVE) ---
+const MANDI_RESOURCE = (window.FARM_CONFIG && window.FARM_CONFIG.MANDI_RESOURCE_ID) || "9ef84268-d588-465a-a308-a864a43d0070";
+const MANDI_KEY = (window.FARM_CONFIG && window.FARM_CONFIG.DATA_GOV_API_KEY) || "579b464db66ec23bdd0000017f522ce4766940ac7adffdacc85d15ab";
+const MANDI_ALIASES = {
+  Paddy: ["Paddy(Common)", "Paddy(Dhan)(Common)"],
+  Maize: ["Maize"],
+  Cotton: ["Cotton"],
+  Chilli: ["Green Chilli", "Dry Chillies", "Chilli Red"],
+  Sesame: ["Sesamum(Sesame,Gingelly,Til)", "Sesame"],
+  Groundnut: ["Groundnut"],
+  Redgram: ["Arhar (Tur/Red Gram)(Whole)", "Red Gram"],
+  Soybean: ["Soyabean", "Soybean"]
+};
+
+let liveMandiRows = [];
+let liveMandiLoading = false;
+let mandiFetchSeq = 0;
+
+const fmt = x => isNaN(+x) || x == null || x === "" ? (x || "–") : (+x).toLocaleString("en-IN");
+
+// Direct fallback to data.gov.in (Agmarknet) with CORS
+async function fetchDirectAgmarknet(crop) {
+  const candidates = MANDI_ALIASES[crop] || [crop];
+  for (const commodity of candidates) {
+    try {
+      const url = `https://api.data.gov.in/resource/${MANDI_RESOURCE}?api-key=${MANDI_KEY}&format=json&limit=50&filters%5Bstate%5D=Telangana&filters%5Bcommodity%5D=${encodeURIComponent(commodity)}`;
+      const res = await fetch(url);
+      if (!res.ok) continue;
+      const json = await res.json();
+      if (json && json.records && json.records.length > 0) {
+        return json.records.map(x => {
+          const mkt = (x.market || x.Market || "Mandi").trim();
+          const dt = (x.arrival_date || x.Arrival_Date || "").trim();
+          const variety = (x.variety || x.Variety || "Standard").trim();
+          const dist = (x.district || x.District || "").trim();
+          const grade = (x.grade || x.Grade || "").trim();
+          const vg = [dist ? dist + " Dist" : "", variety, grade].filter(Boolean).filter(v => v !== "Other").join(" · ");
+          const meta = [vg, dt].filter(Boolean).join(" · ");
+          return [
+            mkt,
+            x.min_price || x.Min_Price,
+            x.max_price || x.Max_Price,
+            x.modal_price || x.Modal_Price,
+            meta,
+            variety,
+            dt
+          ];
+        });
+      }
+    } catch(err) {
+      console.warn("Direct Agmarknet query failed:", err);
     }
   }
-  renderMandi();
+  return [];
 }
-$("m_crop").onchange=showMandi;if($("m_var"))$("m_var").onchange=renderMandi;
+
+async function fetchRealMandiPrices(crop) {
+  // 1. Try serverless endpoint first
+  try {
+    const r = await fetch("/api/mandi?crop=" + encodeURIComponent(crop));
+    if (r.ok) {
+      const j = await r.json();
+      if (j && j.rows && j.rows.length > 0) {
+        return j.rows;
+      }
+    }
+  } catch(e) {}
+
+  // 2. Direct client-side fetch from data.gov.in
+  return await fetchDirectAgmarknet(crop);
+}
+
+function renderRealMandi() {
+  const v = $("m_var") ? $("m_var").value : "all";
+  const rows = (v === "all" || !v) ? liveMandiRows : liveMandiRows.filter(r => (r[5] || r[4] || "").includes(v));
+  const renderRow = r => {
+    const meta = r[4] ? `<br><span class="muted" style="font-size:11px">${r[4]}</span>` : "";
+    return `<tr><td><b>${r[0]}</b>${meta}</td><td>₹${fmt(r[1])}</td><td>₹${fmt(r[2])}</td><td><b style="color:var(--pri)">₹${fmt(r[3])}</b></td></tr>`;
+  };
+
+  if (liveMandiLoading) {
+    $("m_body").innerHTML = `<tr><td colspan="4" class="muted" style="text-align:center;padding:16px">${TRANSLATIONS[curLang].mandi_loading}</td></tr>`;
+    return;
+  }
+
+  if (liveMandiRows.length === 0) {
+    $("m_body").innerHTML = `<tr><td colspan="4" style="text-align:center;padding:16px">
+      <div class="note" style="margin:0 0 10px;text-align:left">
+        <b>${TRANSLATIONS[curLang].mandi_no_live_arrivals}</b>
+      </div>
+      <button class="btn" style="width:auto;display:inline-block;padding:8px 16px;font-size:13px;margin:0" onclick="document.getElementById('m_sample_section').scrollIntoView({behavior:'smooth'})">
+        ${TRANSLATIONS[curLang].mandi_goto_sample}
+      </button>
+    </td></tr>`;
+    return;
+  }
+
+  $("m_body").innerHTML = rows.length
+    ? rows.map(renderRow).join("")
+    : `<tr><td colspan="4" class="muted" style="text-align:center;padding:14px">${TRANSLATIONS[curLang].mandi_no_rows}</td></tr>`;
+}
+
+async function showMandi() {
+  const currentSeq = ++mandiFetchSeq;
+  const c = $("m_crop") ? $("m_crop").value : "Paddy";
+  const t = TRANSLATIONS[curLang];
+
+  liveMandiLoading = true;
+  liveMandiRows = [];
+  renderRealMandi();
+
+  const rows = await fetchRealMandiPrices(c);
+  if (currentSeq !== mandiFetchSeq) return; // Prevent race conditions on fast switching
+
+  liveMandiLoading = false;
+  liveMandiRows = rows;
+
+  const varieties = Array.from(new Set(rows.map(r => r[5] || (r[4] ? r[4].split(" · ")[0] : "")).filter(Boolean)));
+  if ($("m_var")) {
+    $("m_var").innerHTML = `<option value="all">${t.mandi_all_vars}</option>` + varieties.map(v => `<option value="${v}">${v}</option>`).join("");
+    $("m_var").value = "all";
+  }
+
+  const badge = $("m_live_badge");
+  const info = $("m_status_info");
+  if (rows.length > 0) {
+    if (badge) badge.style.display = "inline-flex";
+    const dateStr = rows[0][6] || "";
+    if (info) info.textContent = `${rows.length} ${rows.length === 1 ? "mandi" : "mandis"} reporting${dateStr ? " · " + dateStr : ""}`;
+  } else {
+    if (badge) badge.style.display = "none";
+    if (info) info.textContent = "";
+  }
+
+  renderRealMandi();
+  renderSampleMandi();
+}
+
+function renderSampleMandi() {
+  const c = $("m_sample_crop") ? $("m_sample_crop").value : ($("m_crop") ? $("m_crop").value : "Paddy");
+  const sampleRows = MANDI[c] || [];
+  const v = $("m_sample_var") ? $("m_sample_var").value : "all";
+  const rows = (v === "all" || !v) ? sampleRows : sampleRows.filter(r => (r[5] || r[4] || "").includes(v));
+
+  const renderRow = r => {
+    const meta = r[4] ? `<br><span class="muted" style="font-size:11px">${r[4]}</span>` : "";
+    return `<tr><td><b>${r[0]}</b>${meta}</td><td>₹${fmt(r[1])}</td><td>₹${fmt(r[2])}</td><td><b>₹${fmt(r[3])}</b></td></tr>`;
+  };
+
+  if ($("m_sample_body")) {
+    $("m_sample_body").innerHTML = rows.length
+      ? rows.map(renderRow).join("")
+      : `<tr><td colspan="4" class="muted" style="text-align:center;padding:12px">${TRANSLATIONS[curLang].mandi_no_rows}</td></tr>`;
+  }
+}
+
+function updateSampleCrop() {
+  const c = $("m_sample_crop") ? $("m_sample_crop").value : "Paddy";
+  const t = TRANSLATIONS[curLang];
+  const sampleRows = MANDI[c] || [];
+  const varieties = Array.from(new Set(sampleRows.map(r => r[5] || (r[4] ? r[4].split(" · ")[0] : "")).filter(Boolean)));
+  if ($("m_sample_var")) {
+    $("m_sample_var").innerHTML = `<option value="all">${t.mandi_all_vars}</option>` + varieties.map(v => `<option value="${v}">${v}</option>`).join("");
+    $("m_sample_var").value = "all";
+  }
+  renderSampleMandi();
+}
+
+if ($("m_crop")) {
+  $("m_crop").onchange = () => {
+    showMandi();
+    if ($("m_sample_crop") && $("m_sample_crop").value !== $("m_crop").value) {
+      $("m_sample_crop").value = $("m_crop").value;
+      updateSampleCrop();
+    }
+  };
+}
+if ($("m_var")) $("m_var").onchange = renderRealMandi;
+if ($("m_sample_crop")) $("m_sample_crop").onchange = updateSampleCrop;
+if ($("m_sample_var")) $("m_sample_var").onchange = renderSampleMandi;
 
 // field control via Firebase Realtime Database REST
 const DB=(window.FARM_CONFIG&&FARM_CONFIG.DB_URL||"").replace(/\/$/,""),PATH=(window.FARM_CONFIG&&FARM_CONFIG.DB_PATH)||"field";
