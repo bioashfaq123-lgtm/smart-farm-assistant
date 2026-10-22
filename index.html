@@ -420,7 +420,7 @@ pre{white-space:pre-wrap;font:inherit;margin:0}
   </div>
 </div>
 </main>
-<script src="config.js"></script>
+<script src="config.js?v=1.1"></script>
 <script>
 const $=id=>document.getElementById(id);
 
@@ -1159,14 +1159,13 @@ function openTab(t) {
 
   if (isFieldTab) {
     const fiUi = $("fi_ui"), fiCfg = $("fi_cfg");
-    if (!isOwner) {
+    const hasDb = Boolean(window.FARM_CONFIG && FARM_CONFIG.DB_URL);
+    if (currentSub && currentSub.loggedIn && !currentSub.isOwner && !currentSub.demoModePublic && currentSub.status !== "anonymous") {
       if (fiUi) fiUi.style.display = "none";
       if (fiCfg) fiCfg.innerHTML = `<div class="note">${TRANSLATIONS[curLang].field_owner_only}</div>`;
     } else {
-      if (fiCfg && (!window.FARM_CONFIG || !FARM_CONFIG.DB_URL)) {
-        fiCfg.innerHTML = `<div class="note">${TRANSLATIONS[curLang].field_not_connected}</div>`;
-      } else if (fiCfg) {
-        fiCfg.innerHTML = "";
+      if (fiCfg) {
+        fiCfg.innerHTML = hasDb ? "" : `<div class="note">${TRANSLATIONS[curLang].field_not_connected}</div>`;
       }
       if (fiUi) fiUi.style.display = "block";
     }
@@ -1797,7 +1796,24 @@ if ($("m_sample_var")) $("m_sample_var").onchange = renderSampleMandi;
 
 // field control via Firebase Realtime Database REST
 const DB=(window.FARM_CONFIG&&FARM_CONFIG.DB_URL||"").replace(/\/$/,""),PATH=(window.FARM_CONFIG&&FARM_CONFIG.DB_PATH)||"field";
-const put=(k,v)=>fetch(`${DB}/${PATH}/${k}.json`,{method:"PUT",body:JSON.stringify(v)}).catch(e=>console.warn("Firebase put error:",e));
+const put = async (k, v) => {
+  if (!DB) return;
+  try {
+    const res = await fetch(`${DB}/${PATH}/${k}.json`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(v)
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      if (res.status === 401 || res.status === 403 || (err && err.error)) {
+        if ($("fi_cfg")) $("fi_cfg").innerHTML = `<div class="note">⚠️ <b>Firebase Database Permission Denied:</b> Please set your Realtime Database Rules to allow read and write on "${PATH}". (See docs/04-hardware-and-firmware.md)</div>`;
+      }
+    }
+  } catch (e) {
+    console.warn("Firebase put error:", e);
+  }
+};
 let simPumpState=false;
 function setPump(on){
   const t=TRANSLATIONS[curLang];
@@ -1881,33 +1897,49 @@ function renderMoistureChart(historyObj,threshold=30){
 
 // Field control setup
 if(!DB){
-  $("fi_cfg").innerHTML=`<div class="note">${TRANSLATIONS[curLang].field_not_connected}</div>`;
-  $("fi_ui").style.display="block";
-  $("fi_m").textContent="29% "+TRANSLATIONS[curLang].moisture_suffix;
-  $("fi_t").textContent=TRANSLATIONS[curLang].pump_is_off+" (Demo)";
-  $("fi_on").onclick=()=>setPump(true);$("fi_off").onclick=()=>setPump(false);
-  $("fi_th").onchange=()=>renderMoistureChart(null,+$("fi_th").value);
+  if($("fi_cfg"))$("fi_cfg").innerHTML=`<div class="note">${TRANSLATIONS[curLang].field_not_connected}</div>`;
+  if($("fi_ui"))$("fi_ui").style.display="block";
+  if($("fi_m"))$("fi_m").textContent="29 "+TRANSLATIONS[curLang].moisture_suffix;
+  if($("fi_t"))$("fi_t").textContent=TRANSLATIONS[curLang].pump_is_off+" (Demo)";
+  if($("fi_on"))$("fi_on").onclick=()=>setPump(true);
+  if($("fi_off"))$("fi_off").onclick=()=>setPump(false);
+  if($("fi_th"))$("fi_th").onchange=()=>renderMoistureChart(null,+$("fi_th").value);
   renderMoistureChart(null,30);
 }else{
-  $("fi_ui").style.display="block";
-  $("fi_on").onclick=()=>setPump(true);$("fi_off").onclick=()=>setPump(false);
-  $("fi_mode").onchange=()=>put("mode",$("fi_mode").value);
-  $("fi_th").onchange=()=>{put("threshold",+$("fi_th").value);renderMoistureChart(curHistory,+$("fi_th").value)};
+  if($("fi_cfg"))$("fi_cfg").innerHTML="";
+  if($("fi_ui"))$("fi_ui").style.display="block";
+  if($("fi_on"))$("fi_on").onclick=()=>setPump(true);
+  if($("fi_off"))$("fi_off").onclick=()=>setPump(false);
+  if($("fi_mode"))$("fi_mode").onchange=()=>put("mode",$("fi_mode").value);
+  if($("fi_th"))$("fi_th").onchange=()=>{put("threshold",+$("fi_th").value);renderMoistureChart(curHistory,+$("fi_th").value)};
+  renderMoistureChart(null,30);
   let curHistory=null;
   async function poll(){
     if(isDemoMode)return;
     try{
-      const d=await (await fetch(`${DB}/${PATH}.json`)).json();
+      const res = await fetch(`${DB}/${PATH}.json`);
+      if(!res.ok){
+        if(res.status === 401 || res.status === 403){
+          if($("fi_cfg"))$("fi_cfg").innerHTML=`<div class="note">⚠️ <b>Firebase Database Permission Denied:</b> Please set your Realtime Database Rules to allow read and write on "${PATH}". (See docs/04-hardware-and-firmware.md)</div>`;
+        }
+        return;
+      }
+      const d = await res.json();
       if(d){
         const t=TRANSLATIONS[curLang];
-        $("fi_m").textContent=(d.moisture!=null?d.moisture+t.moisture_suffix:"–");
-        $("fi_t").textContent=(d.pump_state?t.pump_is_on:t.pump_is_off)+(d.updated?" · "+t.device_seen+" "+Math.round((Date.now()/1000-d.updated))+" "+t.seconds_ago:"");
-        if(d.mode)$("fi_mode").value=d.mode;
-        if(d.threshold)$("fi_th").value=d.threshold;
+        if($("fi_m"))$("fi_m").textContent=(d.moisture!=null?d.moisture+" "+t.moisture_suffix:"–");
+        if($("fi_t"))$("fi_t").textContent=(d.pump_state?t.pump_is_on:t.pump_is_off)+(d.updated?" · "+t.device_seen+" "+Math.round((Date.now()/1000-d.updated))+" "+t.seconds_ago:"");
+        if(d.mode&&$("fi_mode"))$("fi_mode").value=d.mode;
+        if(d.threshold&&$("fi_th"))$("fi_th").value=d.threshold;
         curHistory=d.history||null;
         renderMoistureChart(curHistory,d.threshold||30);
+      } else {
+        const t=TRANSLATIONS[curLang];
+        if($("fi_t"))$("fi_t").textContent=t.field_waiting||"Waiting for the device…";
       }
-    }catch(e){}
+    }catch(e){
+      console.warn("Poll field error:", e);
+    }
   }
   poll();setInterval(poll,5000);
 }
