@@ -1,36 +1,64 @@
-// Vercel serverless function: "Raithu Mitra" (రైతు మిత్ర) AI Agriculture Assistant.
+// Vercel serverless function: "Krishi Sahayak" (కృషి సహాయక్) AI Agriculture Assistant.
 // Uses Google Gemini with web grounding (tools: [{ google_search: {} }]) and multimodal audio/image support.
-// Environment variables: GEMINI_API_KEY (required), GEMINI_MODEL (optional, default: gemini-3.5-flash).
+// Subscription gating: Krishi Sahayak stays free for everyone!
+// - Unpaid / expired users & guests: 10 questions/day limit with friendly bilingual prompt & Pay button info.
+// - Subscribers / active trial: higher daily limit (50 questions/day).
+// - Global daily ceiling to protect Gemini API quota.
 
-const ipRateMap = new Map();
-const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
-const MAX_REQUESTS_PER_HOUR = 20;
+const { verifyAuthToken, getUserSubscription, DEMO_MODE_PUBLIC } = require("./_auth");
 
-function checkRateLimit(ip) {
+// In-memory rate limiting structures
+const usageRateMap = new Map();
+const RATE_LIMIT_WINDOW_MS = 24 * 60 * 60 * 1000; // 24 hours rolling
+const GUEST_DAILY_LIMIT = 10;
+const SUBSCRIBER_DAILY_LIMIT = 60;
+const GLOBAL_DAILY_LIMIT = 1200; // Protects Gemini quota
+let globalTimestamps = [];
+
+function checkGlobalLimit() {
   const now = Date.now();
-  const timestamps = (ipRateMap.get(ip) || []).filter(t => now - t < RATE_LIMIT_WINDOW_MS);
-  if (timestamps.length >= MAX_REQUESTS_PER_HOUR) {
-    ipRateMap.set(ip, timestamps);
+  globalTimestamps = globalTimestamps.filter(t => now - t < RATE_LIMIT_WINDOW_MS);
+  if (globalTimestamps.length >= GLOBAL_DAILY_LIMIT) {
     return false;
   }
-  timestamps.push(now);
-  ipRateMap.set(ip, timestamps);
-
-  // Periodically clean up old IP entries
-  if (ipRateMap.size > 1000) {
-    for (const [k, v] of ipRateMap.entries()) {
-      const active = v.filter(t => now - t < RATE_LIMIT_WINDOW_MS);
-      if (active.length === 0) ipRateMap.delete(k);
-      else ipRateMap.set(k, active);
-    }
-  }
+  globalTimestamps.push(now);
   return true;
 }
 
-const SYSTEM_INSTRUCTION = `You are "Raithu Mitra" (రైతు మిత్ర), an intelligent, respectful, and caring agricultural extension assistant for farmers in Telangana and across India, created for the Smart Farm Assistant app (aligned with PJTSAU agronomic recommendations).
+function checkUserOrIpLimit(key, maxAllowed) {
+  const now = Date.now();
+  const timestamps = (usageRateMap.get(key) || []).filter(t => now - t < RATE_LIMIT_WINDOW_MS);
+  if (timestamps.length >= maxAllowed) {
+    usageRateMap.set(key, timestamps);
+    return {
+      allowed: false,
+      count: timestamps.length,
+      limit: maxAllowed
+    };
+  }
+  timestamps.push(now);
+  usageRateMap.set(key, timestamps);
+
+  // Periodic cleanup
+  if (usageRateMap.size > 2000) {
+    for (const [k, v] of usageRateMap.entries()) {
+      const active = v.filter(t => now - t < RATE_LIMIT_WINDOW_MS);
+      if (active.length === 0) usageRateMap.delete(k);
+      else usageRateMap.set(k, active);
+    }
+  }
+
+  return {
+    allowed: true,
+    count: timestamps.length,
+    limit: maxAllowed
+  };
+}
+
+const SYSTEM_INSTRUCTION = `You are "Krishi Sahayak" (కృషి సహాయక్), an intelligent, respectful, and caring agricultural extension assistant for farmers in Telangana and across India, created for the Smart Farm Assistant app (aligned with PJTSAU agronomic recommendations).
 
 YOUR CORE RESPONSIBILITIES & RULES:
-1. LANGUAGE: Respond in the exact language the farmer uses (Telugu, English, Hindi, etc.). Use simple, warm, everyday farmer-friendly vocabulary. In Telugu, address the farmer respectfully as 'రైతన్నా' (Raithanna) or 'నమస్కారం' (Namaskaram). Keep answers clear, structured, and practical.
+1. IDENTITY & LANGUAGE: You are "Krishi Sahayak" (కృషి సహాయక్). Respond in the exact language the farmer uses (Telugu, English, Hindi, etc.). Use simple, warm, everyday farmer-friendly vocabulary. In Telugu, address the farmer respectfully as 'రైతన్నా' (Raithanna) or 'నమస్కారం' (Namaskaram). Keep answers clear, structured, and practical.
 2. CONTEXT AWARENESS: If the app provides farm context (selected crop, district, or weather summary), use it to make your answer relevant, but never reveal internal app mechanics.
 3. AGRICULTURAL SAFETY GUARDRAILS (CRITICAL):
    - Never generate arbitrary pesticide/fungicide/herbicide tank-mix dose recipes from memory. State active ingredient names only (e.g. Chlorantraniliprole 18.5% SC, Neem oil 1500 ppm).
@@ -46,13 +74,55 @@ module.exports = async (req, res) => {
     return res.status(405).json({ error: "Method Not Allowed. POST only." });
   }
 
+  // 1. Check Global Server Quota Ceiling
+  if (!checkGlobalLimit()) {
+    return res.status(429).json({
+      error: "Service is currently experiencing high daily volume across the platform. Please check back shortly.",
+      globalLimitReached: true
+    });
+  }
+
+  // 2. Identify User & Determine Subscription Tier
+  let userSub = null;
+  let rateKey = "";
+  let maxQuestions = GUEST_DAILY_LIMIT;
+  let isSubscriber = false;
+
   const clientIp = (req.headers["x-forwarded-for"] || "").split(",")[0].trim() ||
                    req.socket?.remoteAddress ||
                    "127.0.0.1";
 
-  if (!checkRateLimit(clientIp)) {
+  try {
+    const token = await verifyAuthToken(req);
+    if (token) {
+      userSub = await getUserSubscription(token.uid, token.email, token.name);
+      rateKey = `usr_${token.uid}`;
+      isSubscriber = userSub && userSub.hasAccess;
+      maxQuestions = isSubscriber ? SUBSCRIBER_DAILY_LIMIT : GUEST_DAILY_LIMIT;
+    } else {
+      rateKey = `ip_${clientIp}`;
+      maxQuestions = DEMO_MODE_PUBLIC ? SUBSCRIBER_DAILY_LIMIT : GUEST_DAILY_LIMIT;
+    }
+  } catch (err) {
+    rateKey = `ip_${clientIp}`;
+    maxQuestions = GUEST_DAILY_LIMIT;
+  }
+
+  // 3. Apply Tiered Rate Limit
+  const rateResult = checkUserOrIpLimit(rateKey, maxQuestions);
+  if (!rateResult.allowed) {
     return res.status(429).json({
-      error: "Hourly limit reached (20 questions/hr). Please wait a while before asking again."
+      error: "DAILY_LIMIT_REACHED",
+      limitReached: true,
+      canUpgrade: !isSubscriber,
+      remaining: 0,
+      limit: maxQuestions,
+      message: isSubscriber
+        ? "You have reached your daily limit of questions. Please return tomorrow."
+        : "You have reached the free daily limit of 10 questions for Krishi Sahayak. Subscribe to the 6-month plan (Rs 499) for unlimited questions and full app access!",
+      message_te: isSubscriber
+        ? "మీరు ఈ రోజు ప్రశ్నల పరిమితిని చేరుకున్నారు. దయచేసి రేపు మళ్లీ అడగండి."
+        : "మీరు కృషి సహాయక్ ఉచిత 10 ప్రశ్నల రోజువారీ పరిమితిని చేరుకున్నారు. అపరిమిత ప్రశ్నలు మరియు అన్ని ఫీచర్ల కోసం 6 నెలల ప్లాన్ (₹499) పొందండి!"
     });
   }
 
@@ -194,9 +264,13 @@ module.exports = async (req, res) => {
 
     return res.status(200).json({
       text: text || "నమస్కారం! మీ ప్రశ్నను మరొకసారి అడగగలరా? (Could you please repeat your question?)",
-      sources
+      sources,
+      questionsUsedToday: rateResult.count,
+      questionsDailyLimit: maxQuestions,
+      isSubscriber
     });
   } catch (err) {
+    console.error("Chat error:", err);
     return res.status(500).json({ error: "Service temporarily unavailable. Please try again." });
   }
 };

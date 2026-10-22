@@ -1,8 +1,34 @@
 // Vercel serverless function: crop disease diagnosis using Google Gemini (free tier available).
 // Set GEMINI_API_KEY in Vercel > Project > Settings > Environment Variables. Optional: GEMINI_MODEL.
+const {
+  verifyAuthToken,
+  getUserSubscription,
+  DEMO_MODE_PUBLIC
+} = require("./_auth");
+
 module.exports = async (req, res) => {
   if (req.method !== "POST") return res.status(405).json({ error: "POST only" });
+
   try {
+    // Server-side subscription enforcement
+    if (!DEMO_MODE_PUBLIC) {
+      const token = await verifyAuthToken(req);
+      if (!token) {
+        return res.status(401).json({
+          error: "AUTH_REQUIRED",
+          message: "Please sign in to access AI crop disease diagnosis."
+        });
+      }
+      const sub = await getUserSubscription(token.uid, token.email, token.name);
+      if (!sub.hasAccess) {
+        return res.status(402).json({
+          error: "SUBSCRIPTION_REQUIRED",
+          message: "Your 14-day free trial has ended. Please subscribe to unlock AI crop disease diagnosis.",
+          status: sub.status
+        });
+      }
+    }
+
     const key = process.env.GEMINI_API_KEY;
     if (!key) return res.status(500).json({ error: "GEMINI_API_KEY not set" });
     const { crop, lang, image } = req.body || {};

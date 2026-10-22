@@ -12,8 +12,32 @@ const ALIASES = {
   Soybean: ["Soyabean", "Soybean"]
 };
 let cache = {}; // last good copy per crop
+const {
+  verifyAuthToken,
+  getUserSubscription,
+  DEMO_MODE_PUBLIC
+} = require("./_auth");
 
 module.exports = async (req, res) => {
+  // Server-side subscription enforcement
+  if (!DEMO_MODE_PUBLIC) {
+    const token = await verifyAuthToken(req);
+    if (!token) {
+      return res.status(401).json({
+        error: "AUTH_REQUIRED",
+        message: "Please sign in to access live mandi prices."
+      });
+    }
+    const sub = await getUserSubscription(token.uid, token.email, token.name);
+    if (!sub.hasAccess) {
+      return res.status(402).json({
+        error: "SUBSCRIPTION_REQUIRED",
+        message: "Your 14-day free trial has ended. Please subscribe to unlock live Agmarknet mandi prices.",
+        status: sub.status
+      });
+    }
+  }
+
   const crop = req.query.crop || "Paddy";
   const key = process.env.DATA_GOV_API_KEY || "579b464db66ec23bdd0000017f522ce4766940ac7adffdacc85d15ab";
   if (!key) return res.status(200).json({ rows: cache[crop] || [], reason: "no_key", note: "DATA_GOV_API_KEY not set" });

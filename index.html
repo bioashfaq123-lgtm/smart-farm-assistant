@@ -3,6 +3,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Smart Farm Assistant</title>
+<!-- Firebase Auth & Razorpay SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <style>
 :root{--bg:#f4f7f2;--card:#fff;--text:#1d2b1f;--muted:#5d6e5f;--pri:#2e7d32;--pri-t:#fff;--bd:#d6e0d3;--warn:#fff4d6;--warn-t:#6b4a00;--ok:#e3f4e4;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -29,7 +33,7 @@ section{display:none}section.on{display:block}
 h2{font-size:16px;margin:0 0 10px}label{display:block;font-size:12px;color:var(--muted);margin:10px 0 3px}
 input,select{width:100%;padding:10px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--text);font:inherit}
 .btn{margin-top:12px;width:100%;padding:11px;border:0;border-radius:8px;background:var(--pri);color:var(--pri-t);font:600 15px inherit;cursor:pointer}
-.btn:disabled{opacity:.5}
+.btn:disabled{opacity:.5;cursor:not-allowed}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .note{background:var(--warn);color:var(--warn-t);border-radius:8px;padding:9px 11px;font-size:12px;margin:10px 0}
 .ok{background:var(--ok);border-radius:8px;padding:10px 12px;margin:10px 0}
@@ -38,7 +42,20 @@ input,select{width:100%;padding:10px;border:1px solid var(--bd);border-radius:8p
 th,td{padding:8px 6px;border-bottom:1px solid var(--bd);text-align:left;white-space:nowrap}th{color:var(--muted);font-weight:600}
 img.pv{max-width:100%;max-height:240px;border-radius:8px;margin-top:10px;display:none}
 pre{white-space:pre-wrap;font:inherit;margin:0}
-/* --- RAITHU MITRA CHATBOT STYLES --- */
+/* --- SUBSCRIPTION BANNER & PAYWALL STYLES --- */
+.sub-banner{padding:10px 16px;font-size:13px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;border-bottom:1px solid var(--bd);position:sticky;top:62px;z-index:8}
+.sub-banner.trial{background:#e8f5e9;color:#1b5e20;border-color:#c8e6c9}
+.sub-banner.warn{background:#fff8e1;color:#b26a00;border-color:#ffe082}
+.sub-banner.danger{background:#ffebee;color:#b71c1c;border-color:#ffcdd2}
+.sub-banner.active{background:#f1f8e9;color:#2e7d32;border-color:#dcedc8}
+:root[data-theme="dark"] .sub-banner.trial{background:#1b3320;color:#a5d6a7;border-color:#2e5634}
+:root[data-theme="dark"] .sub-banner.warn{background:#382d0e;color:#ffe082;border-color:#5c4815}
+:root[data-theme="dark"] .sub-banner.danger{background:#361214;color:#ef9a9a;border-color:#592225}
+:root[data-theme="dark"] .sub-banner.active{background:#1f3323;color:#a5d6a7;border-color:#2e5634}
+.sub-banner-btn{background:var(--pri);color:var(--pri-t);border:0;border-radius:12px;padding:5px 12px;font:600 12px inherit;cursor:pointer;white-space:nowrap;transition:opacity .15s}
+.sub-banner-btn:hover{opacity:.9}
+.paywall-box{background:var(--card);border:2px solid var(--bd);border-radius:14px;padding:26px 18px;text-align:center;margin-bottom:14px}
+/* --- KRISHI SAHAYAK CHATBOT STYLES --- */
 .chat-wrap{display:flex;flex-direction:column;min-height:440px;max-height:640px}
 .chat-feed{flex:1;overflow-y:auto;padding:8px 2px;display:flex;flex-direction:column;gap:12px;-webkit-overflow-scrolling:touch}
 .chat-bubble{max-width:88%;padding:10px 14px;border-radius:14px;font-size:14px;line-height:1.5;word-break:break-word}
@@ -76,6 +93,7 @@ pre{white-space:pre-wrap;font:inherit;margin:0}
   <p id="hello" data-i18n="app_sub">Demo for ADSAUF-2047, PJTAU</p>
  </div>
  <div class="hdr-ctrls">
+  <button id="auth_btn" class="demo-pill" title="Sign In with Google" onclick="handleAuthAction()"><span id="auth_icon">👤</span> <span id="auth_txt" data-i18n="auth_signin">Sign In</span></button>
   <button id="demo_btn" class="demo-pill" title="Toggle Demo / Live mode"><span id="demo_dot">🟢</span> <span id="demo_txt">Live</span></button>
   <div class="lang-toggle" role="group" aria-label="Language selection">
    <button id="lang_en" class="lang-btn on" onclick="setLang('en')">EN</button>
@@ -84,9 +102,16 @@ pre{white-space:pre-wrap;font:inherit;margin:0}
  </div>
 </div>
 <nav id="nav">
-<button data-t="reg" class="on" data-i18n="tab_reg">Register</button><button data-t="wx" data-i18n="tab_wx">Weather</button><button data-t="fert" data-i18n="tab_fert">Fertilizer</button><button data-t="dis" data-i18n="tab_dis">Disease check</button><button data-t="chat" data-i18n="tab_chat">Ask Raithu Mitra 🌾</button><button data-t="mandi" data-i18n="tab_mandi">Mandi prices</button><button data-t="field" data-i18n="tab_field">Field control</button>
+<button data-t="reg" class="on" data-i18n="tab_reg">Register</button><button data-t="wx" data-i18n="tab_wx">Weather</button><button data-t="fert" data-i18n="tab_fert">Fertilizer</button><button data-t="dis" data-i18n="tab_dis">Disease check</button><button data-t="chat" data-i18n="tab_chat">Krishi Sahayak 🌾</button><button data-t="mandi" data-i18n="tab_mandi">Mandi prices</button><button data-t="field" data-i18n="tab_field">Field control</button><button data-t="account" data-i18n="tab_account">Account & Plan</button>
 </nav></header>
-<button id="float_chat_btn" aria-label="Ask Raithu Mitra" title="Ask Raithu Mitra / రైతు మిత్ర" onclick="openChatTab()">🌾💬</button>
+
+<!-- Authoritative Subscription & Trial Status Banner -->
+<div id="sub_banner" class="sub-banner trial" style="display:none">
+  <div id="sub_banner_txt" style="display:flex;align-items:center;gap:6px;font-weight:600"></div>
+  <div id="sub_banner_act"></div>
+</div>
+
+<button id="float_chat_btn" aria-label="Ask Krishi Sahayak" title="Ask Krishi Sahayak / కృషి సహాయక్" onclick="openChatTab()">🌾💬</button>
 <main>
 
 <section id="reg" class="on"><div class="card"><h2 data-i18n="reg_title">Farmer registration</h2>
@@ -200,7 +225,7 @@ pre{white-space:pre-wrap;font:inherit;margin:0}
   <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:8px">
     <div>
       <h2 style="margin:0;display:flex;align-items:center;gap:6px">
-        <span>🌾</span> <span data-i18n="chat_title">Raithu Mitra (రైతు మిత్ర)</span>
+        <span>🌾</span> <span data-i18n="chat_title">Krishi Sahayak (కృషి సహాయక్)</span>
       </h2>
       <p class="muted" style="margin:2px 0 0;font-size:12px" data-i18n="chat_sub">AI Agriculture Assistant · PJTSAU Aligned · Voice & Grounded Search</p>
     </div>
@@ -221,8 +246,8 @@ pre{white-space:pre-wrap;font:inherit;margin:0}
   <div class="chat-wrap">
     <div class="chat-feed" id="chat_feed">
       <div class="chat-bubble bot">
-        <div class="chat-avatar">🌾 Raithu Mitra (రైతు మిత్ర)</div>
-        <div class="chat-text" data-i18n="chat_welcome">నమస్కారం రైతన్నా! నేను రైతు మిత్రను. తెగుళ్లు, వాతావరణం, ఎరువులు, మార్కెట్ ధరలు లేదా పంటల సాగు విధానాలపై మీ సందేహాలను తెలుగు లేదా ఇంగ్లీషులో అడగండి. వాయిస్ మెసేజ్ లేదా ఆకుల ఫోటోలు కూడా పంపవచ్చు!</div>
+        <div class="chat-avatar">🌾 Krishi Sahayak (కృషి సహాయక్)</div>
+        <div class="chat-text" data-i18n="chat_welcome">నమస్కారం రైతన్నా! నేను కృషి సహాయక్ ను. తెగుళ్లు, వాతావరణం, ఎరువులు, మార్కెట్ ధరలు లేదా పంటల సాగు విధానాలపై మీ సందేహాలను తెలుగు లేదా ఇంగ్లీషులో అడగండి. వాయిస్ మెసేజ్ లేదా ఆకుల ఫోటోలు కూడా పంపవచ్చు!</div>
         <div class="chat-actions">
           <button class="chat-action-btn" onclick="speakText(this.parentElement.previousElementSibling.innerText, this)">
             🔊 <span data-i18n="chat_read">Read aloud</span>
@@ -292,6 +317,108 @@ pre{white-space:pre-wrap;font:inherit;margin:0}
 <div id="fi_chart_wrap" style="width:100%;min-height:160px"></div>
 <div id="fi_chart_note" class="muted" style="margin-top:6px;font-size:11px"></div>
 </div></section>
+
+<section id="account">
+  <div class="card" id="acc_profile_card">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div id="acc_avatar" style="width:48px;height:48px;border-radius:50%;background:var(--pri);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700">👤</div>
+        <div>
+          <h2 id="acc_name" style="margin:0 0 2px;font-size:17px">Guest Farmer</h2>
+          <p id="acc_email" class="muted" style="margin:0;font-size:13px">Not signed in</p>
+        </div>
+      </div>
+      <div>
+        <button id="acc_auth_btn" class="btn" style="width:auto;margin:0;padding:8px 16px;font-size:13px" onclick="handleAuthAction()">Sign In with Google</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="acc_plan_card">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+      <h2 style="margin:0" data-i18n="acc_plan_title">Subscription & Access Status</h2>
+      <span id="acc_status_badge" style="display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;padding:4px 10px;border-radius:12px;background:#e8f5e9;color:#2e7d32;border:1px solid #c8e6c9">
+        🟢 14-Day Free Trial
+      </span>
+    </div>
+
+    <div id="acc_status_details" style="margin-bottom:16px;font-size:14px;line-height:1.6">
+      <p id="acc_status_msg" style="margin:0 0 6px">14-Day Free Trial with all agricultural features unlocked.</p>
+      <div id="acc_expiry_info" class="muted" style="font-size:13px"></div>
+    </div>
+
+    <!-- Pricing Box -->
+    <div style="background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px">
+        <div style="font-size:18px;font-weight:800;color:var(--pri)">₹499 <span style="font-size:13px;font-weight:600;color:var(--text)">/ 6 months</span></div>
+        <div style="font-size:11px;font-weight:600;background:var(--ok);color:var(--pri);padding:2px 8px;border-radius:10px" data-i18n="tax_inclusive">Inclusive of all taxes</div>
+      </div>
+      <p style="margin:6px 0 0;font-size:13px;font-weight:600" data-i18n="pricing_renew_anytime">Rs 499 for 6 months. Renew anytime by paying again.</p>
+      <p class="muted" style="margin:4px 0 0;font-size:11px" data-i18n="pricing_no_auto_debit">No automatic recurring card deductions. Early renewal adds 6 full months to your existing end date without losing remaining days.</p>
+    </div>
+
+    <!-- Consent Checkbox -->
+    <div style="margin-bottom:14px">
+      <label style="display:flex;align-items:flex-start;gap:8px;font-size:12px;cursor:pointer">
+        <input type="checkbox" id="acc_consent_check" onchange="updatePayBtnState()" style="width:auto;margin-top:2px">
+        <span data-i18n="consent_text">I agree to the <a href="/terms" target="_blank" rel="noopener noreferrer" style="color:var(--pri);font-weight:600">Terms and Conditions</a> and <a href="/refund" target="_blank" rel="noopener noreferrer" style="color:var(--pri);font-weight:600">Refund Policy</a>.</span>
+      </label>
+    </div>
+
+    <!-- Pay / Renew Button -->
+    <button id="acc_pay_btn" class="btn" onclick="startRazorpayPayment(false)" disabled style="font-size:16px;padding:12px">
+      💳 <span id="acc_pay_btn_txt" data-i18n="btn_pay_plan">Pay ₹499 for 6 Months</span>
+    </button>
+
+    <!-- Reconciliation Button -->
+    <div style="margin-top:14px;text-align:center">
+      <button class="chat-action-btn" style="background:transparent;border:1px dashed var(--bd);color:var(--muted);padding:6px 12px;border-radius:8px;font-size:12px" onclick="promptReconcilePayment()">
+        🔄 <span data-i18n="btn_reconcile">I paid but my access is not active</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Payment History & Receipts -->
+  <div class="card" id="acc_history_card">
+    <h2 data-i18n="payment_history_title">Payment History & Receipts</h2>
+    <div id="acc_history_list" style="margin-top:10px">
+      <p class="muted" style="font-size:12px" data-i18n="no_payments_yet">No past payments recorded for this account.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Paywall Overlay View shown when accessing locked tabs while trial expired -->
+<div id="locked_paywall_view" class="card" style="display:none;text-align:center;padding:28px 18px;margin-bottom:14px">
+  <div style="font-size:42px;margin-bottom:8px">🔒</div>
+  <h2 style="font-size:18px;margin:0 0 6px" data-i18n="trial_ended_title">Your Free Trial Has Ended</h2>
+  <p class="muted" style="margin:0 auto 16px;max-width:500px;font-size:13px;line-height:1.5" data-i18n="trial_ended_desc">Your 14-day free trial has completed. Subscribe to unlock weather forecasts, fertilizer calculator, AI crop disease check, and live mandi prices.</p>
+
+  <div style="background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:14px;max-width:440px;margin:0 auto 16px;text-align:left">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <b style="font-size:17px;color:var(--pri)">₹499 <span style="font-size:12px;color:var(--text);font-weight:normal">/ 6 months</span></b>
+      <span style="font-size:11px;background:var(--ok);color:var(--pri);padding:2px 8px;border-radius:10px;font-weight:600" data-i18n="tax_inclusive">Inclusive of all taxes</span>
+    </div>
+    <div style="font-size:12px;font-weight:600" data-i18n="pricing_renew_anytime">Rs 499 for 6 months. Renew anytime by paying again.</div>
+    <div class="muted" style="font-size:11px;margin-top:2px" data-i18n="pricing_no_auto_debit">No automatic recurring card deductions.</div>
+  </div>
+
+  <div style="max-width:440px;margin:0 auto 14px;text-align:left">
+    <label style="display:flex;align-items:flex-start;gap:8px;font-size:12px;cursor:pointer">
+      <input type="checkbox" id="pw_consent_check" onchange="updatePaywallPayBtnState()" style="width:auto;margin-top:2px">
+      <span data-i18n="consent_text">I agree to the <a href="/terms" target="_blank" rel="noopener noreferrer" style="color:var(--pri);font-weight:600">Terms and Conditions</a> and <a href="/refund" target="_blank" rel="noopener noreferrer" style="color:var(--pri);font-weight:600">Refund Policy</a>.</span>
+    </label>
+  </div>
+
+  <button id="pw_pay_btn" class="btn" style="max-width:440px;margin:0 auto 12px;display:block" onclick="startRazorpayPayment(true)" disabled>
+    💳 <span data-i18n="btn_pay_plan">Pay ₹499 for 6 Months</span>
+  </button>
+
+  <div style="font-size:12px;color:var(--muted);margin-top:14px">
+    <span>🌾 </span><span data-i18n="chat_always_free_note">Krishi Sahayak AI chatbot remains free for everyone!</span>
+    <br>
+    <button class="btn" style="width:auto;display:inline-block;margin-top:8px;padding:7px 16px;font-size:12px;background:transparent;border:1px solid var(--pri);color:var(--pri)" onclick="openChatTab()" data-i18n="tab_chat">Ask Krishi Sahayak 🌾</button>
+  </div>
+</div>
 </main>
 <script src="config.js"></script>
 <script>
@@ -310,16 +437,17 @@ const TRANSLATIONS = {
     tab_wx: "Weather",
     tab_fert: "Fertilizer",
     tab_dis: "Disease check",
-    tab_chat: "Ask Raithu Mitra 🌾",
+    tab_chat: "Krishi Sahayak 🌾",
     tab_mandi: "Mandi prices",
     tab_field: "Field control",
+    tab_account: "Account & Plan",
     // chat
-    chat_title: "Raithu Mitra (రైతు మిత్ర)",
+    chat_title: "Krishi Sahayak (కృషి సహాయక్)",
     chat_sub: "AI Agriculture Assistant · PJTSAU Aligned · Voice & Grounded Search",
-    chat_welcome: "Namaskaram! I am Raithu Mitra. Ask me any farming questions in Telugu, English, or Hindi — about pests, weather, fertilizers, crop practices, or market rates. You can also send voice notes or crop leaf photos!",
+    chat_welcome: "Namaskaram! I am Krishi Sahayak. Ask me any farming questions in Telugu, English, or Hindi — about pests, weather, fertilizers, crop practices, or market rates. You can also send voice notes or crop leaf photos!",
     chat_placeholder: "Ask your farming doubt in Telugu or English...",
     chat_send: "Send",
-    chat_thinking: "🌾 Raithu Mitra is thinking...",
+    chat_thinking: "🌾 Krishi Sahayak is thinking...",
     chat_recording: "Recording voice message... (tap mic to stop)",
     chat_rec_cancel: "Cancel",
     chat_photo_attached: "Photo attached",
@@ -332,7 +460,31 @@ const TRANSLATIONS = {
     chip_rain: "🌦️ Will it rain this week?",
     chip_mandi: "💰 Today's cotton mandi rates?",
     chip_fert: "🌱 Recommended fertilizer for maize?",
-    chat_offline: "Offline demo: Raithu Mitra AI chat requires internet connectivity to answer questions.",
+    chat_offline: "Offline demo: Krishi Sahayak AI chat requires internet connectivity to answer questions.",
+    // subscription & account
+    acc_plan_title: "Subscription & Access Status",
+    tax_inclusive: "Inclusive of all taxes",
+    pricing_renew_anytime: "Rs 499 for 6 months. Renew anytime by paying again.",
+    pricing_no_auto_debit: "No automatic recurring card deductions. Early renewal adds 6 full months to your existing end date without losing remaining days.",
+    consent_text: "I agree to the Terms and Conditions and Refund Policy.",
+    btn_pay_plan: "Pay ₹499 for 6 Months",
+    btn_renew_plan: "Renew Plan (₹499)",
+    btn_reconcile: "I paid but my access is not active",
+    payment_history_title: "Payment History & Receipts",
+    no_payments_yet: "No past payments recorded for this account.",
+    trial_ended_title: "Your Free Trial Has Ended",
+    trial_ended_desc: "Your 14-day free trial has completed. Subscribe to unlock weather forecasts, fertilizer calculator, AI crop disease check, and live mandi prices.",
+    chat_always_free_note: "Krishi Sahayak AI chatbot remains free for everyone!",
+    auth_signin: "Sign In",
+    auth_signout: "Sign Out",
+    auth_req_msg: "Please sign in with Google to start your 14-day free trial of all farm intelligence features.",
+    status_trial_active: "14-Day Free Trial Active",
+    status_trial_expired: "Free Trial Ended",
+    status_active: "6-Month Plan Active",
+    status_expired: "Plan Expired",
+    status_demo: "Demo Account (Exempt)",
+    status_public_demo: "Conference Demo Mode",
+    field_owner_only: "🔒 Owner-Only Feature: ESP32 soil moisture telemetry and pump irrigation controls are restricted to the registered farm administrator (ADMIN_EMAIL).",
     // register
     reg_title: "Farmer registration",
     reg_name: "Name",
@@ -467,16 +619,17 @@ const TRANSLATIONS = {
     tab_wx: "వాతావరణం",
     tab_fert: "ఎరువులు",
     tab_dis: "తెగుళ్ల నివారణ",
-    tab_chat: "రైతు మిత్ర 🌾",
+    tab_chat: "కృషి సహాయక్ 🌾",
     tab_mandi: "మార్కెట్ ధరలు",
     tab_field: "పొలం నియంత్రణ",
+    tab_account: "ఖాతా & ప్లాన్",
     // chat
-    chat_title: "రైతు మిత్ర (Raithu Mitra)",
+    chat_title: "కృషి సహాయక్ (Krishi Sahayak)",
     chat_sub: "AI వ్యవసాయ సహాయకుడు · PJTSAU ఆధారితం · వాయిస్ & ఇంటర్నెట్ శోధన",
-    chat_welcome: "నమస్కారం రైతన్నా! నేను రైతు మిత్రను. తెగుళ్లు, వాతావరణం, ఎరువులు, మార్కెట్ ధరలు లేదా పంటల సాగు విధానాలపై మీ సందేహాలను తెలుగు లేదా ఇంగ్లీషులో అడగండి. వాయిస్ మెసేజ్ లేదా ఆకుల ఫోటోలు కూడా పంపవచ్చు!",
+    chat_welcome: "నమస్కారం రైతన్నా! నేను కృషి సహాయక్ ను. తెగుళ్లు, వాతావరణం, ఎరువులు, మార్కెట్ ధరలు లేదా పంటల సాగు విధానాలపై మీ సందేహాలను తెలుగు లేదా ఇంగ్లీషులో అడగండి. వాయిస్ మెసేజ్ లేదా ఆకుల ఫోటోలు కూడా పంపవచ్చు!",
     chat_placeholder: "మీ వ్యవసాయ సందేహాన్ని తెలుగులో అడగండి...",
     chat_send: "పంపు",
-    chat_thinking: "🌾 రైతు మిత్ర సమాధానం సిద్ధం చేస్తోంది...",
+    chat_thinking: "🌾 కృషి సహాయక్ సమాధానం సిద్ధం చేస్తోంది...",
     chat_recording: "వాయిస్ రికార్డ్ అవుతోంది... (ఆపడానికి మైక్ నొక్కండి)",
     chat_rec_cancel: "రద్దు",
     chat_photo_attached: "ఫోటో జతచేయబడింది",
@@ -489,7 +642,31 @@ const TRANSLATIONS = {
     chip_rain: "🌦️ ఈ వారం మా ప్రాంతంలో వర్షం పడుతుందా?",
     chip_mandi: "💰 నేడు మార్కెట్లో పత్తి క్వింటాల్ ధర ఎంత?",
     chip_fert: "🌱 మొక్కజొన్నకు PJTSAU సిఫారసు చేసిన ఎరువుల మోతాదు ఎంత?",
-    chat_offline: "ఆఫ్‌లైన్ డెమో: రైతు మిత్ర AI చాట్ కోసం ఇంటర్నెట్ కనెక్షన్ అవసరం.",
+    chat_offline: "ఆఫ్‌లైన్ డెమో: కృషి సహాయక్ AI చాట్ కోసం ఇంటర్నెట్ కనెక్షన్ అవసరం.",
+    // subscription & account
+    acc_plan_title: "చందా & ఖాతా స్థితి",
+    tax_inclusive: "అన్ని పన్నులు కలిపి",
+    pricing_renew_anytime: "6 నెలలకు రూ. 499. ఎప్పుడైనా మళ్ళీ చెల్లించి పునరుద్ధరించుకోవచ్చు.",
+    pricing_no_auto_debit: "మీ అనుమతి లేకుండా బ్యాంకు నుండి ఆటోమేటిక్‌గా డబ్బులు కట్ కావు. గడువు ముగియకముందే పునరుద్ధరిస్తే మిగిలిన రోజులు పోవు, 6 నెలలు అదనంగా కలుస్తాయి.",
+    consent_text: "నేను నిబంధనలు (Terms) మరియు రీఫండ్ పాలసీ (Refund Policy) ని అంగీకరిస్తున్నాను.",
+    btn_pay_plan: "6 నెలల కోసం ₹499 చెల్లించండి",
+    btn_renew_plan: "ప్లాన్ పునరుద్ధరించండి (₹499)",
+    btn_reconcile: "నేను చెల్లించాను కానీ నా ఖాతా యాక్టివ్ కాలేదు",
+    payment_history_title: "చెల్లింపుల చరిత్ర & రసీదులు",
+    no_payments_yet: "ఈ ఖాతాలో ఇంతకుముందు ఎలాంటి చెల్లింపులు లేవు.",
+    trial_ended_title: "మీ ఉచిత ట్రయల్ ముగిసింది",
+    trial_ended_desc: "మీ 14 రోజుల ఉచిత ట్రయల్ పూర్తయింది. వాతావరణం, ఎరువుల కాలిక్యులేటర్, తెగుళ్ల నిర్ధారణ మరియు మార్కెట్ ధరల కోసం 6 నెలల ప్లాన్ తీసుకోండి.",
+    chat_always_free_note: "కృషి సహాయక్ AI చాట్‌బాట్ అందరికీ ఎల్లప్పుడూ ఉచితం!",
+    auth_signin: "లాగిన్ అవ్వండి",
+    auth_signout: "లాగౌట్",
+    auth_req_msg: "14 రోజుల ఉచిత ట్రయల్ ప్రారంభించడానికి దయచేసి Google తో లాగిన్ అవ్వండి.",
+    status_trial_active: "14 రోజుల ఉచిత ట్రయల్",
+    status_trial_expired: "ఉచిత ట్రయల్ ముగిసింది",
+    status_active: "6 నెలల ప్లాన్ యాక్టివ్",
+    status_expired: "ప్లాన్ గడువు ముగిసింది",
+    status_demo: "డెమో ఖాతా (ఉచితం)",
+    status_public_demo: "సదస్సు డెమో మోడ్",
+    field_owner_only: "🔒 యజమాని మాత్రమే: ESP32 తేమ రీడింగులు మరియు మోటారు పంపు నియంత్రణ కేవలం ఫార్మ్ నిర్వాహకుడి (ADMIN_EMAIL) కి మాత్రమే పరిమితం.",
     // register
     reg_title: "రైతు నమోదు",
     reg_name: "పేరు",
@@ -708,13 +885,595 @@ function setLang(lang){
   if($("d_lang"))$("d_lang").value=(curLang==="te"?"Telugu":"English");
   if($("c_text"))$("c_text").placeholder=TRANSLATIONS[curLang].chat_placeholder;
   if(typeof updateChatCropBadge==="function")updateChatCropBadge();
+  if(typeof renderSubBanner==="function")renderSubBanner();
+  if(typeof renderAccountScreen==="function")renderAccountScreen();
 }
 
-// tabs
-$("nav").onclick=e=>{const t=e.target.dataset.t;if(!t)return;
- document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b===e.target));
- document.querySelectorAll("section").forEach(s=>s.classList.toggle("on",s.id===t));
- if(t==="wx")loadWx();if(t==="mandi")showMandi();if(t==="chat"&&typeof updateChatCropBadge==="function")updateChatCropBadge();window.scrollTo(0,0)};
+// --- FIREBASE AUTH & SUBSCRIPTION STATE ---
+let currentFirebaseUser = null;
+let currentSub = {
+  loggedIn: false,
+  status: "anonymous",
+  hasAccess: false,
+  trialDaysLeft: 14,
+  planDaysLeft: 0,
+  isOwner: false,
+  isSubscribed: false,
+  demoModePublic: false,
+  payments: {}
+};
+let currentActiveTab = "reg";
+
+function updateAuthUi(user) {
+  const btn=$("auth_btn"), txt=$("auth_txt"), icon=$("auth_icon");
+  const accAvatar=$("acc_avatar"), accName=$("acc_name"), accEmail=$("acc_email"), accAuthBtn=$("acc_auth_btn");
+  const t = TRANSLATIONS[curLang];
+
+  if (user) {
+    if (txt) txt.textContent = (user.displayName ? user.displayName.split(" ")[0] : "Account");
+    if (icon) icon.textContent = "👤";
+    if (btn) btn.title = "Signed in as " + (user.email || user.displayName);
+    if (accAvatar) {
+      if (user.photoURL) {
+        accAvatar.innerHTML = `<img src="${user.photoURL}" style="width:100%;height:100%;border-radius:50%;object-fit:cover" alt="User">`;
+      } else {
+        accAvatar.textContent = (user.displayName || "F")[0].toUpperCase();
+      }
+    }
+    if (accName) accName.textContent = user.displayName || "Farmer";
+    if (accEmail) accEmail.textContent = user.email || user.uid;
+    if (accAuthBtn) {
+      accAuthBtn.textContent = t.auth_signout;
+      accAuthBtn.style.background = "#b71c1c";
+    }
+  } else {
+    if (txt) txt.textContent = t.auth_signin;
+    if (icon) icon.textContent = "👤";
+    if (btn) btn.title = "Sign In with Google";
+    if (accAvatar) accAvatar.textContent = "👤";
+    if (accName) accName.textContent = "Guest Farmer";
+    if (accEmail) accEmail.textContent = "Not signed in";
+    if (accAuthBtn) {
+      accAuthBtn.textContent = t.auth_signin;
+      accAuthBtn.style.background = "var(--pri)";
+    }
+  }
+}
+
+async function handleAuthAction() {
+  if (currentFirebaseUser) {
+    if (confirm("Do you want to sign out?")) {
+      try {
+        if (window.firebase && firebase.auth) await firebase.auth().signOut();
+        currentFirebaseUser = null;
+        updateAuthUi(null);
+        await fetchSubscriptionStatus();
+        openTab("chat");
+      } catch (err) {
+        alert("Sign out error: " + err.message);
+      }
+    }
+  } else {
+    if (!window.firebase || !firebase.auth) {
+      alert("Firebase is not initialized. Please verify your FARM_CONFIG.FIREBASE configuration in config.js.");
+      return;
+    }
+    try {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: "select_account" });
+      const result = await firebase.auth().signInWithPopup(provider);
+      currentFirebaseUser = result.user;
+      updateAuthUi(result.user);
+      await fetchSubscriptionStatus();
+      openTab("reg");
+    } catch (err) {
+      if (err.code !== "auth/popup-closed-by-user") {
+        console.warn("Sign-in popup error, trying redirect:", err);
+        try {
+          const provider = new firebase.auth.GoogleAuthProvider();
+          await firebase.auth().signInWithRedirect(provider);
+        } catch (e2) {
+          alert("Sign-in failed: " + e2.message);
+        }
+      }
+    }
+  }
+}
+
+async function getAuthHeader() {
+  if (currentFirebaseUser) {
+    try {
+      const token = await currentFirebaseUser.getIdToken();
+      return { "Authorization": "Bearer " + token };
+    } catch (e) {
+      console.warn("Could not retrieve Firebase token:", e);
+    }
+  }
+  return {};
+}
+
+async function fetchSubscriptionStatus() {
+  try {
+    const headers = await getAuthHeader();
+    const res = await fetch("/api/subscription-status", { headers });
+    if (res.ok) {
+      currentSub = await res.json();
+    } else {
+      currentSub = {
+        loggedIn: !!currentFirebaseUser,
+        status: currentFirebaseUser ? "trial_active" : "anonymous",
+        hasAccess: !currentFirebaseUser ? false : true,
+        trialDaysLeft: 14,
+        planDaysLeft: 0,
+        isOwner: false,
+        isSubscribed: false,
+        payments: {}
+      };
+    }
+  } catch (err) {
+    console.warn("Failed to fetch subscription status:", err);
+  }
+  renderSubBanner();
+  renderAccountScreen();
+}
+
+function renderSubBanner() {
+  const banner = $("sub_banner");
+  const txt = $("sub_banner_txt");
+  const act = $("sub_banner_act");
+  const t = TRANSLATIONS[curLang];
+  if (!banner || !txt || !act) return;
+
+  banner.style.display = "flex";
+  banner.className = "sub-banner";
+
+  if (!currentFirebaseUser && !currentSub.demoModePublic) {
+    banner.classList.add("trial");
+    txt.innerHTML = `<span>🌾</span> <span>${t.auth_req_msg}</span>`;
+    act.innerHTML = `<button class="sub-banner-btn" onclick="handleAuthAction()">${t.auth_signin} →</button>`;
+    return;
+  }
+
+  if (currentSub.demoModePublic) {
+    banner.classList.add("trial");
+    txt.innerHTML = `<span>🟢</span> <span>${t.status_public_demo}: All agricultural features unlocked (ESP32 pump restricted to owner).</span>`;
+    act.innerHTML = ``;
+    return;
+  }
+
+  if (currentSub.isExempt) {
+    banner.classList.add("active");
+    txt.innerHTML = `<span>⭐</span> <span>${t.status_demo}: Permanent administrator access active.</span>`;
+    act.innerHTML = `<button class="sub-banner-btn" onclick="openTab('account')">${t.tab_account}</button>`;
+    return;
+  }
+
+  // Active Paid Plan
+  if (currentSub.isSubscribed && currentSub.planEnd && currentSub.planEnd > Date.now()) {
+    const days = currentSub.planDaysLeft;
+    const endDateStr = new Date(currentSub.planEnd).toLocaleDateString(curLang === "te" ? "te-IN" : "en-IN", { month: "short", day: "numeric", year: "numeric" });
+    if (days <= 7) {
+      banner.classList.add("warn");
+      txt.innerHTML = `<span>🔄</span> <span>${t.banner_plan_renew_soon ? t.banner_plan_renew_soon.replace("{days}", days) : `Plan expires in ${days} days! Renew anytime.`}</span>`;
+      act.innerHTML = `<button class="sub-banner-btn" style="background:#b26a00" onclick="openTab('account')">${t.btn_renew_plan}</button>`;
+    } else {
+      banner.classList.add("active");
+      txt.innerHTML = `<span>⭐</span> <span>${t.status_active} · ${endDateStr} (${days} days left)</span>`;
+      act.innerHTML = `<button class="sub-banner-btn" onclick="openTab('account')">${t.tab_account}</button>`;
+    }
+    return;
+  }
+
+  // Plan Expired
+  if (currentSub.status === "expired") {
+    banner.classList.add("danger");
+    txt.innerHTML = `<span>🔒</span> <span>${t.status_expired} · Subscribe for Rs 499 (6 months) to restore all tools.</span>`;
+    act.innerHTML = `<button class="sub-banner-btn" style="background:#b71c1c" onclick="openTab('account')">${t.btn_renew_plan}</button>`;
+    return;
+  }
+
+  // Active Trial
+  if (currentSub.status === "trial_active") {
+    const days = currentSub.trialDaysLeft;
+    if (days > 3) {
+      banner.classList.add("trial");
+      txt.innerHTML = `<span>✨</span> <span>${t.status_trial_active} · <b>${days} days left</b> · All features unlocked</span>`;
+      act.innerHTML = `<button class="sub-banner-btn" onclick="openTab('account')">₹499 / 6 Mo →</button>`;
+    } else if (days > 1) {
+      banner.classList.add("warn");
+      txt.innerHTML = `<span>⏳</span> <span>${t.banner_trial_reminder_3 ? t.banner_trial_reminder_3.replace("3", days) : `Only ${days} days left in trial!`}</span>`;
+      act.innerHTML = `<button class="sub-banner-btn" style="background:#b26a00" onclick="openTab('account')">${t.btn_pay_plan}</button>`;
+    } else if (days === 1) {
+      banner.classList.add("warn");
+      txt.innerHTML = `<span>⚠️</span> <span>${t.banner_trial_reminder_1 ? t.banner_trial_reminder_1 : "Free trial ends tomorrow!"}</span>`;
+      act.innerHTML = `<button class="sub-banner-btn" style="background:#b26a00" onclick="openTab('account')">${t.btn_pay_plan}</button>`;
+    } else {
+      banner.classList.add("danger");
+      txt.innerHTML = `<span>🔒</span> <span>${t.banner_trial_expired ? t.banner_trial_expired : "Your free trial has ended."}</span>`;
+      act.innerHTML = `<button class="sub-banner-btn" style="background:#b71c1c" onclick="openTab('account')">${t.btn_pay_plan}</button>`;
+    }
+    return;
+  }
+
+  // Trial Expired
+  banner.classList.add("danger");
+  txt.innerHTML = `<span>🔒</span> <span>${t.trial_ended_title}: Subscribe for ₹499 (6 months) to unlock all features.</span>`;
+  act.innerHTML = `<button class="sub-banner-btn" style="background:#b71c1c" onclick="openTab('account')">${t.btn_pay_plan}</button>`;
+}
+
+function openTab(t) {
+  currentActiveTab = t;
+  const paywall = $("locked_paywall_view");
+
+  // Chat, Register, and Account are always accessible
+  const isAlwaysFreeTab = (t === "chat" || t === "reg" || t === "account");
+
+  // Check access permissions
+  const hasAccess = currentSub && (currentSub.hasAccess || currentSub.demoModePublic);
+  const isFieldTab = (t === "field");
+  const isOwner = currentSub && currentSub.isOwner;
+
+  document.querySelectorAll("nav button").forEach(b => b.classList.toggle("on", b.dataset.t === t));
+
+  if (isAlwaysFreeTab) {
+    if (paywall) paywall.style.display = "none";
+    document.querySelectorAll("main > section").forEach(s => s.classList.toggle("on", s.id === t));
+    if (t === "chat" && typeof updateChatCropBadge === "function") updateChatCropBadge();
+    if (t === "account") renderAccountScreen();
+    window.scrollTo(0, 0);
+    return;
+  }
+
+  // Restricted tabs (wx, fert, dis, mandi, field)
+  if (!currentFirebaseUser && !currentSub.demoModePublic) {
+    // Not logged in: show paywall prompting Google Sign-in to start 14-day trial
+    document.querySelectorAll("main > section").forEach(s => s.classList.remove("on"));
+    if (paywall) {
+      paywall.style.display = "block";
+      $("pw_pay_btn").innerHTML = `👤 <span data-i18n="auth_signin">${TRANSLATIONS[curLang].auth_signin}</span>`;
+      $("pw_pay_btn").onclick = handleAuthAction;
+      $("pw_pay_btn").disabled = false;
+      $("pw_consent_check").parentElement.style.display = "none";
+    }
+    window.scrollTo(0, 0);
+    return;
+  }
+
+  if (!hasAccess) {
+    // Trial expired & unpaid: lock gated tabs and show paywall
+    document.querySelectorAll("main > section").forEach(s => s.classList.remove("on"));
+    if (paywall) {
+      paywall.style.display = "block";
+      $("pw_pay_btn").innerHTML = `💳 <span data-i18n="btn_pay_plan">${TRANSLATIONS[curLang].btn_pay_plan}</span>`;
+      $("pw_pay_btn").onclick = () => startRazorpayPayment(true);
+      $("pw_consent_check").parentElement.style.display = "flex";
+      updatePaywallPayBtnState();
+    }
+    window.scrollTo(0, 0);
+    return;
+  }
+
+  // Has access!
+  if (paywall) paywall.style.display = "none";
+  document.querySelectorAll("main > section").forEach(s => s.classList.toggle("on", s.id === t));
+
+  if (isFieldTab) {
+    const fiUi = $("fi_ui"), fiCfg = $("fi_cfg");
+    if (!isOwner) {
+      if (fiUi) fiUi.style.display = "none";
+      if (fiCfg) fiCfg.innerHTML = `<div class="note">${TRANSLATIONS[curLang].field_owner_only}</div>`;
+    } else {
+      if (fiCfg && (!window.FARM_CONFIG || !FARM_CONFIG.DB_URL)) {
+        fiCfg.innerHTML = `<div class="note">${TRANSLATIONS[curLang].field_not_connected}</div>`;
+      } else if (fiCfg) {
+        fiCfg.innerHTML = "";
+      }
+      if (fiUi) fiUi.style.display = "block";
+    }
+  }
+
+  if (t === "wx") loadWx();
+  if (t === "mandi") showMandi();
+  window.scrollTo(0, 0);
+}
+
+function openAccountTab() {
+  openTab("account");
+}
+
+function updatePayBtnState() {
+  const check = $("acc_consent_check");
+  const btn = $("acc_pay_btn");
+  if (btn && check) btn.disabled = !check.checked;
+}
+
+function updatePaywallPayBtnState() {
+  const check = $("pw_consent_check");
+  const btn = $("pw_pay_btn");
+  if (btn && check) btn.disabled = !check.checked;
+}
+
+async function startRazorpayPayment(isFromPaywall = false) {
+  if (!currentFirebaseUser) {
+    handleAuthAction();
+    return;
+  }
+
+  const consent = isFromPaywall ? $("pw_consent_check") : $("acc_consent_check");
+  if (!consent || !consent.checked) {
+    alert("Please accept the Terms and Conditions and Refund Policy before proceeding.");
+    return;
+  }
+
+  const payBtn = isFromPaywall ? $("pw_pay_btn") : $("acc_pay_btn");
+  if (payBtn) payBtn.disabled = true;
+
+  try {
+    const headers = { "Content-Type": "application/json", ...await getAuthHeader() };
+    const r = await fetch("/api/create-order", { method: "POST", headers });
+    const order = await r.json();
+
+    if (!r.ok) {
+      throw new Error(order.error || "Failed to create payment order.");
+    }
+
+    try { localStorage.setItem("sfa_last_order_id", order.order_id); } catch(e) {}
+
+    const options = {
+      key: order.key_id,
+      amount: order.amount,
+      currency: order.currency || "INR",
+      name: "Smart Farm Assistant",
+      description: "6-Month Subscription Plan (₹499)",
+      order_id: order.order_id,
+      prefill: {
+        name: currentFirebaseUser.displayName || "",
+        email: currentFirebaseUser.email || ""
+      },
+      theme: { color: "#2e7d32" },
+      modal: {
+        ondismiss: function() {
+          if (payBtn) payBtn.disabled = false;
+        }
+      },
+      handler: async function(response) {
+        try {
+          const vHeaders = { "Content-Type": "application/json", ...await getAuthHeader() };
+          const vRes = await fetch("/api/verify-payment", {
+            method: "POST",
+            headers: vHeaders,
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature
+            })
+          });
+          const vData = await vRes.json();
+          if (vRes.ok && vData.success) {
+            alert(vData.message || "Payment successful! 6-month plan is now active.");
+            await fetchSubscriptionStatus();
+            openTab("account");
+          } else {
+            alert("Verification note: " + (vData.error || "Could not confirm payment immediately. Tap 'I paid but my access is not active' to reconcile."));
+            await fetchSubscriptionStatus();
+          }
+        } catch (err) {
+          alert("Network error verifying payment. Tap 'I paid but my access is not active' on the Account screen.");
+        }
+      }
+    };
+
+    const rzp = new Razorpay(options);
+    rzp.on("payment.failed", function(resp) {
+      alert("Payment failed or declined by bank: " + (resp.error.description || "Please retry"));
+      if (payBtn) payBtn.disabled = false;
+    });
+    rzp.open();
+  } catch (err) {
+    alert("Error initializing payment: " + err.message);
+    if (payBtn) payBtn.disabled = false;
+  }
+}
+
+async function promptReconcilePayment() {
+  if (!currentFirebaseUser) {
+    handleAuthAction();
+    return;
+  }
+  const lastId = localStorage.getItem("sfa_last_order_id") || "";
+  const orderId = prompt("Enter your Razorpay Order ID (e.g. order_...):", lastId);
+  if (!orderId || !orderId.trim()) return;
+
+  try {
+    const headers = { "Content-Type": "application/json", ...await getAuthHeader() };
+    const r = await fetch("/api/check-order", {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ orderId: orderId.trim() })
+    });
+    const j = await r.json();
+    alert(j.message || (j.activated ? "Payment verified! Plan activated." : "Order status: " + j.status));
+    if (j.activated) {
+      await fetchSubscriptionStatus();
+      openTab("account");
+    }
+  } catch (err) {
+    alert("Error checking order status: " + err.message);
+  }
+}
+
+function renderAccountScreen() {
+  updateAuthUi(currentFirebaseUser);
+  const badge = $("acc_status_badge");
+  const msg = $("acc_status_msg");
+  const exp = $("acc_expiry_info");
+  const payBtnTxt = $("acc_pay_btn_txt");
+  const historyList = $("acc_history_list");
+  const t = TRANSLATIONS[curLang];
+
+  if (!badge || !msg || !exp) return;
+
+  if (!currentFirebaseUser) {
+    badge.textContent = "👤 Guest";
+    badge.style.background = "var(--bg)";
+    badge.style.color = "var(--text)";
+    msg.textContent = t.auth_req_msg;
+    exp.textContent = "";
+    if (payBtnTxt) payBtnTxt.textContent = t.btn_pay_plan;
+    return;
+  }
+
+  if (currentSub.isExempt) {
+    badge.textContent = "⭐ " + t.status_demo;
+    badge.style.background = "#e8f5e9";
+    badge.style.color = "#1b5e20";
+    msg.textContent = "This Google account has permanent unrestricted administrator access.";
+    exp.textContent = "";
+    if (payBtnTxt) payBtnTxt.textContent = t.btn_pay_plan;
+  } else if (currentSub.isSubscribed && currentSub.planEnd && currentSub.planEnd > Date.now()) {
+    badge.textContent = "⭐ " + t.status_active;
+    badge.style.background = "#e8f5e9";
+    badge.style.color = "#1b5e20";
+    const dateStr = new Date(currentSub.planEnd).toLocaleDateString(curLang === "te" ? "te-IN" : "en-IN", {
+      year: "numeric", month: "long", day: "numeric"
+    });
+    msg.textContent = `Your 6-month plan is active with all features unlocked.`;
+    exp.textContent = `Plan End Date: ${dateStr} (${currentSub.planDaysLeft} days remaining). Early renewal adds 6 months without losing days.`;
+    if (payBtnTxt) payBtnTxt.textContent = t.btn_renew_plan;
+  } else if (currentSub.status === "trial_active") {
+    badge.textContent = "🟢 " + t.status_trial_active;
+    badge.style.background = "#e8f5e9";
+    badge.style.color = "#2e7d32";
+    const dateStr = new Date(currentSub.trialEnd).toLocaleDateString(curLang === "te" ? "te-IN" : "en-IN", {
+      year: "numeric", month: "long", day: "numeric"
+    });
+    msg.textContent = `You are on the 14-day free trial. All farm intelligence features are unlocked.`;
+    exp.textContent = `Trial Ends: ${dateStr} (${currentSub.trialDaysLeft} days remaining).`;
+    if (payBtnTxt) payBtnTxt.textContent = t.btn_pay_plan;
+  } else {
+    badge.textContent = "🔒 " + (currentSub.status === "expired" ? t.status_expired : t.status_trial_expired);
+    badge.style.background = "#ffebee";
+    badge.style.color = "#b71c1c";
+    msg.textContent = t.trial_ended_desc;
+    exp.textContent = "Subscribe for Rs 499 (6 months) to restore all farm intelligence tools.";
+    if (payBtnTxt) payBtnTxt.textContent = t.btn_pay_plan;
+  }
+
+  // Render payment history list
+  const payments = currentSub.payments || {};
+  const paymentKeys = Object.keys(payments);
+  if (historyList) {
+    if (paymentKeys.length === 0) {
+      historyList.innerHTML = `<p class="muted" style="font-size:12px">${t.no_payments_yet}</p>`;
+    } else {
+      const rows = paymentKeys.map(k => {
+        const p = payments[k];
+        const dt = new Date(p.createdAt || Date.now()).toLocaleDateString(curLang === "te" ? "te-IN" : "en-IN", { month: "short", day: "numeric", year: "numeric" });
+        return `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bd);flex-wrap:wrap;gap:8px">
+          <div>
+            <b>₹${(p.amount / 100).toFixed(0)}</b> · <span class="muted" style="font-size:11px">${dt}</span>
+            <div style="font-size:11px;font-family:monospace;color:var(--muted)">${p.paymentId || k}</div>
+          </div>
+          <div>
+            <button class="chat-action-btn" onclick="downloadReceipt('${k}')">📄 Receipt</button>
+          </div>
+        </div>
+        `;
+      }).join("");
+      historyList.innerHTML = rows;
+    }
+  }
+}
+
+function downloadReceipt(paymentId) {
+  const p = (currentSub && currentSub.payments && currentSub.payments[paymentId]) || null;
+  if (!p) {
+    alert("Receipt not found.");
+    return;
+  }
+  const dateStr = new Date(p.createdAt || Date.now()).toLocaleDateString("en-IN", {
+    year: "numeric", month: "long", day: "numeric"
+  });
+  const validUntilStr = p.planExtendedUntil ? new Date(p.planExtendedUntil).toLocaleDateString("en-IN", {
+    year: "numeric", month: "long", day: "numeric"
+  }) : "–";
+
+  const receiptHtml = `<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Receipt - Smart Farm Assistant</title>
+<style>
+body { font-family: system-ui, -apple-system, sans-serif; padding: 30px; color: #1d2b1f; max-width: 600px; margin: auto; }
+.header { border-bottom: 2px solid #2e7d32; padding-bottom: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+.title { font-size: 20px; font-weight: bold; color: #2e7d32; }
+table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px; }
+th, td { padding: 10px 8px; border-bottom: 1px solid #d6e0d3; text-align: left; }
+.total { font-size: 16px; font-weight: bold; }
+.footer { margin-top: 30px; font-size: 12px; color: #5d6e5f; border-top: 1px solid #eee; padding-top: 10px; }
+@media print { .no-print { display: none; } }
+</style>
+</head>
+<body>
+<div class="header">
+  <div>
+    <div class="title">🌾 Smart Farm Assistant</div>
+    <div style="font-size:12px;color:#5d6e5f">Agricultural Intelligence Platform</div>
+  </div>
+  <div style="text-align:right;font-size:12px">
+    <b>OFFICIAL PAYMENT RECEIPT</b><br>
+    Date: ${dateStr}
+  </div>
+</div>
+<div style="font-size:13px;margin-bottom:14px">
+  <b>Customer Details:</b><br>
+  Name: ${currentFirebaseUser?.displayName || "Farmer"}<br>
+  Email: ${currentFirebaseUser?.email || currentSub.uid}
+</div>
+<table>
+  <thead>
+    <tr><th>Description</th><th>Validity</th><th style="text-align:right">Amount</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Smart Farm Assistant 6-Month Plan<br><small style="color:#5d6e5f">Weather, Fertilizer, Disease check, Mandi prices</small></td>
+      <td>Valid until ${validUntilStr}</td>
+      <td style="text-align:right">₹${(p.amount / 100).toFixed(2)}</td>
+    </tr>
+    <tr>
+      <td colspan="2" class="total">Total Paid (Inclusive of all taxes)</td>
+      <td style="text-align:right" class="total">₹${(p.amount / 100).toFixed(2)}</td>
+    </tr>
+  </tbody>
+</table>
+<div style="font-size:12px;margin-bottom:16px">
+  <b>Payment ID:</b> <code>${p.paymentId}</code><br>
+  <b>Order ID:</b> <code>${p.orderId || "–"}</code><br>
+  <b>Status:</b> Payment Captured (Success)
+</div>
+<div class="footer">
+  This is a computer-generated receipt for your subscription record. Thank you for using Smart Farm Assistant!
+</div>
+<div class="no-print" style="margin-top:20px;text-align:center">
+  <button onclick="window.print()" style="padding:10px 20px;background:#2e7d32;color:#fff;border:none;border-radius:6px;font-weight:bold;cursor:pointer">🖨️ Print / Save as PDF</button>
+</div>
+</body>
+</html>`;
+
+  const w = window.open("", "_blank");
+  if (w) {
+    w.document.write(receiptHtml);
+    w.document.close();
+  }
+}
+
+// Navigation Wiring
+$("nav").onclick = e => {
+  const t = e.target.dataset.t;
+  if (!t) return;
+  openTab(t);
+};
 
 // registration
 const KEY="sfa_profile";
@@ -821,12 +1580,24 @@ $("d_go").onclick=async()=>{
   if(!f)return;
   if(isDemoMode||!navigator.onLine){out.innerHTML=`<div class="note">${t.dis_offline}</div>`;return}
   $("d_go").disabled=true;out.innerHTML=`<p class="muted">${t.dis_analyzing}</p>`;
-  try{const img=await shrink(f);
-   const r=await fetch("/api/diagnose",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({crop:$("d_crop").value,lang:$("d_lang").value,image:img})});
-   const j=await r.json();if(!r.ok)throw new Error(j.error||"failed");
-   out.innerHTML="<div class='ok'><pre></pre></div>";out.querySelector("pre").textContent=j.text}
+  try{
+    const img=await shrink(f);
+    const headers = { "Content-Type": "application/json", ...await getAuthHeader() };
+    const r=await fetch("/api/diagnose",{method:"POST",headers,body:JSON.stringify({crop:$("d_crop").value,lang:$("d_lang").value,image:img})});
+    const j=await r.json();
+    if(r.status === 401 || (j && j.error === "AUTH_REQUIRED")) {
+      out.innerHTML=`<div class="note">🔒 ${j.message || t.auth_req_msg} <button class="sub-banner-btn" style="margin-left:8px" onclick="handleAuthAction()">${t.auth_signin}</button></div>`;
+      return;
+    }
+    if(r.status === 402 || (j && j.error === "SUBSCRIPTION_REQUIRED")) {
+      out.innerHTML=`<div class="note">🔒 ${j.message || t.trial_ended_desc} <button class="sub-banner-btn" style="margin-left:8px" onclick="openTab('account')">${t.btn_pay_plan}</button></div>`;
+      return;
+    }
+    if(!r.ok)throw new Error(j.error||"failed");
+    out.innerHTML="<div class='ok'><pre></pre></div>";out.querySelector("pre").textContent=j.text;
+  }
   catch(e){out.innerHTML=`<div class="note">${t.dis_failed} (${e.message||"error"}). Check connection and GEMINI_API_KEY.</div>`}
-  $("d_go").disabled=false;
+  finally { $("d_go").disabled=false; }
 };
 
 // --- MANDI PRICES (REAL AGMARKNET DATA + SEPARATE SAMPLE ARCHIVE) ---
@@ -886,19 +1657,33 @@ async function fetchDirectAgmarknet(crop) {
 }
 
 async function fetchRealMandiPrices(crop) {
-  // 1. Try serverless endpoint first
+  // Check access permissions
+  if (!currentFirebaseUser && !currentSub.demoModePublic) {
+    return [];
+  }
+  if (!currentSub.hasAccess && !currentSub.demoModePublic) {
+    return [];
+  }
+
+  // 1. Try serverless endpoint first with auth token
   try {
-    const r = await fetch("/api/mandi?crop=" + encodeURIComponent(crop));
-    if (r.ok) {
-      const j = await r.json();
-      if (j && j.rows && j.rows.length > 0) {
-        return j.rows;
-      }
+    const headers = await getAuthHeader();
+    const r = await fetch("/api/mandi?crop=" + encodeURIComponent(crop), { headers });
+    const j = await r.json();
+    if (r.status === 402 || (j && j.error === "SUBSCRIPTION_REQUIRED")) {
+      openTab("account");
+      return [];
+    }
+    if (r.ok && j && j.rows && j.rows.length > 0) {
+      return j.rows;
     }
   } catch(e) {}
 
-  // 2. Direct client-side fetch from data.gov.in
-  return await fetchDirectAgmarknet(crop);
+  // 2. Direct client-side fetch from data.gov.in (if user has active access)
+  if (currentSub.hasAccess || currentSub.demoModePublic) {
+    return await fetchDirectAgmarknet(crop);
+  }
+  return [];
 }
 
 function renderRealMandi() {
@@ -1402,7 +2187,7 @@ async function sendChatMessage() {
   const botBubble = document.createElement("div");
   botBubble.className = "chat-bubble bot";
   botBubble.innerHTML = `
-    <div class="chat-avatar">🌾 Raithu Mitra (రైతు మిత్ర)</div>
+    <div class="chat-avatar">🌾 Krishi Sahayak (కృషి సహాయక్)</div>
     <div class="chat-text muted" style="font-style:italic">${t.chat_thinking}</div>
   `;
   feed.appendChild(botBubble);
@@ -1416,9 +2201,10 @@ async function sendChatMessage() {
   }
 
   try {
+    const headers = { "Content-Type": "application/json", ...await getAuthHeader() };
     const res = await fetch("/api/chat", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify({
         message: userText,
         history: chatHistory.slice(-6),
@@ -1430,6 +2216,19 @@ async function sendChatMessage() {
     });
 
     const data = await res.json();
+
+    if (res.status === 429 && data.limitReached) {
+      botBubble.innerHTML = `
+        <div class="chat-avatar">🌾 Krishi Sahayak (కృషి సహాయక్)</div>
+        <div class="note" style="margin:6px 0;background:#fff8e1;border:1px solid #ffe082;border-radius:10px;padding:12px">
+          <div style="font-weight:700;color:#e65100;margin-bottom:4px">⚠️ ${curLang === 'te' ? 'రోజువారీ ప్రశ్నల పరిమితి చేరుకుంది' : 'Daily Limit Reached'}</div>
+          <div style="font-size:13px;line-height:1.5;color:var(--text);margin-bottom:8px">${curLang === 'te' ? (data.message_te || data.message) : data.message}</div>
+          ${data.canUpgrade ? `<button class="btn" style="margin:0;width:auto;padding:8px 16px;font-size:13px" onclick="openAccountTab()">💳 ${curLang === 'te' ? '₹499 తో 6 నెలల ప్లాన్ పొందండి' : 'Upgrade to 6-Month Plan (₹499)'}</button>` : ''}
+        </div>
+      `;
+      return;
+    }
+
     if (!res.ok) {
       throw new Error(data.error || `Server error (${res.status})`);
     }
@@ -1448,7 +2247,7 @@ async function sendChatMessage() {
     }
 
     botBubble.innerHTML = `
-      <div class="chat-avatar">🌾 Raithu Mitra (రైతు మిత్ర)</div>
+      <div class="chat-avatar">🌾 Krishi Sahayak (కృషి సహాయక్)</div>
       <div class="chat-text">${formatBotAnswer(replyText)}</div>
       ${sourcesHtml}
       <div class="chat-actions">
@@ -1464,8 +2263,8 @@ async function sendChatMessage() {
 
   } catch (err) {
     botBubble.innerHTML = `
-      <div class="chat-avatar">🌾 Raithu Mitra (రైతు మిత్ర)</div>
-      <div class="chat-text" style="color:#b71c1c">⚠️ ${err.message || "Could not connect to Raithu Mitra."}</div>
+      <div class="chat-avatar">🌾 Krishi Sahayak (కృషి సహాయక్)</div>
+      <div class="chat-text" style="color:#b71c1c">⚠️ ${err.message || "Could not connect to Krishi Sahayak."}</div>
     `;
   } finally {
     if (sendBtn) sendBtn.disabled = false;
@@ -1473,6 +2272,26 @@ async function sendChatMessage() {
   }
 }
 
-// Initialize language and demo states on load
+function initFirebaseAuth() {
+  if (window.firebase && window.FARM_CONFIG && FARM_CONFIG.FIREBASE && FARM_CONFIG.FIREBASE.apiKey) {
+    if (!firebase.apps.length) {
+      try { firebase.initializeApp(FARM_CONFIG.FIREBASE); } catch(e){ console.warn("Firebase init:", e); }
+    }
+    firebase.auth().onAuthStateChanged(async user => {
+      currentFirebaseUser = user;
+      updateAuthUi(user);
+      await fetchSubscriptionStatus();
+      if (currentActiveTab && currentSub.hasAccess && $("locked_paywall_view") && $("locked_paywall_view").style.display !== "none") {
+        openTab(currentActiveTab);
+      }
+    });
+  } else {
+    updateAuthUi(null);
+    fetchSubscriptionStatus();
+  }
+}
+
+// Initialize language, demo states, and Firebase auth on load
 setLang(curLang);
+initFirebaseAuth();
 </script></body></html>

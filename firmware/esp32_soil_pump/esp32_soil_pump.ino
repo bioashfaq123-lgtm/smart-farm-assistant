@@ -15,7 +15,7 @@
 // ---------- EDIT THESE ----------
 const char* WIFI_SSID = "YOUR_WIFI_NAME";
 const char* WIFI_PASS = "YOUR_WIFI_PASSWORD";
-const char* DB_URL    = "https://YOUR-PROJECT-default-rtdb.firebaseio.com"; // no trailing slash
+const char* DB_URL    = "https://smart-farm-assistant-32782-default-rtdb.firebaseio.com"; // no trailing slash
 const char* DB_PATH   = "field";   // must match DB_PATH in config.js
 const int   SENSOR_PIN = 34;
 const int   RELAY_PIN  = 26;
