@@ -172,8 +172,7 @@ If the photo is unclear or not a plant, explain politely and request a closer ph
               parts: [
                 { text: prompt },
                 {
-                  inline_data: { mime_type: "image/jpeg", data: cleanImg },
-                  inlineData: { mimeType: "image/jpeg", data: cleanImg }
+                  inline_data: { mime_type: "image/jpeg", data: cleanImg }
                 }
               ]
             }]
