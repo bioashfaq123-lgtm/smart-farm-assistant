@@ -2,95 +2,661 @@
 <html lang="en"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Smart Farm Assistant</title>
+<title>Smart Farm Assistant — PJTAU</title>
+<!-- Google Fonts: Plus Jakarta Sans & Noto Sans Telugu -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <!-- Firebase Auth & Razorpay SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <style>
-:root{--bg:#f4f7f2;--card:#fff;--text:#1d2b1f;--muted:#5d6e5f;--pri:#2e7d32;--pri-t:#fff;--bd:#d6e0d3;--warn:#fff4d6;--warn-t:#6b4a00;--ok:#e3f4e4;
-box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121a13;--card:#1c271d;--text:#e6efe6;--muted:#9fb3a1;--pri:#66bb6a;--pri-t:#0d1a0e;--bd:#2f4031;--warn:#3a3012;--warn-t:#f1d98a;--ok:#1f3a21}}
-:root[data-theme="dark"]{--bg:#121a13;--card:#1c271d;--text:#e6efe6;--muted:#9fb3a1;--pri:#66bb6a;--pri-t:#0d1a0e;--bd:#2f4031;--warn:#3a3012;--warn-t:#f1d98a;--ok:#1f3a21}
-*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
-body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--pri);z-index:10}
-header{background:var(--pri);color:var(--pri-t);padding:12px 16px 8px;position:sticky;top:env(safe-area-inset-top,0px);z-index:9}
-.hdr-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px}
-header h1{margin:0;font-size:18px}header p{margin:2px 0 6px;font-size:12px;opacity:.9}
-.hdr-ctrls{display:flex;align-items:center;gap:8px;flex-shrink:0}
-.lang-toggle{display:inline-flex;background:rgba(0,0,0,.22);border-radius:18px;padding:2px}
-.lang-btn{background:transparent;border:0;color:var(--pri-t);padding:4px 9px;font:600 12px inherit;border-radius:14px;cursor:pointer;opacity:.8;transition:all .15s}
-.lang-btn.on{background:var(--pri-t);color:var(--pri);opacity:1;box-shadow:0 1px 3px rgba(0,0,0,.2)}
-.demo-pill{border:1px solid rgba(255,255,255,.35);border-radius:16px;padding:4px 9px;font:600 11px inherit;cursor:pointer;display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.15);color:var(--pri-t);transition:all .15s}
-.demo-pill.active{background:#ffecb3;color:#6b4a00;border-color:#ffd54f;box-shadow:0 1px 3px rgba(0,0,0,.2)}
-nav{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;-webkit-overflow-scrolling:touch}
-nav button{flex:0 0 auto;border:0;border-radius:18px;padding:7px 13px;font:600 13px inherit;background:rgba(255,255,255,.2);color:var(--pri-t);cursor:pointer}
-nav button.on{background:var(--pri-t);color:var(--pri)}
-main{max-width:720px;margin:0 auto;padding:14px}
-section{display:none}section.on{display:block}
-.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:12px}
-h2{font-size:16px;margin:0 0 10px}label{display:block;font-size:12px;color:var(--muted);margin:10px 0 3px}
-input,select{width:100%;padding:10px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--text);font:inherit}
-.btn{margin-top:12px;width:100%;padding:11px;border:0;border-radius:8px;background:var(--pri);color:var(--pri-t);font:600 15px inherit;cursor:pointer}
-.btn:disabled{opacity:.5;cursor:not-allowed}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.note{background:var(--warn);color:var(--warn-t);border-radius:8px;padding:9px 11px;font-size:12px;margin:10px 0}
-.ok{background:var(--ok);border-radius:8px;padding:10px 12px;margin:10px 0}
-.big{font-size:34px;font-weight:700}.muted{color:var(--muted);font-size:12px}
-.scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px}
-th,td{padding:8px 6px;border-bottom:1px solid var(--bd);text-align:left;white-space:nowrap}th{color:var(--muted);font-weight:600}
-img.pv{max-width:100%;max-height:240px;border-radius:8px;margin-top:10px;display:none}
-pre{white-space:pre-wrap;font:inherit;margin:0}
+:root {
+  --bg: #f4f7f4;
+  --card: #ffffff;
+  --text: #162417;
+  --muted: #536755;
+  --pri: #2e7d32;
+  --pri-dark: #1b5e20;
+  --pri-light: #e8f5e9;
+  --pri-t: #ffffff;
+  --bd: #dce5dc;
+  --warn: #fff8e1;
+  --warn-t: #7c4a00;
+  --ok: #edf7ed;
+  --ok-t: #1b5e20;
+  --danger: #ffebee;
+  --danger-t: #b71c1c;
+  --shadow-sm: 0 2px 8px rgba(18, 48, 20, 0.05);
+  --shadow-md: 0 8px 24px -4px rgba(18, 48, 20, 0.08), 0 2px 6px -1px rgba(18, 48, 20, 0.04);
+  --radius-lg: 16px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1610;
+    --card: #182319;
+    --text: #eaf3ea;
+    --muted: #94a896;
+    --pri: #4caf50;
+    --pri-dark: #2e7d32;
+    --pri-light: #1c3321;
+    --pri-t: #0a140b;
+    --bd: #28392a;
+    --warn: #3b2d10;
+    --warn-t: #ffe082;
+    --ok: #19331e;
+    --ok-t: #a5d6a7;
+    --danger: #3b1416;
+    --danger-t: #ef9a9a;
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1610;
+  --card: #182319;
+  --text: #eaf3ea;
+  --muted: #94a896;
+  --pri: #4caf50;
+  --pri-dark: #2e7d32;
+  --pri-light: #1c3321;
+  --pri-t: #0a140b;
+  --bd: #28392a;
+  --warn: #3b2d10;
+  --warn-t: #ffe082;
+  --ok: #19331e;
+  --ok-t: #a5d6a7;
+  --danger: #3b1416;
+  --danger-t: #ef9a9a;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+* { box-sizing: border-box; }
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Plus Jakarta Sans', 'Noto Sans Telugu', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 14.5px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto;
+  height: env(safe-area-inset-top, 0px);
+  background: var(--pri-dark);
+  z-index: 100;
+}
+header {
+  background: rgba(27, 94, 32, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  color: #fff;
+  padding: 10px 16px 6px;
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 90;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+.hdr-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.hdr-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.hdr-logo-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  flex-shrink: 0;
+}
+header h1 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+header p {
+  margin: 2px 0 0;
+  font-size: 11.5px;
+  opacity: 0.9;
+  letter-spacing: 0.1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hdr-ctrls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.lang-toggle {
+  display: inline-flex;
+  background: rgba(0, 0, 0, 0.22);
+  border-radius: 20px;
+  padding: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+.lang-btn {
+  background: transparent;
+  border: 0;
+  color: #fff;
+  padding: 4px 9px;
+  font: 600 11.5px inherit;
+  border-radius: 16px;
+  cursor: pointer;
+  opacity: 0.75;
+  transition: all .18s;
+}
+.lang-btn.on {
+  background: #fff;
+  color: var(--pri-dark);
+  opacity: 1;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+.demo-pill {
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 16px;
+  padding: 5px 10px;
+  font: 600 11.5px inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  transition: all .18s;
+}
+.demo-pill:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+.demo-pill.active {
+  background: #ffe082;
+  color: #5c3800;
+  border-color: #ffd54f;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+nav {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 4px 0 6px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+nav::-webkit-scrollbar { display: none; }
+nav button {
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 20px;
+  padding: 7px 14px;
+  font: 600 12.5px inherit;
+  background: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+  transition: all .18s ease;
+  white-space: nowrap;
+}
+nav button:hover {
+  background: rgba(255, 255, 255, 0.24);
+  color: #fff;
+}
+nav button.on {
+  background: #ffffff;
+  color: var(--pri-dark);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+}
+main {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 16px 14px 40px;
+}
+section { display: none; }
+section.on { display: block; }
+.card {
+  background: var(--card);
+  border: 1px solid var(--bd);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow .2s ease;
+}
+.card:hover {
+  box-shadow: var(--shadow-md);
+}
+h2 {
+  font-size: 17px;
+  font-weight: 700;
+  margin: 0 0 12px;
+  letter-spacing: -0.2px;
+  color: var(--text);
+}
+label {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--muted);
+  margin: 12px 0 5px;
+}
+input, select {
+  width: 100%;
+  padding: 11px 13px;
+  border: 1px solid var(--bd);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  transition: border-color .15s, box-shadow .15s;
+}
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--pri);
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.16);
+}
+.btn {
+  margin-top: 14px;
+  width: 100%;
+  padding: 12px 16px;
+  border: 0;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
+  color: #fff;
+  font: 600 14.5px inherit;
+  cursor: pointer;
+  box-shadow: 0 3px 12px rgba(46, 125, 50, 0.25);
+  transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(46, 125, 50, 0.35);
+}
+.btn:active {
+  transform: scale(0.98);
+}
+.btn:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 520px) {
+  .row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+.note {
+  background: var(--warn);
+  color: var(--warn-t);
+  border-radius: 10px;
+  padding: 11px 13px;
+  font-size: 12.5px;
+  margin: 12px 0;
+  border: 1px solid rgba(255, 213, 79, 0.3);
+}
+.ok {
+  background: var(--ok);
+  color: var(--ok-t);
+  border-radius: 10px;
+  padding: 11px 13px;
+  font-size: 12.5px;
+  margin: 12px 0;
+  border: 1px solid rgba(129, 199, 132, 0.3);
+}
+.big { font-size: 34px; font-weight: 700; }
+.muted { color: var(--muted); font-size: 12px; }
+.scroll { overflow-x: auto; border-radius: 10px; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td {
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--bd);
+  text-align: left;
+  white-space: nowrap;
+}
+th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px; }
+tbody tr:hover { background: rgba(0, 0, 0, 0.02); }
+:root[data-theme="dark"] tbody tr:hover { background: rgba(255, 255, 255, 0.03); }
+img.pv { max-width: 100%; max-height: 240px; border-radius: 10px; margin-top: 10px; display: none; }
+pre { white-space: pre-wrap; font: inherit; margin: 0; }
+
+/* --- FARMER ID PROFILE CARD STYLES --- */
+.farmer-id-card {
+  background: var(--card);
+  border: 1.5px solid var(--bd);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.farmer-id-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #2e7d32, #66bb6a, #81c784);
+}
+.farmer-id-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--bd);
+}
+.farmer-id-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.farmer-avatar-badge {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+  border: 2px solid #81c784;
+  color: #1b5e20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(46, 125, 50, 0.15);
+}
+.farmer-id-title-box h2 {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--text);
+}
+.farmer-verified-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: #e8f5e9;
+  color: #1b5e20;
+  border: 1px solid #c8e6c9;
+}
+:root[data-theme="dark"] .farmer-verified-pill {
+  background: #1b3320;
+  color: #a5d6a7;
+  border-color: #2e5634;
+}
+.farmer-sub-loc {
+  margin: 3px 0 0;
+  font-size: 12.5px;
+  color: var(--muted);
+  font-weight: 500;
+}
+.btn-edit-profile {
+  background: var(--bg);
+  border: 1px solid var(--bd);
+  color: var(--text);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font: 600 12.5px inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all .15s;
+}
+.btn-edit-profile:hover {
+  background: var(--pri-light);
+  border-color: var(--pri);
+  color: var(--pri);
+}
+.farmer-details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+  margin: 16px 0;
+}
+.farmer-grid-item {
+  background: var(--bg);
+  border: 1px solid var(--bd);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.grid-label {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.grid-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+.farmer-sync-banner {
+  background: #edf7ed;
+  border: 1px solid #c8e6c9;
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-size: 12.5px;
+  color: #1b5e20;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+:root[data-theme="dark"] .farmer-sync-banner {
+  background: #19331e;
+  border-color: #2b5030;
+  color: #a5d6a7;
+}
+.farmer-quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.action-chip {
+  flex: 1 1 auto;
+  min-width: 130px;
+  background: var(--bg);
+  border: 1px solid var(--bd);
+  border-radius: 20px;
+  padding: 9px 14px;
+  font: 600 12.5px inherit;
+  color: var(--text);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all .15s;
+}
+.action-chip:hover {
+  background: var(--pri);
+  color: #fff;
+  border-color: var(--pri);
+  box-shadow: 0 2px 8px rgba(46, 125, 50, 0.25);
+}
+.btn-cancel-edit {
+  background: transparent;
+  border: 1px solid var(--bd);
+  color: var(--muted);
+  border-radius: 16px;
+  padding: 4px 12px;
+  font: 600 12px inherit;
+  cursor: pointer;
+}
+.btn-cancel-edit:hover {
+  color: var(--text);
+  border-color: var(--text);
+}
+
+/* Toast Notification */
+.toast-box {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+.toast-item {
+  pointer-events: auto;
+  background: var(--card);
+  color: var(--text);
+  padding: 10px 18px;
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--bd);
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  animation: slideDown .25s ease-out;
+  transition: opacity .3s, transform .3s;
+}
+.toast-item.toast-ok { border-color: #81c784; background: #f1f8e9; color: #1b5e20; }
+.toast-item.toast-err { border-color: #e57373; background: #ffebee; color: #b71c1c; }
+.toast-item.fade-out { opacity: 0; transform: translateY(-10px); }
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 /* --- SUBSCRIPTION BANNER & PAYWALL STYLES --- */
-.sub-banner{padding:10px 16px;font-size:13px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;border-bottom:1px solid var(--bd);position:sticky;top:62px;z-index:8}
-.sub-banner.trial{background:#e8f5e9;color:#1b5e20;border-color:#c8e6c9}
-.sub-banner.warn{background:#fff8e1;color:#b26a00;border-color:#ffe082}
-.sub-banner.danger{background:#ffebee;color:#b71c1c;border-color:#ffcdd2}
-.sub-banner.active{background:#f1f8e9;color:#2e7d32;border-color:#dcedc8}
-:root[data-theme="dark"] .sub-banner.trial{background:#1b3320;color:#a5d6a7;border-color:#2e5634}
-:root[data-theme="dark"] .sub-banner.warn{background:#382d0e;color:#ffe082;border-color:#5c4815}
-:root[data-theme="dark"] .sub-banner.danger{background:#361214;color:#ef9a9a;border-color:#592225}
-:root[data-theme="dark"] .sub-banner.active{background:#1f3323;color:#a5d6a7;border-color:#2e5634}
-.sub-banner-btn{background:var(--pri);color:var(--pri-t);border:0;border-radius:12px;padding:5px 12px;font:600 12px inherit;cursor:pointer;white-space:nowrap;transition:opacity .15s}
-.sub-banner-btn:hover{opacity:.9}
-.paywall-box{background:var(--card);border:2px solid var(--bd);border-radius:14px;padding:26px 18px;text-align:center;margin-bottom:14px}
+.sub-banner {
+  padding: 10px 16px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--bd);
+  position: sticky;
+  top: 62px;
+  z-index: 80;
+}
+.sub-banner.trial { background: #e8f5e9; color: #1b5e20; border-color: #c8e6c9; }
+.sub-banner.warn { background: #fff8e1; color: #b26a00; border-color: #ffe082; }
+.sub-banner.danger { background: #ffebee; color: #b71c1c; border-color: #ffcdd2; }
+.sub-banner.active { background: #f1f8e9; color: #2e7d32; border-color: #dcedc8; }
+:root[data-theme="dark"] .sub-banner.trial { background: #1b3320; color: #a5d6a7; border-color: #2e5634; }
+:root[data-theme="dark"] .sub-banner.warn { background: #382d0e; color: #ffe082; border-color: #5c4815; }
+:root[data-theme="dark"] .sub-banner.danger { background: #361214; color: #ef9a9a; border-color: #592225; }
+:root[data-theme="dark"] .sub-banner.active { background: #1f3323; color: #a5d6a7; border-color: #2e5634; }
+.sub-banner-btn {
+  background: var(--pri);
+  color: var(--pri-t);
+  border: 0;
+  border-radius: 14px;
+  padding: 6px 14px;
+  font: 600 12px inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity .15s;
+}
+.sub-banner-btn:hover { opacity: .9; }
+.paywall-box {
+  background: var(--card);
+  border: 1.5px solid var(--bd);
+  border-radius: var(--radius-lg);
+  padding: 28px 20px;
+  text-align: center;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow-sm);
+}
+
 /* --- KRISHI SAHAYAK CHATBOT STYLES --- */
-.chat-wrap{display:flex;flex-direction:column;min-height:440px;max-height:640px}
-.chat-feed{flex:1;overflow-y:auto;padding:8px 2px;display:flex;flex-direction:column;gap:12px;-webkit-overflow-scrolling:touch}
-.chat-bubble{max-width:88%;padding:10px 14px;border-radius:14px;font-size:14px;line-height:1.5;word-break:break-word}
-.chat-bubble.bot{align-self:flex-start;background:var(--card);border:1px solid var(--bd);border-bottom-left-radius:3px}
-.chat-bubble.user{align-self:flex-end;background:var(--pri);color:var(--pri-t);border-bottom-right-radius:3px}
-.chat-bubble pre{white-space:pre-wrap;font-family:inherit;font-size:inherit;margin:0}
-.chat-avatar{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:12px;margin-bottom:4px;color:var(--pri)}
-:root[data-theme="dark"] .chat-avatar, @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .chat-avatar{color:var(--pri)}}
-.chat-sources{margin-top:8px;padding-top:6px;border-top:1px dashed var(--bd);font-size:11px}
-.chat-sources a{color:var(--pri);text-decoration:underline;margin-right:8px;display:inline-block}
-.chat-actions{display:flex;gap:8px;margin-top:6px}
-.chat-action-btn{background:rgba(0,0,0,0.06);border:0;border-radius:12px;padding:3px 9px;font-size:11px;cursor:pointer;color:var(--text);display:inline-flex;align-items:center;gap:4px;transition:all .15s}
-:root[data-theme="dark"] .chat-action-btn, @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .chat-action-btn{background:rgba(255,255,255,0.12)}}
-.chat-chips{display:flex;gap:6px;overflow-x:auto;padding:4px 0 10px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
-.chat-chips::-webkit-scrollbar{display:none}
-.chat-chip{flex:0 0 auto;background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:6px 12px;font-size:12px;cursor:pointer;color:var(--text);white-space:nowrap;transition:all .15s}
-.chat-chip:hover{border-color:var(--pri);color:var(--pri)}
-.chat-input-bar{display:flex;align-items:flex-end;gap:6px;padding-top:8px;border-top:1px solid var(--bd)}
-.chat-input-bar textarea{flex:1;resize:none;padding:9px 12px;border:1px solid var(--bd);border-radius:20px;background:var(--bg);color:var(--text);font:inherit;font-size:14px;max-height:110px;min-height:40px;line-height:20px}
-.chat-btn-icon{width:40px;height:40px;border-radius:50%;border:1px solid var(--bd);background:var(--card);color:var(--text);font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .15s}
-.chat-btn-icon.active{background:#b71c1c;color:#fff;border-color:#b71c1c;animation:pulseRed 1.2s infinite}
-.chat-btn-send{width:40px;height:40px;border-radius:50%;border:0;background:var(--pri);color:var(--pri-t);font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
-.chat-btn-send:disabled{opacity:0.4;cursor:not-allowed}
-.chat-preview-bar{display:flex;align-items:center;gap:8px;padding:4px 0 6px;font-size:12px}
-.chat-preview-item{display:inline-flex;align-items:center;gap:6px;background:var(--ok);padding:3px 8px;border-radius:12px}
-.chat-preview-del{cursor:pointer;font-weight:bold;color:#b71c1c}
-#float_chat_btn{position:fixed;bottom:24px;right:20px;width:54px;height:54px;border-radius:50%;background:var(--pri);color:var(--pri-t);border:2px solid #fff;box-shadow:0 4px 16px rgba(0,0,0,0.25);font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:90;transition:transform .15s,box-shadow .15s}
-#float_chat_btn:hover{transform:scale(1.08);box-shadow:0 6px 20px rgba(0,0,0,0.3)}
-@keyframes pulseRed{0%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.08)}100%{opacity:1;transform:scale(1)}}
+.chat-wrap { display: flex; flex-direction: column; min-height: 440px; max-height: 640px; }
+.chat-feed { flex: 1; overflow-y: auto; padding: 8px 2px; display: flex; flex-direction: column; gap: 12px; -webkit-overflow-scrolling: touch; }
+.chat-bubble { max-width: 88%; padding: 12px 16px; border-radius: 16px; font-size: 14px; line-height: 1.5; word-break: break-word; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+.chat-bubble.bot { align-self: flex-start; background: var(--card); border: 1px solid var(--bd); border-bottom-left-radius: 4px; }
+.chat-bubble.user { align-self: flex-end; background: linear-gradient(135deg, #2e7d32, #1b5e20); color: #fff; border-bottom-right-radius: 4px; box-shadow: 0 2px 8px rgba(46,125,50,0.25); }
+.chat-bubble pre { white-space: pre-wrap; font-family: inherit; font-size: inherit; margin: 0; }
+.chat-avatar { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 12px; margin-bottom: 4px; color: var(--pri); }
+:root[data-theme="dark"] .chat-avatar, @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .chat-avatar { color: var(--pri); } }
+.chat-sources { margin-top: 8px; padding-top: 6px; border-top: 1px dashed var(--bd); font-size: 11px; }
+.chat-sources a { color: var(--pri); text-decoration: underline; margin-right: 8px; display: inline-block; }
+.chat-actions { display: flex; gap: 8px; margin-top: 6px; }
+.chat-action-btn { background: rgba(0,0,0,0.06); border: 0; border-radius: 12px; padding: 4px 10px; font-size: 11px; cursor: pointer; color: var(--text); display: inline-flex; align-items: center; gap: 4px; transition: all .15s; }
+:root[data-theme="dark"] .chat-action-btn, @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .chat-action-btn { background: rgba(255,255,255,0.12); } }
+.chat-chips { display: flex; gap: 6px; overflow-x: auto; padding: 4px 0 10px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.chat-chips::-webkit-scrollbar { display: none; }
+.chat-chip { flex: 0 0 auto; background: var(--card); border: 1px solid var(--bd); border-radius: 18px; padding: 7px 14px; font-size: 12.5px; cursor: pointer; color: var(--text); white-space: nowrap; transition: all .15s; }
+.chat-chip:hover { border-color: var(--pri); color: var(--pri); background: var(--pri-light); }
+.chat-input-bar { display: flex; align-items: flex-end; gap: 8px; padding-top: 10px; border-top: 1px solid var(--bd); }
+.chat-input-bar textarea { flex: 1; resize: none; padding: 10px 14px; border: 1px solid var(--bd); border-radius: 20px; background: var(--bg); color: var(--text); font: inherit; font-size: 14px; max-height: 110px; min-height: 42px; line-height: 20px; }
+.chat-btn-icon { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--bd); background: var(--card); color: var(--text); font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: all .15s; }
+.chat-btn-icon.active { background: #b71c1c; color: #fff; border-color: #b71c1c; animation: pulseRed 1.2s infinite; }
+.chat-btn-send { width: 42px; height: 42px; border-radius: 50%; border: 0; background: linear-gradient(135deg, #2e7d32, #1b5e20); color: #fff; font-size: 16px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; box-shadow: 0 2px 8px rgba(46,125,50,0.3); }
+.chat-btn-send:disabled { opacity: 0.4; cursor: not-allowed; }
+.chat-preview-bar { display: flex; align-items: center; gap: 8px; padding: 4px 0 6px; font-size: 12px; }
+.chat-preview-item { display: inline-flex; align-items: center; gap: 6px; background: var(--ok); padding: 4px 10px; border-radius: 12px; }
+.chat-preview-del { cursor: pointer; font-weight: bold; color: #b71c1c; }
+#float_chat_btn { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 20px); right: 18px; width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #2e7d32, #1b5e20); color: #fff; border: 2.5px solid #fff; box-shadow: 0 4px 20px rgba(0,0,0,0.28); font-size: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 95; transition: transform .18s, box-shadow .18s; }
+#float_chat_btn:hover { transform: scale(1.08); box-shadow: 0 6px 24px rgba(0,0,0,0.35); }
+@keyframes pulseRed { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(1.08); } 100% { opacity: 1; transform: scale(1); } }
 </style></head><body>
+<div id="toast_box" class="toast-box"></div>
 <header>
 <div class="hdr-top">
- <div>
-  <h1 id="hdr_title" data-i18n="app_title">🌾 Smart Farm Assistant</h1>
-  <p id="hello" data-i18n="app_sub">Demo for ADSAUF-2047, PJTAU</p>
+ <div class="hdr-brand">
+  <div class="hdr-logo-icon">🌾</div>
+  <div>
+   <h1 id="hdr_title" data-i18n="app_title">Smart Farm Assistant</h1>
+   <p id="hello" data-i18n="app_sub">ADSAUF-2047 · PJTAU</p>
+  </div>
  </div>
  <div class="hdr-ctrls">
   <button id="auth_btn" class="demo-pill" title="Sign In with Google" onclick="handleAuthAction()"><span id="auth_icon">👤</span> <span id="auth_txt" data-i18n="auth_signin">Sign In</span></button>
@@ -114,13 +680,98 @@ pre{white-space:pre-wrap;font:inherit;margin:0}
 <button id="float_chat_btn" aria-label="Ask Krishi Sahayak" title="Ask Krishi Sahayak / కృషి సహాయక్" onclick="openChatTab()">🌾💬</button>
 <main>
 
-<section id="reg" class="on"><div class="card"><h2 data-i18n="reg_title">Farmer registration</h2>
-<label data-i18n="reg_name">Name</label><input id="r_name" autocomplete="name">
-<label data-i18n="reg_ph">Mobile number (10 digits)</label><input id="r_ph" inputmode="numeric" maxlength="10">
-<div class="row"><div><label data-i18n="reg_vil">Village / mandal</label><input id="r_vil"></div><div><label data-i18n="reg_dist">District</label><select id="r_dist"></select></div></div>
-<div class="row"><div><label data-i18n="reg_crop">Main crop</label><select id="r_crop"></select></div><div><label data-i18n="reg_ac">Land (acres)</label><input id="r_ac" type="number" min="0" step="0.1"></div></div>
-<button class="btn" id="r_save" data-i18n="reg_save">Save my profile</button><div id="r_msg"></div>
-<p class="muted" data-i18n="reg_note">Your profile is kept only in this browser on this device. It sets the default crop, area and location in the other tabs.</p></div></section>
+<section id="reg" class="on">
+  <!-- 1. Registered Farmer Profile Card (Visible when registered) -->
+  <div id="r_profile_card" class="farmer-id-card" style="display:none">
+    <div class="farmer-id-header">
+      <div class="farmer-id-left">
+        <div class="farmer-avatar-badge" id="prof_avatar_box">
+          <span id="prof_avatar_icon">👨‍🌾</span>
+        </div>
+        <div class="farmer-id-title-box">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+            <h2 id="prof_name">Farmer Name</h2>
+            <span class="farmer-verified-pill">✓ <span data-i18n="prof_verified">Verified Profile</span></span>
+          </div>
+          <p id="prof_loc" class="farmer-sub-loc">Village, District</p>
+        </div>
+      </div>
+      <button class="btn-edit-profile" onclick="editFarmerProfile()" title="Edit details">
+        <span>✏️</span> <span data-i18n="prof_edit_txt">Edit Profile</span>
+      </button>
+    </div>
+
+    <div class="farmer-details-grid">
+      <div class="farmer-grid-item">
+        <span class="grid-label" data-i18n="reg_ph">Mobile</span>
+        <span class="grid-value" id="prof_ph">+91 —</span>
+      </div>
+      <div class="farmer-grid-item">
+        <span class="grid-label" data-i18n="reg_crop">Main Crop</span>
+        <span class="grid-value" id="prof_crop">Paddy</span>
+      </div>
+      <div class="farmer-grid-item">
+        <span class="grid-label" data-i18n="reg_ac">Landholding</span>
+        <span class="grid-value" id="prof_acres">1.0 Acres</span>
+      </div>
+      <div class="farmer-grid-item">
+        <span class="grid-label" data-i18n="reg_dist">District</span>
+        <span class="grid-value" id="prof_dist">Telangana</span>
+      </div>
+    </div>
+
+    <div class="farmer-sync-banner">
+      <span>✨</span>
+      <span data-i18n="prof_sync_msg">Profile active! Your crop and land size are automatically synced with Weather, Fertilizer Calculator & Krishi Sahayak.</span>
+    </div>
+
+    <div class="farmer-quick-actions">
+      <button class="action-chip" onclick="openTab('wx')">🌦️ <span data-i18n="prof_btn_wx">Check Weather</span></button>
+      <button class="action-chip" onclick="openTab('fert')">🧪 <span data-i18n="prof_btn_fert">Fertilizer Calculator</span></button>
+      <button class="action-chip" onclick="openChatTab()">🌾 <span data-i18n="prof_btn_chat">Ask Krishi Sahayak</span></button>
+    </div>
+  </div>
+
+  <!-- 2. Registration / Edit Form (Visible only when not yet registered or when clicking Edit Profile) -->
+  <div id="r_form_wrap" class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <h2 style="margin:0" data-i18n="reg_title">Farmer registration</h2>
+      <button id="r_cancel_edit" class="btn-cancel-edit" style="display:none" onclick="cancelEditProfile()" data-i18n="prof_cancel_edit">Cancel</button>
+    </div>
+    <p class="muted" style="margin:0 0 14px;font-size:13px" data-i18n="reg_note">Enter your details once. Your selected crop, area and location will automatically pre-fill the other farm intelligence tools.</p>
+    
+    <label data-i18n="reg_name">Farmer Name</label>
+    <input id="r_name" autocomplete="name" placeholder="e.g. Ramesh Kumar">
+
+    <label data-i18n="reg_ph">Mobile number (10 digits)</label>
+    <input id="r_ph" inputmode="numeric" maxlength="10" placeholder="e.g. 9876543210">
+
+    <div class="row">
+      <div>
+        <label data-i18n="reg_vil">Village / mandal</label>
+        <input id="r_vil" placeholder="e.g. Rajendranagar">
+      </div>
+      <div>
+        <label data-i18n="reg_dist">District</label>
+        <select id="r_dist"></select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label data-i18n="reg_crop">Main crop</label>
+        <select id="r_crop"></select>
+      </div>
+      <div>
+        <label data-i18n="reg_ac">Land (acres)</label>
+        <input id="r_ac" type="number" min="0" step="0.1" value="1.0">
+      </div>
+    </div>
+
+    <button class="btn" id="r_save" data-i18n="reg_save">Save my profile →</button>
+    <div id="r_msg"></div>
+  </div>
+</section>
 
 <section id="wx"><div class="card"><h2 data-i18n="wx_title">Weather and rain forecast</h2>
 <label data-i18n="wx_loc">Location</label><select id="w_loc"></select>
@@ -497,6 +1148,14 @@ const TRANSLATIONS = {
     reg_note: "Your profile is kept only in this browser on this device. It sets the default crop, area and location in the other tabs.",
     reg_err: "Please enter your name, a 10-digit mobile number and your village.",
     reg_ok: "Profile saved. Crop and land area are now pre-filled in the other tabs.",
+    tab_profile: "Farmer Profile",
+    prof_verified: "Verified Profile",
+    prof_edit_txt: "Edit Profile",
+    prof_cancel_edit: "Cancel",
+    prof_sync_msg: "Profile active! Your crop and land size are automatically synced with Weather, Fertilizer Calculator & Krishi Sahayak.",
+    prof_btn_wx: "Check Weather",
+    prof_btn_fert: "Fertilizer Calculator",
+    prof_btn_chat: "Ask Krishi Sahayak",
     // weather
     wx_title: "Weather and rain forecast",
     wx_loc: "Location",
@@ -679,6 +1338,14 @@ const TRANSLATIONS = {
     reg_note: "మీ ప్రొఫైల్ వివరాలు ఈ డివైస్‌లో మాత్రమే భద్రపరచబడతాయి. ఇతర ట్యాబ్‌లలో పంట మరియు భూమి వివరాలు ఆటోమేటిక్‌గా నింపబడతాయి.",
     reg_err: "దయచేసి మీ పేరు, 10 అంకెల మొబైల్ నంబర్ మరియు గ్రామం పేరు నమోదు చేయండి.",
     reg_ok: "ప్రొఫైల్ సేవ్ చేయబడింది. పంట మరియు భూమి వివరాలు ఇతర ట్యాబ్‌లలో నింపబడ్డాయి.",
+    tab_profile: "రైతు ప్రొఫైల్",
+    prof_verified: "ధృవీకరించబడిన ప్రొఫైల్",
+    prof_edit_txt: "సవరించండి",
+    prof_cancel_edit: "రద్దు",
+    prof_sync_msg: "ప్రొఫైల్ యాక్టివ్‌గా ఉంది! మీ పంట మరియు భూమి వివరాలు వాతావరణం, ఎరువుల కాలిక్యులేటర్ & కృషి సహాయక్‌తో సమకాలీకరించబడ్డాయి.",
+    prof_btn_wx: "వాతావరణం చూడండి",
+    prof_btn_fert: "ఎరువుల లెక్కలు",
+    prof_btn_chat: "కృషి సహాయక్ తో మాట్లాడండి",
     // weather
     wx_title: "వాతావరణం & వర్ష సూచన",
     wx_loc: "ప్రాంతం",
@@ -887,6 +1554,7 @@ function setLang(lang){
   if(typeof updateChatCropBadge==="function")updateChatCropBadge();
   if(typeof renderSubBanner==="function")renderSubBanner();
   if(typeof renderAccountScreen==="function")renderAccountScreen();
+  if(typeof renderRegState==="function")renderRegState();
 }
 
 // --- FIREBASE AUTH & SUBSCRIPTION STATE ---
@@ -1108,6 +1776,8 @@ function renderSubBanner() {
 
 function openTab(t) {
   currentActiveTab = t;
+  const floatBtn = $("float_chat_btn");
+  if (floatBtn) floatBtn.style.display = (t === "chat") ? "none" : "flex";
   const paywall = $("locked_paywall_view");
 
   // Chat, Register, and Account are always accessible
@@ -1479,23 +2149,136 @@ $("nav").onclick = e => {
   openTab(t);
 };
 
-// registration
-const KEY="sfa_profile";
-function getP(){try{return JSON.parse(localStorage.getItem(KEY)||"null")}catch(e){return null}}
-function applyP(p){
-  if(!p){$("hello").textContent=TRANSLATIONS[curLang].app_sub;return;}
-  $("hello").textContent=TRANSLATIONS[curLang].welcome+", "+p.name+" · "+p.village;
-  ["f_crop","d_crop","m_crop","m_sample_crop"].forEach(i=>{if($(i))$(i).value=p.crop});
-  if(p.acres&&$("f_area"))$("f_area").value=p.acres;
+// --- TOAST NOTIFICATIONS ---
+function showToast(msg, type = "ok") {
+  const box = $("toast_box");
+  if (!box) return;
+  const item = document.createElement("div");
+  item.className = "toast-item " + (type === "ok" ? "toast-ok" : "toast-err");
+  item.innerHTML = (type === "ok" ? "✅ " : "⚠️ ") + `<span>${msg}</span>`;
+  box.appendChild(item);
+  setTimeout(() => {
+    item.classList.add("fade-out");
+    setTimeout(() => { try { item.remove(); } catch(e){} }, 320);
+  }, 3200);
 }
-$("r_save").onclick=()=>{
-  const p={name:$("r_name").value.trim(),phone:$("r_ph").value.trim(),village:$("r_vil").value.trim(),district:$("r_dist").value,crop:$("r_crop").value,acres:$("r_ac").value};
-  const m=$("r_msg");
-  if(!p.name||!/^\d{10}$/.test(p.phone)||!p.village){m.innerHTML=`<div class="note">${TRANSLATIONS[curLang].reg_err}</div>`;return}
-  try{localStorage.setItem(KEY,JSON.stringify(p))}catch(e){}
-  applyP(p);m.innerHTML=`<div class="ok">${TRANSLATIONS[curLang].reg_ok}</div>`;
+
+// --- FARMER PROFILE & REGISTRATION LOGIC ---
+const KEY = "sfa_profile";
+function getP() {
+  try { return JSON.parse(localStorage.getItem(KEY) || "null"); } catch(e) { return null; }
+}
+
+function renderRegState() {
+  const p = getP();
+  const card = $("r_profile_card");
+  const form = $("r_form_wrap");
+  const regTabBtn = document.querySelector('nav button[data-t="reg"]');
+  const t = TRANSLATIONS[curLang] || TRANSLATIONS.en;
+
+  if (p && p.name) {
+    // Farmer is registered: show sleek verified profile card, hide form
+    if (card) {
+      card.style.display = "block";
+      if ($("prof_name")) $("prof_name").textContent = p.name;
+      if ($("prof_loc")) $("prof_loc").textContent = (p.village ? p.village + ", " : "") + (p.district || "Telangana");
+      if ($("prof_ph")) $("prof_ph").textContent = p.phone ? `+91 ${p.phone}` : "—";
+      if ($("prof_crop")) {
+        const cropName = t["crop_" + p.crop] || p.crop;
+        $("prof_crop").textContent = cropName;
+      }
+      if ($("prof_acres")) $("prof_acres").textContent = `${p.acres || 1} ${t.unit_acre || "Acres"}`;
+      if ($("prof_dist")) $("prof_dist").textContent = p.district || "Telangana";
+    }
+    if (form) form.style.display = "none";
+    if (regTabBtn) {
+      regTabBtn.dataset.i18n = "tab_profile";
+      regTabBtn.textContent = t.tab_profile || "Farmer Profile";
+    }
+  } else {
+    // Not registered: show registration form, hide profile card
+    if (card) card.style.display = "none";
+    if (form) {
+      form.style.display = "block";
+      if ($("r_cancel_edit")) $("r_cancel_edit").style.display = "none";
+    }
+    if (regTabBtn) {
+      regTabBtn.dataset.i18n = "tab_reg";
+      regTabBtn.textContent = t.tab_reg || "Register";
+    }
+  }
+}
+
+function editFarmerProfile() {
+  const p = getP();
+  if (p) {
+    if ($("r_name")) $("r_name").value = p.name || "";
+    if ($("r_ph")) $("r_ph").value = p.phone || "";
+    if ($("r_vil")) $("r_vil").value = p.village || "";
+    if ($("r_dist")) $("r_dist").value = p.district || "";
+    if ($("r_crop")) $("r_crop").value = p.crop || "Paddy";
+    if ($("r_ac")) $("r_ac").value = p.acres || "1.0";
+  }
+  if ($("r_profile_card")) $("r_profile_card").style.display = "none";
+  if ($("r_form_wrap")) $("r_form_wrap").style.display = "block";
+  if ($("r_cancel_edit")) $("r_cancel_edit").style.display = "inline-block";
+  if ($("r_msg")) $("r_msg").innerHTML = "";
+  setTimeout(() => { if ($("r_name")) $("r_name").focus(); }, 80);
+}
+
+function cancelEditProfile() {
+  const p = getP();
+  if (p && p.name) {
+    renderRegState();
+  }
+}
+
+function applyP(p) {
+  if (!p) {
+    if ($("hello")) $("hello").textContent = TRANSLATIONS[curLang].app_sub;
+    return;
+  }
+  if ($("hello")) $("hello").textContent = TRANSLATIONS[curLang].welcome + ", " + p.name + " · " + (p.village || p.district);
+  ["f_crop", "d_crop", "m_crop", "m_sample_crop"].forEach(i => { if ($(i)) $(i).value = p.crop; });
+  if (p.acres && $("f_area")) $("f_area").value = p.acres;
+}
+
+$("r_save").onclick = () => {
+  const name = $("r_name") ? $("r_name").value.trim() : "";
+  const phone = $("r_ph") ? $("r_ph").value.trim() : "";
+  const village = $("r_vil") ? $("r_vil").value.trim() : "";
+  const district = $("r_dist") ? $("r_dist").value : "";
+  const crop = $("r_crop") ? $("r_crop").value : "Paddy";
+  const acres = $("r_ac") ? $("r_ac").value : "1.0";
+  const p = { name, phone, village, district, crop, acres };
+  const m = $("r_msg");
+  const t = TRANSLATIONS[curLang];
+
+  if (!p.name || !/^\d{10}$/.test(p.phone) || !p.village) {
+    if (m) m.innerHTML = `<div class="note">${t.reg_err}</div>`;
+    showToast(t.reg_err, "err");
+    return;
+  }
+
+  try { localStorage.setItem(KEY, JSON.stringify(p)); } catch(e){}
+  applyP(p);
+  renderRegState();
+  showToast(t.reg_ok, "ok");
 };
-(()=>{const p=getP();if(p){$("r_name").value=p.name;$("r_ph").value=p.phone;$("r_vil").value=p.village;$("r_dist").value=p.district;$("r_crop").value=p.crop;$("r_ac").value=p.acres}})();
+
+// Initial sync on script evaluation
+(() => {
+  const p = getP();
+  if (p) {
+    if ($("r_name")) $("r_name").value = p.name || "";
+    if ($("r_ph")) $("r_ph").value = p.phone || "";
+    if ($("r_vil")) $("r_vil").value = p.village || "";
+    if ($("r_dist")) $("r_dist").value = p.district || "";
+    if ($("r_crop")) $("r_crop").value = p.crop || "Paddy";
+    if ($("r_ac")) $("r_ac").value = p.acres || "1.0";
+  }
+  renderRegState();
+})();
 
 // weather
 const DEMO_WX={demo:true,current:{temperature_2m:31,relative_humidity_2m:62,precipitation:0},
@@ -1967,10 +2750,7 @@ function updateChatCropBadge() {
 }
 
 function openChatTab() {
-  document.querySelectorAll("nav button").forEach(b => b.classList.toggle("on", b.dataset.t === "chat"));
-  document.querySelectorAll("section").forEach(s => s.classList.toggle("on", s.id === "chat"));
-  updateChatCropBadge();
-  window.scrollTo(0, 0);
+  openTab("chat");
   setTimeout(() => { if ($("c_text")) $("c_text").focus(); }, 120);
 }
 
@@ -2331,4 +3111,9 @@ function initFirebaseAuth() {
 // Initialize language, demo states, and Firebase auth on load
 setLang(curLang);
 initFirebaseAuth();
+
+// If farmer has already registered, default away from registration tab to Krishi Sahayak chat
+if (getP()?.name) {
+  openTab("chat");
+}
 </script></body></html>
