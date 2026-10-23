@@ -896,6 +896,13 @@
       color: var(--pri);
       font-size: 0.98rem;
     }
+    .mandi-mkt-title {
+      font-weight: 700;
+    }
+    .mandi-mobile-meta,
+    .mandi-mobile-range {
+      display: none;
+    }
 
     /* Disease Panel Styles */
     .disease-dropzone {
@@ -1447,6 +1454,10 @@
     }
 
     @media (max-width: 680px) {
+      .wrap {
+        padding: 0 10px;
+        width: 100%;
+      }
       .top-nav {
         padding: 0;
       }
@@ -1455,7 +1466,7 @@
         gap: 6px;
       }
       .brand {
-        font-size: 0.95rem;
+        font-size: 0.92rem;
         gap: 6px;
         white-space: nowrap;
         overflow: hidden;
@@ -1474,67 +1485,74 @@
       }
       .nav-links { display: none; }
       .nav-actions {
-        gap: 6px;
+        gap: 4px;
         flex-shrink: 0;
       }
       .ctrl-pill {
         padding: 2px;
       }
       .ctrl-btn {
-        padding: 3px 6px;
+        padding: 3px 5px;
         font-size: 0.72rem;
       }
       .theme-toggle-btn {
-        width: 30px;
-        height: 30px;
-        font-size: 0.82rem;
+        width: 28px;
+        height: 28px;
+        font-size: 0.8rem;
       }
       .top-nav .btn {
-        padding: 6px 10px;
-        font-size: 0.76rem;
+        padding: 5px 8px;
+        font-size: 0.74rem;
         border-radius: 8px;
         white-space: nowrap;
       }
 
       .hero-title { font-size: 2.05rem; }
-      .features-grid { grid-template-columns: 1fr; }
-      .steps-grid { grid-template-columns: 1fr; }
+      .features-grid { grid-template-columns: 1fr; gap: 14px; }
+      .steps-grid { grid-template-columns: 1fr; gap: 14px; }
       .hero-actions { flex-direction: column; width: 100%; }
       .hero-actions .btn { width: 100%; }
-      .app-box { padding: 20px; }
+      .app-box { padding: 18px 14px; border-radius: var(--radius-sm); }
+      .diagram-card { padding: 14px 10px; border-radius: var(--radius-sm); }
+      .notes-card { padding: 18px 14px; border-radius: var(--radius-sm); }
+      .about-card { padding: 20px 14px; border-radius: var(--radius-sm); }
       .footer-inner { flex-direction: column; text-align: center; }
 
       /* Workbench Mobile Polish */
       .suite-box {
-        border-radius: var(--radius-md);
+        border-radius: var(--radius-sm);
+        margin-bottom: 24px;
+        width: 100%;
       }
       .suite-header {
-        padding: 16px 14px 12px;
-        gap: 10px;
-      }
-      .suite-tabs-scroll {
-        padding: 0 12px 14px;
+        padding: 12px 10px;
         gap: 8px;
       }
+      .suite-tabs-scroll {
+        padding: 8px 10px;
+        gap: 6px;
+      }
       .suite-tab {
-        padding: 6px 12px;
-        font-size: 0.82rem;
+        padding: 6px 10px;
+        font-size: 0.8rem;
       }
       .suite-body {
-        padding: 16px 12px;
+        padding: 14px 10px;
       }
+
+      /* Weather Mobile */
       .weather-current-card {
-        padding: 14px;
-        gap: 12px;
+        padding: 12px;
+        gap: 10px;
       }
       .weather-temp-city {
-        font-size: 1.02rem;
+        font-size: 1rem;
       }
       .weather-cur-icon {
-        font-size: 2.7rem;
+        font-size: 2.5rem;
       }
       .weather-temp-big {
-        font-size: 2.7rem;
+        font-size: 2.5rem;
       }
       .weather-stats-badge {
         width: 100%;
@@ -1542,27 +1560,190 @@
         text-align: center;
       }
       .weather-forecast-grid {
-        grid-template-columns: repeat(5, minmax(88px, 1fr));
-        gap: 8px;
+        grid-template-columns: repeat(5, minmax(84px, 1fr));
+        gap: 6px;
         padding-bottom: 6px;
         -webkit-overflow-scrolling: touch;
+      }
+
+      /* Fertilizer Mobile Horizontal Cards */
+      .fert-bags-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        margin: 14px 0;
+      }
+      .fert-bag-card {
+        display: grid;
+        grid-template-columns: 44px 1fr auto;
+        align-items: center;
+        text-align: left;
+        padding: 12px 14px;
+        gap: 6px 12px;
+      }
+      .fert-bag-icon {
+        font-size: 2rem;
+        margin-bottom: 0;
+        grid-row: 1 / span 2;
+      }
+      .fert-bag-name {
+        margin-bottom: 0;
+        font-size: 0.95rem;
+      }
+      .fert-bag-kg {
+        margin-top: 0;
+        font-size: 0.78rem;
+      }
+      .fert-bag-count {
+        grid-column: 3;
+        grid-row: 1;
+        font-size: 1.45rem;
+        text-align: right;
+      }
+      .fert-bag-unit {
+        grid-column: 3;
+        grid-row: 2;
+        font-size: 0.75rem;
+        text-align: right;
+      }
+
+      /* Field Dashboard Mobile */
+      .field-dashboard-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+      .field-gauge-card {
+        padding: 18px 14px;
+      }
+
+      /* Mandi Mobile Cards - 100% full width */
+      .suite-table-wrap {
+        overflow-x: visible;
+        border: none;
+        background: transparent;
+        border-radius: 0;
+      }
+      .suite-table {
+        display: block;
+        width: 100%;
+      }
+      .suite-table thead {
+        display: none;
+      }
+      .suite-table tbody {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        width: 100%;
+      }
+      .suite-table tr.mandi-item-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 11px 12px;
+        width: 100%;
+        box-sizing: border-box;
+        gap: 10px;
+      }
+      .suite-table tr.mandi-item-row:hover {
+        background: var(--card-alt);
+        border-color: var(--pri);
+      }
+      .suite-table td.mandi-col-mkt {
+        display: flex;
+        flex-direction: column;
+        padding: 0;
+        border: none;
+        min-width: 0;
+        flex: 1;
+      }
+      .mandi-mkt-title {
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: var(--text-main);
+        line-height: 1.3;
+      }
+      .mandi-mobile-meta {
+        display: block;
+        font-size: 0.74rem;
+        color: var(--text-muted);
+        margin-top: 2px;
+        line-height: 1.25;
+      }
+      .suite-table td.mandi-col-meta,
+      .suite-table td.mandi-col-min,
+      .suite-table td.mandi-col-max {
+        display: none;
+      }
+      .suite-table td.mandi-col-modal {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        padding: 0;
+        border: none;
+        flex-shrink: 0;
+        text-align: right;
+      }
+      .modal-price-pill {
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: var(--pri);
+        line-height: 1.2;
+      }
+      .mandi-mobile-range {
+        display: block;
+        font-size: 0.72rem;
+        color: var(--text-muted);
+        margin-top: 2px;
+        white-space: nowrap;
+      }
+      .suite-table tbody tr:not(.mandi-item-row) {
+        display: block;
+        width: 100%;
+      }
+      .suite-table tbody tr:not(.mandi-item-row) td {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      /* Chat Mobile */
+      .suite-chat-container {
+        height: 420px;
+        border-radius: var(--radius-sm);
+      }
+      .suite-chat-bubble {
+        max-width: 90%;
+      }
+      .suite-chat-input-bar {
+        padding: 8px 10px;
       }
     }
 
     @media (max-width: 440px) {
-      .nav-inner {
+      .wrap {
         padding: 0 8px;
       }
+      .nav-inner {
+        padding: 0 4px;
+      }
       .brand {
-        font-size: 0.88rem;
-        max-width: 140px;
+        font-size: 0.86rem;
       }
       .top-nav .btn {
-        padding: 5px 8px;
-        font-size: 0.72rem;
+        padding: 5px 6px;
+        font-size: 0.7rem;
       }
       .hero-title {
         font-size: 1.85rem;
+      }
+      .mandi-mkt-title {
+        font-size: 0.88rem;
+      }
+      .modal-price-pill {
+        font-size: 1rem;
       }
     }
 
@@ -3122,6 +3303,10 @@
         return;
       }
 
+      const isTe = curLang === "te";
+      const minLabel = isTe ? "కనిష్టం" : "Min";
+      const maxLabel = isTe ? "గరిష్టం" : "Max";
+
       const rowsHtml = filtered.map(r => {
         const mkt = r[0] || "Mandi";
         const meta = r[4] || "FAQ";
@@ -3130,12 +3315,18 @@
         const modalP = Number(r[3] || 0).toLocaleString("en-IN");
 
         return `
-          <tr>
-            <td><b>${mkt}</b></td>
-            <td><span style="font-size:0.82rem;color:var(--text-muted);">${meta}</span></td>
-            <td>₹${minP}</td>
-            <td>₹${maxP}</td>
-            <td><span class="modal-price-pill">₹${modalP}</span></td>
+          <tr class="mandi-item-row">
+            <td class="mandi-col-mkt">
+              <span class="mandi-mkt-title">${mkt}</span>
+              <span class="mandi-mobile-meta">${meta}</span>
+            </td>
+            <td class="mandi-col-meta"><span style="font-size:0.82rem;color:var(--text-muted);">${meta}</span></td>
+            <td class="mandi-col-min">₹${minP}</td>
+            <td class="mandi-col-max">₹${maxP}</td>
+            <td class="mandi-col-modal">
+              <span class="modal-price-pill">₹${modalP}</span>
+              <span class="mandi-mobile-range">${minLabel} ₹${minP} · ${maxLabel} ₹${maxP}</span>
+            </td>
           </tr>
         `;
       }).join("");
