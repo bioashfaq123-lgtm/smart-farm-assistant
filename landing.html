@@ -663,18 +663,54 @@
       background: linear-gradient(135deg, var(--pri-surface), var(--card-bg));
       border: 1px solid var(--pri-border);
       border-radius: var(--radius-md);
-      padding: 22px;
+      padding: 18px 20px;
       margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .weather-card-top {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 10px;
       flex-wrap: wrap;
+      padding-bottom: 10px;
+      border-bottom: 1px dashed var(--pri-border);
+    }
+    .weather-temp-city {
+      font-size: 1.12rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .weather-live-tag {
+      font-size: 0.78rem;
+      font-weight: 600;
+      background: var(--card-alt);
+      padding: 3px 10px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+    .weather-card-main {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       gap: 16px;
+      flex-wrap: wrap;
     }
     .weather-temp-box {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 14px;
+    }
+    .weather-cur-icon {
+      font-size: 3.2rem;
+      line-height: 1;
     }
     .weather-temp-big {
       font-size: 3.2rem;
@@ -683,18 +719,18 @@
       color: var(--text-main);
       letter-spacing: -0.03em;
     }
-    .weather-temp-meta {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
+    .weather-stats-badge {
+      display: inline-flex;
+      align-items: center;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px 12px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
     }
-    .weather-temp-city {
-      font-size: 1.15rem;
-      font-weight: 700;
-      color: var(--text-main);
-    }
-    .weather-temp-sub {
+    .weather-stats-text {
       font-size: 0.88rem;
+      font-weight: 600;
       color: var(--text-muted);
     }
     .weather-alert-banner {
@@ -1411,14 +1447,123 @@
     }
 
     @media (max-width: 680px) {
+      .top-nav {
+        padding: 0;
+      }
+      .nav-inner {
+        height: 56px;
+        gap: 6px;
+      }
+      .brand {
+        font-size: 0.95rem;
+        gap: 6px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        flex-shrink: 1;
+        min-width: 0;
+      }
+      .brand-icon {
+        font-size: 1.2rem;
+        flex-shrink: 0;
+      }
+      .brand-title {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
       .nav-links { display: none; }
-      .hero-title { font-size: 2.15rem; }
+      .nav-actions {
+        gap: 6px;
+        flex-shrink: 0;
+      }
+      .ctrl-pill {
+        padding: 2px;
+      }
+      .ctrl-btn {
+        padding: 3px 6px;
+        font-size: 0.72rem;
+      }
+      .theme-toggle-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 0.82rem;
+      }
+      .top-nav .btn {
+        padding: 6px 10px;
+        font-size: 0.76rem;
+        border-radius: 8px;
+        white-space: nowrap;
+      }
+
+      .hero-title { font-size: 2.05rem; }
       .features-grid { grid-template-columns: 1fr; }
       .steps-grid { grid-template-columns: 1fr; }
       .hero-actions { flex-direction: column; width: 100%; }
       .hero-actions .btn { width: 100%; }
-      .app-box { padding: 24px; }
+      .app-box { padding: 20px; }
       .footer-inner { flex-direction: column; text-align: center; }
+
+      /* Workbench Mobile Polish */
+      .suite-box {
+        border-radius: var(--radius-md);
+      }
+      .suite-header {
+        padding: 16px 14px 12px;
+        gap: 10px;
+      }
+      .suite-tabs-scroll {
+        padding: 0 12px 14px;
+        gap: 8px;
+      }
+      .suite-tab {
+        padding: 6px 12px;
+        font-size: 0.82rem;
+      }
+      .suite-body {
+        padding: 16px 12px;
+      }
+      .weather-current-card {
+        padding: 14px;
+        gap: 12px;
+      }
+      .weather-temp-city {
+        font-size: 1.02rem;
+      }
+      .weather-cur-icon {
+        font-size: 2.7rem;
+      }
+      .weather-temp-big {
+        font-size: 2.7rem;
+      }
+      .weather-stats-badge {
+        width: 100%;
+        justify-content: center;
+        text-align: center;
+      }
+      .weather-forecast-grid {
+        grid-template-columns: repeat(5, minmax(88px, 1fr));
+        gap: 8px;
+        padding-bottom: 6px;
+        -webkit-overflow-scrolling: touch;
+      }
+    }
+
+    @media (max-width: 440px) {
+      .nav-inner {
+        padding: 0 8px;
+      }
+      .brand {
+        font-size: 0.88rem;
+        max-width: 140px;
+      }
+      .top-nav .btn {
+        padding: 5px 8px;
+        font-size: 0.72rem;
+      }
+      .hero-title {
+        font-size: 1.85rem;
+      }
     }
 
     /* Utility */
@@ -1435,7 +1580,7 @@
     <div class="wrap nav-inner">
       <a href="#" class="brand">
         <span class="brand-icon">🌾</span>
-        <span data-i18n="brand_title">Smart Farm Assistant</span>
+        <span class="brand-title" data-i18n="brand_title">Smart Farm Assistant</span>
       </a>
 
       <ul class="nav-links">
@@ -1678,16 +1823,18 @@
 
             <!-- Current Conditions Card -->
             <div class="weather-current-card">
-              <div class="weather-temp-box">
-                <div id="sw_cur_icon" style="font-size:3.5rem;line-height:1;">🌤️</div>
-                <div class="weather-temp-big" id="sw_cur_temp">31°C</div>
-                <div class="weather-temp-meta">
-                  <div class="weather-temp-city" id="sw_cur_city">Rajendranagar, Hyderabad</div>
-                  <div class="weather-temp-sub" id="sw_cur_details">Humidity: 62% · Current Rain: 0.0 mm</div>
-                </div>
+              <div class="weather-card-top">
+                <div class="weather-temp-city" id="sw_cur_city">Rajendranagar, Hyderabad</div>
+                <span class="weather-live-tag" data-i18n="wx_live_badge">Live Open-Meteo</span>
               </div>
-              <div style="text-align:right;">
-                <span style="font-size:0.8rem;background:var(--card-alt);padding:4px 10px;border-radius:12px;border:1px solid var(--border);color:var(--text-muted);" data-i18n="wx_live_badge">Live Open-Meteo</span>
+              <div class="weather-card-main">
+                <div class="weather-temp-box">
+                  <div id="sw_cur_icon" class="weather-cur-icon">🌤️</div>
+                  <div class="weather-temp-big" id="sw_cur_temp">31°C</div>
+                </div>
+                <div class="weather-stats-badge">
+                  <span class="weather-stats-text" id="sw_cur_details">Humidity: 62% · Current Rain: 0.0 mm</span>
+                </div>
               </div>
             </div>
 
