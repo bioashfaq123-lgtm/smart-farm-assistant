@@ -247,7 +247,7 @@ pre{white-space:pre-wrap;font:inherit;margin:0}
     <div class="chat-feed" id="chat_feed">
       <div class="chat-bubble bot">
         <div class="chat-avatar">🌾 Krishi Sahayak (కృషి సహాయక్)</div>
-        <div class="chat-text" data-i18n="chat_welcome">నమస్కారం రైతన్నా! నేను కృషి సహాయక్ ను. తెగుళ్లు, వాతావరణం, ఎరువులు, మార్కెట్ ధరలు లేదా పంటల సాగు విధానాలపై మీ సందేహాలను తెలుగు లేదా ఇంగ్లీషులో అడగండి. వాయిస్ మెసేజ్ లేదా ఆకుల ఫోటోలు కూడా పంపవచ్చు!</div>
+        <div class="chat-text" data-i18n="chat_welcome">నమస్తే రైతన్నా! నేను మీ కృషి సహాయక్ ను. మన చేలల్ల పైర్లకు వచ్చే రోగాలు, పురుగులు, మందుల పిచికారీ, ఎరువుల లెక్కలు, వాన ముచ్చట్లు, మర్కెట్ల పత్తి-వరి ధరలు.. ఏ సందేహం ఉన్నా మన తెలంగాణ యాసల్లనే అడగండి! వాయిస్ మెసేజ్ పంపొచ్చు లేదా ఆకుల ఫోటోలు తీసి పంపొచ్చు.</div>
         <div class="chat-actions">
           <button class="chat-action-btn" onclick="speakText(this.parentElement.previousElementSibling.innerText, this)">
             🔊 <span data-i18n="chat_read">Read aloud</span>
@@ -444,8 +444,8 @@ const TRANSLATIONS = {
     // chat
     chat_title: "Krishi Sahayak (కృషి సహాయక్)",
     chat_sub: "AI Agriculture Assistant · PJTAU Aligned · Voice & Grounded Search",
-    chat_welcome: "Namaskaram! I am Krishi Sahayak. Ask me any farming questions in Telugu, English, or Hindi — about pests, weather, fertilizers, crop practices, or market rates. You can also send voice notes or crop leaf photos!",
-    chat_placeholder: "Ask your farming doubt in Telugu or English...",
+    chat_welcome: "Namaskaram Raithanna! I am Krishi Sahayak. Feel free to ask any farming doubts in Indian English or Telangana Telugu — regarding crop pests, PJTAU fertilizer doses, rain forecast, or daily mandi prices. You can also send voice notes or crop leaf photos!",
+    chat_placeholder: "Ask your farming question in Indian English or Telugu...",
     chat_send: "Send",
     chat_thinking: "🌾 Krishi Sahayak is thinking...",
     chat_recording: "Recording voice message... (tap mic to stop)",
@@ -626,11 +626,11 @@ const TRANSLATIONS = {
     // chat
     chat_title: "కృషి సహాయక్ (Krishi Sahayak)",
     chat_sub: "AI వ్యవసాయ సహాయకుడు · PJTAU ఆధారితం · వాయిస్ & ఇంటర్నెట్ శోధన",
-    chat_welcome: "నమస్కారం రైతన్నా! నేను కృషి సహాయక్ ను. తెగుళ్లు, వాతావరణం, ఎరువులు, మార్కెట్ ధరలు లేదా పంటల సాగు విధానాలపై మీ సందేహాలను తెలుగు లేదా ఇంగ్లీషులో అడగండి. వాయిస్ మెసేజ్ లేదా ఆకుల ఫోటోలు కూడా పంపవచ్చు!",
-    chat_placeholder: "మీ వ్యవసాయ సందేహాన్ని తెలుగులో అడగండి...",
+    chat_welcome: "నమస్తే రైతన్నా! నేను మీ కృషి సహాయక్ ను. మన చేలల్ల పైర్లకు వచ్చే రోగాలు, పురుగులు, మందుల పిచికారీ, ఎరువుల లెక్కలు, వాన ముచ్చట్లు, మర్కెట్ల పత్తి-వరి ధరలు.. ఏ సందేహం ఉన్నా మన తెలంగాణ యాసల్లనే అడగండి! వాయిస్ మెసేజ్ పంపొచ్చు లేదా ఆకుల ఫోటోలు తీసి పంపొచ్చు.",
+    chat_placeholder: "మన తెలంగాణ యాసల్లనే మీ సందేహాన్ని అడగండి...",
     chat_send: "పంపు",
-    chat_thinking: "🌾 కృషి సహాయక్ సమాధానం సిద్ధం చేస్తోంది...",
-    chat_recording: "వాయిస్ రికార్డ్ అవుతోంది... (ఆపడానికి మైక్ నొక్కండి)",
+    chat_thinking: "🌾 కృషి సహాయక్ ఆలోచిస్తున్నది...",
+    chat_recording: "మీ మాటలు రికార్డ్ అయితున్నాయి... (ఆపడానికి మైక్ నొక్కండి)",
     chat_rec_cancel: "రద్దు",
     chat_photo_attached: "ఫోటో జతచేయబడింది",
     chat_audio_attached: "వాయిస్ మెసేజ్ సిద్ధంగా ఉంది",
@@ -638,10 +638,10 @@ const TRANSLATIONS = {
     chat_read: "చదవండి",
     chat_stop_read: "ఆపండి",
     chat_disclaimer: "⚠️ AI ఇచ్చే సమాచారం సూచన మాత్రమే. రసాయన మందుల మోతాదులను ఉత్పత్తి లేబుల్‌పై సరిచూసుకొని, పిచికారీ చేసే ముందు మీ స్థానిక మండల వ్యవసాయ విస్తరణ అధికారి (AEO) లేదా PJTAU శాస్త్రవేత్తను సంప్రదించండి.",
-    chip_paddy: "🌾 వరిలో కాండం తొలుచు పురుగు నివారణ ఏమిటి?",
-    chip_rain: "🌦️ ఈ వారం మా ప్రాంతంలో వర్షం పడుతుందా?",
-    chip_mandi: "💰 నేడు మార్కెట్లో పత్తి క్వింటాల్ ధర ఎంత?",
-    chip_fert: "🌱 మొక్కజొన్నకు PJTAU సిఫారసు చేసిన ఎరువుల మోతాదు ఎంత?",
+    chip_paddy: "🌾 వరి చేన్ల కాండం తొలుచు పురుగు మందు ఏంది?",
+    chip_rain: "🌦️ ఈ వారం మన కాడ వాన పడుతదా?",
+    chip_mandi: "💰 ఈరోజు పత్తి క్వింటాల్ రేట్లు ఎట్లున్నయ్?",
+    chip_fert: "🌱 మక్క చేనుకు ఎంత ఎరువు ఏయాలె?",
     chat_offline: "ఆఫ్‌లైన్ డెమో: కృషి సహాయక్ AI చాట్ కోసం ఇంటర్నెట్ కనెక్షన్ అవసరం.",
     // subscription & account
     acc_plan_title: "చందా & ఖాతా స్థితి",
