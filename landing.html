@@ -1459,7 +1459,7 @@
         </button>
 
         <!-- CTA Button -->
-        <a href="/app" class="btn btn-primary" data-i18n="btn_open_app">Open the app →</a>
+        <a href="#features" onclick="scrollToSuite(); return false;" class="btn btn-primary" data-i18n="btn_open_app">Farmer Tools ↓</a>
       </div>
     </div>
   </header>
@@ -1480,10 +1480,10 @@
           Real-time soil moisture monitoring, automated rain-skip irrigation, PJTAU fertilizer calculation, AI leaf diagnostics, and live mandi prices in one accessible platform.
         </p>
         <div class="hero-actions">
-          <a href="#features" class="btn btn-primary btn-lg" data-i18n="hero_cta_tools" style="display:inline-flex; align-items:center; gap:8px;">
+          <a href="#features" onclick="scrollToSuite(); return false;" class="btn btn-primary btn-lg" data-i18n="hero_cta_tools" style="display:inline-flex; align-items:center; gap:8px;">
             <span>🌾</span> <span data-i18n="hero_cta_tools_text">Explore Farmer Tools ↓</span>
           </a>
-          <a href="/app" class="btn btn-secondary btn-lg" data-i18n="hero_cta_open">Open Full App →</a>
+          <a href="#how-it-works" class="btn btn-secondary btn-lg" data-i18n="hero_cta_how">See how it works ↓</a>
         </div>
 
         <!-- Quick feature jumps right above the fold -->
@@ -1492,19 +1492,22 @@
             <span>⚡</span> <span data-i18n="hero_quick_title">Direct Tools on this page (Free & Instant):</span>
           </div>
           <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-            <button type="button" onclick="switchSuiteTab('weather'); document.getElementById('features').scrollIntoView({behavior:'smooth'});" class="hero-chip">
+            <button type="button" onclick="switchSuiteTab('weather'); scrollToSuite();" class="hero-chip">
               <span>🌦️</span> <span data-i18n="tab_wx">Weather & Rain</span>
             </button>
-            <button type="button" onclick="switchSuiteTab('fertilizer'); document.getElementById('features').scrollIntoView({behavior:'smooth'});" class="hero-chip">
+            <button type="button" onclick="switchSuiteTab('fertilizer'); scrollToSuite();" class="hero-chip">
               <span>🧪</span> <span data-i18n="tab_fert">Fertilizer Calculator</span>
             </button>
-            <button type="button" onclick="switchSuiteTab('mandi'); document.getElementById('features').scrollIntoView({behavior:'smooth'});" class="hero-chip">
+            <button type="button" onclick="switchSuiteTab('mandi'); scrollToSuite();" class="hero-chip">
               <span>⚖️</span> <span data-i18n="tab_mandi">Mandi Prices</span>
             </button>
-            <button type="button" onclick="switchSuiteTab('disease'); document.getElementById('features').scrollIntoView({behavior:'smooth'});" class="hero-chip">
+            <button type="button" onclick="switchSuiteTab('disease'); scrollToSuite();" class="hero-chip">
               <span>🔍</span> <span data-i18n="tab_dis">AI Disease Check</span>
             </button>
-            <button type="button" onclick="switchSuiteTab('field'); document.getElementById('features').scrollIntoView({behavior:'smooth'});" class="hero-chip">
+            <button type="button" onclick="switchSuiteTab('chat'); scrollToSuite();" class="hero-chip">
+              <span>🌾</span> <span data-i18n="tab_chat">Krishi Sahayak</span>
+            </button>
+            <button type="button" onclick="switchSuiteTab('field'); scrollToSuite();" class="hero-chip">
               <span>💧</span> <span data-i18n="tab_field">Field Control</span>
             </button>
           </div>
@@ -1624,7 +1627,7 @@
             <span class="suite-subtitle" data-i18n="suite_subtitle">Instant interactive tools — no download or sign-in needed. Use directly on your farm.</span>
           </div>
           <div class="suite-fullapp-link">
-            <a href="/app" class="btn-suite-app" data-i18n="suite_open_full">Open Full PWA App ↗</a>
+            <span class="suite-badge-free" style="display:inline-flex;align-items:center;gap:6px;font-size:0.82rem;font-weight:700;color:var(--pri);background:var(--pri-surface);padding:6px 14px;border-radius:20px;border:1px solid var(--pri-border);">🌾 100% Free for Farmers</span>
           </div>
         </div>
 
@@ -1648,7 +1651,7 @@
           </button>
           <button class="suite-tab" data-tab="chat" role="tab" aria-selected="false" onclick="switchSuiteTab('chat')">
             <span class="tab-icon">🌾💬</span>
-            <span class="tab-label" data-i18n="tab_chat">Raithu Mitra AI</span>
+            <span class="tab-label" data-i18n="tab_chat">Krishi Sahayak 🌾</span>
           </button>
           <button class="suite-tab" data-tab="field" role="tab" aria-selected="false" onclick="switchSuiteTab('field')">
             <span class="tab-icon">💧</span>
@@ -1824,13 +1827,13 @@
             <p style="font-size:0.78rem;color:var(--text-muted);margin-top:12px;" data-i18n="dis_disclaimer">⚠️ AI screening suggestion. Please confirm with your local Mandal Agricultural Extension Officer (AEO) before spraying chemicals.</p>
           </div>
 
-          <!-- 5. RAITHU MITRA AI ASSISTANT -->
+          <!-- 5. KRISHI SAHAYAK AI ASSISTANT -->
           <div class="suite-panel" id="panel-chat">
             <div class="suite-chat-container">
               <div class="suite-chat-feed" id="sc_feed">
                 <div class="suite-chat-bubble bot">
-                  <div style="font-size:0.78rem;font-weight:700;color:var(--pri);margin-bottom:4px;">🌾 Raithu Mitra (రైతు మిత్ర)</div>
-                  <div id="sc_welcome_text" data-i18n="chat_welcome_txt">Namaskaram Raithanna! I am Raithu Mitra, your AI farming assistant. Ask any agricultural doubt regarding crop pests, PJTAU fertilizer recommendations, weather forecasts, or market rates in simple English or Telugu.</div>
+                  <div style="font-size:0.78rem;font-weight:700;color:var(--pri);margin-bottom:4px;">🌾 Krishi Sahayak (కృషి సహాయక్)</div>
+                  <div id="sc_welcome_text" data-i18n="chat_welcome_txt">Namaskaram Raithanna! I am Krishi Sahayak, your AI farming assistant. Ask any agricultural doubt regarding crop pests, PJTAU fertilizer recommendations, weather forecasts, or market rates in simple English or Telugu.</div>
                   <div style="margin-top:8px;">
                     <button class="ctrl-btn" style="border:1px solid var(--border);padding:3px 8px;font-size:0.75rem;" onclick="speakSuiteBubble(this)">
                       🔊 <span data-i18n="chat_read_aloud">Read aloud</span>
@@ -1992,10 +1995,10 @@
           <button class="btn-card-launch" onclick="switchSuiteTab('disease'); scrollToSuite();" data-i18n="btn_try_dis">Check Leaf Disease ↑</button>
         </div>
 
-        <!-- 5. Raithu Mitra AI Chatbot -->
+        <!-- 5. Krishi Sahayak AI Chatbot -->
         <div class="feature-card">
           <div class="feature-icon-box">🌾💬</div>
-          <h3 data-i18n="f5_title">Raithu Mitra AI Assistant</h3>
+          <h3 data-i18n="f5_title">Krishi Sahayak (కృషి సహాయక్)</h3>
           <p data-i18n="f5_desc">
             Voice-enabled agricultural chatbot grounded with live internet search. Answers doubts on crop health, weather, and PJTAU practices in simple Telugu and English.
           </p>
@@ -2004,7 +2007,7 @@
             <li data-i18n="f5_h2">Search grounding with verified source links</li>
             <li data-i18n="f5_h3">Strict agricultural safety and IPM guardrails</li>
           </ul>
-          <button class="btn-card-launch" onclick="switchSuiteTab('chat'); scrollToSuite();" data-i18n="btn_try_chat">Ask Raithu Mitra ↑</button>
+          <button class="btn-card-launch" onclick="switchSuiteTab('chat'); scrollToSuite();" data-i18n="btn_try_chat">Ask Krishi Sahayak ↑</button>
         </div>
 
         <!-- 6. Mandi Prices -->
@@ -2144,7 +2147,7 @@
               <span data-i18n="qr_point_3">Full bilingual support with one-tap English & Telugu switching</span>
             </div>
           </div>
-          <a href="/app" class="btn btn-primary btn-lg" data-i18n="qr_btn">Launch Web App Now →</a>
+          <a href="#features" onclick="scrollToSuite(); return false;" class="btn btn-primary btn-lg" data-i18n="qr_btn">Use Farmer Tools Now ↑</a>
         </div>
 
         <div class="qr-box">
@@ -2237,7 +2240,7 @@
         <span data-i18n="footer_copy">© 2026 Smart Farm Assistant. Built with dedication for farmers.</span>
       </div>
       <ul class="footer-links">
-        <li><a href="/app" data-i18n="footer_link_app">Launch App</a></li>
+        <li><a href="#features" onclick="scrollToSuite(); return false;" data-i18n="footer_link_app">Farmer Tools</a></li>
         <li><a href="#features" data-i18n="footer_link_feat">Features</a></li>
         <li><a href="#how-it-works" data-i18n="footer_link_how">How It Works</a></li>
         <li><a href="mailto:bioashfaq123@gmail.com" data-i18n="footer_link_contact">Contact Creator</a></li>
@@ -2258,13 +2261,13 @@
         nav_app: "Mobile Access",
         nav_notes: "Guidelines",
         nav_about: "About",
-        btn_open_app: "Open the app →",
+        btn_open_app: "Farmer Tools ↓",
 
         hero_badge: "Modern Agricultural Automation Platform",
         hero_title_1: "Smart Irrigation & Crop Intelligence for",
         hero_title_2: "Every Farmer.",
         hero_subtitle: "Real-time soil moisture monitoring, automated rain-skip irrigation, PJTAU fertilizer calculation, AI leaf diagnostics, and live mandi prices in one accessible platform.",
-        hero_cta_open: "Open the app →",
+        hero_cta_open: "Farmer Tools ↓",
         hero_cta_how: "See how it works ↓",
         hero_cta_tools: "Explore Farmer Tools ↓",
         hero_cta_tools_text: "Explore Farmer Tools ↓",
@@ -2282,13 +2285,13 @@
         tab_fert: "Fertilizer Calculator",
         tab_mandi: "Mandi Prices",
         tab_dis: "AI Disease Check",
-        tab_chat: "Raithu Mitra AI",
+        tab_chat: "Krishi Sahayak 🌾",
         tab_field: "Field Control",
         btn_try_field: "Use Field Control ↑",
         btn_try_wx: "Check Weather Live ↑",
         btn_try_fert: "Calculate Fertilizer ↑",
         btn_try_dis: "Check Leaf Disease ↑",
-        btn_try_chat: "Ask Raithu Mitra ↑",
+        btn_try_chat: "Ask Krishi Sahayak ↑",
         btn_try_mandi: "Check Mandi Rates ↑",
 
         // Weather Suite
@@ -2342,7 +2345,7 @@
         dis_disclaimer: "⚠️ AI screening suggestion. Please confirm with your local Mandal Agricultural Extension Officer (AEO) before spraying chemicals.",
 
         // Chat Suite
-        chat_welcome_txt: "Namaskaram Raithanna! I am Raithu Mitra, your AI farming assistant. Ask any agricultural doubt regarding crop pests, PJTAU fertilizer recommendations, weather forecasts, or market rates in simple English or Telugu.",
+        chat_welcome_txt: "Namaskaram Raithanna! I am Krishi Sahayak, your AI farming assistant. Ask any agricultural doubt regarding crop pests, PJTAU fertilizer recommendations, weather forecasts, or market rates in simple English or Telugu.",
         chat_chip_1: "🌾 Paddy stem borer remedy?",
         chat_chip_2: "🌦️ Will it rain this week?",
         chat_chip_3: "💰 Today's cotton mandi rates?",
@@ -2387,7 +2390,7 @@
         f4_h2: "Organic and chemical management advice",
         f4_h3: "Full English and Telugu responses",
 
-        f5_title: "Raithu Mitra AI Assistant (రైతు మిత్ర)",
+        f5_title: "Krishi Sahayak (కృషి సహాయక్)",
         f5_desc: "Voice-enabled agricultural chatbot grounded with live internet search. Answers doubts on crop health, weather, and PJTAU practices in simple Telugu and English.",
         f5_h1: "Voice queries with native audio recording",
         f5_h2: "Search grounding with verified source links",
@@ -2417,7 +2420,7 @@
         qr_point_1: "Compatible with Android, iPhone, tablet, or desktop browsers",
         qr_point_2: "Lightweight architecture (< 60 KB) optimized for 2G/3G rural networks",
         qr_point_3: "Full bilingual support with one-tap English & Telugu switching",
-        qr_btn: "Launch Web App Now →",
+        qr_btn: "Use Farmer Tools Now ↑",
         qr_scan_txt: "Scan with your mobile camera to open immediately",
 
         notes_title: "Responsible Technology & Advisory Guidelines",
@@ -2445,13 +2448,13 @@
         nav_app: "మొబైల్ యాక్సెస్",
         nav_notes: "మార్గదర్శకాలు",
         nav_about: "రూపకర్త",
-        btn_open_app: "యాప్ ఓపెన్ చేయండి →",
+        btn_open_app: "రైతు పరికరాలు ↓",
 
         hero_badge: "రైతుల కోసం ఆధునిక వ్యవసాయ ఆటోమేషన్ ప్లాట్‌ఫామ్",
         hero_title_1: "రైతులందరి కోసం స్మార్ట్ సాగునీరు &",
         hero_title_2: "పంట విజ్ఞానం.",
         hero_subtitle: "పొలంలో నిజ-సమయ నేల తేమ పర్యవేక్షణ, వర్ష సూచన ఆధారిత ఆటోమేటిక్ నీటిపారుదల, PJTAU ఎరువుల లెక్కింపు, AI పంట తెగుళ్ల నిర్ధారణ మరియు లైవ్ మార్కెట్ ధరలు — అన్నీ ఒకే వేదికపై.",
-        hero_cta_open: "యాప్ ఓపెన్ చేయండి →",
+        hero_cta_open: "రైతు పరికరాలు ↓",
         hero_cta_how: "ఇది ఎలా పనిచేస్తుందో చూడండి ↓",
         hero_cta_tools: "రైతు పరికరాలు చూడండి ↓",
         hero_cta_tools_text: "రైతు పరికరాలు చూడండి ↓",
@@ -2469,13 +2472,13 @@
         tab_fert: "ఎరువుల మోతాదు",
         tab_mandi: "మార్కెట్ ధరలు",
         tab_dis: "AI తెగుళ్ల పరీక్ష",
-        tab_chat: "రైతు మిత్ర AI",
+        tab_chat: "కృషి సహాయక్ 🌾",
         tab_field: "మోటార్ కంట్రోల్",
         btn_try_field: "మోటార్ కంట్రోల్ చూడండి ↑",
         btn_try_wx: "వాతావరణం చూడండి ↑",
         btn_try_fert: "ఎరువులు లెక్కించండి ↑",
         btn_try_dis: "తెగులు ఫోటో పరీక్షించండి ↑",
-        btn_try_chat: "రైతు మిత్రతో మాట్లాడండి ↑",
+        btn_try_chat: "కృషి సహాయక్ తో మాట్లాడండి ↑",
         btn_try_mandi: "మార్కెట్ ధరలు చూడండి ↑",
 
         // Weather Suite
@@ -2529,7 +2532,7 @@
         dis_disclaimer: "⚠️ ఇది ప్రాథమిక AI సూచన మాత్రమే. మందులు పిచికారీ చేసే ముందు తప్పనిసరిగా మండల వ్యవసాయ విస్తరణ అధికారి (AEO) ని సంప్రదించండి.",
 
         // Chat Suite
-        chat_welcome_txt: "నమస్కారం రైతన్న గారూ! నేను మీ రైతు మిత్ర AI అసిస్టెంట్ ను (PJTAU ఆధారిత సలహాదారు). పంట తెగుళ్లు, నివారణ చర్యలు, ఎరువుల యాజమాన్యం లేదా మార్కెట్ ధరలపై మీ సందేహాలను అడగండి.",
+        chat_welcome_txt: "నమస్కారం రైతన్న గారూ! నేను మీ కృషి సహాయక్ AI అసిస్టెంట్ ను (PJTAU ఆధారిత సలహాదారు). పంట తెగుళ్లు, నివారణ చర్యలు, ఎరువుల యాజమాన్యం లేదా మార్కెట్ ధరలపై మీ సందేహాలను అడగండి.",
         chat_chip_1: "🌾 వరిలో కాండం తొలుచు పురుగు నివారణ?",
         chat_chip_2: "🌦️ ఈ వారం వర్షం పడుతుందా?",
         chat_chip_3: "💰 నేటి పత్తి మార్కెట్ ధరలు ఎంత?",
@@ -2574,7 +2577,7 @@
         f4_h2: "సేంద్రీయ మరియు రసాయన నివారణ చర్యల సలహాలు",
         f4_h3: "పూర్తిగా తెలుగు మరియు ఇంగ్లీష్ సమాధానాలు",
 
-        f5_title: "రైతు మిత్ర (Raithu Mitra) AI అసిస్టెంట్",
+        f5_title: "కృషి సహాయక్ (Krishi Sahayak)",
         f5_desc: "వాయిస్ మెసేజ్ మరియు లైవ్ ఇంటర్నెట్ సెర్చ్ సదుపాయం కలిగిన AI చాట్‌బాట్. పంటల సాగు, తెగుళ్లు, మార్కెట్ ధరలపై తెలుగులో తక్షణ సహాయం అందిస్తుంది.",
         f5_h1: "తెలుగు మరియు ఇంగ్లీష్ వాయిస్ ప్రశ్నలు",
         f5_h2: "ఆధారిత వెబ్ లింకులు మరియు రీడ్ అలౌడ్",
@@ -2604,7 +2607,7 @@
         qr_point_1: "ఆండ్రాయిడ్, ఐఫోన్, టాబ్లెట్ లేదా కంప్యూటర్‌లలో నడుస్తుంది",
         qr_point_2: "గ్రామీణ 2G/3G నెట్‌వర్క్‌ల కోసం అత్యంత తేలికైన నిర్మాణం (< 60 KB)",
         qr_point_3: "ఒకే క్లిక్‌తో ఇంగ్లీష్ లేదా తెలుగులోకి మారే పూర్తి సౌలభ్యం",
-        qr_btn: "ఇప్పుడే యాప్ ప్రారంభించండి →",
+        qr_btn: "వ్యవసాయ పరికరాలు ప్రారంభించండి ↑",
         qr_scan_txt: "మీ మొబైల్ కెమెరాతో స్కాన్ చేసి నేరుగా ఓపెన్ చేయండి",
 
         notes_title: "బాధ్యతాయుతమైన సాంకేతికత & ముఖ్య సూచనలు",
@@ -2620,7 +2623,7 @@
         about_bio: "మొక్కల జన్యుశాస్త్రం, అధునాతన IoT ఆటోమేషన్ మరియు రైతు శ్రేయస్సును అనుసంధానిస్తూ స్మార్ట్ ఫార్మ్ అసిస్టెంట్ రూపొందించబడింది. తెలంగాణలోని రైతులకు తక్కువ ఖర్చుతో కూడిన ఆధునిక సాధనాలను అందించి నీటి పొదుపు, సరైన ఎరువుల యాజమాన్యం మరియు అధిక దిగుబడులను సాధించడమే ఈ ప్రాజెక్ట్ ప్రధాన లక్ష్యం.",
 
         footer_copy: "© 2026 స్మార్ట్ ఫార్మ్ అసిస్టెంట్. రైతుల అభ్యున్నతి కోసం అంకితం.",
-        footer_link_app: "యాప్ ఓపెన్ చేయండి",
+        footer_link_app: "రైతు పరికరాలు",
         footer_link_feat: "ఫీచర్లు",
         footer_link_how: "పనితీరు",
         footer_link_contact: "రూపకర్తను సంప్రదించండి"
@@ -3064,7 +3067,7 @@
       if (btn) btn.disabled = false;
     }
 
-    // --- 5. RAITHU MITRA AI CHAT ENGINE ---
+    // --- 5. KRISHI SAHAYAK AI CHAT ENGINE ---
     function askSuiteChip(btn) {
       const qType = btn.dataset.q;
       const input = document.getElementById("sc_input");
@@ -3105,7 +3108,7 @@
       // Bot thinking bubble
       const botBubble = document.createElement("div");
       botBubble.className = "suite-chat-bubble bot";
-      botBubble.innerHTML = `<span style="color:var(--text-muted);">🌾 ${curLang === "te" ? "రైతు మిత్ర సమాధానం సిద్ధం చేస్తోంది..." : "Raithu Mitra is thinking..."}</span>`;
+      botBubble.innerHTML = `<span style="color:var(--text-muted);">🌾 ${curLang === "te" ? "కృషి సహాయక్ సమాధానం సిద్ధం చేస్తోంది..." : "Krishi Sahayak is thinking..."}</span>`;
       feed.appendChild(botBubble);
       feed.scrollTop = feed.scrollHeight;
 
@@ -3118,7 +3121,7 @@
         const json = await res.json();
         if (res.ok && json.text) {
           botBubble.innerHTML = `
-            <div style="font-size:0.78rem;font-weight:700;color:var(--pri);margin-bottom:4px;">🌾 Raithu Mitra (రైతు మిత్ర)</div>
+            <div style="font-size:0.78rem;font-weight:700;color:var(--pri);margin-bottom:4px;">🌾 Krishi Sahayak (కృషి సహాయక్)</div>
             <div style="white-space:pre-wrap;">${json.text}</div>
             <div style="margin-top:8px;">
               <button class="ctrl-btn" style="border:1px solid var(--border);padding:3px 8px;font-size:0.75rem;" onclick="speakSuiteBubble(this)">
@@ -3153,7 +3156,7 @@
                 : "fert";
 
       botBubble.innerHTML = `
-        <div style="font-size:0.78rem;font-weight:700;color:var(--pri);margin-bottom:4px;">🌾 Raithu Mitra (రైతు మిత్ర)</div>
+        <div style="font-size:0.78rem;font-weight:700;color:var(--pri);margin-bottom:4px;">🌾 Krishi Sahayak (కృషి సహాయక్)</div>
         <div style="white-space:pre-wrap;">${answers[key]}</div>
         <div style="margin-top:8px;">
           <button class="ctrl-btn" style="border:1px solid var(--border);padding:3px 8px;font-size:0.75rem;" onclick="speakSuiteBubble(this)">
@@ -3167,7 +3170,7 @@
     function speakSuiteBubble(btn) {
       const bubble = btn.closest(".suite-chat-bubble");
       if (!bubble) return;
-      const text = bubble.innerText.replace("🔊 Read aloud", "").replace("🔊 వినిపించు", "").replace("🌾 Raithu Mitra (రైతు మిత్ర)", "").trim();
+      const text = bubble.innerText.replace("🔊 Read aloud", "").replace("🔊 వినిపించు", "").replace("🌾 Krishi Sahayak (కృషి సహాయక్)", "").trim();
       if (!text) return;
 
       if ("speechSynthesis" in window) {
