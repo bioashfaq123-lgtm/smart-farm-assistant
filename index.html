@@ -420,7 +420,7 @@ pre{white-space:pre-wrap;font:inherit;margin:0}
   </div>
 </div>
 </main>
-<script src="config.js?v=1.1"></script>
+<script src="config.js?v=1.2"></script>
 <script>
 const $=id=>document.getElementById(id);
 
@@ -944,7 +944,7 @@ async function handleAuthAction() {
   if (currentFirebaseUser) {
     if (confirm("Do you want to sign out?")) {
       try {
-        if (window.firebase && firebase.auth) await firebase.auth().signOut();
+        if (window.firebase && firebase.apps && firebase.apps.length && firebase.auth) await firebase.auth().signOut();
         currentFirebaseUser = null;
         updateAuthUi(null);
         await fetchSubscriptionStatus();
@@ -954,8 +954,13 @@ async function handleAuthAction() {
       }
     }
   } else {
-    if (!window.firebase || !firebase.auth) {
-      alert("Firebase is not initialized. Please verify your FARM_CONFIG.FIREBASE configuration in config.js.");
+    if (window.firebase && (!firebase.apps || !firebase.apps.length)) {
+      if (window.FARM_CONFIG && FARM_CONFIG.FIREBASE && FARM_CONFIG.FIREBASE.apiKey) {
+        try { firebase.initializeApp(FARM_CONFIG.FIREBASE); } catch(e) { console.warn("Firebase init:", e); }
+      }
+    }
+    if (!window.firebase || !firebase.auth || !firebase.apps || !firebase.apps.length) {
+      alert("Firebase is not initialized yet. Please add your Firebase Web App credentials (apiKey, authDomain, projectId) into config.js, or enable DEMO_MODE_PUBLIC in Vercel.");
       return;
     }
     try {

@@ -8,12 +8,12 @@ window.FARM_CONFIG = {
   // Firebase Web Client Config (from Firebase Console > Project Settings > General > Your apps > Web app)
   // Used in browser for Firebase Google Sign-In
   FIREBASE: {
-    apiKey: "",
-    authDomain: "",
-    projectId: "",
-    storageBucket: "",
-    messagingSenderId: "",
-    appId: "",
+    apiKey: "AIzaSyCJ5Qfb9hs01YhNbHy9K1931PUB1GpnUYs",
+    authDomain: "smart-farm-assistant-32782.firebaseapp.com",
+    projectId: "smart-farm-assistant-32782",
+    storageBucket: "smart-farm-assistant-32782.firebasestorage.app",
+    messagingSenderId: "1019263301303",
+    appId: "1:1019263301303:web:eaa17e134be29baa6cff32",
     databaseURL: "https://smart-farm-assistant-32782-default-rtdb.firebaseio.com"
   },
 
