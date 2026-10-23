@@ -2386,8 +2386,17 @@ $("d_go").onclick=async()=>{
       out.innerHTML=`<div class="note">🔒 ${j.message || t.trial_ended_desc} <button class="sub-banner-btn" style="margin-left:8px" onclick="openTab('account')">${t.btn_pay_plan}</button></div>`;
       return;
     }
-    if(!r.ok)throw new Error(j.error||"failed");
-    out.innerHTML="<div class='ok'><pre></pre></div>";out.querySelector("pre").textContent=j.text;
+    if (!r.ok) throw new Error(j.error || "Diagnosis failed");
+    out.innerHTML = `
+      <div class="ok" style="white-space:pre-wrap;line-height:1.65;font-size:13.5px;padding:14px 16px">
+        <div style="font-weight:700;color:#1b5e20;margin-bottom:8px;display:flex;align-items:center;gap:6px">
+          <span>🌿</span> <span>${curLang === "te" ? "పంట తెగులు నిర్ధారణ ఫలితం" : "Crop Disease Diagnosis Result"}</span>
+        </div>
+        <div id="diag_result_text"></div>
+      </div>
+    `;
+    const resEl = $("diag_result_text");
+    if (resEl) resEl.textContent = j.text;
   }
   catch(e){out.innerHTML=`<div class="note">${t.dis_failed} (${e.message||"error"}). Check connection and GEMINI_API_KEY.</div>`}
   finally { $("d_go").disabled=false; }

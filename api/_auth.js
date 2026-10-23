@@ -10,9 +10,14 @@ let firebaseApp = null;
  */
 function getFirebaseAdmin() {
   if (firebaseApp) return admin;
-  if (admin.apps.length > 0) {
-    firebaseApp = admin.app();
-    return admin;
+  try {
+    const existingApps = typeof admin.getApps === "function" ? admin.getApps() : (admin.apps || []);
+    if (existingApps && existingApps.length > 0) {
+      firebaseApp = typeof admin.getApp === "function" ? admin.getApp() : existingApps[0];
+      return admin;
+    }
+  } catch (e) {
+    console.warn("Error checking existing Firebase apps:", e.message);
   }
 
   const rawSa = process.env.FIREBASE_SERVICE_ACCOUNT;
