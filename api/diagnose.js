@@ -1,9 +1,68 @@
-// Vercel serverless function: crop disease diagnosis using Google Gemini
+// Vercel serverless function: AI Crop Disease Diagnosis using Google Gemini
 const {
   verifyAuthToken,
   getUserSubscription,
   DEMO_MODE_PUBLIC
 } = require("./_auth");
+
+let cachedAvailableModels = null;
+let lastModelFetch = 0;
+
+/**
+ * Dynamically queries Google Generative Language API to discover
+ * which exact models are enabled and active for the user's GEMINI_API_KEY.
+ */
+async function getAvailableGeminiModels(apiKey) {
+  if (cachedAvailableModels && cachedAvailableModels.length > 0 && (Date.now() - lastModelFetch < 1800000)) {
+    return cachedAvailableModels;
+  }
+
+  const versions = ["v1beta", "v1"];
+  for (const v of versions) {
+    try {
+      const res = await fetch(`https://generativelanguage.googleapis.com/${v}/models?key=${apiKey}`);
+      if (res.ok) {
+        const data = await res.json().catch(() => ({}));
+        if (Array.isArray(data.models) && data.models.length > 0) {
+          const supported = data.models
+            .filter(m => Array.isArray(m.supportedGenerationMethods) && m.supportedGenerationMethods.includes("generateContent"))
+            .map(m => ({
+              id: m.name.replace(/^models\//, ""),
+              version: v
+            }));
+
+          if (supported.length > 0) {
+            // Prioritize flash models first, then any other generative models
+            supported.sort((a, b) => {
+              const aFlash = a.id.includes("flash") ? 1 : 0;
+              const bFlash = b.id.includes("flash") ? 1 : 0;
+              return bFlash - aFlash;
+            });
+            cachedAvailableModels = supported;
+            lastModelFetch = Date.now();
+            return supported;
+          }
+        }
+      }
+    } catch (err) {
+      console.warn(`ListModels error on ${v}:`, err.message);
+    }
+  }
+
+  // Fallback candidate list if ListModels is unavailable
+  return [
+    { id: process.env.GEMINI_MODEL || "gemini-1.5-flash-latest", version: "v1beta" },
+    { id: "gemini-1.5-flash", version: "v1" },
+    { id: "gemini-1.5-flash-latest", version: "v1" },
+    { id: "gemini-2.0-flash", version: "v1beta" },
+    { id: "gemini-2.0-flash-exp", version: "v1beta" },
+    { id: "gemini-2.5-flash", version: "v1beta" },
+    { id: "gemini-1.5-flash-001", version: "v1beta" },
+    { id: "gemini-1.5-flash-002", version: "v1beta" },
+    { id: "gemini-1.5-pro", version: "v1" },
+    { id: "gemini-1.5-pro", version: "v1beta" }
+  ];
+}
 
 module.exports = async (req, res) => {
   if (req.method !== "POST") return res.status(405).json({ error: "POST only" });
@@ -21,7 +80,7 @@ module.exports = async (req, res) => {
       if (!token) {
         return res.status(401).json({
           error: "AUTH_REQUIRED",
-          message: "Please sign in to access AI crop disease diagnosis."
+          message: "Please sign in with Google to access AI crop disease diagnosis."
         });
       }
 
@@ -78,23 +137,31 @@ When to get help: (when to contact the local Mandal AEO or PJTAU scientist)`
 
 If the photo is unclear or not a plant, explain politely and request a closer photo of an affected leaf. Avoid excessive markdown symbols.`;
 
-    // Candidate models in priority order with resilient fallback
-    const candidateModels = [
-      process.env.GEMINI_MODEL,
-      "gemini-2.5-flash",
-      "gemini-2.0-flash",
-      "gemini-1.5-flash"
-    ].filter(Boolean);
+    // 2. Discover available models for this specific API key
+    const discoveredModels = await getAvailableGeminiModels(key);
 
-    // Deduplicate models
-    const modelsToTry = [...new Set(candidateModels)];
+    // If custom env model is set, prepend it to candidate list
+    const candidateList = [];
+    if (process.env.GEMINI_MODEL) {
+      candidateList.push({ id: process.env.GEMINI_MODEL, version: "v1beta" });
+      candidateList.push({ id: process.env.GEMINI_MODEL, version: "v1" });
+    }
+
+    discoveredModels.forEach(m => {
+      if (!candidateList.some(c => c.id === m.id && c.version === m.version)) {
+        candidateList.push(m);
+      }
+    });
 
     let lastError = null;
     let diagnosisText = "";
 
-    for (const modelName of modelsToTry) {
+    // 3. Try available models sequentially until one succeeds
+    for (const item of candidateList) {
+      const { id: modelName, version } = item;
       try {
-        const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent`, {
+        const url = `https://generativelanguage.googleapis.com/${version}/models/${modelName}:generateContent?key=${key}`;
+        const r = await fetch(url, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -104,7 +171,10 @@ If the photo is unclear or not a plant, explain politely and request a closer ph
             contents: [{
               parts: [
                 { text: prompt },
-                { inline_data: { mime_type: "image/jpeg", data: cleanImg } }
+                {
+                  inline_data: { mime_type: "image/jpeg", data: cleanImg },
+                  inlineData: { mimeType: "image/jpeg", data: cleanImg }
+                }
               ]
             }]
           })
@@ -116,8 +186,8 @@ If the photo is unclear or not a plant, explain politely and request a closer ph
           if (diagnosisText) break;
         } else {
           lastError = (j.error && j.error.message) || `Gemini API error (${r.status})`;
-          console.warn(`Model ${modelName} failed (${r.status}):`, lastError);
-          // If 404 (model not found) or 503 (high demand) or 400 (bad model), try next model
+          console.warn(`Model ${modelName} on ${version} failed (${r.status}):`, lastError);
+          // If 404 (model not found) or 503 (busy) or 400 (unsupported), try next candidate
           if (r.status === 404 || r.status === 503 || r.status === 400) continue;
           break;
         }

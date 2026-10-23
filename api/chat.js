@@ -270,10 +270,14 @@ module.exports = async (req, res) => {
       data = await response.json().catch(() => ({}));
     }
 
-    // If primary model experiences a 503 high-demand spike, retry with fallback model
-    if (response.status === 503) {
-      response = await callGemini(fallbackModel, false);
-      data = await response.json().catch(() => ({}));
+    // If primary model experiences a 404 (model not found) or 503 (high demand), retry with fallback models
+    if (!response.ok && (response.status === 404 || response.status === 503)) {
+      const fallbacks = [fallbackModel, "gemini-1.5-flash-latest", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"];
+      for (const fb of fallbacks) {
+        response = await callGemini(fb, false);
+        data = await response.json().catch(() => ({}));
+        if (response.ok) break;
+      }
     }
 
     if (!response.ok) {
