@@ -2,10 +2,9 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { LanguageProvider } from "@/components/common/LanguageContext";
 import { ThemeProvider } from "@/components/common/ThemeContext";
-import { DesktopSidebar } from "@/components/layout/DesktopSidebar";
-import { BottomNav } from "@/components/layout/BottomNav";
-import { Header } from "@/components/layout/Header";
+import { AppShell } from "@/components/layout/AppShell";
 import { PWARegister } from "@/components/common/PWARegister";
+import { AnalyticsTracker } from "@/components/common/AnalyticsTracker";
 
 export const viewport: Viewport = {
   themeColor: "#15803d",
@@ -57,21 +56,8 @@ export default function RootLayout({
         <ThemeProvider>
           <LanguageProvider>
             <PWARegister />
-            <div className="flex min-h-screen w-full flex-col md:flex-row">
-              {/* Left Desktop Sidebar */}
-              <DesktopSidebar />
-
-              {/* Main Content Area */}
-              <div className="flex flex-1 flex-col md:ml-64 min-h-screen">
-                <Header />
-                <main className="flex-1 p-4 pb-24 md:p-8 md:pb-12 max-w-7xl w-full mx-auto">
-                  {children}
-                </main>
-              </div>
-
-              {/* Mobile Bottom Tab Navigation */}
-              <BottomNav />
-            </div>
+            <AnalyticsTracker />
+            <AppShell>{children}</AppShell>
           </LanguageProvider>
         </ThemeProvider>
       </body>
