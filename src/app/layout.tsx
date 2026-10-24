@@ -25,6 +25,9 @@ export const metadata: Metadata = {
     icon: "/icon.svg",
     apple: "/icon.svg",
   },
+  verification: {
+    google: "6T6_uPweHA5yPTKumhdlNSNq2gEXdzQQ1TVda3CIt5M",
+  },
   alternates: {
     canonical: "https://smartfarming-web.vercel.app",
     languages: {
