@@ -6,6 +6,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
     },
-    sitemap: "https://smart-farm-assistant.vercel.app/sitemap.xml",
+    sitemap: "https://smartfarm-pjtau.vercel.app/sitemap.xml",
   };
 }

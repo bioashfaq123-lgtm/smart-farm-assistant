@@ -1,7 +1,7 @@
 import { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://smart-farm-assistant.vercel.app";
+  const baseUrl = "https://smartfarm-pjtau.vercel.app";
   const routes = ["", "/advisory", "/iot", "/market", "/tools", "/insights"];
 
   return routes.map((route) => ({

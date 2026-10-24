@@ -15,6 +15,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://smartfarm-pjtau.vercel.app"),
   title: "Smart Farm Assistant | Telangana Rythu Digital Portal",
   description:
     "AI-powered agronomic advisory, live IoT sensor monitoring, Telangana APMC mandi rates, and PJTAU package of practices for Telangana farmers.",
@@ -24,10 +25,18 @@ export const metadata: Metadata = {
     icon: "/icon.svg",
     apple: "/icon.svg",
   },
+  alternates: {
+    canonical: "https://smartfarm-pjtau.vercel.app",
+    languages: {
+      "en-IN": "https://smartfarm-pjtau.vercel.app",
+      "te-IN": "https://smartfarm-pjtau.vercel.app",
+    },
+  },
   openGraph: {
     title: "Smart Farm Assistant — Telangana Rythu Portal",
     description: "Bilingual digital farming assistant and IoT agronomy portal for Telangana farmers.",
     type: "website",
+    url: "https://smartfarm-pjtau.vercel.app",
     locale: "en_IN",
     alternateLocale: "te_IN",
     siteName: "Smart Farm Assistant",
