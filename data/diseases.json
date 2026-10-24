@@ -1,0 +1,852 @@
+{
+  "$schema": "./diseases.schema.json",
+  "metadata": {
+    "version": "1.0.0",
+    "region": "Telangana, India",
+    "institutions": ["PJTAU (Professor Jayashankar Telangana Agricultural University)", "ICAR institutes (CRIDA, IIRR, IIMR, CICR, IIOR)"],
+    "reviewStatus": "draft - needs expert review",
+    "disclaimer": "All management advice is indicative and based on published university packages of practices. Chemical references specify active ingredient chemical groups only; no specific commercial brands, dosages, or mixtures are prescribed. Always verify against current Central Insecticides Board & Registration Committee (CIB&RC) registrations, follow statutory product label instructions, and use appropriate personal protective equipment (PPE)."
+  },
+  "crops": {
+    "Paddy": {
+      "nameEn": "Paddy (Rice)",
+      "nameTe": "వరి",
+      "scientificName": "Oryza sativa",
+      "disorders": [
+        {
+          "id": "paddy_blast",
+          "commonName": "Rice Blast (Leaf & Neck Blast)",
+          "nameTe": "అగ్గితెగులు (ఆకు & మెడ విరుపు)",
+          "scientificName": "Magnaporthe oryzae (Pyricularia oryzae)",
+          "type": "fungal",
+          "status": "draft - needs expert review",
+          "source": "https://pjtau.edu.in/crop-production-paddy.html",
+          "symptoms": "Spindle or eye-shaped lesions with grey or whitish centers and dark reddish-brown margins on leaves. In neck blast, the panicle base turns blackish-brown and snaps, causing completely or partially unfilled (chaffy) grains.",
+          "fieldCheck": "Look for spindle-shaped spots on leaves with ash-grey centers. Inspect panicle base for blackening and rotting during grain filling.",
+          "differential": "Brown spot lesions are smaller, more oval/circular with yellow halo and dark center, whereas blast lesions are distinctly spindle-shaped with tapering ends.",
+          "favourableConditions": {
+            "tempRangeC": [20, 26],
+            "relativeHumidityMin": 90,
+            "weatherFactors": "Cloudy days, cool night temperatures, morning dew, high relative humidity (>90%), and excessive nitrogen application."
+          },
+          "management": {
+            "cultural": [
+              "Avoid excess application of nitrogen fertilizers; split nitrogen into 3-4 doses.",
+              "Maintain proper plant spacing (15x15 cm or 20x15 cm) to improve airflow in canopy.",
+              "Use blast-tolerant/resistant varieties recommended by PJTAU (e.g. Telangana Sona RNR-15048, MTU-1010, BPT-5204 tolerant crosses)."
+            ],
+            "biological": [
+              "Seed treatment with Pseudomonas fluorescens or Trichoderma viride formulations.",
+              "Foliar spray of neem-based formulations or Pseudomonas fluorescens in early seedling stages."
+            ],
+            "chemicalClass": [
+              "Triazole group fungicides (e.g., tricyclazole class, tebuconazole class, or isoprothiolane group).",
+              "Strobilurin group fungicides (e.g., azoxystrobin class combinations registered for paddy blast)."
+            ],
+            "regulatoryDisclaimer": "Use only CIB&RC approved fungicides registered for paddy in India. Strictly adhere to container label directions and safety withholding periods. Always wear gloves, mask, and protective clothing during handling."
+          }
+        },
+        {
+          "id": "paddy_bacterial_leaf_blight",
+          "commonName": "Bacterial Leaf Blight (BLB)",
+          "nameTe": "బాక్టీరియా ఆకు ఎండు తెగులు",
+          "scientificName": "Xanthomonas oryzae pv. oryzae",
+          "type": "bacterial",
+          "status": "draft - needs expert review",
+          "source": "https://icar-iirr.org",
+          "symptoms": "Water-soaked yellowish-green translucent lesions along leaf margins that rapidly turn wavy, creamy-white to straw-colored stripes moving down the blade. Bacterial oozing beads appear on young lesions early morning.",
+          "fieldCheck": "Cut an affected green-yellow border leaf and place cut edge in a clear glass tube of water; white milky bacterial streams oozing into the water confirms bacterial blight (ooze test).",
+          "differential": "Zinc deficiency causes rusty brown spots across mid-leaf; BLB causes wavy straw-yellow drying strictly originating from the tip or edges along margins.",
+          "favourableConditions": {
+            "tempRangeC": [25, 34],
+            "relativeHumidityMin": 70,
+            "weatherFactors": "Warm rainy weather, high winds, cyclonic storms with rain splashing, and excessive urea topdressing."
+          },
+          "management": {
+            "cultural": [
+              "Temporarily withhold urea top-dressing as soon as symptoms appear; apply potash.",
+              "Drain stagnant water from the field for 3-4 days if feasible.",
+              "Select BLB-resistant varieties developed by PJTAU / ICAR (e.g., Improved Samba Mahsuri RP Bio-226)."
+            ],
+            "biological": [
+              "Seed soaking with Pseudomonas fluorescens formulations.",
+              "Spraying fresh cow-dung extract supernatant (filtered) or microbial biocontrol formulations as per university recommendations."
+            ],
+            "chemicalClass": [
+              "Copper-based bactericide class combined with antibiotic group (streptomycin + tetracycline combinations approved under statutory guidance)."
+            ],
+            "regulatoryDisclaimer": "Use only CIB&RC approved products for paddy BLB in India. Follow approved dilution and label safety instructions."
+          }
+        },
+        {
+          "id": "paddy_sheath_blight",
+          "commonName": "Sheath Blight",
+          "nameTe": "మట్ట కుళ్లు తెగులు",
+          "scientificName": "Rhizoctonia solani",
+          "type": "fungal",
+          "status": "draft - needs expert review",
+          "source": "https://pjtau.edu.in",
+          "symptoms": "Oval or serpent-like greenish-grey water-soaked lesions with irregular dark brown margins developing on leaf sheaths just above the water level. Lesions enlarge, coalesce, and produce brownish sclerotia bodies.",
+          "fieldCheck": "Part the canopy and inspect lower leaf sheaths right above the water line for greyish-green snake-like patches and mustard-seed-like dark brown sclerotial bodies.",
+          "differential": "Sheath rot causes dark brown lesions on the upper flag leaf sheath enclosing the panicle; sheath blight starts at the bottom near the water line.",
+          "favourableConditions": {
+            "tempRangeC": [28, 32],
+            "relativeHumidityMin": 85,
+            "weatherFactors": "High relative humidity (>85%), dense plant canopy, high temperature (28-32°C), and standing water."
+          },
+          "management": {
+            "cultural": [
+              "Avoid dense planting; maintain 20x15 cm spacing and skip an alley row (every 2-3 meters) for aeration and light penetration.",
+              "Balance nitrogen fertilizers with adequate potassium."
+            ],
+            "biological": [
+              "Soil application of Trichoderma harzianum or Pseudomonas fluorescens enriched farmyard manure.",
+              "Seedling dip in bio-agent suspension prior to transplanting."
+            ],
+            "chemicalClass": [
+              "Carboxamide group or triazole group fungicides (e.g., validamycin class, hexaconazole group, or propiconazole group)."
+            ],
+            "regulatoryDisclaimer": "Use only CIB&RC registered fungicides. Observe post-harvest intervals and wear protective gear."
+          }
+        },
+        {
+          "id": "paddy_brown_planthopper",
+          "commonName": "Brown Planthopper (BPH)",
+          "nameTe": "సుడి దోమ",
+          "scientificName": "Nilaparvata lugens",
+          "type": "insect",
+          "status": "draft - needs expert review",
+          "source": "https://icar-iirr.org",
+          "symptoms": "Both nymphs and adults congregate at base of tillers sucking plant sap. Infected patches dry up rapidly in circular patterns turning golden-brown, commonly referred to as 'hopper burn'.",
+          "fieldCheck": "Part tillers near water level and tap gently; tiny brown wedge-shaped hoppers jumping on water surface confirms BPH infestation.",
+          "differential": "Stem borer causes single tillers or scattered heads to dry (dead heart/white ear); BPH causes entire circular clumps of tillers to turn brown and dry simultaneously.",
+          "favourableConditions": {
+            "tempRangeC": [25, 32],
+            "relativeHumidityMin": 75,
+            "weatherFactors": "Stagnant water, dense microclimate, excessive nitrogen fertilizer, and indiscriminate early spraying of broad-spectrum synthetic pyrethroids killing natural predators."
+          },
+          "management": {
+            "cultural": [
+              "Form alley pathways (20-30 cm every 2 meters, 'alla baata') for sunlight penetration and wind circulation.",
+              "Drain water from field alternately for 3-4 days to expose hopper nymphs to heat and predators."
+            ],
+            "biological": [
+              "Conserve natural predators such as mirid bugs (Cyrtorhinus lividipennis), wolf spiders, and damselflies.",
+              "Spray neem seed kernel extract (NSKE) or azadirachtin formulations."
+            ],
+            "chemicalClass": [
+              "Pyridine-azomethine group (pymetrozine class), neonicotinoid class, or triflumezopyrim group registered for paddy BPH."
+            ],
+            "regulatoryDisclaimer": "Avoid unrecommended pyrethroid sprays that induce BPH resurgence. Follow CIB&RC labeled insecticides and wear PPE."
+          }
+        },
+        {
+          "id": "paddy_zinc_deficiency",
+          "commonName": "Zinc Deficiency (Khaira / Rusting)",
+          "nameTe": "జింక్ లోపం (ఆకు తుప్పు మచ్చలు)",
+          "scientificName": "Abiotic nutritional disorder",
+          "type": "nutrient",
+          "status": "draft - needs expert review",
+          "source": "https://pjtau.edu.in",
+          "symptoms": "Appears 2-3 weeks after transplanting. Lower leaves develop irregular rusty reddish-brown or bronze blotches starting from midrib, stunted growth, reduced tillering, and delayed maturity.",
+          "fieldCheck": "Examine if yellowing/bronzing occurs on older lower leaves uniformly across low-lying alkali/calcareous patches with poor drainage.",
+          "differential": "Blast produces spindle-shaped lesions with ash-grey centers; zinc deficiency produces diffuse rusty blotches and stunted plants without fungal mycelium or spore masses.",
+          "favourableConditions": {
+            "tempRangeC": [20, 35],
+            "relativeHumidityMin": 50,
+            "weatherFactors": "Calcareous, high pH (>7.5) alkaline soils, intensive double-cropped paddy with poor drainage and submerged reducing conditions."
+          },
+          "management": {
+            "cultural": [
+              "Drain field to allow soil aeration and oxidation.",
+              "Apply zinc sulphate (heptahydrate or monohydrate) to soil during final land preparation as per PJTAU soil-test recommendations."
+            ],
+            "biological": [
+              "Incorporate well-decomposed farmyard manure or green manure (Dhaincha/Sunn hemp) to enhance zinc bioavailability."
+            ],
+            "chemicalClass": [
+              "Chelated zinc (Zn-EDTA) or foliar grade zinc sulphate spray neutralised with agricultural lime."
+            ],
+            "regulatoryDisclaimer": "Apply micro-nutrient fertilizers strictly at soil-test recommended concentrations to avoid foliar scorch."
+          }
+        }
+      ]
+    },
+    "Maize": {
+      "nameEn": "Maize",
+      "nameTe": "మొక్కజొన్న",
+      "scientificName": "Zea mays",
+      "disorders": [
+        {
+          "id": "maize_fall_armyworm",
+          "commonName": "Fall Armyworm (FAW)",
+          "nameTe": "కత్తెర పురుగు",
+          "scientificName": "Spodoptera frugiperda",
+          "type": "insect",
+          "status": "draft - needs expert review",
+          "source": "https://millets.res.in",
+          "symptoms": "Early instar larvae scrape leaf surface creating translucent 'papery windows'. Later instars feed deeply within whorls causing large ragged holes, leaving abundant moist, sawdust-like brownish frass.",
+          "fieldCheck": "Unfurl central leaf whorl of damaged plant; look for brownish larva with four dark dots in a square on the 8th abdominal segment and an inverted 'Y' mark on the head.",
+          "differential": "Stem borer (Chilo) produces straight horizontal rows of neat pinholes across leaves; FAW produces irregular large ragged tears and heavy pellet-like sawdust frass.",
+          "favourableConditions": {
+            "tempRangeC": [22, 32],
+            "relativeHumidityMin": 60,
+            "weatherFactors": "Extended warm and humid weather with staggered planting in adjoining fields providing continuous food supply."
+          },
+          "management": {
+            "cultural": [
+              "Synchronized community planting over large contiguous areas; avoid staggered sowing.",
+              "Erect bird perches (10-15 per acre) to encourage predatory birds.",
+              "Apply dry sand or wood ash mixed with fine lime into whorls in early vegetative stage."
+            ],
+            "biological": [
+              "Install FAW pheromone traps (4-5 per acre for monitoring, 10-12 per acre for mass trapping).",
+              "Spray Bacillus thuringiensis (Bt) or Metarhizium rileyi / Beauveria bassiana formulations."
+            ],
+            "chemicalClass": [
+              "Diamide group (e.g., chlorantraniliprole class) or avermectin/spinosyn group (e.g., spinetoram or emamectin benzoate class) registered for maize FAW."
+            ],
+            "regulatoryDisclaimer": "Direct nozzle spray straight into central whorls. Use only registered insecticides following statutory label directions and wear PPE."
+          }
+        },
+        {
+          "id": "maize_turcicum_blight",
+          "commonName": "Turcicum Leaf Blight (Northern Corn Leaf Blight)",
+          "nameTe": "టర్సికమ్ ఆకు ఎండు తెగులు",
+          "scientificName": "Exserohilum turcicum (Setosphaeria turcica)",
+          "type": "fungal",
+          "status": "draft - needs expert review",
+          "source": "https://pjtau.edu.in",
+          "symptoms": "Long, elliptical, boat or cigar-shaped greyish-green to tan lesions (2.5 to 15 cm long) appearing first on lower leaves and progressing upwards. Under humid conditions, dark velvety spore growth appears on lesions.",
+          "fieldCheck": "Inspect lower leaves for elongated, spindle-cigar shaped tan dried spots running parallel to leaf veins.",
+          "differential": "Maydis leaf blight spots are smaller, rectangular, bounded by veins; Turcicum spots are much larger, boat-shaped and elliptical.",
+          "favourableConditions": {
+            "tempRangeC": [18, 27],
+            "relativeHumidityMin": 80,
+            "weatherFactors": "Cool temperatures with high relative humidity, heavy dew deposits, and cloudy overcast weather."
+          },
+          "management": {
+            "cultural": [
+              "Deep summer ploughing to bury crop residues harboring fungus.",
+              "Crop rotation with non-host crops (pulses, oilseeds).",
+              "Grow PJTAU / ICAR recommended blight-tolerant hybrids (e.g., DHM-117, DHM-121)."
+            ],
+            "biological": [
+              "Seed treatment with Trichoderma viride."
+            ],
+            "chemicalClass": [
+              "Dithiocarbamate group (mancozeb class) or triazole group (propiconazole / tebuconazole class) registered for maize."
+            ],
+            "regulatoryDisclaimer": "Use CIB&RC approved fungicides for maize. Observe proper dilution and safe pre-harvest intervals."
+          }
+        },
+        {
+          "id": "maize_nitrogen_deficiency",
+          "commonName": "Nitrogen Deficiency",
+          "nameTe": "నత్రజని లోపం",
+          "scientificName": "Abiotic nutritional deficiency",
+          "type": "nutrient",
+          "status": "draft - needs expert review",
+          "source": "https://pjtau.edu.in",
+          "symptoms": "Characteristic inverted 'V'-shaped yellowing that begins at the tip of older lower leaves and progresses along the midrib towards the leaf base. Lower leaves eventually fire (dry up) and drop early.",
+          "fieldCheck": "Check if yellowing begins strictly at the tip of the oldest leaves and forms a distinct 'V' along the midrib while margins remain greener temporarily.",
+          "differential": "Potassium deficiency causes yellowing and firing along outer leaf margins; nitrogen deficiency causes yellowing along the central midrib.",
+          "favourableConditions": {
+            "tempRangeC": [15, 38],
+            "relativeHumidityMin": 40,
+            "weatherFactors": "Leaching after heavy rainstorms on light sandy soils, waterlogged anaerobic soils, or inadequate basal/top-dress fertilizer."
+          },
+          "management": {
+            "cultural": [
+              "Split nitrogen into 3 critical stages: basal, knee-high (vegetative), and tasseling/silking stage as per PJTAU package of practices.",
+              "Ensure adequate drainage to prevent denitrification in waterlogged soils."
+            ],
+            "biological": [
+              "Seed inoculation with Azospirillum or Azotobacter biofertilizers.",
+              "Incorporate green manure or compost into soil."
+            ],
+            "chemicalClass": [
+              "Top dressing of urea or foliar spray of 1-2% urea solution for rapid recovery."
+            ],
+            "regulatoryDisclaimer": "Avoid foliar spray during hot mid-day sun to prevent leaf scorch."
+          }
+        }
+      ]
+    },
+    "Cotton": {
+      "nameEn": "Cotton",
+      "nameTe": "పత్తి",
+      "scientificName": "Gossypium hirsutum",
+      "disorders": [
+        {
+          "id": "cotton_bacterial_blight",
+          "commonName": "Bacterial Blight / Angular Leaf Spot / Blackarm",
+          "nameTe": "కోణీయ మచ్చ తెగులు / నల్లకాండం",
+          "scientificName": "Xanthomonas citri pv. malvacearum",
+          "type": "bacterial",
+          "status": "draft - needs expert review",
+          "source": "https://cicr.org.in",
+          "symptoms": "Small angular water-soaked spots bounded by leaf veins on lower surface, turning dark brown/black. Lesions extend along main veins (vein blight) and spread to branches/stems creating elongated black girdling lesions ('black arm').",
+          "fieldCheck": "Look on leaf underside for angular water-soaked spots constrained strictly by veinlets; check tender branches for dark sunken black arm lesions.",
+          "differential": "Alternaria spots are circular with concentric rings; bacterial blight spots are sharp and angular, bounded strictly by tiny veins.",
+          "favourableConditions": {
+            "tempRangeC": [25, 32],
+            "relativeHumidityMin": 80,
+            "weatherFactors": "Intermittent rainfall, warm humid days with rain splattering, and high relative humidity (>80%)."
+          },
+          "management": {
+            "cultural": [
+              "Collect and destroy crop debris after harvest.",
+              "Ensure proper drainage and avoid excessive nitrogen application.",
+              "Grow tolerant cultivars recommended for Telangana."
+            ],
+            "biological": [
+              "Seed treatment with Pseudomonas fluorescens or Bacillus subtilis."
+            ],
+            "chemicalClass": [
+              "Copper oxychloride class combined with agricultural bactericide (streptomycin sulfate group) as registered."
+            ],
+            "regulatoryDisclaimer": "Use CIB&RC approved products for cotton. Wear protective equipment."
+          }
+        },
+        {
+          "id": "cotton_pink_bollworm",
+          "commonName": "Pink Bollworm",
+          "nameTe": "గులాబీ రంగు కాయ తొలిచే పురుగు",
+          "scientificName": "Pectinophora gossypiella",
+          "type": "insect",
+          "status": "draft - needs expert review",
+          "source": "https://cicr.org.in",
+          "symptoms": "Larvae bore into flower buds causing rosetted flowers (twisted petals resembling a closed rosette). In bolls, larvae burrow into seeds and lint, creating premature dropping, rotting, and stained lint with tiny exit holes.",
+          "fieldCheck": "Inspect open flowers for rosette flower symptom; cut open 20 green bolls (20-25 days old) across the field and look for pink-colored larvae inside seeds.",
+          "differential": "Spotted bollworm (Earias) bores terminal shoots causing drooping tips; pink bollworm exclusively targets squares, flowers, and internal developing green bolls.",
+          "favourableConditions": {
+            "tempRangeC": [24, 34],
+            "relativeHumidityMin": 65,
+            "weatherFactors": "Prolonged cloudy weather, late-sown cotton, and continuous cotton cultivation across extended seasons."
+          },
+          "management": {
+            "cultural": [
+              "Terminate crop by December-January; strictly avoid ratoon cotton.",
+              "Install pheromone traps (Gossyplure) at 2 per acre for monitoring, 8 per acre for mass trapping.",
+              "Hand-pick and destroy rosetted flowers."
+            ],
+            "biological": [
+              "Release egg parasitoid Trichogramma bactrae @ 60,000/acre at weekly intervals.",
+              "Spray neem seed kernel extract (NSKE 5%) or azadirachtin."
+            ],
+            "chemicalClass": [
+              "Synthetic pyrethroid class or avermectin class or spinosyn class registered specifically for cotton pink bollworm under statutory guidance."
+            ],
+            "regulatoryDisclaimer": "Spray only when ETL threshold (8 moths/trap/night for 3 consecutive days or 10% damaged green bolls) is breached. Follow CIB&RC label."
+          }
+        },
+        {
+          "id": "cotton_magnesium_deficiency",
+          "commonName": "Magnesium Deficiency (Leaf Reddening)",
+          "nameTe": "మెగ్నీషియం లోపం (ఎరుపు ఆకులు)",
+          "scientificName": "Abiotic nutritional disorder",
+          "type": "nutrient",
+          "status": "draft - needs expert review",
+          "source": "https://pjtau.edu.in",
+          "symptoms": "Interveinal chlorosis followed by purplish-red to brick-red discoloration between the leaf veins on mature lower leaves, while the main leaf veins remain distinctly green.",
+          "fieldCheck": "Examine if red discoloration is confined strictly between the veins on older lower/middle leaves while veins remain green, especially during boll development.",
+          "differential": "Jassid hopperburn causes leaf margins to curl downward with yellowing and marginal burning; magnesium deficiency causes smooth purplish reddening strictly in interveinal areas without curled margins.",
+          "favourableConditions": {
+            "tempRangeC": [20, 38],
+            "relativeHumidityMin": 40,
+            "weatherFactors": "Light sandy red chalka soils, heavy boll load demanding high nutrients, sudden drop in night temperatures, and water stress."
+          },
+          "management": {
+            "cultural": [
+              "Maintain balanced fertilization; avoid excessive potassium which antagonizes magnesium uptake.",
+              "Soil application of magnesium sulphate in soils known to be deficient."
+            ],
+            "biological": [
+              "Incorporate bulky organic manures or vermicompost to improve soil cation exchange capacity."
+            ],
+            "chemicalClass": [
+              "Foliar spray of 1% magnesium sulphate (MgSO4) solution at square formation and boll development."
+            ],
+            "regulatoryDisclaimer": "Spray in early morning or late afternoon to avoid leaf scorch."
+          }
+        }
+      ]
+    },
+    "Groundnut": {
+      "nameEn": "Groundnut (Peanut)",
+      "nameTe": "వేరుశనగ",
+      "scientificName": "Arachis hypogaea",
+      "disorders": [
+        {
+          "id": "groundnut_tikka_leaf_spot",
+          "commonName": "Tikka Leaf Spot (Early & Late Leaf Spot)",
+          "nameTe": "టిక్కా ఆకుమచ్చ తెగులు",
+          "scientificName": "Cercospora arachidicola & Cercosporidium personatum",
+          "type": "fungal",
+          "status": "draft - needs expert review",
+          "source": "https://pjtau.edu.in",
+          "symptoms": "Early spots are reddish-brown, circular with distinct bright yellow halo on upper leaf surface. Late spots are small, dark brown to jet-black, nearly circular without yellow halo, densely covered with spores underneath. Causes severe premature defoliation.",
+          "fieldCheck": "Inspect lower leaves for small circular dark brown spots; check if lower leaves turn yellow and drop prematurely leaving bare stems.",
+          "differential": "Alternaria spots have concentric rings and are less circular; Tikka spots are rounded, darker, and lead to rapid leaflet dropping.",
+          "favourableConditions": {
+            "tempRangeC": [24, 30],
+            "relativeHumidityMin": 85,
+            "weatherFactors": "Prolonged high relative humidity (>85%), warm days with cloudy overcast conditions, and intermittent rain."
+          },
+          "management": {
+            "cultural": [
+              "Destroy volunteer plants and infected crop debris after harvest.",
+              "Intercrop with pigeonpea, pearl millet, or sorghum.",
+              "Rotate with non-leguminous crops."
+            ],
+            "biological": [
+              "Seed treatment with Trichoderma viride.",
+              "Foliar spray of neem seed kernel extract (NSKE 5%)."
+            ],
+            "chemicalClass": [
+              "Triazole group (hexaconazole or tebuconazole class) or strobilurin-triazole combination registered for groundnut."
+            ],
+            "regulatoryDisclaimer": "Use CIB&RC approved fungicides for groundnut. Observe safety guidelines."
+          }
+        },
+        {
+          "id": "groundnut_collar_rot",
+          "commonName": "Collar Rot / Crown Rot",
+          "nameTe": "మొదలు కుళ్లు తెగులు",
+          "scientificName": "Aspergillus niger",
+          "type": "fungal",
+          "status": "draft - needs expert review",
+          "source": "https://pjtau.edu.in",
+          "symptoms": "Sudden wilting and drying of seedlings within 30 days of sowing. The collar region near the soil surface rots, turns dark brown, and becomes densely covered with black powdery fungal spore masses.",
+          "fieldCheck": "Uproot wilted seedling; examine collar region at soil line for blackened decaying stem covered with soot-like black powdery spores.",
+          "differential": "Stem rot (Sclerotium rolfsii) produces white fan-like cottony mycelium with mustard-like brown sclerotia; collar rot produces dense black powdery sooty spores.",
+          "favourableConditions": {
+            "tempRangeC": [28, 35],
+            "relativeHumidityMin": 60,
+            "weatherFactors": "High soil temperatures, dry soil followed by irrigation, mechanical damage during intercultivation."
+          },
+          "management": {
+            "cultural": [
+              "Deep summer ploughing to expose fungal spores to solar heat.",
+              "Avoid sowing seeds too deep; maintain optimum depth (4-5 cm).",
+              "Crop rotation with cereals (sorghum, maize)."
+            ],
+            "biological": [
+              "Seed treatment with Trichoderma viride or Pseudomonas fluorescens formulations."
+            ],
+            "chemicalClass": [
+              "Dithiocarbamate group (mancozeb) or carboxin-thiram combination class registered for groundnut seed treatment."
+            ],
+            "regulatoryDisclaimer": "Seed treatment is statutory and preventive. Follow manufacturer label instructions."
+          }
+        },
+        {
+          "id": "groundnut_iron_chlorosis",
+          "commonName": "Iron Deficiency (Iron Chlorosis)",
+          "nameTe": "ఇనుము లోపం (పై ఆకులు తెల్లబారడం)",
+          "scientificName": "Abiotic nutritional disorder",
+          "type": "nutrient",
+          "status": "draft - needs expert review",
+          "source": "https://pjtau.edu.in",
+          "symptoms": "Young apical leaves at the top of the canopy turn pale yellow, and in severe cases bleach into ivory white, while veins may initially remain faintly green. Stunted growth.",
+          "fieldCheck": "Observe if yellowing is strictly confined to the youngest top leaves while older lower leaves remain healthy and dark green.",
+          "differential": "Nitrogen and magnesium deficiencies appear first on older lower leaves; iron chlorosis appears exclusively on the newest youngest crown leaves.",
+          "favourableConditions": {
+            "tempRangeC": [22, 38],
+            "relativeHumidityMin": 40,
+            "weatherFactors": "Calcareous, alkaline (pH > 7.8) black cotton soils, waterlogged or excessively compacted soils immobilizing iron."
+          },
+          "management": {
+            "cultural": [
+              "Avoid over-irrigation and stagnant water in heavy soils.",
+              "Incorporate organic manures (FYM, compost) to lower localized rhizosphere pH."
+            ],
+            "biological": [
+              "Application of sulphur-oxidizing or iron-solubilizing bio-inoculants."
+            ],
+            "chemicalClass": [
+              "Foliar spray of 0.5% ferrous sulphate (FeSO4) mixed with 0.1% citric acid or chelated iron (Fe-EDTA)."
+            ],
+            "regulatoryDisclaimer": "Spray on cool mornings. Follow university concentration guidelines to avoid leaf burn."
+          }
+        }
+      ]
+    },
+    "Sesame": {
+      "nameEn": "Sesame (Gingelly)",
+      "nameTe": "నువ్వులు",
+      "scientificName": "Sesamum indicum",
+      "disorders": [
+        {
+          "id": "sesame_phyllody",
+          "commonName": "Sesame Phyllody",
+          "nameTe": "ఆకుజెముడు / ఫిల్లోడి తెగులు",
+          "scientificName": "Phytoplasma (transmitted by leafhopper Orosius albicinctus)",
+          "type": "other",
+          "status": "draft - needs expert review",
+          "source": "https://dor-icar.org.in",
+          "symptoms": "All floral parts are transformed into green leaf-like structures (virescence and phyllody). Severe proliferation of auxiliary shoots gives a stunted, bunched 'witches broom' appearance; plants become completely sterile.",
+          "fieldCheck": "Look for plants where flowers have turned completely green, leafy and sterile with excessive small bunched shoot proliferation at top.",
+          "differential": "Normal sesame produces tubular pinkish-white flowers; phyllody-infected plants produce green bunches of deformed leaves instead of flowers.",
+          "favourableConditions": {
+            "tempRangeC": [25, 35],
+            "relativeHumidityMin": 50,
+            "weatherFactors": "Dry warm conditions favoring rapid buildup and migration of the vector leafhopper (Orosius albicinctus)."
+          },
+          "management": {
+            "cultural": [
+              "Rogue out and destroy infected phyllody plants immediately upon detection to stop vector acquisition.",
+              "Avoid delayed sowing; intercrop with pearl millet or redgram."
+            ],
+            "biological": [
+              "Install yellow sticky traps (10-12 per acre) to monitor and mass trap leafhopper vectors.",
+              "Spray neem seed kernel extract (NSKE 5%)."
+            ],
+            "chemicalClass": [
+              "Systemic neonicotinoid class insecticide registered for leafhopper vector control on sesame."
+            ],
+            "regulatoryDisclaimer": "Control the vector early in vegetative stage. Follow CIB&RC directions."
+          }
+        },
+        {
+          "id": "sesame_leaf_webber",
+          "commonName": "Shoot Webbing and Pod Caterpillar",
+          "nameTe": "ఆకు ముడుత & కాయ తొలిచే పురుగు",
+          "scientificName": "Antigastra catalaunalis",
+          "type": "insect",
+          "status": "draft - needs expert review",
+          "source": "https://pjtau.edu.in",
+          "symptoms": "Larvae web top leaves together with silk and feed inside. Later, larvae bore into tender shoots, flower buds, and developing green capsules, causing drying of shoots and perforated pods with dropped frass.",
+          "fieldCheck": "Inspect apical shoot tips for curled webbed leaves bound with white silken threads; open the web to locate the active green larva with black spots.",
+          "differential": "Aphid infestation causes sticky honeydew and leaf crinkling; Antigastra causes distinctly webbed silken nests with chewed shoot tips.",
+          "favourableConditions": {
+            "tempRangeC": [25, 34],
+            "relativeHumidityMin": 55,
+            "weatherFactors": "Warm dry spells interspersed with light showers during vegetative and flowering stages."
+          },
+          "management": {
+            "cultural": [
+              "Hand-pick and crush webbed leaf clusters in initial stage of attack.",
+              "Deep summer ploughing to expose pupae in soil."
+            ],
+            "biological": [
+              "Conserve natural braconid parasitoids.",
+              "Spray neem oil formulation or Bacillus thuringiensis."
+            ],
+            "chemicalClass": [
+              "Organophosphate group (quinalphos class) or avermectin group registered for sesame under label recommendations."
+            ],
+            "regulatoryDisclaimer": "Spray during early morning or late afternoon when larvae are active. Wear PPE."
+          }
+        }
+      ]
+    },
+    "Redgram": {
+      "nameEn": "Redgram (Pigeonpea / Arhar)",
+      "nameTe": "కందులు",
+      "scientificName": "Cajanus cajan",
+      "disorders": [
+        {
+          "id": "redgram_fusarium_wilt",
+          "commonName": "Fusarium Wilt",
+          "nameTe": "ఎండు తెగులు",
+          "scientificName": "Fusarium udum",
+          "type": "fungal",
+          "status": "draft - needs expert review",
+          "source": "https://crida.in",
+          "symptoms": "Gradual wilting, drooping, and yellowing of foliage beginning on one branch or across the entire plant. When the main stem/taproot is split longitudinally, distinct blackish-purple vascular streaks are visible.",
+          "fieldCheck": "Split the main stem and collar of the wilted plant vertically with a knife; observe characteristic dark purple/brown vascular browning inside the wood.",
+          "differential": "Termite or root-rot damage shows chewed outer roots; Fusarium wilt exhibits clear internal vascular discoloration running up the internal stem vessels.",
+          "favourableConditions": {
+            "tempRangeC": [20, 30],
+            "relativeHumidityMin": 50,
+            "weatherFactors": "Monocropping in heavy black soils, soil compaction, and flowering/podding stage stress."
+          },
+          "management": {
+            "cultural": [
+              "Crop rotation with sorghum, tobacco, or maize for at least 3 years.",
+              "Grow wilt-resistant/tolerant PJTAU cultivars (e.g., WRG-65, Asha ICPL-87119, PRG-176).",
+              "Solarize soil during peak summer months."
+            ],
+            "biological": [
+              "Seed treatment with Trichoderma viride formulations.",
+              "Soil application of Trichoderma enriched farmyard manure at planting."
+            ],
+            "chemicalClass": [
+              "Preventive seed dressing with triazole or benzimidazole group fungicides (carbendazim class) registered for pigeonpea."
+            ],
+            "regulatoryDisclaimer": "No curative soil drench is commercially effective once wilt fully establishes. Focus on resistant cultivars and seed bio-protection."
+          }
+        },
+        {
+          "id": "redgram_pod_borer",
+          "commonName": "Gram Pod Borer",
+          "nameTe": "శనగ పచ్చపురుగు",
+          "scientificName": "Helicoverpa armigera",
+          "type": "insect",
+          "status": "draft - needs expert review",
+          "source": "https://pjtau.edu.in",
+          "symptoms": "Larvae feed on foliage, flower buds, and bore neat circular holes into developing pods, thrusting their head inside while the rest of the body remains outside. Damaged pods have empty seeds and frass.",
+          "fieldCheck": "Check flowers and green pods for round circular bore-holes and presence of plump greenish/brown larvae with lateral stripes.",
+          "differential": "Pod fly (Melanagromyza) shows tiny pin-sized oviposition dots and larvae remain entirely inside seed with no large exit holes; Helicoverpa creates conspicuous large round holes.",
+          "favourableConditions": {
+            "tempRangeC": [22, 32],
+            "relativeHumidityMin": 60,
+            "weatherFactors": "Warm overcast weather, dense canopy, and synchronous flowering of host crops across the landscape."
+          },
+          "management": {
+            "cultural": [
+              "Install bird perches (15-20 per acre) during flowering.",
+              "Grow marigold or sorghum as trap crops along field borders.",
+              "Shake plants over cloth sheets early in the morning to dislodge larvae."
+            ],
+            "biological": [
+              "Install Helicoverpa pheromone traps (4 per acre for monitoring, 8 per acre for mass trapping).",
+              "Foliar spray of HaNPV (Helicoverpa Nuclear Polyhedrosis Virus) or Bacillus thuringiensis (Bt).",
+              "Apply neem seed kernel extract (NSKE 5%)."
+            ],
+            "chemicalClass": [
+              "Diamide group (chlorantraniliprole class) or avermectin group (emamectin benzoate class) registered for redgram pod borer."
+            ],
+            "regulatoryDisclaimer": "Spray at peak flowering / early podding when small larvae are noticed. Strictly adhere to CIB&RC label and wear PPE."
+          }
+        },
+        {
+          "id": "redgram_sterility_mosaic",
+          "commonName": "Sterility Mosaic Disease (SMD)",
+          "nameTe": "వెర్రి తెగులు / మొజాయిక్ తెగులు",
+          "scientificName": "Pigeonpea sterility mosaic virus (transmitted by eriophyid mite Aceria cajani)",
+          "type": "viral",
+          "status": "draft - needs expert review",
+          "source": "https://crida.in",
+          "symptoms": "Severe stunting, bushy vegetative proliferation with reduced leaf size and yellowish mosaic mottling. Infected plants fail to produce flowers or pods, leading to total sterility.",
+          "fieldCheck": "Look for bushy pale-green patches of plants that produce dense small leaves but zero flowers or pods in the middle of a flowering field.",
+          "differential": "Healthy redgram flowers profusely; SMD plants remain intensely vegetative, bushy, mosaic-patterned, and completely sterile.",
+          "favourableConditions": {
+            "tempRangeC": [24, 34],
+            "relativeHumidityMin": 60,
+            "weatherFactors": "Continuous cultivation of pigeonpea, presence of ratoon or perennial plants harboring the eriophyid mite vector."
+          },
+          "management": {
+            "cultural": [
+              "Rogue out and destroy infected SMD plants as soon as symptoms appear in young crop.",
+              "Avoid keeping ratoon or perennial pigeonpea near annual crop fields.",
+              "Plant SMD-resistant varieties (e.g., ICPL-87119 Asha, BSMR-736)."
+            ],
+            "biological": [
+              "Conserve predatory phytoseiid mites."
+            ],
+            "chemicalClass": [
+              "Acaricide / miticide class (propargite class or wettable sulphur group) to control the eriophyid mite vector."
+            ],
+            "regulatoryDisclaimer": "Control mite vectors early before viral spread across field. Follow CIB&RC approved guidelines."
+          }
+        }
+      ]
+    },
+    "Chilli": {
+      "nameEn": "Chilli",
+      "nameTe": "మిర్చి",
+      "scientificName": "Capsicum annuum",
+      "disorders": [
+        {
+          "id": "chilli_murda_leaf_curl",
+          "commonName": "Chilli Leaf Curl & Thrips Complex (Murda Complex)",
+          "nameTe": "ముడత తెగులు / బొబ్బర (తామర పురుగులు & నల్లి)",
+          "scientificName": "Thrips (Scirtothrips dorsalis), Mites (Polyphagotarsonemus latus) & Begomovirus",
+          "type": "other",
+          "status": "draft - needs expert review",
+          "source": "https://pjtau.edu.in",
+          "symptoms": "Leaves curl upward into a boat shape with crinkled margins due to thrips sucking; downward inverted boat curling with thick leathery texture due to yellow mites; yellow mosaic puckering due to virus.",
+          "fieldCheck": "Inspect tender apical leaves with hand lens: upward curling indicates thrips; downward curling with elongated petioles indicates yellow mite infestation.",
+          "differential": "Fungal powdery mildew produces white powdery coating; murda complex produces severe physical twisting, curling, and brittleness without powdery mold.",
+          "favourableConditions": {
+            "tempRangeC": [25, 35],
+            "relativeHumidityMin": 50,
+            "weatherFactors": "Dry, warm weather spells favoring rapid proliferation of thrips and whitefly vectors."
+          },
+          "management": {
+            "cultural": [
+              "Raise barrier crops (2-3 rows of maize, sorghum, or pearl millet) around chilli field.",
+              "Avoid excessive nitrogenous fertilizers; maintain balanced nutrition.",
+              "Install blue sticky traps for thrips and yellow sticky traps for whiteflies/aphids (15-20 per acre)."
+            ],
+            "biological": [
+              "Foliar spray of neem oil (10,000 ppm) or pongamia oil formulations.",
+              "Spray entomopathogenic fungi such as Lecanicillium lecanii or Beauveria bassiana."
+            ],
+            "chemicalClass": [
+              "For thrips: spinosyn class or phenylpyrazole class (fipronil group) registered for chilli.",
+              "For mites: acaricide group (spiromesifen class or diafenthiuron group) registered for chilli."
+            ],
+            "regulatoryDisclaimer": "Alternate insecticide modes of action to prevent rapid resistance development. Follow statutory CIB&RC label instructions and observe PPE."
+          }
+        },
+        {
+          "id": "chilli_anthracnose_fruit_rot",
+          "commonName": "Anthracnose / Dieback / Fruit Rot",
+          "nameTe": "కొమ్మ ఎండు తెగులు & కాయకుళ్లు",
+          "scientificName": "Colletotrichum capsici (Colletotrichum truncatum)",
+          "type": "fungal",
+          "status": "draft - needs expert review",
+          "source": "https://pjtau.edu.in",
+          "symptoms": "On twigs: dieback starting from tip downwards, twigs turning straw-colored with black acervuli dots. On ripe chillies: circular sunken water-soaked spots with concentric rings of black fungal dots; fruits bleach and dry prematurely.",
+          "fieldCheck": "Examine drying twigs from tip down for black pin-head dots; inspect ripening fruits for sunken circular spots with concentric rings.",
+          "differential": "Sunscald causes papery bleached patches on fruit side exposed to harsh sun without black concentric acervuli rings; anthracnose has distinct sunken spots with rings of black fruiting bodies.",
+          "favourableConditions": {
+            "tempRangeC": [26, 32],
+            "relativeHumidityMin": 80,
+            "weatherFactors": "High relative humidity (>80%), heavy dew, and unseasonal rainfall during ripening stage."
+          },
+          "management": {
+            "cultural": [
+              "Use certified disease-free seed.",
+              "Collect and burn infected twigs and dried mummified fruit.",
+              "Avoid overhead sprinkler irrigation during fruit ripening stage."
+            ],
+            "biological": [
+              "Seed treatment with Trichoderma viride or Pseudomonas fluorescens.",
+              "Foliar spray of microbial bio-antagonists."
+            ],
+            "chemicalClass": [
+              "Triazole group (difenoconazole or tebuconazole class) or strobilurin group (azoxystrobin class) registered for chilli anthracnose."
+            ],
+            "regulatoryDisclaimer": "Use CIB&RC approved fungicides for chilli. Observe pre-harvest intervals (PHI) to prevent residue on marketable dry chillies."
+          }
+        },
+        {
+          "id": "chilli_powdery_mildew",
+          "commonName": "Powdery Mildew",
+          "nameTe": "బూడిద తెగులు",
+          "scientificName": "Leveillula taurica",
+          "type": "fungal",
+          "status": "draft - needs expert review",
+          "source": "https://pjtau.edu.in",
+          "symptoms": "White powdery fungal patches develop on the lower surface of leaves. Corresponding upper leaf surface shows chlorotic bright yellow patches. Leaves curl, dry up, and drop prematurely.",
+          "fieldCheck": "Turn over yellowing leaves and check lower leaf surface for distinctive white powdery mildew patches.",
+          "differential": "Leaf curl complex produces distortion without fungal powder; powdery mildew has clear white flour-like growth on leaf underside.",
+          "favourableConditions": {
+            "tempRangeC": [20, 30],
+            "relativeHumidityMin": 65,
+            "weatherFactors": "Warm dry days followed by cool humid nights, heavy dew, especially from November to February."
+          },
+          "management": {
+            "cultural": [
+              "Provide clean cultivation and weed-free field borders.",
+              "Avoid dense planting; maintain good light penetration."
+            ],
+            "biological": [
+              "Foliar spray of ampelomyces or Bacillus subtilis formulations.",
+              "Spray wettable sulphur at recommended concentrations."
+            ],
+            "chemicalClass": [
+              "Inorganic sulphur group (wettable sulphur 80% WP) or triazole group (penconazole or myclobutanil class) registered for chilli."
+            ],
+            "regulatoryDisclaimer": "Do not spray sulphur during hot mid-day sun (>35°C) to avoid phytotoxicity."
+          }
+        }
+      ]
+    },
+    "Soybean": {
+      "nameEn": "Soybean",
+      "nameTe": "సోయాబీన్",
+      "scientificName": "Glycine max",
+      "disorders": [
+        {
+          "id": "soybean_yellow_mosaic",
+          "commonName": "Yellow Mosaic Virus (YMV)",
+          "nameTe": "పసుపు రంగు మొజాయిక్ తెగులు",
+          "scientificName": "Mungbean yellow mosaic India virus (MYMIV, transmitted by whitefly Bemisia tabaci)",
+          "type": "viral",
+          "status": "draft - needs expert review",
+          "source": "https://iisr.icar.gov.in",
+          "symptoms": "Bright yellow chlorotic specks appear on young leaves, coalescing into prominent alternating yellow and green mosaic patches. Leaves turn completely golden yellow, plants become stunted, and pods are small, deformed with few seeds.",
+          "fieldCheck": "Inspect youngest upper leaves for vivid bright yellow patches contrasting with green areas; check leaf undersides for tiny powdery whiteflies.",
+          "differential": "Nutrient chlorosis is uniform or interveinal; YMV produces irregular mosaic patches of yellow and green islands across leaf blades.",
+          "favourableConditions": {
+            "tempRangeC": [25, 35],
+            "relativeHumidityMin": 55,
+            "weatherFactors": "Warm dry spells during early rainy season accelerating whitefly population expansion."
+          },
+          "management": {
+            "cultural": [
+              "Sow YMV-tolerant/resistant varieties recommended for Telangana (e.g., JS-335 tolerant lines, JS-93-05, Basar / JS-97-52).",
+              "Rogue out and destroy infected yellow plants within first 30 days.",
+              "Install yellow sticky traps (10-12 per acre) across the field."
+            ],
+            "biological": [
+              "Seed treatment with bio-agents and foliar spray of neem formulations (azadirachtin)."
+            ],
+            "chemicalClass": [
+              "Systemic neonicotinoid class insecticide registered for whitefly vector management on soybean."
+            ],
+            "regulatoryDisclaimer": "Control whitefly vectors in early vegetative phase. Follow CIB&RC instructions and wear PPE."
+          }
+        },
+        {
+          "id": "soybean_girdle_beetle",
+          "commonName": "Girdle Beetle",
+          "nameTe": "రింగ్ బీటిల్ / కాండం తొలిచే పురుగు",
+          "scientificName": "Obereopsis brevis",
+          "type": "insect",
+          "status": "draft - needs expert review",
+          "source": "https://iisr.icar.gov.in",
+          "symptoms": "Female beetle cuts two distinct parallel circular rings/girdles on stem or petiole and lays an egg between them. The portion of the stem or leaf above the girdle wilts, dries up, and droops downward characteristically.",
+          "fieldCheck": "Look for wilted drooping petioles; inspect the stem for two neat parallel circular cuts 1-2 cm apart; splitting the stem reveals small creamish grub boring down.",
+          "differential": "Stem fly causes reddish-brown zig-zag tunnel inside the stem from ground level; girdle beetle specifically causes two distinct external circular cuts with withering above the cut.",
+          "favourableConditions": {
+            "tempRangeC": [24, 32],
+            "relativeHumidityMin": 70,
+            "weatherFactors": "Continuous humid monsoon weather during July and August coinciding with vegetative growth."
+          },
+          "management": {
+            "cultural": [
+              "Hand-pick and destroy girdled petioles or stems along with eggs/larvae in early infestation.",
+              "Maintain optimum plant population (don't over-sow).",
+              "Crop rotation with non-host crops."
+            ],
+            "biological": [
+              "Foliar spray of neem seed kernel extract (NSKE 5%).",
+              "Conserve generalist predators like spiders and reduviid bugs."
+            ],
+            "chemicalClass": [
+              "Organophosphate group (triazophos class) or diamide group registered for soybean girdle beetle under statutory label."
+            ],
+            "regulatoryDisclaimer": "Apply when ETL (5-10 girdled plants per meter row) is observed. Wear protective clothing."
+          }
+        },
+        {
+          "id": "soybean_potassium_deficiency",
+          "commonName": "Potassium Deficiency",
+          "nameTe": "పొటాష్ లోపం",
+          "scientificName": "Abiotic nutritional disorder",
+          "type": "nutrient",
+          "status": "draft - needs expert review",
+          "source": "https://pjtau.edu.in",
+          "symptoms": "Chlorosis followed by necrosis (firing and browning) along the outer edges and margins of older lower leaves, while the center and veins remain green. Leaf margins appear scorched and curl downward.",
+          "fieldCheck": "Inspect older leaves at the bottom of the plant for distinct brown marginal leaf scorch running along the outer edges.",
+          "differential": "Nitrogen deficiency causes 'V'-shaped yellowing down the center midrib; potassium deficiency specifically scorches the outer perimeter edges.",
+          "favourableConditions": {
+            "tempRangeC": [20, 36],
+            "relativeHumidityMin": 45,
+            "weatherFactors": "Light sandy or shallow soils, drought stress, or fields with continuous cropping without balanced potash fertilizer application."
+          },
+          "management": {
+            "cultural": [
+              "Apply recommended dose of muriate of potash (MOP) as basal application based on PJTAU soil test.",
+              "Incorporate crop residues to recycle soil potassium."
+            ],
+            "biological": [
+              "Application of potassium-solubilizing bacteria (KSB) biofertilizer."
+            ],
+            "chemicalClass": [
+              "Foliar spray of 1-2% potassium nitrate (13-0-45) or sulphate of potash (SOP) solution during reproductive stage."
+            ],
+            "regulatoryDisclaimer": "Spray during cool morning or evening hours."
+          }
+        }
+      ]
+    }
+  }
+}

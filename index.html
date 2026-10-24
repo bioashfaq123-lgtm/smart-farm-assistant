@@ -744,6 +744,257 @@ pre { white-space: pre-wrap; font: inherit; margin: 0; }
   margin-top: 3px;
 }
 
+/* --- GUIDED CROP DISEASE DIAGNOSIS STYLES --- */
+.guide-box {
+  background: #edf7ed;
+  border: 1px solid #c8e6c9;
+  border-radius: 10px;
+  padding: 12px;
+}
+:root[data-theme="dark"] .guide-box {
+  background: rgba(46, 125, 50, 0.15);
+  border-color: rgba(46, 125, 50, 0.3);
+}
+.guide-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 8px;
+}
+.guide-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  line-height: 1.35;
+}
+.guide-icon {
+  font-size: 18px;
+  flex: 0 0 auto;
+}
+.photo-slots-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 6px;
+}
+.photo-slot {
+  background: var(--bg);
+  border: 1.5px dashed var(--bd);
+  border-radius: 10px;
+  height: 105px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color .15s, background .15s;
+}
+.photo-slot:hover {
+  border-color: var(--pri);
+}
+.slot-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  cursor: pointer;
+  padding: 4px;
+  text-align: center;
+}
+.slot-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text);
+  margin-top: 2px;
+}
+.slot-hint {
+  font-size: 9.5px;
+  color: var(--muted);
+  line-height: 1.2;
+}
+.slot-filled {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+.slot-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.slot-quality-badge {
+  position: absolute;
+  bottom: 3px;
+  left: 3px;
+  right: 3px;
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 2px 4px;
+  border-radius: 4px;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.slot-quality-badge.good {
+  background: rgba(46, 125, 50, 0.88);
+}
+.slot-quality-badge.warn {
+  background: rgba(230, 81, 0, 0.88);
+}
+.slot-remove-btn {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  border: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  padding: 0;
+}
+.slot-remove-btn:hover {
+  background: #c62828;
+}
+.ctx-box {
+  background: var(--bg);
+  border: 1px solid var(--bd);
+  border-radius: 10px;
+  padding: 12px;
+}
+.ctx-group {
+  margin-bottom: 10px;
+}
+.ctx-group:last-child {
+  margin-bottom: 0;
+}
+.ctx-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.pill-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.pill-btn {
+  border: 1px solid var(--bd);
+  background: var(--card);
+  color: var(--text);
+  padding: 5px 9px;
+  border-radius: 16px;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s ease;
+  line-height: 1.3;
+}
+.pill-btn:hover {
+  border-color: var(--pri);
+}
+.pill-btn.on {
+  background: var(--pri);
+  color: #ffffff;
+  border-color: var(--pri);
+  box-shadow: 0 1px 4px rgba(46, 125, 50, 0.3);
+}
+.diag-res-card {
+  background: var(--card);
+  border: 1px solid var(--bd);
+  border-left: 5px solid var(--pri);
+  border-radius: 10px;
+  padding: 16px;
+  margin-top: 14px;
+}
+.diag-conf-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.diag-conf-pill.high {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+}
+.diag-conf-pill.medium {
+  background: #fff8e1;
+  color: #f57f17;
+  border: 1px solid #ffe082;
+}
+.diag-conf-pill.low {
+  background: #ffebee;
+  color: #c62828;
+  border: 1px solid #ffcdd2;
+}
+.diag-section-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--pri-dark);
+  margin: 12px 0 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+:root[data-theme="dark"] .diag-section-title {
+  color: #a5d6a7;
+}
+.diag-mgmt-step {
+  padding: 8px 10px;
+  background: var(--bg);
+  border-radius: 6px;
+  margin-bottom: 6px;
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+.diag-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+.diag-action-btn {
+  flex: 1 1 140px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid var(--bd);
+  background: var(--card);
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-decoration: none;
+}
+.diag-action-btn.whatsapp {
+  background: #25d366;
+  color: #fff;
+  border-color: #25d366;
+}
+.diag-feedback-box {
+  margin-top: 14px;
+  padding: 10px 12px;
+  background: var(--bg);
+  border: 1px dashed var(--bd);
+  border-radius: 8px;
+  font-size: 12px;
+}
+
 @media print {
   header, nav, #sub_banner, #float_chat_btn, .no-print, .btn, .lang-toggle, .demo-pill, .seed-action-row, #s_reset {
     display: none !important;
@@ -1078,13 +1329,207 @@ pre { white-space: pre-wrap; font: inherit; margin: 0; }
   </div>
 </div></div></section>
 
-<section id="dis"><div class="card"><h2 data-i18n="dis_title">Crop disease and pest check</h2>
-<label data-i18n="dis_crop">Crop</label><select id="d_crop"></select>
-<label data-i18n="dis_lang">Answer language</label><select id="d_lang"><option value="English">English</option><option value="Telugu">Telugu</option></select>
-<label data-i18n="dis_photo">Photo of the affected leaf or plant</label><input id="d_file" type="file" accept="image/*" capture="environment">
-<img id="d_img" class="pv" alt="Selected leaf photo">
-<button class="btn" id="d_go" disabled data-i18n="dis_diagnose">Diagnose</button><div id="d_out"></div>
-<div class="note" data-i18n="dis_disclaimer">AI suggestion only. Confirm with your local agriculture or extension officer before spraying anything.</div></div></section>
+<section id="dis">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px">
+      <h2 style="margin:0" data-i18n="dis_title">Crop Disease & Pest Diagnosis</h2>
+      <span class="demo-pill active" style="font-size:11px" data-i18n="dis_badge_pjtau">PJTAU & ICAR Standards</span>
+    </div>
+    <p class="muted" style="margin:0 0 12px;font-size:12.5px" data-i18n="dis_subtitle">
+      AI clinical assistant for Telangana crops. Management advice is sourced directly from university packages of practices.
+    </p>
+
+    <!-- Crop & Language Selection -->
+    <div class="row">
+      <div>
+        <label data-i18n="dis_crop">Crop</label>
+        <select id="d_crop"></select>
+      </div>
+      <div>
+        <label data-i18n="dis_lang">Response Language</label>
+        <select id="d_lang">
+          <option value="English">English</option>
+          <option value="Telugu">తెలుగు (Telugu)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Guided Capture Instructions Banner with Icons -->
+    <div class="guide-box" style="margin:14px 0 12px">
+      <div style="font-weight:700;color:#1b5e20;font-size:12.5px;margin-bottom:6px;display:flex;align-items:center;gap:6px">
+        <span>📸</span> <span data-i18n="dis_guide_title">Photo Capture Guide (1 to 3 Photos):</span>
+      </div>
+      <div class="guide-grid">
+        <div class="guide-item">
+          <div class="guide-icon">🌿</div>
+          <div class="guide-txt" data-i18n="dis_guide_leaf"><b>1. Close-up:</b> Affected leaf in clear daylight</div>
+        </div>
+        <div class="guide-item">
+          <div class="guide-icon">🌾</div>
+          <div class="guide-txt" data-i18n="dis_guide_plant"><b>2. Whole Plant:</b> Overall shape & lodging</div>
+        </div>
+        <div class="guide-item">
+          <div class="guide-icon">🔍</div>
+          <div class="guide-txt" data-i18n="dis_guide_underside"><b>3. Underside:</b> Spores or hidden insects</div>
+        </div>
+        <div class="guide-item">
+          <div class="guide-icon">🍃</div>
+          <div class="guide-txt" data-i18n="dis_guide_healthy"><b>4. Comparison:</b> Healthy leaf nearby</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Multi-Slot Photo Uploaders with In-Browser Quality Verification -->
+    <label style="margin-top:10px" data-i18n="dis_photos_label">Upload 1 to 3 photos (Camera or Gallery)</label>
+    <div class="photo-slots-container">
+      <!-- Slot 1 (Primary) -->
+      <div class="photo-slot" id="slot_wrap_0">
+        <input type="file" id="d_slot_input_0" accept="image/*" capture="environment" style="display:none">
+        <div class="slot-empty" id="slot_empty_0" onclick="$('d_slot_input_0').click()">
+          <span style="font-size:24px">📷</span>
+          <span class="slot-label" data-i18n="dis_slot_1">Photo 1 (Required)</span>
+          <span class="slot-hint" data-i18n="dis_slot_1_hint">Affected leaf / part</span>
+        </div>
+        <div class="slot-filled" id="slot_filled_0" style="display:none">
+          <img id="slot_img_0" class="slot-thumb" alt="Photo 1 preview">
+          <div id="slot_badge_0" class="slot-quality-badge"></div>
+          <button type="button" class="slot-remove-btn" onclick="clearPhotoSlot(0)" title="Remove photo">✕</button>
+        </div>
+      </div>
+
+      <!-- Slot 2 (Optional) -->
+      <div class="photo-slot" id="slot_wrap_1">
+        <input type="file" id="d_slot_input_1" accept="image/*" capture="environment" style="display:none">
+        <div class="slot-empty" id="slot_empty_1" onclick="$('d_slot_input_1').click()">
+          <span style="font-size:24px">📸</span>
+          <span class="slot-label" data-i18n="dis_slot_2">Photo 2 (Optional)</span>
+          <span class="slot-hint" data-i18n="dis_slot_2_hint">Whole plant / underside</span>
+        </div>
+        <div class="slot-filled" id="slot_filled_1" style="display:none">
+          <img id="slot_img_1" class="slot-thumb" alt="Photo 2 preview">
+          <div id="slot_badge_1" class="slot-quality-badge"></div>
+          <button type="button" class="slot-remove-btn" onclick="clearPhotoSlot(1)" title="Remove photo">✕</button>
+        </div>
+      </div>
+
+      <!-- Slot 3 (Optional) -->
+      <div class="photo-slot" id="slot_wrap_2">
+        <input type="file" id="d_slot_input_2" accept="image/*" capture="environment" style="display:none">
+        <div class="slot-empty" id="slot_empty_2" onclick="$('d_slot_input_2').click()">
+          <span style="font-size:24px">🍃</span>
+          <span class="slot-label" data-i18n="dis_slot_3">Photo 3 (Optional)</span>
+          <span class="slot-hint" data-i18n="dis_slot_3_hint">Healthy comparison leaf</span>
+        </div>
+        <div class="slot-filled" id="slot_filled_2" style="display:none">
+          <img id="slot_img_2" class="slot-thumb" alt="Photo 3 preview">
+          <div id="slot_badge_2" class="slot-quality-badge"></div>
+          <button type="button" class="slot-remove-btn" onclick="clearPhotoSlot(2)" title="Remove photo">✕</button>
+        </div>
+      </div>
+    </div>
+    <div id="d_quality_warnings" style="margin-top:8px"></div>
+
+    <!-- Context Questions (Tap Choices / Pills) -->
+    <div class="ctx-box" style="margin-top:14px">
+      <div style="font-weight:700;color:var(--text);font-size:13px;margin-bottom:8px;display:flex;align-items:center;gap:6px">
+        <span>📋</span> <span data-i18n="dis_ctx_title">Field Context (Tap choices to help diagnose accurately):</span>
+      </div>
+
+      <!-- Growth Stage -->
+      <div class="ctx-group">
+        <div class="ctx-label" data-i18n="dis_ctx_stage">Growth Stage / Days Since Sowing:</div>
+        <div class="pill-group" id="ctx_stage_pills">
+          <button type="button" class="pill-btn on" data-val="vegetative" data-i18n="dis_stg_veg">Vegetative (పైరు దశ)</button>
+          <button type="button" class="pill-btn" data-val="seedling" data-i18n="dis_stg_seedling">Seedling (మొలక/నారు దశ)</button>
+          <button type="button" class="pill-btn" data-val="flowering" data-i18n="dis_stg_flowering">Flowering / Fruiting (పూత/కాయ దశ)</button>
+          <button type="button" class="pill-btn" data-val="maturity" data-i18n="dis_stg_maturity">Maturity / Grain filling (పక్వత దశ)</button>
+        </div>
+      </div>
+
+      <!-- Affected Part -->
+      <div class="ctx-group">
+        <div class="ctx-label" data-i18n="dis_ctx_part">Affected Plant Part:</div>
+        <div class="pill-group" id="ctx_part_pills">
+          <button type="button" class="pill-btn on" data-val="leaf" data-i18n="dis_part_leaf">Leaf (ఆకు)</button>
+          <button type="button" class="pill-btn" data-val="stem" data-i18n="dis_part_stem">Stem / Branch (కాండం/కొమ్మ)</button>
+          <button type="button" class="pill-btn" data-val="fruit" data-i18n="dis_part_fruit">Fruit / Pod / Ear (కాయ/కంకి)</button>
+          <button type="button" class="pill-btn" data-val="root" data-i18n="dis_part_root">Root / Collar (వేరు/మొదలు)</button>
+        </div>
+      </div>
+
+      <!-- Spread Pattern -->
+      <div class="ctx-group">
+        <div class="ctx-label" data-i18n="dis_ctx_spread">Spread Across Field:</div>
+        <div class="pill-group" id="ctx_spread_pills">
+          <button type="button" class="pill-btn on" data-val="patches" data-i18n="dis_spr_patches">Scattered patches (మచ్చలు మచ్చలుగా)</button>
+          <button type="button" class="pill-btn" data-val="few" data-i18n="dis_spr_few">Few isolated plants (కొన్ని మొక్కలే)</button>
+          <button type="button" class="pill-btn" data-val="whole_field" data-i18n="dis_spr_whole">Whole field (మొత్తం పొలంలో)</button>
+        </div>
+      </div>
+
+      <!-- Moisture / Rain -->
+      <div class="ctx-group">
+        <div class="ctx-label" data-i18n="dis_ctx_weather">Recent Rain or Irrigation:</div>
+        <div class="pill-group" id="ctx_weather_pills">
+          <button type="button" class="pill-btn on" data-val="normal" data-i18n="dis_wx_normal">Dry last 5 days (పొడిగా ఉంది)</button>
+          <button type="button" class="pill-btn" data-val="irrigated" data-i18n="dis_wx_irrigated">Recently irrigated (నీరు పెట్టాము)</button>
+          <button type="button" class="pill-btn" data-val="heavy_rain" data-i18n="dis_wx_rain">Heavy rain / Cloud (వర్షం పడింది)</button>
+        </div>
+      </div>
+
+      <!-- Sprays -->
+      <div class="ctx-group">
+        <div class="ctx-label" data-i18n="dis_ctx_sprays">Recent Sprays / Treatments:</div>
+        <div class="pill-group" id="ctx_sprays_pills">
+          <button type="button" class="pill-btn on" data-val="none" data-i18n="dis_sp_none">No sprays yet (ఏ మందూ కొట్టలేదు)</button>
+          <button type="button" class="pill-btn" data-val="fungicide" data-i18n="dis_sp_fung">Fungicide sprayed (తెగులు మందు)</button>
+          <button type="button" class="pill-btn" data-val="insecticide" data-i18n="dis_sp_ins">Insecticide sprayed (పురుగు మందు)</button>
+          <button type="button" class="pill-btn" data-val="other" data-i18n="dis_sp_other">Fertilizer / Herbicide (ఎరువు/కలుపు)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Anonymous Dataset Contribution Consent Checkbox -->
+    <div style="margin:14px 0 6px;padding:10px 12px;background:rgba(0,0,0,0.02);border:1px dashed var(--bd);border-radius:8px">
+      <label style="display:flex;align-items:flex-start;gap:8px;margin:0;cursor:pointer;font-weight:400;font-size:12px;color:var(--text)">
+        <input type="checkbox" id="d_consent_save" style="width:16px;height:16px;margin-top:2px;accent-color:var(--pri)">
+        <span data-i18n="dis_consent_text">
+          I consent to anonymously save this photo to build a local dataset for Telangana farming research. No name, mobile, or personal location data is stored.
+        </span>
+      </label>
+    </div>
+
+    <!-- Diagnose Button -->
+    <button class="btn" id="d_go" disabled data-i18n="dis_diagnose">Diagnose Crop Disease</button>
+    <div id="d_out"></div>
+
+    <!-- Farmer Diagnosis History & 3-Day Reminders -->
+    <div id="d_history_wrap" style="margin-top:16px;border-top:1px solid var(--bd);padding-top:12px;display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-weight:700;font-size:13px;color:var(--text);display:flex;align-items:center;gap:6px">
+          <span>🕒</span> <span data-i18n="dis_history_title">My Recent Diagnoses & Reminders</span>
+        </span>
+        <button type="button" style="background:none;border:0;color:#c62828;font-size:11px;font-weight:600;cursor:pointer;text-decoration:underline" onclick="clearDiagnosisHistory()" data-i18n="dis_history_clear">
+          Clear history
+        </button>
+      </div>
+      <div id="d_history_list" style="display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+
+    <!-- Disclaimer & Extension Contact Note -->
+    <div class="note" style="margin-top:14px">
+      <div style="margin-bottom:6px">
+        <span data-i18n="dis_disclaimer">
+          AI clinical recommendation only. Strictly follow container label directions and wear personal protective equipment. Always verify with your local Mandal Agricultural Extension Officer (AEO) or PJTAU scientist before purchasing or applying any chemical sprays.
+        </span>
+      </div>
+      <div style="font-size:11px;color:var(--muted);border-top:1px solid rgba(0,0,0,0.08);padding-top:6px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
+        <span>🏛️ PJTAU & Telangana Agri Extension Portal: <a href="https://pjtau.edu.in" target="_blank" rel="noopener noreferrer" style="color:var(--pri);font-weight:700">pjtau.edu.in ↗</a></span>
+        <span>📞 Kisan Call Center: <b>1800-180-1551</b> (Toll Free)</span>
+      </div>
+    </div>
+  </div>
+</section>
 
 <section id="mandi">
 <div class="card">
@@ -1536,15 +1981,68 @@ const TRANSLATIONS = {
     fert_inst_label: "PJTAU, Rajendranagar, Hyderabad",
     fert_verify_btn: "🔗 Verify on Official PJTAU Portal (pjtau.edu.in) ↗",
     // disease
-    dis_title: "Crop disease and pest check",
+    dis_title: "Crop Disease & Pest Diagnosis",
+    dis_badge_pjtau: "PJTAU & ICAR Standards",
+    dis_subtitle: "AI clinical assistant for Telangana crops. Management advice is sourced directly from university packages of practices.",
     dis_crop: "Crop",
-    dis_lang: "Answer language",
-    dis_photo: "Photo of the affected leaf or plant",
-    dis_diagnose: "Diagnose",
-    dis_analyzing: "Analysing the photo…",
-    dis_disclaimer: "AI suggestion only. Confirm with your local agriculture or extension officer before spraying anything.",
+    dis_lang: "Response Language",
+    dis_guide_title: "Photo Capture Guide (1 to 3 Photos)",
+    dis_guide_leaf: "1. Close-up: Affected leaf in clear daylight",
+    dis_guide_plant: "2. Whole Plant: Overall shape & lodging",
+    dis_guide_underside: "3. Underside: Spores or hidden insects",
+    dis_guide_healthy: "4. Comparison: Healthy leaf nearby",
+    dis_photos_label: "Upload 1 to 3 photos (Camera or Gallery)",
+    dis_slot_1: "Photo 1 (Required)",
+    dis_slot_1_hint: "Affected leaf / part",
+    dis_slot_2: "Photo 2 (Optional)",
+    dis_slot_2_hint: "Whole plant / underside",
+    dis_slot_3: "Photo 3 (Optional)",
+    dis_slot_3_hint: "Healthy comparison leaf",
+    dis_ctx_title: "Field Context (Tap choices to help diagnose accurately)",
+    dis_ctx_stage: "Growth Stage / Days Since Sowing:",
+    dis_stg_veg: "Vegetative (పైరు దశ)",
+    dis_stg_seedling: "Seedling (మొలక/నారు దశ)",
+    dis_stg_flowering: "Flowering / Fruiting (పూత/కాయ దశ)",
+    dis_stg_maturity: "Maturity / Grain filling (పక్వత దశ)",
+    dis_ctx_part: "Affected Plant Part:",
+    dis_part_leaf: "Leaf (ఆకు)",
+    dis_part_stem: "Stem / Branch (కాండం/కొమ్మ)",
+    dis_part_fruit: "Fruit / Pod / Ear (కాయ/కంకి)",
+    dis_part_root: "Root / Collar (వేరు/మొదలు)",
+    dis_ctx_spread: "Spread Across Field:",
+    dis_spr_patches: "Scattered patches (మచ్చలు మచ్చలుగా)",
+    dis_spr_few: "Few isolated plants (కొన్ని మొక్కలే)",
+    dis_spr_whole: "Whole field (మొత్తం పొలంలో)",
+    dis_ctx_weather: "Recent Rain or Irrigation:",
+    dis_wx_normal: "Dry last 5 days (పొడిగా ఉంది)",
+    dis_wx_irrigated: "Recently irrigated (నీరు పెట్టాము)",
+    dis_wx_rain: "Heavy rain / Cloud (వర్షం పడింది)",
+    dis_ctx_sprays: "Recent Sprays / Treatments:",
+    dis_sp_none: "No sprays yet (ఏ మందూ కొట్టలేదు)",
+    dis_sp_fung: "Fungicide sprayed (తెగులు మందు)",
+    dis_sp_ins: "Insecticide sprayed (పురుగు మందు)",
+    dis_sp_other: "Fertilizer / Herbicide (ఎరువు/కలుపు)",
+    dis_consent_text: "I consent to anonymously save this photo to build a local dataset for Telangana farming research. No name, mobile, or personal location data is stored.",
+    dis_diagnose: "Diagnose Crop Disease",
+    dis_analyzing: "Analyzing photo and matching against PJTAU knowledge base…",
+    dis_disclaimer: "AI clinical recommendation only. Strictly follow container label directions and wear personal protective equipment. Always verify with your local Mandal Agricultural Extension Officer (AEO) or PJTAU scientist before purchasing or applying any chemical sprays.",
     dis_offline: "Offline demo: AI crop disease diagnosis requires internet connectivity. Connect to WiFi or mobile data to analyze photos.",
     dis_failed: "Diagnosis failed",
+    dis_history_title: "My Recent Diagnoses & Reminders",
+    dis_history_clear: "Clear history",
+    dis_conf_high: "High Confidence",
+    dis_conf_med: "Medium Confidence",
+    dis_conf_low: "Low Confidence",
+    dis_btn_expert: "📞 Talk to Mandal AEO / Expert",
+    dis_btn_whatsapp: "📲 Share on WhatsApp",
+    dis_feedback_q: "Was this diagnosis correct?",
+    dis_fb_yes: "👍 Yes",
+    dis_fb_no: "👎 No",
+    dis_fb_notsure: "🤔 Not sure",
+    dis_fb_placeholder: "What was the actual problem? (Optional)",
+    dis_fb_submit: "Submit",
+    dis_fb_thanks: "Thank you for your feedback! It helps improve accuracy.",
+    dis_reminder_badge: "📅 3-Day Check Reminder",
     // mandi - real prices
     mandi_title: "Real Mandi prices (Rs. per quintal)",
     mandi_crop: "Crop",
@@ -1793,14 +2291,67 @@ const TRANSLATIONS = {
     fert_verify_btn: "🔗 అధికారిక PJTAU పోర్టల్‌లో సరిచూసుకోండి (pjtau.edu.in) ↗",
     // disease
     dis_title: "పంట తెగుళ్లు & చీడపీడల నిర్ధారణ",
+    dis_badge_pjtau: "PJTAU & ICAR ప్రమాణాలు",
+    dis_subtitle: "తెలంగాణ పంటల కోసం AI పరిశీలన సహాయకుడు. నివారణ చర్యలు నేరుగా యూనివర్సిటీ పరిశోధనల ఆధారంగా అందించబడతాయి.",
     dis_crop: "పంట",
     dis_lang: "సమాధానం భాష",
-    dis_photo: "తెగులు సోకిన ఆకు లేదా మొక్క ఫోటో",
+    dis_guide_title: "ఫోటో తీసే సరైన పద్ధతి (1 నుండి 3 ఫోటోలు):",
+    dis_guide_leaf: "1. దగ్గరి ఫోటో: ఎండ వెలుతురులో తెగులు సోకిన ఆకు",
+    dis_guide_plant: "2. మొత్తం మొక్క: మొక్క తీరు & పడిపోవడం",
+    dis_guide_underside: "3. ఆకు వెనుక భాగం: బూజు లేదా దాగి ఉన్న పురుగులు",
+    dis_guide_healthy: "4. పోలిక ఫోటో: పక్కనే ఉన్న ఆరోగ్యకరమైన ఆకు",
+    dis_photos_label: "1 నుండి 3 ఫోటోలు అప్‌లోడ్ చేయండి (కెమెరా లేదా గ్యాలరీ)",
+    dis_slot_1: "ఫోటో 1 (తప్పనిసరి)",
+    dis_slot_1_hint: "తెగులు సోకిన భాగం",
+    dis_slot_2: "ఫోటో 2 (ఐచ్ఛికం)",
+    dis_slot_2_hint: "మొత్తం మొక్క / వెనుక భాగం",
+    dis_slot_3: "ఫోటో 3 (ఐచ్ఛికం)",
+    dis_slot_3_hint: "ఆరోగ్యకరమైన ఆకు పోలిక",
+    dis_ctx_title: "పొలం వివరాలు (ఖచ్చితమైన నిర్ధారణ కోసం తాకండి):",
+    dis_ctx_stage: "పంట ఎదుగుదల దశ / విత్తిన రోజుల సంఖ్య:",
+    dis_stg_veg: "పైరు/ఎదుగుదల దశ",
+    dis_stg_seedling: "మొలక/నారు దశ",
+    dis_stg_flowering: "పూత/కాయ దశ",
+    dis_stg_maturity: "పక్వత/గింజ ఊరే దశ",
+    dis_ctx_part: "బాధిత మొక్క భాగం:",
+    dis_part_leaf: "ఆకు",
+    dis_part_stem: "కాండం / కొమ్మ",
+    dis_part_fruit: "కాయ / కంకి",
+    dis_part_root: "వేరు / మొదలు",
+    dis_ctx_spread: "పొలంలో తెగులు వ్యాప్తి చెందే తీరు:",
+    dis_spr_patches: "మధ్య మధ్యలో మచ్చలుగా",
+    dis_spr_few: "కొన్ని మొక్కలు మాత్రమే",
+    dis_spr_whole: "మొత్తం పొలంలో",
+    dis_ctx_weather: "ఇటీవలి వర్షం లేదా తడులు:",
+    dis_wx_normal: "గత 5 రోజులుగా పొడిగా ఉంది",
+    dis_wx_irrigated: "ఇటీవల నీరు పెట్టాము",
+    dis_wx_rain: "భారీ వర్షం / మబ్బులు",
+    dis_ctx_sprays: "ఇటీవల పిచికారీ చేసిన మందులు:",
+    dis_sp_none: "ఇంకా ఏ మందూ కొట్టలేదు",
+    dis_sp_fung: "తెగులు మందు కొట్టాము",
+    dis_sp_ins: "పురుగు మందు కొట్టాము",
+    dis_sp_other: "ఎరువులు / కలుపు మందు",
+    dis_consent_text: "తెలంగాణ స్థానిక పంటల పరిశోధన డేటాసెట్ తయారీ కోసం ఈ ఫోటోను వ్యక్తిగత వివరాలు (పేరు, ఫోన్ నంబర్) లేకుండా నిల్వ చేయడానికి సమ్మతిస్తున్నాను.",
     dis_diagnose: "వ్యాధిని నిర్ధారించండి",
-    dis_analyzing: "ఫోటోను AI విశ్లేషిస్తోంది…",
-    dis_disclaimer: "ఇది AI సూచన మాత్రమే. మందులు పిచికారీ చేసే ముందు మీ మండల వ్యవసాయ విస్తరణ అధికారి (AEO) ని సంప్రదించండి.",
+    dis_analyzing: "ఫోటోను విశ్లేషించి, PJTAU సమాచారంతో పోల్చుతోంది…",
+    dis_disclaimer: "ఇది AI సాంకేతిక సూచన మాత్రమే. మందుల సీసా/ప్యాకెట్ పై ఉన్న లేబుల్ సూచనలను ఖచ్చితంగా పాటించండి మరియు రక్షణ తొడుగులు వాడండి. మందులు పిచికారీ చేసే ముందు తప్పనిసరిగా మీ మండల వ్యవసాయ విస్తరణ అధికారి (AEO) లేదా PJTAU శాస్త్రవేత్తను సంప్రదించండి.",
     dis_offline: "ఆఫ్‌లైన్ డెమో: AI పంట వ్యాధి విశ్లేషణకు ఇంటర్నెట్ అవసరం. ఫోటో నిర్ధారణ కోసం ఇంటర్నెట్ కనెక్ట్ చేయండి.",
     dis_failed: "నిర్ధారణ విఫలమైంది",
+    dis_history_title: "గత నిర్ధారణలు & 3 రోజుల ఫాలో-అప్",
+    dis_history_clear: "హిస్టరీని తొలగించండి",
+    dis_conf_high: "అధిక ఖచ్చితత్వం (High)",
+    dis_conf_med: "మధ్యస్థ ఖచ్చితత్వం (Medium)",
+    dis_conf_low: "తక్కువ ఖచ్చితత్వం (Low)",
+    dis_btn_expert: "📞 మండల AEO / నిపుణులతో మాట్లాడండి",
+    dis_btn_whatsapp: "📲 వాట్సాప్‌లో వివరాలు పంపండి",
+    dis_feedback_q: "ఈ నిర్ధారణ సరైనదేనా?",
+    dis_fb_yes: "👍 అవును (సరిపోయింది)",
+    dis_fb_no: "👎 కాదు (తప్పు)",
+    dis_fb_notsure: "🤔 చెప్పలేము / ఖచ్చితంగా తెలియదు",
+    dis_fb_placeholder: "సరైన సమస్య ఏమిటి? (ఐచ్ఛికం)",
+    dis_fb_submit: "సమర్పించండి",
+    dis_fb_thanks: "మీ అభిప్రాయానికి ధన్యవాదాలు! ఇది నిర్ధారణ ఖచ్చితత్వాన్ని పెంచడంలో సహాయపడుతుంది.",
+    dis_reminder_badge: "📅 3 రోజుల పరిశీలన రిమైండర్",
     // mandi - real prices
     mandi_title: "నిజమైన మార్కెట్ ధరలు (క్వింటాల్‌కు రూ.)",
     mandi_crop: "పంట",
@@ -3301,43 +3852,539 @@ $("f_go").onclick=()=>{
   <p class="muted" style="margin:8px 0 4px">${splitAdvice[crop]||t.fert_split_note}</p>`;
 };
 
-// disease diagnosis
-$("d_file").onchange=()=>{const f=$("d_file").files[0];$("d_go").disabled=!f;
- if(f){$("d_img").src=URL.createObjectURL(f);$("d_img").style.display="block"}};
-function shrink(f){return new Promise((ok,no)=>{const i=new Image();i.onload=()=>{const k=Math.min(1,1024/Math.max(i.width,i.height)),c=document.createElement("canvas");c.width=i.width*k;c.height=i.height*k;c.getContext("2d").drawImage(i,0,0,c.width,c.height);ok(c.toDataURL("image/jpeg",0.8).split(",")[1])};i.onerror=no;i.src=URL.createObjectURL(f)})}
-$("d_go").onclick=async()=>{
-  const out=$("d_out"),f=$("d_file").files[0],t=TRANSLATIONS[curLang];
-  if(!f)return;
-  if(isDemoMode||!navigator.onLine){out.innerHTML=`<div class="note">${t.dis_offline}</div>`;return}
-  $("d_go").disabled=true;out.innerHTML=`<p class="muted">${t.dis_analyzing}</p>`;
-  try{
-    const img=await shrink(f);
-    const headers = { "Content-Type": "application/json", ...await getAuthHeader() };
-    const r=await fetch("/api/diagnose",{method:"POST",headers,body:JSON.stringify({crop:$("d_crop").value,lang:$("d_lang").value,image:img})});
-    const j=await r.json();
-    if(r.status === 401 || (j && j.error === "AUTH_REQUIRED")) {
-      out.innerHTML=`<div class="note">🔒 ${j.message || t.auth_req_msg} <button class="sub-banner-btn" style="margin-left:8px" onclick="handleAuthAction()">${t.auth_signin}</button></div>`;
-      return;
+// --- ENHANCED CROP DISEASE DIAGNOSIS (PJTAU/ICAR STANDARDS) ---
+const uploadedPhotoSlots = [null, null, null];
+
+function checkCanvasQuality(img) {
+  if (img.width < 180 || img.height < 180) {
+    return {
+      ok: false,
+      status: "warn",
+      messageEn: "⚠️ Too small (min 200x200)",
+      messageTe: "⚠️ ఫోటో పరిమాణం చాలా చిన్నది"
+    };
+  }
+
+  try {
+    const sc = document.createElement("canvas");
+    sc.width = 64;
+    sc.height = 64;
+    const sctx = sc.getContext("2d");
+    sctx.drawImage(img, 0, 0, 64, 64);
+    const idata = sctx.getImageData(0, 0, 64, 64).data;
+
+    let lumSum = 0;
+    for (let i = 0; i < idata.length; i += 4) {
+      lumSum += (0.299 * idata[i] + 0.587 * idata[i + 1] + 0.114 * idata[i + 2]);
     }
-    if(r.status === 402 || (j && j.error === "SUBSCRIPTION_REQUIRED")) {
-      out.innerHTML=`<div class="note">🔒 ${j.message || t.trial_ended_desc} <button class="sub-banner-btn" style="margin-left:8px" onclick="openTab('account')">${t.btn_pay_plan}</button></div>`;
-      return;
+    const avgLum = lumSum / (64 * 64);
+
+    if (avgLum < 38) {
+      return {
+        ok: false,
+        status: "warn",
+        messageEn: "⚠️ Too dark - retake in daylight",
+        messageTe: "⚠️ ఫోటో చీకటిగా ఉంది - వెలుతురులో తీయండి"
+      };
     }
-    if (!r.ok) throw new Error(j.error || "Diagnosis failed");
-    out.innerHTML = `
-      <div class="ok" style="white-space:pre-wrap;line-height:1.65;font-size:13.5px;padding:14px 16px">
-        <div style="font-weight:700;color:#1b5e20;margin-bottom:8px;display:flex;align-items:center;gap:6px">
-          <span>🌿</span> <span>${curLang === "te" ? "పంట తెగులు నిర్ధారణ ఫలితం" : "Crop Disease Diagnosis Result"}</span>
+
+    // Edge gradient variance check for blur detection
+    let gradSum = 0;
+    for (let y = 0; y < 63; y++) {
+      for (let x = 0; x < 63; x++) {
+        const idx = (y * 64 + x) * 4;
+        const rightIdx = (y * 64 + (x + 1)) * 4;
+        const downIdx = ((y + 1) * 64 + x) * 4;
+        const val = (idata[idx] + idata[idx + 1] + idata[idx + 2]) / 3;
+        const valRight = (idata[rightIdx] + idata[rightIdx + 1] + idata[rightIdx + 2]) / 3;
+        const valDown = (idata[downIdx] + idata[downIdx + 1] + idata[downIdx + 2]) / 3;
+        gradSum += Math.abs(val - valRight) + Math.abs(val - valDown);
+      }
+    }
+    const avgGrad = gradSum / (63 * 63 * 2);
+
+    if (avgGrad < 4.0) {
+      return {
+        ok: false,
+        status: "warn",
+        messageEn: "⚠️ Blurry - hold steady & retake",
+        messageTe: "⚠️ ఫోటో మసకగా ఉంది - స్థిరంగా తీయండి"
+      };
+    }
+
+    return {
+      ok: true,
+      status: "good",
+      messageEn: "✓ Good daylight quality",
+      messageTe: "✓ నాణ్యత బాగుంది"
+    };
+  } catch (err) {
+    return { ok: true, status: "good", messageEn: "✓ Photo loaded", messageTe: "✓ ఫోటో స్వీకరించబడింది" };
+  }
+}
+
+function updateDiagnosisButtonState() {
+  const hasPhoto = uploadedPhotoSlots.some(s => s !== null);
+  const btn = $("d_go");
+  if (btn) btn.disabled = !hasPhoto;
+
+  // Update warnings banner if any photo is poor quality
+  const warnEl = $("d_quality_warnings");
+  if (warnEl) {
+    const poorSlots = uploadedPhotoSlots
+      .map((s, idx) => (s && !s.quality.ok ? { idx: idx + 1, msg: (curLang === "te" ? s.quality.messageTe : s.quality.messageEn) } : null))
+      .filter(Boolean);
+
+    if (poorSlots.length > 0) {
+      warnEl.innerHTML = `<div class="note" style="border-left-color:#e65100;background:#fff3e0">
+        <b>${curLang === "te" ? "ఫోటో నాణ్యత హెచ్చరిక:" : "Photo Quality Notice:"}</b>
+        ${poorSlots.map(p => `<div>Photo ${p.idx}: ${p.msg}</div>`).join("")}
+        <div style="font-size:11px;margin-top:4px">${curLang === "te" ? "మంచి ఫలితం కోసం పై ఫోటోను క్లియర్ చేసి మళ్ళీ తీయండి." : "For best diagnostic accuracy, consider retaking unclear photos."}</div>
+      </div>`;
+    } else {
+      warnEl.innerHTML = "";
+    }
+  }
+}
+
+function handleSlotChange(slotIdx) {
+  const input = $("d_slot_input_" + slotIdx);
+  if (!input || !input.files || !input.files[0]) return;
+  const file = input.files[0];
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      const maxDim = 1280;
+      const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      const quality = checkCanvasQuality(img);
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.82);
+      const base64 = dataUrl.split(",")[1];
+
+      uploadedPhotoSlots[slotIdx] = {
+        file,
+        dataUrl,
+        base64,
+        quality
+      };
+
+      // Update DOM for this slot
+      const emptyEl = $("slot_empty_" + slotIdx);
+      const filledEl = $("slot_filled_" + slotIdx);
+      const imgEl = $("slot_img_" + slotIdx);
+      const badgeEl = $("slot_badge_" + slotIdx);
+
+      if (emptyEl) emptyEl.style.display = "none";
+      if (filledEl) filledEl.style.display = "block";
+      if (imgEl) imgEl.src = dataUrl;
+      if (badgeEl) {
+        badgeEl.className = "slot-quality-badge " + (quality.ok ? "good" : "warn");
+        badgeEl.textContent = curLang === "te" ? quality.messageTe : quality.messageEn;
+      }
+
+      updateDiagnosisButtonState();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearPhotoSlot(slotIdx) {
+  uploadedPhotoSlots[slotIdx] = null;
+  const input = $("d_slot_input_" + slotIdx);
+  if (input) input.value = "";
+
+  const emptyEl = $("slot_empty_" + slotIdx);
+  const filledEl = $("slot_filled_" + slotIdx);
+  const imgEl = $("slot_img_" + slotIdx);
+
+  if (emptyEl) emptyEl.style.display = "flex";
+  if (filledEl) filledEl.style.display = "none";
+  if (imgEl) imgEl.src = "";
+
+  updateDiagnosisButtonState();
+}
+
+// Bind file slot inputs
+for (let i = 0; i < 3; i++) {
+  const inp = $("d_slot_input_" + i);
+  if (inp) {
+    const idx = i;
+    inp.onchange = () => handleSlotChange(idx);
+  }
+}
+
+// Context pill selectors toggling logic
+function setupPillGroup(groupId) {
+  const container = $(groupId);
+  if (!container) return;
+  const btns = container.querySelectorAll(".pill-btn");
+  btns.forEach(btn => {
+    btn.onclick = () => {
+      btns.forEach(b => b.classList.remove("on"));
+      btn.classList.add("on");
+    };
+  });
+}
+setupPillGroup("ctx_stage_pills");
+setupPillGroup("ctx_part_pills");
+setupPillGroup("ctx_spread_pills");
+setupPillGroup("ctx_weather_pills");
+setupPillGroup("ctx_sprays_pills");
+
+function getSelectedPillVal(groupId, defaultVal) {
+  const container = $(groupId);
+  if (!container) return defaultVal;
+  const onBtn = container.querySelector(".pill-btn.on");
+  return onBtn ? onBtn.getAttribute("data-val") : defaultVal;
+}
+
+function getDiagnosisContext() {
+  return {
+    stage: getSelectedPillVal("ctx_stage_pills", "vegetative"),
+    part: getSelectedPillVal("ctx_part_pills", "leaf"),
+    spread: getSelectedPillVal("ctx_spread_pills", "patches"),
+    weather: getSelectedPillVal("ctx_weather_pills", "normal"),
+    sprays: getSelectedPillVal("ctx_sprays_pills", "none")
+  };
+}
+
+// Diagnosis History Storage
+const DIAG_HISTORY_KEY = "sfa_diag_history";
+function getDiagnosisHistory() {
+  try {
+    return JSON.parse(localStorage.getItem(DIAG_HISTORY_KEY) || "[]");
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveDiagnosisToHistory(item) {
+  try {
+    let hist = getDiagnosisHistory();
+    hist.unshift(item);
+    if (hist.length > 10) hist = hist.slice(0, 10);
+    localStorage.setItem(DIAG_HISTORY_KEY, JSON.stringify(hist));
+    renderDiagnosisHistory();
+  } catch (e) {}
+}
+
+function clearDiagnosisHistory() {
+  const t = TRANSLATIONS[curLang];
+  if (confirm(curLang === "te" ? "మీ గత నిర్ధారణల హిస్టరీని ఖచ్చితంగా తొలగించాలనుకుంటున్నారా?" : "Are you sure you want to delete your saved diagnosis history?")) {
+    try { localStorage.removeItem(DIAG_HISTORY_KEY); } catch (e) {}
+    renderDiagnosisHistory();
+  }
+}
+
+function renderDiagnosisHistory() {
+  const wrap = $("d_history_wrap");
+  const listEl = $("d_history_list");
+  if (!wrap || !listEl) return;
+
+  const hist = getDiagnosisHistory();
+  if (hist.length === 0) {
+    wrap.style.display = "none";
+    return;
+  }
+  wrap.style.display = "block";
+
+  listEl.innerHTML = hist.map((item, idx) => {
+    const dt = new Date(item.timestamp);
+    const dateStr = dt.toLocaleDateString(curLang === "te" ? "te-IN" : "en-IN", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+    const is3DaysPassed = (Date.now() - item.timestamp) >= 3 * 24 * 60 * 60 * 1000;
+
+    return `
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;background:var(--bg);border:1px solid var(--bd);border-radius:8px;font-size:12px">
+        <div style="display:flex;align-items:center;gap:10px">
+          ${item.thumb ? `<img src="${item.thumb}" style="width:38px;height:38px;object-fit:cover;border-radius:6px;border:1px solid var(--bd)" alt="crop thumb">` : `<span style="font-size:24px">🌿</span>`}
+          <div>
+            <div style="font-weight:700;color:var(--text)">${item.topCauseName || item.crop}</div>
+            <div class="muted" style="font-size:11px">${item.crop} · ${dateStr}</div>
+          </div>
         </div>
-        <div id="diag_result_text"></div>
+        <div style="text-align:right">
+          <span class="diag-conf-pill ${item.confidence || 'medium'}">${(item.confidence || 'medium').toUpperCase()}</span>
+          <div style="font-size:10px;color:${is3DaysPassed ? '#e65100' : 'var(--pri)'};margin-top:3px;font-weight:600">
+            ${is3DaysPassed ? (curLang === 'te' ? '⚠️ 3 రోజుల ఫాలో-అప్ సమయం' : '⚠️ 3-day follow-up due') : (curLang === 'te' ? '📅 3 రోజుల రిమైండర్' : '📅 3-day monitor')}
+          </div>
+        </div>
       </div>
     `;
-    const resEl = $("diag_result_text");
-    if (resEl) resEl.textContent = j.text;
+  }).join("");
+}
+
+// Farmer Feedback Submission
+async function submitDiagnosisFeedback(diagId, feedbackVal) {
+  const container = $("diag_fb_box_" + diagId);
+  const correctInput = $("diag_fb_input_" + diagId);
+  const correctVal = correctInput ? correctInput.value.trim() : "";
+
+  try {
+    const headers = { "Content-Type": "application/json", ...await getAuthHeader() };
+    await fetch("/api/diagnose?action=feedback", {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        id: diagId,
+        feedback: feedbackVal,
+        correctDisease: correctVal
+      })
+    });
+  } catch (err) {
+    console.warn("Feedback network error:", err.message);
   }
-  catch(e){out.innerHTML=`<div class="note">${t.dis_failed} (${e.message||"error"}). Check connection and GEMINI_API_KEY.</div>`}
-  finally { $("d_go").disabled=false; }
+
+  if (container) {
+    container.innerHTML = `<div style="color:#2e7d32;font-weight:700;display:flex;align-items:center;gap:6px">
+      <span>✓</span> <span>${TRANSLATIONS[curLang].dis_fb_thanks}</span>
+    </div>`;
+  }
+}
+
+function showExpertModal() {
+  const isTe = (curLang === "te");
+  const msg = isTe
+    ? "🏛️ తెలంగాణ వ్యవసాయ శాఖ & PJTAU నిపుణుల సలహా:\n\n1. మీ గ్రామ లేదా మండల వ్యవసాయ విస్తరణ అధికారి (AEO / MAO) ని నేరుగా సంప్రదించండి.\n2. కిసాన్ కాల్ సెంటర్ ఉచిత హెల్ప్‌లైన్: 1800-180-1551 (ఉదయం 6 నుండి రాత్రి 10 గంటల వరకు)\n3. అధికారిక పోర్టల్: https://pjtau.edu.in"
+    : "🏛️ Agricultural Extension & PJTAU Expert Consultation:\n\n1. Contact your local Mandal Agricultural Extension Officer (AEO / MAO).\n2. Kisan Call Center (Toll Free): 1800-180-1551 (6:00 AM - 10:00 PM)\n3. Official University Portal: https://pjtau.edu.in";
+  alert(msg);
+}
+
+function shareDiagnosisOnWhatsApp(crop, diseaseName, confidence, managementSummary) {
+  const isTe = (curLang === "te");
+  const text = isTe
+    ? `🌿 *స్మార్ట్ ఫార్మ్ అసిస్టెంట్ - పంట తెగులు నిర్ధారణ*\nపంట: ${crop}\nసమస్య: ${diseaseName}\nఖచ్చితత్వం: ${confidence}\n\n*సిఫారసు చేసిన చర్యలు (PJTAU):*\n${managementSummary}\n\nమరిన్ని వివరాలకు స్థానిక AEO లేదా PJTAU పోర్టల్ (pjtau.edu.in) పరిశీలించండి.`
+    : `🌿 *Smart Farm Assistant - Crop Diagnosis*\nCrop: ${crop}\nProblem: ${diseaseName}\nConfidence: ${confidence}\n\n*Management (PJTAU / ICAR):*\n${managementSummary}\n\nAlways follow statutory product label and wear protective equipment.`;
+
+  const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+  window.open(url, "_blank");
+}
+
+function renderStructuredDiagnosis(result) {
+  const out = $("d_out");
+  if (!out) return;
+  const t = TRANSLATIONS[curLang];
+  const isTe = (curLang === "te");
+
+  // Fallback / Not Sure response
+  if (!result.isUnderstood || !result.candidates || result.candidates.length === 0) {
+    out.innerHTML = `
+      <div class="note" style="border-left-color:#c62828;background:#ffebee;margin-top:14px;padding:16px">
+        <div style="font-weight:700;color:#c62828;margin-bottom:8px;display:flex;align-items:center;gap:6px;font-size:14px">
+          <span>⚠️</span> <span>${isTe ? "ఖచ్చితమైన నిర్ధారణ చేయలేకపోయాము" : "Ambiguous or Unclear Diagnosis"}</span>
+        </div>
+        <p style="margin:0 0 10px;font-size:13px;line-height:1.5">${result.notSureReason}</p>
+        <div style="padding:10px 12px;background:rgba(0,0,0,0.03);border-radius:6px;font-size:12px;margin-bottom:12px">
+          <b>${isTe ? "సలహా:" : "Recommendation:"}</b> ${result.adviceSummary || t.dis_disclaimer}
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          <button class="diag-action-btn" onclick="showExpertModal()">📞 ${t.dis_btn_expert}</button>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  const top = result.topCandidate;
+  const diagId = result.diagnosisId || ("diag_" + Date.now());
+  const mgmt = top.management || {};
+
+  const cultItems = (mgmt.cultural || []).map(c => `<li>${c}</li>`).join("");
+  const bioItems = (mgmt.biological || []).map(b => `<li>${b}</li>`).join("");
+  const chemItems = (mgmt.chemicalClass || []).map(k => `<li>${k}</li>`).join("");
+
+  const otherPossibilities = (result.candidates.slice(1) || []).map((alt, idx) => `
+    <div style="padding:8px 10px;background:var(--bg);border-radius:6px;margin-top:6px;font-size:12px">
+      <div style="font-weight:700;color:var(--text);display:flex;justify-content:space-between">
+        <span>${idx + 2}. ${isTe ? (alt.nameTe || alt.commonName) : alt.commonName}</span>
+        <span class="diag-conf-pill ${alt.confidence || 'low'}">${(alt.confidence || 'low').toUpperCase()}</span>
+      </div>
+      <div class="muted" style="margin-top:2px">${alt.differentialCheck || alt.symptomsSeen}</div>
+    </div>
+  `).join("");
+
+  const whatsappSummary = (mgmt.cultural && mgmt.cultural[0] ? `• Cultural: ${mgmt.cultural[0]}\n` : "") +
+    (mgmt.chemicalClass && mgmt.chemicalClass[0] ? `• Chemical Group: ${mgmt.chemicalClass[0]}` : "");
+
+  out.innerHTML = `
+    <div class="diag-res-card">
+      <!-- Top Diagnosis Header -->
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:8px">
+        <div>
+          <span style="font-size:11px;font-weight:700;color:var(--pri);text-transform:uppercase;letter-spacing:0.5px">
+            ${isTe ? "ప్రాథమిక నిర్ధారణ (Top Candidate)" : "Primary Diagnostic Assessment"}
+          </span>
+          <h3 style="margin:2px 0 0;font-size:18px;color:var(--text)">
+            ${isTe ? (top.nameTe || top.commonName) : top.commonName}
+          </h3>
+          <div class="muted" style="font-size:12px;font-style:italic">${top.scientificName || ""}</div>
+        </div>
+        <div>
+          <span class="diag-conf-pill ${top.confidence || 'medium'}">
+            ${top.confidence === 'high' ? t.dis_conf_high : top.confidence === 'medium' ? t.dis_conf_med : t.dis_conf_low}
+          </span>
+        </div>
+      </div>
+
+      <!-- Symptoms & Field Verification -->
+      <div class="diag-section-title">🔍 ${isTe ? "ఫోటోలో కనిపించే లక్షణాలు" : "Symptoms Seen in Photo"}</div>
+      <div style="font-size:13px;line-height:1.5;color:var(--text)">${top.symptomsSeen}</div>
+
+      <div class="diag-section-title">🔬 ${isTe ? "ఇతర సమస్యలతో పోలిక & తేడా" : "How to Tell Apart from Similar Problems"}</div>
+      <div style="font-size:13px;line-height:1.5;color:var(--text)">${top.differentialCheck}</div>
+
+      <div class="diag-section-title">🌾 ${isTe ? "పొలంలో నిర్ధారించుకోవలసిన అంశాలు" : "What to Check in the Field to Confirm"}</div>
+      <div style="font-size:13px;line-height:1.5;color:var(--text);padding:8px 10px;background:#f9fbe7;border:1px solid #dce775;border-radius:6px">
+        ${top.fieldCheck}
+      </div>
+
+      <!-- Tiered Management Steps from KB -->
+      <div class="diag-section-title" style="margin-top:16px">🛠️ ${isTe ? "నివారణ చర్యలు (PJTAU ప్రామాణిక పద్ధతులు)" : "Management Hierarchy (PJTAU / ICAR)"}</div>
+      <div style="margin-top:6px">
+        <div class="diag-mgmt-step">
+          <b style="color:#2e7d32">1. ${isTe ? "సాగు పద్ధతులు (Cultural Management):" : "Cultural Controls:"}</b>
+          <ul style="margin:4px 0 0;padding-left:18px">${cultItems || "<li>Maintain standard field hygiene.</li>"}</ul>
+        </div>
+        <div class="diag-mgmt-step">
+          <b style="color:#1565c0">2. ${isTe ? "జీవ నియంత్రణ (Biological Management):" : "Biological Controls:"}</b>
+          <ul style="margin:4px 0 0;padding-left:18px">${bioItems || "<li>Bio-control formulations as per university recommendation.</li>"}</ul>
+        </div>
+        <div class="diag-mgmt-step">
+          <b style="color:#c62828">3. ${isTe ? "రసాయన క్రియాశీల పదార్థ తరగతి (Chemical Active Ingredient Group):" : "Chemical Class (Group Only - No Tank Mixes):"}</b>
+          <ul style="margin:4px 0 0;padding-left:18px">${chemItems || "<li>Consult Mandal AEO for registered active ingredients.</li>"}</ul>
+          <div style="margin-top:6px;font-size:11px;color:#c62828;border-top:1px dashed #ef9a9a;padding-top:4px">
+            ⚠️ <b>${isTe ? "రక్షణ హెచ్చరిక:" : "Statutory Disclaimer:"}</b> ${mgmt.regulatoryDisclaimer || "Use only CIB&RC approved products. Follow statutory package labels and wear protective gear."}
+          </div>
+        </div>
+      </div>
+
+      <!-- Other Candidates Accordion -->
+      ${otherPossibilities ? `
+        <div style="margin-top:12px;border-top:1px solid var(--bd);padding-top:8px">
+          <span class="muted" style="font-size:12px;font-weight:700">
+            ${isTe ? "ఇతర సాధ్యమైన అవకాశాలు (Other Possibilities):" : "Other Possibilities to Consider:"}
+          </span>
+          ${otherPossibilities}
+        </div>
+      ` : ""}
+
+      <!-- 3-Day Follow-Up Reminder Banner -->
+      <div style="margin-top:14px;padding:10px 12px;background:#e8f5e9;border:1px solid #a5d6a7;border-radius:8px;font-size:12px;display:flex;align-items:center;gap:8px">
+        <span style="font-size:18px">📅</span>
+        <div>
+          <b style="color:#1b5e20">${isTe ? "3 రోజుల పరిశీలన రిమైండర్:" : "3-Day Follow-up Reminder:"}</b>
+          <div>${isTe ? "మందులు లేదా సస్యరక్షణ చర్యలు చేపట్టిన 3 రోజుల తర్వాత మీ పొలాన్ని మళ్ళీ పరిశీలించి ఫలితాన్ని సరిచూసుకోండి." : "Check your field again in 3 days to monitor crop response and disease progression."}</div>
+        </div>
+      </div>
+
+      <!-- Action Buttons: Talk to Expert & WhatsApp Share -->
+      <div class="diag-actions-row">
+        <button class="diag-action-btn" onclick="showExpertModal()">📞 ${t.dis_btn_expert}</button>
+        <button class="diag-action-btn whatsapp" onclick="shareDiagnosisOnWhatsApp('${result.crop}', '${(isTe ? top.nameTe : top.commonName)}', '${top.confidence.toUpperCase()}', '${whatsappSummary.replace(/'/g, "\\'")}')">
+          📲 ${t.dis_btn_whatsapp}
+        </button>
+      </div>
+
+      <!-- Feedback Widget -->
+      <div class="diag-feedback-box" id="diag_fb_box_${diagId}">
+        <div style="font-weight:700;color:var(--text);margin-bottom:6px">${t.dis_feedback_q}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          <button class="pill-btn" onclick="submitDiagnosisFeedback('${diagId}', 'yes')">${t.dis_fb_yes}</button>
+          <button class="pill-btn" onclick="submitDiagnosisFeedback('${diagId}', 'no')">${t.dis_fb_no}</button>
+          <button class="pill-btn" onclick="submitDiagnosisFeedback('${diagId}', 'not_sure')">${t.dis_fb_notsure}</button>
+        </div>
+        <div style="margin-top:8px;display:flex;gap:6px">
+          <input type="text" id="diag_fb_input_${diagId}" placeholder="${t.dis_fb_placeholder}" style="padding:6px 10px;font-size:12px">
+          <button class="pill-btn" style="background:var(--pri);color:#fff;border-color:var(--pri)" onclick="submitDiagnosisFeedback('${diagId}', 'custom')">${t.dis_fb_submit}</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Save to farmer's local history
+  saveDiagnosisToHistory({
+    diagnosisId: diagId,
+    timestamp: Date.now(),
+    crop: result.crop,
+    topCauseId: top.id,
+    topCauseName: isTe ? (top.nameTe || top.commonName) : top.commonName,
+    confidence: top.confidence,
+    thumb: uploadedPhotoSlots[0]?.dataUrl || null
+  });
+}
+
+// Main Diagnosis Execution Trigger
+$("d_go").onclick = async () => {
+  const out = $("d_out");
+  const t = TRANSLATIONS[curLang];
+  const activeImages = uploadedPhotoSlots.filter(s => s !== null).map(s => s.base64);
+
+  if (activeImages.length === 0) return;
+
+  if (isDemoMode || !navigator.onLine) {
+    out.innerHTML = `<div class="note">${t.dis_offline}</div>`;
+    return;
+  }
+
+  $("d_go").disabled = true;
+  out.innerHTML = `<p class="muted">${t.dis_analyzing}</p>`;
+
+  try {
+    const context = getDiagnosisContext();
+    const consentSave = $("d_consent_save") ? $("d_consent_save").checked : false;
+    const headers = { "Content-Type": "application/json", ...await getAuthHeader() };
+
+    const r = await fetch("/api/diagnose", {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        crop: $("d_crop").value,
+        lang: $("d_lang").value,
+        images: activeImages,
+        context,
+        consentSave
+      })
+    });
+
+    const j = await r.json();
+
+    if (r.status === 401 || (j && j.error === "AUTH_REQUIRED")) {
+      out.innerHTML = `<div class="note">🔒 ${j.message || t.auth_req_msg} <button class="sub-banner-btn" style="margin-left:8px" onclick="handleAuthAction()">${t.auth_signin}</button></div>`;
+      return;
+    }
+    if (r.status === 402 || (j && j.error === "SUBSCRIPTION_REQUIRED")) {
+      out.innerHTML = `<div class="note">🔒 ${j.message || t.trial_ended_desc} <button class="sub-banner-btn" style="margin-left:8px" onclick="openTab('account')">${t.btn_pay_plan}</button></div>`;
+      return;
+    }
+    if (r.status === 429 || (j && j.error === "RATE_LIMITED")) {
+      out.innerHTML = `<div class="note" style="border-left-color:#e65100;background:#fff3e0">⏱️ ${j.message || "Diagnosis limit reached. Please wait a moment."}</div>`;
+      return;
+    }
+
+    if (!r.ok) throw new Error(j.error || j.message || "Diagnosis failed");
+
+    if (j.result) {
+      renderStructuredDiagnosis(j.result);
+    } else if (j.text) {
+      out.innerHTML = `<div class="ok" style="white-space:pre-wrap;line-height:1.6;font-size:13.5px;padding:14px 16px"><div style="font-weight:700;color:#1b5e20;margin-bottom:8px">🌿 Diagnosis Result:</div>${j.text}</div>`;
+    }
+  } catch (e) {
+    out.innerHTML = `<div class="note">${t.dis_failed} (${e.message || "error"}). Check connection and GEMINI_API_KEY.</div>`;
+  } finally {
+    $("d_go").disabled = !uploadedPhotoSlots.some(s => s !== null);
+  }
 };
+
+// Initial diagnosis history render on boot
+renderDiagnosisHistory();
+
 
 // --- MANDI PRICES (REAL AGMARKNET DATA + SEPARATE SAMPLE ARCHIVE) ---
 const MANDI_RESOURCE = (window.FARM_CONFIG && window.FARM_CONFIG.MANDI_RESOURCE_ID) || "9ef84268-d588-465a-a308-a864a43d0070";

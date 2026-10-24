@@ -50,7 +50,7 @@ import { useLanguage } from "@/components/common/LanguageContext";
 import {
   SAMPLE_PROFILE,
   SAMPLE_WEATHER,
-  SAMPLE_MANDI_ITEMS,
+  SAMPLE_MANDI_PRICES as SAMPLE_MANDI_ITEMS,
 } from "@/lib/data/sampleData";
 import { calculateFertilizer } from "@/lib/calculators/fertCalc";
 

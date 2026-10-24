@@ -1,76 +1,207 @@
-// Vercel serverless function: AI Crop Disease Diagnosis using Google Gemini
+// Vercel serverless function: AI Crop Disease Diagnosis with Structured Output, KB Enrichment & Consent Dataset
 const {
   verifyAuthToken,
   getUserSubscription,
+  getFirebaseAdmin,
   DEMO_MODE_PUBLIC
 } = require("./_auth");
+const { diagnoseCropPhoto, getSupportedCrops } = require("../lib/diagnosis");
+const crypto = require("crypto");
+const fs = require("fs");
+const path = require("path");
 
-let cachedAvailableModels = null;
-let lastModelFetch = 0;
+// Local dataset file path for offline/local environment fallback
+const LOCAL_DATASET_FILE = path.join(process.cwd(), "data", "diagnoses_dataset.json");
 
-/**
- * Dynamically queries Google Generative Language API to discover
- * which exact models are enabled and active for the user's GEMINI_API_KEY.
- */
-async function getAvailableGeminiModels(apiKey) {
-  if (cachedAvailableModels && cachedAvailableModels.length > 0 && (Date.now() - lastModelFetch < 1800000)) {
-    return cachedAvailableModels;
+function getClientIp(req) {
+  const forwarded = req.headers["x-forwarded-for"];
+  if (forwarded) {
+    return forwarded.split(",")[0].trim();
   }
+  return req.headers["x-real-ip"] || req.connection?.remoteAddress || "127.0.0.1";
+}
 
-  const versions = ["v1beta", "v1"];
-  for (const v of versions) {
-    try {
-      const res = await fetch(`https://generativelanguage.googleapis.com/${v}/models?key=${apiKey}`);
-      if (res.ok) {
-        const data = await res.json().catch(() => ({}));
-        if (Array.isArray(data.models) && data.models.length > 0) {
-          const supported = data.models
-            .filter(m => Array.isArray(m.supportedGenerationMethods) && m.supportedGenerationMethods.includes("generateContent"))
-            .map(m => ({
-              id: m.name.replace(/^models\//, ""),
-              version: v
-            }));
-
-          if (supported.length > 0) {
-            // Prioritize flash models first, then any other generative models
-            supported.sort((a, b) => {
-              const aFlash = a.id.includes("flash") ? 1 : 0;
-              const bFlash = b.id.includes("flash") ? 1 : 0;
-              return bFlash - aFlash;
-            });
-            cachedAvailableModels = supported;
-            lastModelFetch = Date.now();
-            return supported;
-          }
-        }
-      }
-    } catch (err) {
-      console.warn(`ListModels error on ${v}:`, err.message);
+async function saveConsentRecord(record) {
+  try {
+    const adminApp = getFirebaseAdmin();
+    if (adminApp) {
+      const db = adminApp.database();
+      await db.ref(`diagnoses_dataset/${record.id}`).set(record);
+      return;
     }
+  } catch (err) {
+    console.warn("Could not save consent record to Firebase:", err.message);
   }
 
-  // Fallback candidate list if ListModels is unavailable
-  return [
-    { id: process.env.GEMINI_MODEL || "gemini-1.5-flash-latest", version: "v1beta" },
-    { id: "gemini-1.5-flash", version: "v1" },
-    { id: "gemini-1.5-flash-latest", version: "v1" },
-    { id: "gemini-2.0-flash", version: "v1beta" },
-    { id: "gemini-2.0-flash-exp", version: "v1beta" },
-    { id: "gemini-2.5-flash", version: "v1beta" },
-    { id: "gemini-1.5-flash-001", version: "v1beta" },
-    { id: "gemini-1.5-flash-002", version: "v1beta" },
-    { id: "gemini-1.5-pro", version: "v1" },
-    { id: "gemini-1.5-pro", version: "v1beta" }
-  ];
+  // Fallback to local file store
+  try {
+    let list = [];
+    if (fs.existsSync(LOCAL_DATASET_FILE)) {
+      list = JSON.parse(fs.readFileSync(LOCAL_DATASET_FILE, "utf8") || "[]");
+    }
+    list.unshift(record);
+    if (list.length > 200) list = list.slice(0, 200);
+    fs.writeFileSync(LOCAL_DATASET_FILE, JSON.stringify(list, null, 2), "utf8");
+  } catch (fe) {
+    console.warn("Could not write to local dataset file:", fe.message);
+  }
+}
+
+async function updateFeedbackRecord(id, feedback, correctDisease) {
+  try {
+    const adminApp = getFirebaseAdmin();
+    if (adminApp) {
+      const db = adminApp.database();
+      await db.ref(`diagnoses_dataset/${id}`).update({
+        userFeedback: feedback,
+        userCorrectDisease: correctDisease || "",
+        feedbackTimestamp: Date.now()
+      });
+      return true;
+    }
+  } catch (err) {
+    console.warn("Could not update feedback in Firebase:", err.message);
+  }
+
+  try {
+    if (fs.existsSync(LOCAL_DATASET_FILE)) {
+      const list = JSON.parse(fs.readFileSync(LOCAL_DATASET_FILE, "utf8") || "[]");
+      const item = list.find(x => x.id === id);
+      if (item) {
+        item.userFeedback = feedback;
+        item.userCorrectDisease = correctDisease || "";
+        item.feedbackTimestamp = Date.now();
+        fs.writeFileSync(LOCAL_DATASET_FILE, JSON.stringify(list, null, 2), "utf8");
+        return true;
+      }
+    }
+  } catch (fe) {
+    console.warn("Could not update local dataset file:", fe.message);
+  }
+  return false;
+}
+
+async function getDatasetForAdmin() {
+  try {
+    const adminApp = getFirebaseAdmin();
+    if (adminApp) {
+      const db = adminApp.database();
+      const snap = await db.ref("diagnoses_dataset").limitToLast(100).once("value");
+      const val = snap.val() || {};
+      return Object.values(val).reverse();
+    }
+  } catch (err) {
+    console.warn("Could not read dataset from Firebase:", err.message);
+  }
+
+  try {
+    if (fs.existsSync(LOCAL_DATASET_FILE)) {
+      return JSON.parse(fs.readFileSync(LOCAL_DATASET_FILE, "utf8") || "[]");
+    }
+  } catch (e) {
+    console.warn("Could not read local dataset file:", e.message);
+  }
+  return [];
+}
+
+async function updateAdminLabel(id, label, notes) {
+  try {
+    const adminApp = getFirebaseAdmin();
+    if (adminApp) {
+      const db = adminApp.database();
+      await db.ref(`diagnoses_dataset/${id}`).update({
+        adminLabel: label,
+        adminNotes: notes || "",
+        adminVerifiedAt: Date.now()
+      });
+      return true;
+    }
+  } catch (err) {
+    console.warn("Could not update label in Firebase:", err.message);
+  }
+
+  try {
+    if (fs.existsSync(LOCAL_DATASET_FILE)) {
+      const list = JSON.parse(fs.readFileSync(LOCAL_DATASET_FILE, "utf8") || "[]");
+      const item = list.find(x => x.id === id);
+      if (item) {
+        item.adminLabel = label;
+        item.adminNotes = notes || "";
+        item.adminVerifiedAt = Date.now();
+        fs.writeFileSync(LOCAL_DATASET_FILE, JSON.stringify(list, null, 2), "utf8");
+        return true;
+      }
+    }
+  } catch (fe) {
+    console.warn("Could not update local dataset label:", fe.message);
+  }
+  return false;
 }
 
 module.exports = async (req, res) => {
-  if (req.method !== "POST") return res.status(405).json({ error: "POST only" });
+  const action = req.query.action || "";
+
+  // -------------------------------------------------------------
+  // SUB-ENDPOINT: Farmer Feedback Submission
+  // -------------------------------------------------------------
+  if (action === "feedback" && req.method === "POST") {
+    try {
+      const { id, feedback, correctDisease } = req.body || {};
+      if (!id || !feedback) {
+        return res.status(400).json({ error: "id and feedback are required" });
+      }
+      await updateFeedbackRecord(id, feedback, correctDisease);
+      return res.status(200).json({ success: true, message: "Feedback recorded. Thank you for helping improve diagnosis accuracy." });
+    } catch (err) {
+      return res.status(500).json({ error: err.message });
+    }
+  }
+
+  // -------------------------------------------------------------
+  // SUB-ENDPOINT: Admin Dataset Review & Labeling
+  // -------------------------------------------------------------
+  if (action === "dataset" || action === "label") {
+    let token = null;
+    try {
+      token = await verifyAuthToken(req);
+    } catch (e) {}
+
+    let isOwner = false;
+    if (token) {
+      const sub = await getUserSubscription(token.uid, token.email, token.name);
+      isOwner = Boolean(sub && sub.isOwner);
+    }
+
+    if (!isOwner && !DEMO_MODE_PUBLIC) {
+      return res.status(403).json({ error: "FORBIDDEN", message: "Only the administrator can access the diagnosis dataset." });
+    }
+
+    if (action === "dataset" && req.method === "GET") {
+      const dataset = await getDatasetForAdmin();
+      return res.status(200).json({ success: true, count: dataset.length, dataset });
+    }
+
+    if (action === "label" && req.method === "POST") {
+      const { id, label, notes } = req.body || {};
+      if (!id || !label) {
+        return res.status(400).json({ error: "id and label are required" });
+      }
+      await updateAdminLabel(id, label, notes);
+      return res.status(200).json({ success: true, message: "Label updated successfully." });
+    }
+  }
+
+  // -------------------------------------------------------------
+  // MAIN ENDPOINT: Crop Disease Diagnosis
+  // -------------------------------------------------------------
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "POST only" });
+  }
 
   try {
-    // 1. Server-side subscription & trial enforcement
+    // 1. Subscription & Trial Enforcement
+    let token = null;
     if (!DEMO_MODE_PUBLIC) {
-      let token = null;
       try {
         token = await verifyAuthToken(req);
       } catch (authErr) {
@@ -100,107 +231,129 @@ module.exports = async (req, res) => {
       }
     }
 
-    const key = process.env.GEMINI_API_KEY;
-    if (!key) {
-      return res.status(500).json({ error: "GEMINI_API_KEY not set in environment" });
+    const {
+      crop,
+      lang = "en",
+      image,
+      images,
+      context = {},
+      consentSave = false
+    } = req.body || {};
+
+    // Collect images: supports both single `image` and array `images`
+    let imageList = [];
+    if (Array.isArray(images) && images.length > 0) {
+      imageList = images;
+    } else if (image) {
+      imageList = [image];
     }
 
-    const { crop, lang, image } = req.body || {};
-    if (!image) {
-      return res.status(400).json({ error: "No crop image provided for diagnosis" });
+    if (imageList.length === 0) {
+      return res.status(400).json({ error: "No crop image provided for diagnosis." });
     }
 
-    // Clean base64 image string
-    const cleanImg = String(image).replace(/^data:image\/[a-zA-Z0-9+.-]+;base64,/, "").trim();
-    if (cleanImg.length < 50) {
-      return res.status(400).json({ error: "Invalid image payload" });
+    // Limit to 3 images maximum
+    if (imageList.length > 3) {
+      imageList = imageList.slice(0, 3);
     }
 
-    const isTelugu = (lang === "Telugu" || lang === "te");
-    const prompt = `You are an expert agricultural extension pathologist for farmers in Telangana, India (PJTAU standard). The crop is ${crop || "field crop"}.
-Look at the attached plant photo and provide an accurate diagnostic assessment.
-Reply strictly in ${isTelugu ? "professional, polite Telugu (ప్రామాణిక వ్యవసాయ తెలుగు)" : "clear Indian English"}, using these clear labelled sections:
-
-${isTelugu ? 
-`సమస్య / తెగులు నిర్ధారణ: (తెగులు, పురుగు లేదా పోషక లోపం పేరు, మరియు మీ అంచనా ఖచ్చితత్వం)
-లక్షణాలు: (ఫోటోలో కనిపించే నిర్దిష్ట ఆకు/మొక్క నష్ట లక్షణాలు)
-ఇతర అవకాశాలు: (ఒకటి లేదా రెండు ఇతర సారూప్య తెగుళ్లు లేదా కారణాలు)
-సస్యరక్షణ & నివారణ చర్యలు: (ముందుగా సమగ్ర సస్యరక్షణ / సేంద్రీయ పద్ధతులు, ఆపై రసాయన మందుల క్రియాశీల పదార్థాల పేర్లు మరియు మోతాదు PJTAU మార్గదర్శకాల ప్రకారం)
-సలహా & సంప్రదింపులు: (స్థానిక మండల వ్యవసాయ విస్తరణ అధికారి లేదా PJTAU శాస్త్రవేత్తను ఎప్పుడు సంప్రదించాలి)`
-:
-`Likely problem: (disease, pest or nutrient deficiency name, and diagnostic certainty)
-What I can see: (the visible leaf/plant symptoms)
-Other possibilities: (one or two alternative causes)
-What to do now: (Integrated Pest Management: cultural and bio-control first, then recommended chemical active ingredients with PJTAU safety guidance)
-When to get help: (when to contact the local Mandal AEO or PJTAU scientist)`
-}
-
-If the photo is unclear or not a plant, explain politely and request a closer photo of an affected leaf. Avoid excessive markdown symbols.`;
-
-    // 2. Discover available models for this specific API key
-    const discoveredModels = await getAvailableGeminiModels(key);
-
-    // If custom env model is set, prepend it to candidate list
-    const candidateList = [];
-    if (process.env.GEMINI_MODEL) {
-      candidateList.push({ id: process.env.GEMINI_MODEL, version: "v1beta" });
-      candidateList.push({ id: process.env.GEMINI_MODEL, version: "v1" });
-    }
-
-    discoveredModels.forEach(m => {
-      if (!candidateList.some(c => c.id === m.id && c.version === m.version)) {
-        candidateList.push(m);
+    // Validate payload size (max 4MB per image base64)
+    for (const img of imageList) {
+      if (typeof img !== "string" || img.length > 5 * 1024 * 1024) {
+        return res.status(413).json({
+          error: "IMAGE_TOO_LARGE",
+          message: "One or more images exceed the 4MB upload limit. Please use compressed images."
+        });
       }
+    }
+
+    const clientIp = getClientIp(req);
+    const userId = token ? token.uid : null;
+
+    // 2. Execute Structured Diagnosis
+    const diagResponse = await diagnoseCropPhoto({
+      crop,
+      lang,
+      images: imageList,
+      context,
+      ip: clientIp,
+      userId
     });
 
-    let lastError = null;
-    let diagnosisText = "";
+    if (!diagResponse.success) {
+      return res.status(diagResponse.status || 500).json({
+        error: diagResponse.error,
+        message: diagResponse.message,
+        resetSeconds: diagResponse.resetSeconds
+      });
+    }
 
-    // 3. Try available models sequentially until one succeeds
-    for (const item of candidateList) {
-      const { id: modelName, version } = item;
-      try {
-        const url = `https://generativelanguage.googleapis.com/${version}/models/${modelName}:generateContent?key=${key}`;
-        const r = await fetch(url, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-goog-api-key": key
-          },
-          body: JSON.stringify({
-            contents: [{
-              parts: [
-                { text: prompt },
-                {
-                  inline_data: { mime_type: "image/jpeg", data: cleanImg }
-                }
-              ]
-            }]
-          })
-        });
+    const result = diagResponse.result;
+    const diagnosisId = "diag_" + Date.now() + "_" + crypto.randomBytes(4).toString("hex");
+    result.diagnosisId = diagnosisId;
 
-        const j = await r.json().catch(() => ({}));
-        if (r.ok) {
-          diagnosisText = (j.candidates?.[0]?.content?.parts || []).map(p => p.text || "").join("").trim();
-          if (diagnosisText) break;
-        } else {
-          lastError = (j.error && j.error.message) || `Gemini API error (${r.status})`;
-          console.warn(`Model ${modelName} on ${version} failed (${r.status}):`, lastError);
-          // If 404 (model not found) or 503 (busy) or 400 (unsupported), try next candidate
-          if (r.status === 404 || r.status === 503 || r.status === 400) continue;
-          break;
-        }
-      } catch (err) {
-        lastError = err.message;
-        console.warn(`Fetch error for ${modelName}:`, err.message);
+    // Format human-readable text for backward compatibility with existing UI
+    const isTe = (lang === "te" || lang === "Telugu");
+    let legacyText = "";
+    if (!result.isUnderstood) {
+      legacyText = isTe
+        ? `⚠️ నిర్ధారణ ఖచ్చితంగా చేయలేకపోయాము:\n${result.notSureReason}\n\nసలహా:\n${result.adviceSummary}`
+        : `⚠️ Could not make a definitive diagnosis:\n${result.notSureReason}\n\nAdvice:\n${result.adviceSummary}`;
+    } else {
+      const top = result.topCandidate;
+      const mgmt = top.management || {};
+      const cult = (mgmt.cultural || []).map(c => `• ${c}`).join("\n");
+      const bio = (mgmt.biological || []).map(b => `• ${b}`).join("\n");
+      const chem = (mgmt.chemicalClass || []).map(k => `• ${k}`).join("\n");
+
+      if (isTe) {
+        legacyText = `🌿 సమస్య / తెగులు నిర్ధారణ: ${top.nameTe || top.commonName} (${top.scientificName || ""})\nఅంచనా ఖచ్చితత్వం: ${top.confidence === "high" ? "ఎక్కువ (High)" : top.confidence === "medium" ? "మధ్యస్థం (Medium)" : "తక్కువ (Low)"}\n\n` +
+          `🔍 కనిపించే లక్షణాలు:\n${top.symptomsSeen}\n\n` +
+          `🔬 ఇతర పోలికలతో తేడా (Differential check):\n${top.differentialCheck}\n\n` +
+          `🌾 పొలంలో నిర్ధారించుకోవలసిన అంశాలు:\n${top.fieldCheck}\n\n` +
+          `🛠️ సస్యరక్షణ & నివారణ చర్యలు (PJTAU ప్రామాణిక పద్ధతులు):\n` +
+          `1. సాగు పద్ధతులు (Cultural):\n${cult || "• మండల వ్యవసాయ అధికారి సూచించిన జాగ్రత్తలు పాటించండి."}\n\n` +
+          `2. జీవ నియంత్రణ (Biological):\n${bio || "• వేప నూనె లేదా ట్రైకోడెర్మా పిచికారీ చేయండి."}\n\n` +
+          `3. రసాయన మందుల తరగతి (Chemical Group Only):\n${chem || "• సిఫారసు చేసిన క్రియాశీల పదార్థ తరగతి మందులు మాత్రమే వాడండి."}\n\n` +
+          `⚠️ గమనిక & రక్షణ:\n${mgmt.regulatoryDisclaimer || "సిఫారసు చేసిన మోతాదు లేబుల్ ప్రకారం వాడండి. మాస్క్ మరియు చేతి తొడుగులు ధరించండి."}`;
+      } else {
+        legacyText = `Likely problem: ${top.commonName} (${top.scientificName})\nDiagnostic confidence: ${top.confidence.toUpperCase()}\n\n` +
+          `Visible symptoms in photo:\n${top.symptomsSeen}\n\n` +
+          `How to tell apart from similar issues:\n${top.differentialCheck}\n\n` +
+          `What to verify in the field:\n${top.fieldCheck}\n\n` +
+          `Management (PJTAU / ICAR standard):\n` +
+          `1. Cultural controls:\n${cult || "• Follow standard university field hygiene."}\n\n` +
+          `2. Biological controls:\n${bio || "• Bio-control agent application."}\n\n` +
+          `3. Chemical active ingredient group:\n${chem || "• Consult registered active ingredient class."}\n\n` +
+          `Statutory Safety:\n${mgmt.regulatoryDisclaimer || "Use only CIB&RC approved products for this crop. Always follow package label and wear personal protective equipment."}`;
       }
     }
 
-    if (!diagnosisText) {
-      return res.status(502).json({ error: lastError || "Failed to analyze photo with Gemini AI" });
+    // 3. Anonymous Dataset Saving on Farmer Consent
+    if (consentSave) {
+      const anonymousRecord = {
+        id: diagnosisId,
+        timestamp: Date.now(),
+        crop: result.crop,
+        context,
+        topCauseId: result.topCandidate?.id || "",
+        topCauseName: result.topCandidate?.commonName || "",
+        confidence: result.confidence,
+        isUnderstood: result.isUnderstood,
+        // Store thumbnail (first image only, truncated to avoid giant payload)
+        imageThumb: imageList[0] ? `data:image/jpeg;base64,${imageList[0]}` : null,
+        userFeedback: null,
+        userCorrectDisease: null,
+        adminLabel: null
+      };
+      saveConsentRecord(anonymousRecord).catch(err => console.warn("Failed background consent save:", err.message));
     }
 
-    return res.status(200).json({ text: diagnosisText });
+    return res.status(200).json({
+      success: true,
+      text: legacyText,
+      result
+    });
   } catch (e) {
     console.error("Diagnose unhandled error:", e);
     return res.status(500).json({ error: String(e.message || e) });

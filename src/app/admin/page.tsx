@@ -46,6 +46,7 @@ import {
   exportAnalyticsCSV,
   AnalyticsSummary,
 } from "@/lib/analytics/analyticsStore";
+import CropDiseaseDatasetManager from "@/components/admin/CropDiseaseDatasetManager";
 
 export default function AdminPortalPage() {
   // Authentication states
@@ -57,6 +58,9 @@ export default function AdminPortalPage() {
   const [authError, setAuthError] = useState<string>("");
   const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false);
   const [showForgotModal, setShowForgotModal] = useState<boolean>(false);
+
+  // Active section tab
+  const [adminTab, setAdminTab] = useState<"analytics" | "dataset">("analytics");
 
   // Analytics states
   const [stats, setStats] = useState<AnalyticsSummary | null>(null);
@@ -477,34 +481,64 @@ export default function AdminPortalPage() {
         </div>
       </header>
 
+      {/* Admin Section Tab Switcher */}
+      <div className="bg-white dark:bg-stone-900 border-b border-stone-200 dark:border-stone-800 px-4 md:px-8 py-2">
+        <div className="max-w-7xl mx-auto flex items-center gap-2">
+          <button
+            onClick={() => setAdminTab("analytics")}
+            className={`px-3.5 py-1.5 text-xs font-bold rounded-xl transition ${
+              adminTab === "analytics"
+                ? "bg-indigo-600 text-white shadow-sm"
+                : "text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800"
+            }`}
+          >
+            📊 Visitor Analytics
+          </button>
+          <button
+            onClick={() => setAdminTab("dataset")}
+            className={`px-3.5 py-1.5 text-xs font-bold rounded-xl transition ${
+              adminTab === "dataset"
+                ? "bg-indigo-600 text-white shadow-sm"
+                : "text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800"
+            }`}
+          >
+            🌱 Crop Disease Dataset & Labeling
+          </button>
+        </div>
+      </div>
+
       {/* Main Dashboard Content */}
       <main className="max-w-7xl mx-auto px-4 md:px-8 pt-6 space-y-6">
-        {/* Banner Alert with Conference Context */}
-        <div className="bg-gradient-to-r from-indigo-900 via-blue-900 to-indigo-950 text-white rounded-2xl p-4 md:p-5 shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-indigo-700/50">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-indigo-500/30 text-indigo-200 border border-indigo-400/40">
-                ADSAUF-2047 Telangana
-              </span>
-              <span className="text-xs text-indigo-300">Live Production Monitoring</span>
+        {adminTab === "dataset" ? (
+          <CropDiseaseDatasetManager />
+        ) : (
+          <>
+            {/* Banner Alert with Conference Context */}
+            <div className="bg-gradient-to-r from-indigo-900 via-blue-900 to-indigo-950 text-white rounded-2xl p-4 md:p-5 shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-indigo-700/50">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-indigo-500/30 text-indigo-200 border border-indigo-400/40">
+                    ADSAUF-2047 Telangana
+                  </span>
+                  <span className="text-xs text-indigo-300">Live Production Monitoring</span>
+                </div>
+                <h2 className="text-base md:text-lg font-bold">
+                  Real-Time Rythu User Engagement Portal
+                </h2>
+                <p className="text-xs text-indigo-200/90 mt-0.5">
+                  Live tracking active users across Telangana APMC Mandis, AI Disease Check, and ESP32 field units.
+                </p>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={handleSimulateVisitor}
+                  className="px-3 py-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 transition active:scale-95"
+                >
+                  <Zap className="w-3.5 h-3.5 text-amber-400" />
+                  Simulate 5 Farmers
+                </button>
+              </div>
             </div>
-            <h2 className="text-base md:text-lg font-bold">
-              Real-Time Rythu User Engagement Portal
-            </h2>
-            <p className="text-xs text-indigo-200/90 mt-0.5">
-              Live tracking active users across Telangana APMC Mandis, AI Disease Check, and ESP32 field units.
-            </p>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <button
-              onClick={handleSimulateVisitor}
-              className="px-3 py-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 transition active:scale-95"
-            >
-              <Zap className="w-3.5 h-3.5 text-amber-400" />
-              Simulate 5 Farmers
-            </button>
-          </div>
-        </div>
 
         {/* 4 Key Traffic KPI Metric Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -821,6 +855,8 @@ export default function AdminPortalPage() {
             Ready for live demonstration at ADSAUF-2047 (PJTAU, Hyderabad)
           </div>
         </div>
+        </>
+        )}
       </main>
     </div>
   );
