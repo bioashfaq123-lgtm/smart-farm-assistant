@@ -995,6 +995,334 @@ pre { white-space: pre-wrap; font: inherit; margin: 0; }
   font-size: 12px;
 }
 
+/* --- WEATHER FEATURE STYLES (PHASE 2) --- */
+.wx-top-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin: 10px 0 14px;
+}
+.wx-loc-select {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--bd);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 500;
+}
+.wx-btn {
+  padding: 7px 11px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--bd);
+  background: var(--card);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+.wx-btn:hover {
+  background: var(--pri-light);
+  border-color: var(--pri);
+}
+.wx-banner-severe {
+  background: #ffebee;
+  border: 1px solid #ef5350;
+  border-left: 5px solid #d32f2f;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  margin-bottom: 12px;
+  color: #b71c1c;
+  line-height: 1.45;
+}
+:root[data-theme="dark"] .wx-banner-severe {
+  background: #3b1416;
+  border-color: #e57373;
+  color: #ef9a9a;
+}
+.wx-banner-severe a {
+  color: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+}
+.wx-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 11.5px;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.wx-consensus-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  border: 1px solid transparent;
+  line-height: 1.4;
+}
+.wx-consensus-pill.rain {
+  background: #e3f2fd;
+  color: #0d47a1;
+  border-color: #90caf9;
+}
+:root[data-theme="dark"] .wx-consensus-pill.rain {
+  background: #0d2745;
+  color: #90caf9;
+  border-color: #1565c0;
+}
+.wx-consensus-pill.dry {
+  background: #fff8e1;
+  color: #f57f17;
+  border-color: #ffe082;
+}
+:root[data-theme="dark"] .wx-consensus-pill.dry {
+  background: #33260c;
+  color: #ffe082;
+  border-color: #f57f17;
+}
+.wx-consensus-pill.diverging {
+  background: #fbe9e7;
+  color: #d84315;
+  border-color: #ffab91;
+}
+:root[data-theme="dark"] .wx-consensus-pill.diverging {
+  background: #3b1d16;
+  color: #ffab91;
+  border-color: #bf360c;
+}
+.wx-current-hero {
+  background: var(--pri-light);
+  border: 1px solid var(--bd);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-bottom: 14px;
+}
+.wx-hero-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.wx-hero-temp {
+  font-size: 38px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--text);
+}
+.wx-hero-icon {
+  font-size: 42px;
+}
+.wx-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+@media (min-width: 480px) {
+  .wx-metrics-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+.wx-metric-box {
+  background: var(--card);
+  border: 1px solid var(--bd);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+}
+.wx-metric-lbl {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+.wx-metric-val {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  margin-top: 2px;
+}
+.wx-adv-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.wx-adv-card {
+  background: var(--card);
+  border: 1px solid var(--bd);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  box-shadow: var(--shadow-sm);
+}
+.wx-adv-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.wx-adv-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.wx-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.wx-badge.ok {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+.wx-badge.warn {
+  background: #fff3e0;
+  color: #e65100;
+}
+.wx-badge.info {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+:root[data-theme="dark"] .wx-badge.ok { background: #1c3321; color: #a5d6a7; }
+:root[data-theme="dark"] .wx-badge.warn { background: #3b2814; color: #ffb74d; }
+:root[data-theme="dark"] .wx-badge.info { background: #12283e; color: #90caf9; }
+.wx-adv-body {
+  font-size: 12.5px;
+  color: var(--text);
+  line-height: 1.45;
+}
+.wx-adv-sub {
+  font-size: 11.5px;
+  color: var(--muted);
+  margin-top: 5px;
+  font-style: italic;
+  line-height: 1.4;
+}
+.wx-strip-wrap {
+  margin: 14px 0;
+  padding: 8px 0;
+}
+.wx-strip-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  -webkit-overflow-scrolling: touch;
+}
+.wx-hour-card {
+  flex: 0 0 82px;
+  background: var(--card);
+  border: 1px solid var(--bd);
+  border-radius: var(--radius-sm);
+  padding: 8px 6px;
+  text-align: center;
+  font-size: 12px;
+}
+.wx-hour-time {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.wx-hour-icon {
+  font-size: 22px;
+  margin: 3px 0;
+}
+.wx-hour-temp {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text);
+}
+.wx-hour-rain {
+  font-size: 10.5px;
+  color: #1976d2;
+  font-weight: 600;
+  margin-top: 3px;
+}
+:root[data-theme="dark"] .wx-hour-rain { color: #64b5f6; }
+.wx-hour-wind {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.wx-accuracy-card {
+  background: var(--bg);
+  border: 1px solid var(--bd);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  margin-top: 14px;
+}
+.wx-feedback-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.wx-feedback-btn {
+  flex: 1 1 130px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--bd);
+  background: var(--card);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  transition: all 0.15s ease;
+}
+.wx-feedback-btn:hover {
+  background: var(--pri-light);
+  border-color: var(--pri);
+}
+.wx-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.wx-modal.open {
+  display: flex;
+}
+.wx-modal-box {
+  background: var(--card);
+  border: 1px solid var(--bd);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 440px;
+  padding: 18px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-md);
+}
+
 @media print {
   header, nav, #sub_banner, #float_chat_btn, .no-print, .btn, .lang-toggle, .demo-pill, .seed-action-row, #s_reset {
     display: none !important;
@@ -1141,9 +1469,38 @@ pre { white-space: pre-wrap; font: inherit; margin: 0; }
   </div>
 </section>
 
-<section id="wx"><div class="card"><h2 data-i18n="wx_title">Weather and rain forecast</h2>
-<label data-i18n="wx_loc">Location</label><select id="w_loc"></select>
-<div id="w_out"><p class="muted" data-i18n="wx_loading">Loading…</p></div></div></section>
+<section id="wx"><div class="card">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px">
+    <h2 style="margin:0" data-i18n="wx_title">Weather and rain forecast</h2>
+    <button class="wx-btn" id="w_refresh_btn" onclick="loadWx(true)" title="Refresh forecast">🔄 <span data-i18n="wx_refresh">Refresh</span></button>
+  </div>
+
+  <!-- Location Bar with Dropdown, GPS, Village Search & Save Plot -->
+  <div class="wx-top-controls">
+    <div style="flex:1 1 200px">
+      <select id="w_loc" class="wx-loc-select" onchange="handleWeatherLocationChange()"></select>
+    </div>
+    <button class="wx-btn" id="w_gps_btn" onclick="detectGpsLocation()" title="Detect current field GPS">📍 <span data-i18n="wx_gps">GPS</span></button>
+    <button class="wx-btn" id="w_search_btn" onclick="openVillageSearchModal()" title="Search village in Telangana">🔍 <span data-i18n="wx_search_btn">Search Village</span></button>
+    <button class="wx-btn" id="w_save_btn" onclick="saveCurrentPlotLocation()" title="Save current field plot">💾 <span data-i18n="wx_save_plot">Save Plot</span></button>
+  </div>
+
+  <div id="w_out"><p class="muted" data-i18n="wx_loading">Loading…</p></div>
+
+  <!-- Village Geocoding Search Modal -->
+  <div id="wx_search_modal" class="wx-modal">
+    <div class="wx-modal-box">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <h3 style="margin:0;font-size:16px" data-i18n="wx_search_title">Search Village / Mandal in Telangana</h3>
+        <button class="wx-btn" onclick="closeVillageSearchModal()" style="padding:4px 8px">✕</button>
+      </div>
+      <input type="text" id="wx_search_input" placeholder="Type village name (e.g. Jagtial, Siddipet)..." oninput="handleVillageSearchInput(this.value)" style="width:100%;margin-bottom:10px;padding:9px 12px;border-radius:8px;border:1px solid var(--bd);background:var(--bg);color:var(--text);font-size:14px">
+      <div id="wx_search_results" style="max-height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:6px">
+        <p class="muted" style="font-size:12px;text-align:center;padding:12px">Type village or town name to search with Open-Meteo geocoding.</p>
+      </div>
+    </div>
+  </div>
+</div></section>
 
 <section id="seed"><div class="card">
   <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px">
@@ -1877,7 +2234,7 @@ const TRANSLATIONS = {
     // weather
     wx_title: "Weather and rain forecast",
     wx_loc: "Location",
-    wx_loading: "Loading…",
+    wx_loading: "Loading live forecast…",
     wx_hum: "Humidity",
     wx_rain_now: "Rain now",
     wx_rain_skip: "Rain likely: skip irrigation for now.",
@@ -1887,7 +2244,42 @@ const TRANSLATIONS = {
     wx_th_prob: "Rain chance",
     wx_th_rain: "Rain",
     wx_sample_note: "Showing sample data because live weather could not be loaded (offline / demo mode).",
-    wx_source: "Source: Open-Meteo",
+    wx_source: "Source: Open-Meteo Meteorological Service",
+    wx_refresh: "Refresh",
+    wx_gps: "GPS",
+    wx_gps_locating: "Locating...",
+    wx_search_btn: "Search Village",
+    wx_search_title: "Search Village / Mandal in Telangana",
+    wx_search_placeholder: "Type village name (e.g. Jagtial, Siddipet)...",
+    wx_save_plot: "Save Plot",
+    wx_save_plot_prompt: "Enter name for this farm plot (e.g., North Paddy Plot, Borewell 2):",
+    wx_plot_saved: "Farm plot location saved successfully!",
+    wx_consensus_title: "Multi-Model Forecast Consensus",
+    wx_hourly_title: "24-Hour Hourly Forecast",
+    wx_daily_title: "7-Day Farm Forecast",
+    wx_advisory_title: "Farm Weather Advisories",
+    wx_spray_card_title: "Spray Window Advisor",
+    wx_spray_safe: "SAFE TO SPRAY",
+    wx_spray_unsafe: "AVOID SPRAYING",
+    wx_spray_disclaimer: "Follow CIB&RC statutory label directions. Wear personal protective equipment. No unauthorized pesticide mixtures.",
+    wx_irrig_card_title: "Smart Irrigation & Rain-Skip",
+    wx_rain_skip_active: "Rain-Skip Active (Irrigation Suspended)",
+    wx_rain_skip_normal: "Normal Irrigation Active",
+    wx_et0_label: "Evapotranspiration (ET0)",
+    wx_disease_card_title: "Microclimate Disease Risk Indicator",
+    wx_disease_disclaimer: "Weather-based risk indicator only — NOT a field diagnosis. Inspect plants to confirm.",
+    wx_severe_title: "Official Weather Warning Alert",
+    wx_imd_link: "Open Official IMD Warning Portal (mausam.imd.gov.in)",
+    wx_accuracy_title: "Local Forecast Reliability",
+    wx_rain_question: "Did it rain at your field today?",
+    wx_rain_yes: "Yes, it rained",
+    wx_rain_no: "No, stayed dry",
+    wx_accuracy_logged: "Field observation recorded! Thank you.",
+    wx_accuracy_need_more: "Logging local ground truth ({count}/5 days recorded). Accuracy score appears after 5 days.",
+    wx_accuracy_score: "Rain forecast was correct on {correct} of {total} recorded days for this location.",
+    wx_th_et0: "ET0 (mm)",
+    wx_th_wind: "Wind",
+    wx_wind_label: "Wind / Gusts",
     // seed rate
     seed_title: "Seed rate calculator",
     seed_badge_indicative: "PJTAU Indicative Defaults",
@@ -2186,7 +2578,7 @@ const TRANSLATIONS = {
     // weather
     wx_title: "వాతావరణం & వర్ష సూచన",
     wx_loc: "ప్రాంతం",
-    wx_loading: "లోడ్ అవుతోంది…",
+    wx_loading: "వాతావరణ సమాచారం లోడ్ అవుతోంది…",
     wx_hum: "గాలిలో తేమ",
     wx_rain_now: "ప్రస్తుత వర్షం",
     wx_rain_skip: "వర్షం పడే అవకాశం ఉంది: ప్రస్తుతానికి నీటిపారుదల ఆపండి.",
@@ -2197,6 +2589,41 @@ const TRANSLATIONS = {
     wx_th_rain: "వర్షపాతం",
     wx_sample_note: "ఇంటర్నెట్ అందుబాటులో లేనందున నమూనా వాతావరణం చూపబడుతోంది (ఆఫ్‌లైన్ డెమో మోడ్).",
     wx_source: "మూలం: ఓపెన్-మెటియో (Open-Meteo)",
+    wx_refresh: "తాజాకరించు",
+    wx_gps: "GPS",
+    wx_gps_locating: "GPS చూస్తోంది...",
+    wx_search_btn: "గ్రామం వెతకండి",
+    wx_search_title: "తెలంగాణలో గ్రామం / మండలం వెతకండి",
+    wx_search_placeholder: "గ్రామం లేదా మండలం పేరు నమోదు చేయండి...",
+    wx_save_plot: "పొలం భద్రపరచండి",
+    wx_save_plot_prompt: "ఈ పొలం పేరు నమోదు చేయండి (ఉదా: ఉత్తరం చేను, బోరుబావి):",
+    wx_plot_saved: "పొలం వివరాలు భద్రపరచబడ్డాయి!",
+    wx_consensus_title: "వివిధ వాతావరణ నమూనాల అంచనా (Consensus)",
+    wx_hourly_title: "24 గంటల వాతావరణ సూచన",
+    wx_daily_title: "7 రోజుల వ్యవసాయ వాతావరణం",
+    wx_advisory_title: "రైతులకు వాతావరణ సలహాలు",
+    wx_spray_card_title: "మందుల పిచికారీ అనుకూల సమయం",
+    wx_spray_safe: "పిచికారీకి అనుకూలం",
+    wx_spray_unsafe: "పిచికారీ చేయవద్దు",
+    wx_spray_disclaimer: "CIB&RC లేబుల్ మార్గదర్శకాలు పాటించండి. రక్షణ దుస్తులు ధరించండి. సిఫారసు లేని మందుల కలయికలు వాడవద్దు.",
+    wx_irrig_card_title: "నీటిపారుదల & వర్షం ఆధారం (Rain-Skip)",
+    wx_rain_skip_active: "వర్ష సూచన ఉంది: నీటిపారుదల నిలిపివేయండి",
+    wx_rain_skip_normal: "సాధారణ నీటిపారుదల కొనసాగించవచ్చు",
+    wx_et0_label: "నీటి ఆవిరి రేటు (ET0)",
+    wx_disease_card_title: "వాతావరణ ఆధారిత తెగుళ్ల ముందస్తు సూచన",
+    wx_disease_disclaimer: "ఇది కేవలం వాతావరణ ఆధారిత సూచన మాత్రమే — నేరుగా తెగులు నిర్ధారణ కాదు. పంటను పరిశీలించి నిర్ధారించుకోండి.",
+    wx_severe_title: "అధికారిక వాతావరణ హెచ్చరిక",
+    wx_imd_link: "అధికారిక IMD హెచ్చరికల పోర్టల్ (mausam.imd.gov.in)",
+    wx_accuracy_title: "స్థానిక వాతావరణ సూచన విశ్వసనీయత",
+    wx_rain_question: "ఈ రోజు మీ పొలంలో వర్షం పడిందా?",
+    wx_rain_yes: "అవును, పడింది",
+    wx_rain_no: "లేదు, పొడిగా ఉంది",
+    wx_accuracy_logged: "మీ వివరాలు నమోదయ్యాయి! ధన్యవాదాలు.",
+    wx_accuracy_need_more: "స్థానిక వర్షపాతం నమోదు ({count}/5 రోజులు నమోదయ్యాయి). 5 రోజుల తర్వాత ఖచ్చితత్వ గణాంకాలు చూపబడుతాయి.",
+    wx_accuracy_score: "ఈ ప్రాంతంలో నమోదైన {total} రోజులలో {correct} రోజులు వర్ష సూచన సరిగ్గా సరిపోయింది.",
+    wx_th_et0: "ET0 (మి.మీ)",
+    wx_th_wind: "గాలి వేగం",
+    wx_wind_label: "గాలి / ఈదురుగాలులు",
     // seed rate
     seed_title: "విత్తన మోతాదు కాలిక్యులేటర్",
     seed_badge_indicative: "PJTAU సూచిక మార్గదర్శకాలు",
@@ -2418,7 +2845,49 @@ let curLang = localStorage.getItem("sfa_lang") || "en";
 let isDemoMode = !navigator.onLine; // default to demo mode if offline
 
 const DIST=["Hyderabad","Jagtial","Karimnagar","Warangal","Nizamabad","Adilabad","Khammam","Nalgonda","Mahabubnagar","Medak"];
-const LOC={"Rajendranagar, Hyderabad":[17.32,78.40],"Jagtial":[18.79,78.91],"Karimnagar":[18.44,79.13],"Warangal":[17.97,79.59],"Nizamabad":[18.67,78.09],"Khammam":[17.25,80.15]};
+let LOC={"Rajendranagar, Hyderabad":[17.32,78.40],"Jagtial":[18.79,78.91],"Karimnagar":[18.44,79.13],"Warangal":[17.97,79.59],"Nizamabad":[18.67,78.09],"Khammam":[17.25,80.15],"Nalgonda":[17.05,79.27],"Adilabad":[19.67,78.53],"Mahabubnagar":[16.74,77.99],"Medak":[18.04,78.26]};
+
+function getSavedFieldLocations() {
+  try {
+    const raw = localStorage.getItem("sfa_field_locations");
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) { return []; }
+}
+
+function populateWeatherLocations(selectedKey = null) {
+  const el = $("w_loc");
+  if (!el) return;
+  const currentVal = selectedKey || el.value || "Jagtial";
+  const savedPlots = getSavedFieldLocations();
+  let html = "";
+  
+  if (savedPlots.length > 0) {
+    html += `<optgroup label="${curLang === 'te' ? 'నా పొలాలు (Saved Plots)' : 'My Farm Plots'}">`;
+    savedPlots.forEach(p => {
+      const k = `plot:${p.name}`;
+      LOC[k] = [p.lat, p.lon];
+      html += `<option value="${k}">🌱 ${p.name} (${p.lat.toFixed(2)}, ${p.lon.toFixed(2)})</option>`;
+    });
+    html += `</optgroup>`;
+  }
+  
+  html += `<optgroup label="${curLang === 'te' ? 'తెలంగాణ ప్రాంతాలు' : 'Telangana Mandals & Districts'}">`;
+  const defaultKeys = ["Rajendranagar, Hyderabad", "Jagtial", "Karimnagar", "Warangal", "Nizamabad", "Khammam", "Nalgonda", "Adilabad", "Mahabubnagar", "Medak"];
+  defaultKeys.forEach(k => {
+    html += `<option value="${k}">${k}</option>`;
+  });
+  html += `</optgroup>`;
+  
+  el.innerHTML = html;
+  if (LOC[currentVal]) {
+    el.value = currentVal;
+  } else if (savedPlots.length > 0) {
+    el.value = `plot:${savedPlots[0].name}`;
+  } else {
+    el.value = "Jagtial";
+  }
+}
+
 // kg/ha of N, P2O5, K2O (PJTAU practices)
 const CROPS={"Paddy":[120,60,40],"Maize":[180,60,50],"Cotton":[150,60,60],"Sesame":[60,40,30],"Groundnut":[30,40,50],"Redgram":[20,50,0],"Chilli":[150,60,60],"Soybean":[20,60,40]};
 const MANDI={"Paddy":[["Jagtial APMC",2150,2320,2230,"MTU-1010 · FAQ","MTU-1010"],["Nizamabad APMC",2180,2350,2260,"BPT-5204 · FAQ","BPT-5204"],["Warangal APMC",2120,2300,2210,"Common · Grade A","Common"]],
@@ -2431,7 +2900,8 @@ const MANDI={"Paddy":[["Jagtial APMC",2150,2320,2230,"MTU-1010 · FAQ","MTU-1010
 "Soybean":[["Nizamabad APMC",4300,4750,4600,"JS-335 · FAQ","JS-335"],["Adilabad APMC",4250,4700,4550,"JS-9305 · FAQ","JS-9305"],["Medak APMC",4200,4680,4520,"Yellow · Grade A","Yellow"]]};
 
 const fill=(id,arr)=>{$(id).innerHTML=arr.map(v=>`<option value="${v}">${v}</option>`).join("")};
-fill("r_dist",DIST);fill("w_loc",Object.keys(LOC));
+fill("r_dist",DIST);
+populateWeatherLocations();
 
 function populateCrops(){
   const cropKeys=Object.keys(CROPS);
@@ -2502,6 +2972,7 @@ function setLang(lang){
   populateUnits();
   populateSoil();
   populateFiMode();
+  populateWeatherLocations();
   if (typeof populateSeedCrops === "function") populateSeedCrops();
   if (typeof populateSeedMethods === "function") populateSeedMethods();
   if (typeof updateSeedCropSpec === "function") updateSeedCropSpec();
@@ -3249,37 +3720,812 @@ $("r_save").onclick = () => {
   renderRegState();
 })();
 
-// weather
-const DEMO_WX={demo:true,current:{temperature_2m:31,relative_humidity_2m:62,precipitation:0},
-daily:{time:[0,1,2,3,4].map(i=>{const d=new Date();d.setDate(d.getDate()+i);return d.toISOString().slice(0,10)}),
-temperature_2m_max:[33,32,31,30,32],temperature_2m_min:[23,23,22,22,23],precipitation_sum:[0,6,12,2,0],precipitation_probability_max:[10,65,80,35,15]}};
-let lastWxData=null;
+// ==========================================
+// WEATHER FEATURE (PHASE 2 - AGROMET ENGINE)
+// ==========================================
 
-function renderWxData(d){
-  lastWxData=d;
-  const c=d.current,y=d.daily,t=TRANSLATIONS[curLang];
-  const skip=Math.max(y.precipitation_probability_max[0],y.precipitation_probability_max[1])>=60||y.precipitation_sum[1]>=5;
-  const days=y.time.map((tm,i)=>`<tr><td>${new Date(tm).toLocaleDateString(curLang==="te"?"te-IN":"en-IN",{weekday:"short",day:"numeric",month:"short"})}</td><td>${y.temperature_2m_min[i]}–${y.temperature_2m_max[i]}°C</td><td>${y.precipitation_probability_max[i]}%</td><td>${y.precipitation_sum[i]} mm</td></tr>`).join("");
-  $("w_out").innerHTML=`<div class="big">${c.temperature_2m}°C</div><div class="muted">${t.wx_hum} ${c.relative_humidity_2m}% · ${t.wx_rain_now} ${c.precipitation} mm</div>
-  <div class="${skip?"note":"ok"}"><b>${skip?t.wx_rain_skip:t.wx_no_rain}</b></div>
-  <div class="scroll"><table><thead><tr><th>${t.wx_th_day}</th><th>${t.wx_th_temp}</th><th>${t.wx_th_prob}</th><th>${t.wx_th_rain}</th></tr></thead><tbody>${days}</tbody></table></div>
-  ${(d.demo||isDemoMode)?`<div class="note">${t.wx_sample_note}</div>`:`<p class="muted">${t.wx_source}</p>`}`;
+const DEMO_WX = {
+  demo: true,
+  fromCache: false,
+  cachedAt: Date.now(),
+  source: "Open-Meteo Meteorological Service (Demo Mode)",
+  coordinates: { lat: 18.79, lon: 78.91 },
+  crop: "Paddy",
+  current: {
+    temperature_2m: 31.5,
+    relative_humidity_2m: 68,
+    precipitation: 0.0,
+    weather_code: 2,
+    wind_speed_10m: 8.5,
+    wind_gusts_10m: 13.0
+  },
+  hourly: {
+    time: Array.from({ length: 24 }, (_, i) => {
+      const d = new Date();
+      d.setHours(d.getHours() + i, 0, 0, 0);
+      return d.toISOString();
+    }),
+    temperature_2m: [31, 30, 28, 27, 26, 25, 24, 25, 27, 29, 31, 33, 34, 34, 33, 32, 30, 29, 28, 27, 26, 25, 25, 26],
+    relative_humidity_2m: [65, 70, 75, 80, 85, 88, 90, 85, 78, 70, 62, 55, 50, 52, 58, 65, 72, 78, 82, 85, 87, 88, 86, 80],
+    precipitation_probability: [10, 10, 15, 20, 25, 30, 30, 20, 15, 10, 10, 5, 5, 10, 15, 25, 35, 45, 50, 40, 25, 15, 10, 10],
+    precipitation: [0, 0, 0, 0, 0, 0.2, 0.5, 0, 0, 0, 0, 0, 0, 0, 0, 0.4, 0.8, 1.2, 1.5, 0.6, 0.2, 0, 0, 0],
+    weather_code: [1, 1, 2, 2, 3, 3, 51, 2, 1, 0, 0, 0, 1, 1, 2, 61, 61, 80, 80, 61, 2, 1, 1, 0],
+    wind_speed_10m: [8, 7, 6, 6, 5, 5, 6, 8, 10, 12, 14, 14, 13, 12, 11, 9, 8, 7, 6, 6, 5, 5, 6, 7],
+    wind_gusts_10m: [12, 11, 10, 9, 8, 8, 9, 12, 15, 18, 20, 21, 19, 18, 16, 14, 12, 11, 10, 9, 8, 8, 9, 11],
+    et0_fao_evapotranspiration: [0, 0, 0, 0, 0, 0.1, 0.2, 0.3, 0.5, 0.6, 0.7, 0.7, 0.6, 0.5, 0.4, 0.2, 0.1, 0, 0, 0, 0, 0, 0, 0]
+  },
+  daily: {
+    time: Array.from({ length: 7 }, (_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() + i);
+      return d.toISOString().slice(0, 10);
+    }),
+    temperature_2m_max: [33, 32, 30, 29, 31, 32, 33],
+    temperature_2m_min: [23, 22, 21, 22, 23, 23, 24],
+    precipitation_sum: [0.0, 7.5, 14.0, 3.2, 0.0, 0.0, 1.0],
+    precipitation_probability_max: [15, 70, 85, 45, 20, 15, 25],
+    wind_speed_10m_max: [14, 18, 22, 16, 12, 11, 13],
+    wind_gusts_10m_max: [20, 26, 32, 24, 18, 16, 19],
+    et0_fao_evapotranspiration: [4.4, 3.2, 2.5, 3.8, 4.5, 4.8, 4.6]
+  },
+  consensus: {
+    models: { best_match: 0.0, ecmwf: 7.0, gfs: 8.5, icon: 6.8 },
+    consensusRain: true,
+    uncertainty: false,
+    messageEn: "Major forecast models (ECMWF, GFS, ICON) agree: Rain expected in the next 24–48 hours.",
+    messageTe: "ప్రధాన వాతావరణ నమూనాలు (ECMWF, GFS, ICON) ఏకాభిప్రాయం: రాబోయే 24–48 గంటల్లో వర్షం కురిసే అవకాశం ఉంది."
+  },
+  sprayWindow: {
+    isOptimal: true,
+    score: 85,
+    reasonEn: "Current wind speed (8.5 km/h) is calm (<15 km/h). No heavy rain expected in immediate 4 hours. Best spray window: 6:00 AM – 9:00 AM or 4:00 PM – 6:00 PM.",
+    reasonTe: "గాలి వేగం (8.5 కి.మీ/గం) తక్కువగా ఉంది. రాబోయే 4 గంటల్లో భారీ వర్షం లేదు. పిచికారీకి అనుకూల సమయం: ఉదయం 6:00 - 9:00 లేదా సాయంత్రం 4:00 - 6:00.",
+    details: { windSpeedKmh: 8.5, rainProbMax: 15, tempC: 31.5, hour: new Date().getHours() }
+  },
+  irrigationAdvice: {
+    shouldIrrigate: false,
+    rainSkip: true,
+    et0DailyMm: 4.4,
+    deficitMm: 4.4,
+    reasonEn: "Significant rain (7.5–14.0 mm, 70%–85% chance) forecast in the next 24–48 hours. Irrigation suspended (Rain-Skip active) to save water and energy.",
+    reasonTe: "రాబోయే 24–48 గంటల్లో మోస్తరు నుండి భారీ వర్షం (7.5–14.0 మి.మీ, 70%–85% అవకాశం) సూచన ఉంది. నీరు, కరెంట్ ఆదా చేయడానికి నీటిపారుదల నిలిపివేయబడింది (Rain-Skip)."
+  },
+  diseaseAlerts: [
+    {
+      diseaseId: "paddy_blast",
+      diseaseNameEn: "Rice Blast (Pyricularia oryzae)",
+      diseaseNameTe: "వరి అగ్గితెగులు",
+      crop: "Paddy",
+      riskLevel: "HIGH",
+      reasonEn: "Forecast temperature (20–26°C) and nighttime high relative humidity (>85%) create favorable conditions for Rice Blast spore germination.",
+      reasonTe: "రాత్రి ఉష్ణోగ్రత (20–26°C) మరియు గాలిలో అధిక తేమ (>85%) వరి అగ్గితెగులు వ్యాప్తికి అత్యంత అనుకూలం.",
+      isRiskIndicatorOnly: true,
+      sourceUrl: "https://pjtau.edu.in"
+    }
+  ],
+  severeWarnings: [],
+  imdOfficialAlertsUrl: "https://mausam.imd.gov.in"
+};
+
+let lastWxData = null;
+let activeWxCoords = null; // { name, lat, lon } if custom or GPS
+
+function getWmoIcon(code, rainProb = 0) {
+  if (code === 0) return "☀️";
+  if (code === 1 || code === 2) return "🌤️";
+  if (code === 3) return "☁️";
+  if (code === 45 || code === 48) return "🌫️";
+  if (code >= 51 && code <= 55) return "🌦️";
+  if (code >= 61 && code <= 65) return "🌧️";
+  if (code >= 71 && code <= 77) return "🌨️";
+  if (code >= 80 && code <= 82) return "🌦️";
+  if (code >= 95 && code <= 99) return "⛈️";
+  if (rainProb >= 60) return "🌧️";
+  if (rainProb >= 30) return "🌦️";
+  return "⛅";
 }
 
-async function loadWx(){
-  const [lat,lon]=LOC[$("w_loc").value];
-  if(isDemoMode){renderWxData(DEMO_WX);return;}
-  $("w_out").innerHTML=`<p class="muted">${TRANSLATIONS[curLang].wx_loading}</p>`;
-  let d;
-  try{
-    const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,precipitation&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max&timezone=Asia%2FKolkata&forecast_days=5`);
-    if(!r.ok)throw 0;d=await r.json();
-  }catch(e){d=DEMO_WX}
-  const skip=Math.max(d.daily.precipitation_probability_max[0],d.daily.precipitation_probability_max[1])>=60||d.daily.precipitation_sum[1]>=5;
-  try{if(DB)put("rain_skip",skip)}catch(e){}
-  renderWxData(d);
+function handleWeatherLocationChange() {
+  activeWxCoords = null;
+  loadWx();
 }
-$("w_loc").onchange=loadWx;
+
+function detectGpsLocation() {
+  const btn = $("w_gps_btn");
+  const origText = btn ? btn.innerHTML : "";
+  if (btn) btn.innerHTML = `📍 ${TRANSLATIONS[curLang].wx_gps_locating || "Locating..."}`;
+
+  if (!navigator.geolocation) {
+    if (btn) btn.innerHTML = origText;
+    showToast("Geolocation is not supported by your browser");
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      if (btn) btn.innerHTML = origText;
+      const lat = pos.coords.latitude;
+      const lon = pos.coords.longitude;
+      const label = `📍 ${curLang === 'te' ? 'నా పొలం GPS' : 'My Field GPS'} (${lat.toFixed(2)}, ${lon.toFixed(2)})`;
+      activeWxCoords = { name: label, lat, lon };
+
+      const el = $("w_loc");
+      let gpsOpt = Array.from(el.options).find(o => o.value === "gps:current");
+      if (!gpsOpt) {
+        gpsOpt = document.createElement("option");
+        gpsOpt.value = "gps:current";
+        el.insertBefore(gpsOpt, el.firstChild);
+      }
+      gpsOpt.textContent = label;
+      el.value = "gps:current";
+      LOC["gps:current"] = [lat, lon];
+      loadWx(true);
+    },
+    err => {
+      if (btn) btn.innerHTML = origText;
+      showToast("Could not retrieve GPS location: " + (err.message || "Permission denied"));
+    },
+    { timeout: 10000, enableHighAccuracy: true }
+  );
+}
+
+function saveCurrentPlotLocation() {
+  const el = $("w_loc");
+  const t = TRANSLATIONS[curLang];
+  let lat, lon, defName = "My Farm Plot";
+
+  if (activeWxCoords) {
+    lat = activeWxCoords.lat;
+    lon = activeWxCoords.lon;
+    defName = activeWxCoords.name.replace(/^📍\s*/, "");
+  } else if (LOC[el.value]) {
+    [lat, lon] = LOC[el.value];
+    defName = el.value.replace(/^plot:\s*/, "");
+  } else {
+    lat = 18.79; lon = 78.91;
+  }
+
+  const name = prompt(t.wx_save_plot_prompt, defName);
+  if (!name || !name.trim()) return;
+
+  const plots = getSavedFieldLocations().filter(p => p.name.toLowerCase() !== name.trim().toLowerCase());
+  plots.unshift({ name: name.trim(), lat, lon, createdAt: Date.now() });
+  try {
+    localStorage.setItem("sfa_field_locations", JSON.stringify(plots));
+    showToast(t.wx_plot_saved);
+    populateWeatherLocations(`plot:${name.trim()}`);
+    loadWx(true);
+  } catch (e) {
+    showToast("Could not save plot: " + e.message);
+  }
+}
+
+let villageSearchTimeout = null;
+function openVillageSearchModal() {
+  const m = $("wx_search_modal");
+  if (m) {
+    m.classList.add("open");
+    const inp = $("wx_search_input");
+    if (inp) { inp.value = ""; inp.focus(); }
+  }
+}
+
+function closeVillageSearchModal() {
+  const m = $("wx_search_modal");
+  if (m) m.classList.remove("open");
+}
+
+function handleVillageSearchInput(val) {
+  clearTimeout(villageSearchTimeout);
+  const container = $("wx_search_results");
+  if (!val || val.trim().length < 2) {
+    if (container) container.innerHTML = `<p class="muted" style="font-size:12px;text-align:center;padding:12px">Type village or town name to search with Open-Meteo geocoding.</p>`;
+    return;
+  }
+  villageSearchTimeout = setTimeout(() => searchOpenMeteoVillages(val.trim()), 350);
+}
+
+async function searchOpenMeteoVillages(query) {
+  const container = $("wx_search_results");
+  if (container) container.innerHTML = `<p class="muted" style="font-size:12px;text-align:center;padding:12px">Searching villages in Open-Meteo...</p>`;
+
+  try {
+    const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=6&language=en&format=json`);
+    if (!res.ok) throw new Error("Search service error");
+    const json = await res.json();
+    const results = (json.results || []).filter(r => r.country_code === "IN" || !r.country_code);
+
+    if (results.length === 0) {
+      if (container) container.innerHTML = `<p class="muted" style="font-size:12px;text-align:center;padding:12px">No locations found for "${query}". Try nearby mandal or district.</p>`;
+      return;
+    }
+
+    if (container) {
+      container.innerHTML = results.map(r => {
+        const title = `${r.name}, ${r.admin2 || r.admin1 || "Telangana"}`;
+        const sub = `${r.admin1 || "India"} &middot; ${r.latitude.toFixed(2)}°N, ${r.longitude.toFixed(2)}°E`;
+        return `
+          <div onclick="selectSearchedVillage('${r.name.replace(/'/g, "\\'")}', ${r.latitude}, ${r.longitude}, '${(r.admin2 || r.admin1 || "").replace(/'/g, "\\'")}')" 
+               style="padding:10px 12px;background:var(--bg);border:1px solid var(--bd);border-radius:8px;cursor:pointer;transition:all 0.15s ease">
+            <div style="font-weight:700;font-size:13px;color:var(--text)">📍 ${title}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">${sub}</div>
+          </div>
+        `;
+      }).join("");
+    }
+  } catch (err) {
+    if (container) container.innerHTML = `<p class="danger-t" style="font-size:12px;text-align:center;padding:12px">Failed to search: ${err.message}</p>`;
+  }
+}
+
+function selectSearchedVillage(name, lat, lon, admin) {
+  closeVillageSearchModal();
+  const label = `${name}${admin ? ' (' + admin + ')' : ''}`;
+  activeWxCoords = { name: label, lat, lon };
+
+  const el = $("w_loc");
+  const key = `search:${name}`;
+  LOC[key] = [lat, lon];
+
+  let opt = Array.from(el.options).find(o => o.value === key);
+  if (!opt) {
+    opt = document.createElement("option");
+    opt.value = key;
+    el.insertBefore(opt, el.firstChild);
+  }
+  opt.textContent = `📍 ${label}`;
+  el.value = key;
+  loadWx(true);
+}
+
+function clientComputeAdvisories(current, daily, hourly, crop) {
+  const rainProb0 = daily.precipitation_probability_max?.[0] || 0;
+  const rainProb1 = daily.precipitation_probability_max?.[1] || 0;
+  const rainSum0 = daily.precipitation_sum?.[0] || 0;
+  const rainSum1 = daily.precipitation_sum?.[1] || 0;
+  const maxProb = Math.max(rainProb0, rainProb1);
+  const maxRain = Math.max(rainSum0, rainSum1);
+  const rainSkip = maxProb >= 60 || maxRain >= 5.0;
+
+  const windSpeed = current.wind_speed_10m || 8;
+  const windGusts = current.wind_gusts_10m || 12;
+  const temp = current.temperature_2m || 30;
+  const next6hProb = (hourly.precipitation_probability || []).slice(0, 6);
+  const maxNext6hProb = next6hProb.length ? Math.max(...next6hProb) : rainProb0;
+  
+  const spraySafe = windSpeed <= 15 && windGusts <= 25 && maxNext6hProb < 40 && temp <= 35;
+  const sprayReasonEn = spraySafe
+    ? `Wind speed (${windSpeed} km/h) and rain risk (<40%) are safe for spraying. Best hours: 6–9 AM or 4–6 PM.`
+    : `Spraying not recommended right now (Wind: ${windSpeed} km/h, Rain probability: ${maxNext6hProb}%, Temp: ${temp}°C). Wait for calmer conditions.`;
+  const sprayReasonTe = spraySafe
+    ? `గాలి వేగం (${windSpeed} కి.మీ/గం) మరియు వర్ష సూచన పిచికారీకి అనుకూలంగా ఉన్నాయి. అనుకూల సమయం: ఉదయం 6–9 లేదా సాయంత్రం 4–6.`
+    : `ప్రస్తుతం పిచికారీ చేయవద్దు (గాలి: ${windSpeed} కి.మీ/గం, వర్ష అవకాశం: ${maxNext6hProb}%, ఉష్ణోగ్రత: ${temp}°C). గాలి తగ్గే వరకు వేచి ఉండండి.`;
+
+  const et0 = daily.et0_fao_evapotranspiration?.[0] || 4.2;
+  const irrigReasonEn = rainSkip
+    ? `Rain forecast in next 24–48h (${maxProb}% prob, ~${maxRain.toFixed(1)} mm). Irrigation suspended (Rain-Skip active) to save water and power.`
+    : `No significant rain forecast in next 48h (${maxProb}% max prob). Irrigate based on crop ET0 water demand (~${et0.toFixed(1)} mm/day).`;
+  const irrigReasonTe = rainSkip
+    ? `రాబోయే 24–48 గంటల్లో వర్షం కురిసే అవకాశం ఉంది (${maxProb}% అవకాశం, ~${maxRain.toFixed(1)} మి.మీ). నీటిపారుదల నిలిపివేయబడింది (Rain-Skip).`
+    : `రాబోయే 48 గంటల్లో భారీ వర్ష సూచన లేదు. పంట నీటి అవసరం (~${et0.toFixed(1)} మి.మీ/రోజు) బట్టి నీరు పెట్టండి.`;
+
+  const diseaseAlerts = [];
+  const hum = current.relative_humidity_2m || 65;
+  if (crop === "Paddy" && temp >= 20 && temp <= 26 && hum >= 85) {
+    diseaseAlerts.push({
+      diseaseId: "paddy_blast",
+      diseaseNameEn: "Rice Blast (Pyricularia oryzae)",
+      diseaseNameTe: "వరి అగ్గితెగులు",
+      crop: "Paddy",
+      riskLevel: "HIGH",
+      reasonEn: "Current night temperature (20–26°C) and high humidity (>85%) are favorable for Rice Blast spore germination.",
+      reasonTe: "రాత్రి ఉష్ణోగ్రత (20–26°C) మరియు గాలిలో అధిక తేమ (>85%) వరి అగ్గితెగులు వ్యాప్తికి అనుకూలం.",
+      isRiskIndicatorOnly: true,
+      sourceUrl: "https://pjtau.edu.in"
+    });
+  } else if (crop === "Cotton" && temp >= 28 && hum >= 80) {
+    diseaseAlerts.push({
+      diseaseId: "cotton_bacterial_blight",
+      diseaseNameEn: "Bacterial Blight / Black Arm (Xanthomonas citri pv. malvacearum)",
+      diseaseNameTe: "పత్తి నల్లమచ్చ తెగులు",
+      crop: "Cotton",
+      riskLevel: "MODERATE",
+      reasonEn: "Warm humid weather (RH >80%) favors bacterial blight spread. Inspect leaf veins for angular water-soaked lesions.",
+      reasonTe: "వెచ్చని మరియు అధిక తేమతో కూడిన వాతావరణం నల్లమచ్చ తెగులు వ్యాప్తికి అనుకూలం. ఆకుల ఈనెలను గమనించండి.",
+      isRiskIndicatorOnly: true,
+      sourceUrl: "https://pjtau.edu.in"
+    });
+  }
+
+  const severeWarnings = [];
+  if (temp >= 40 || (daily.temperature_2m_max?.[0] || 0) >= 42) {
+    severeWarnings.push({
+      type: "HEAT_WAVE",
+      titleEn: "Extreme Heat Wave Alert (>40°C)",
+      titleTe: "తీవ్రమైన వడగాడ్పుల హెచ్చరిక (>40°C)",
+      messageEn: "Provide light frequent irrigations. Avoid midday farm labor.",
+      messageTe: "ఎండ తీవ్రత నుండి పంటను కాపాడటానికి తేలికపాటి తడులు ఇవ్వండి. మధ్యాహ్నం వ్యవసాయ పనులు చేయవద్దు."
+    });
+  }
+  if (maxRain >= 35) {
+    severeWarnings.push({
+      type: "HEAVY_RAIN",
+      titleEn: "Heavy Rainfall Warning (>35 mm)",
+      titleTe: "భారీ వర్ష సూచన హెచ్చరిక (>35 మి.మీ)",
+      messageEn: "Clear field drainage channels to prevent water stagnation and root asphyxiation.",
+      messageTe: "పొలంలో నీరు నిల్వ ఉండకుండా మురుగు కాలువలను సరిచేసుకోండి."
+    });
+  }
+  if (windGusts >= 40) {
+    severeWarnings.push({
+      type: "HIGH_WIND",
+      titleEn: "Strong Wind & Gusts Alert (>40 km/h)",
+      titleTe: "ఈదురు గాలుల హెచ్చరిక (>40 కి.మీ/గం)",
+      messageEn: "Suspend spraying. Provide staking for tall crops like chilli or banana.",
+      messageTe: "మందుల పిచికారీ నిలిపివేయండి. ఎత్తుగా పెరిగే పంటలకు ఊతాలు ఏర్పాటు చేయండి."
+    });
+  }
+
+  return {
+    consensus: {
+      models: { best_match: maxRain },
+      consensusRain: maxRain >= 5 || maxProb >= 60,
+      uncertainty: false,
+      messageEn: rainSkip ? "Rain expected in the next 24–48 hours." : "Dry or minimal rain expected in the next 48 hours.",
+      messageTe: rainSkip ? "రాబోయే 24–48 గంటల్లో వర్షం కురిసే అవకాశం ఉంది." : "రాబోయే 48 గంటల్లో పొడి వాతావరణం ఉండే అవకాశం ఉంది."
+    },
+    sprayWindow: { isOptimal: spraySafe, score: spraySafe ? 80 : 35, reasonEn: sprayReasonEn, reasonTe: sprayReasonTe },
+    irrigationAdvice: { shouldIrrigate: !rainSkip, rainSkip, et0DailyMm: et0, deficitMm: et0, reasonEn: irrigReasonEn, reasonTe: irrigReasonTe },
+    diseaseAlerts,
+    severeWarnings,
+    imdOfficialAlertsUrl: "https://mausam.imd.gov.in"
+  };
+}
+
+async function loadWx(force = false) {
+  let lat, lon, locName = "";
+  const el = $("w_loc");
+
+  if (activeWxCoords) {
+    lat = activeWxCoords.lat;
+    lon = activeWxCoords.lon;
+    locName = activeWxCoords.name;
+  } else if (LOC[el.value]) {
+    [lat, lon] = LOC[el.value];
+    locName = el.value.replace(/^plot:\s*/, "");
+  } else {
+    lat = 18.79; lon = 78.91; locName = "Jagtial";
+  }
+
+  const p = getP();
+  const crop = (p && p.crop) ? p.crop : "Paddy";
+
+  if (isDemoMode) {
+    renderWxData(DEMO_WX, locName);
+    return;
+  }
+
+  const cacheKey = `sfa_wx_cache_${lat.toFixed(3)}_${lon.toFixed(3)}`;
+  const cachedRaw = localStorage.getItem(cacheKey);
+  let cachedPayload = null;
+  if (cachedRaw) {
+    try { cachedPayload = JSON.parse(cachedRaw); } catch (e) {}
+  }
+
+  if (!force && cachedPayload && (Date.now() - cachedPayload.savedAt < 2 * 60 * 60 * 1000)) {
+    renderWxData(cachedPayload.data, locName, true, cachedPayload.savedAt);
+    return;
+  }
+
+  $("w_out").innerHTML = `<div style="text-align:center;padding:24px"><div style="font-size:32px">🌦️</div><p class="muted" style="margin-top:8px">${TRANSLATIONS[curLang].wx_loading}</p></div>`;
+
+  let d = null;
+  let fromCache = false;
+  let cachedAt = Date.now();
+
+  try {
+    const r = await fetch(`/api/weather?lat=${lat}&lon=${lon}&crop=${encodeURIComponent(crop)}`);
+    if (r.ok) {
+      d = await r.json();
+      fromCache = d.fromCache || false;
+      cachedAt = d.cachedAt || Date.now();
+    }
+  } catch (err) {
+    console.warn("Serverless weather endpoint unavailable, trying direct Open-Meteo fallback:", err);
+  }
+
+  if (!d || !d.current) {
+    try {
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
+        `&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m,wind_gusts_10m` +
+        `&hourly=temperature_2m,relative_humidity_2m,precipitation_probability,precipitation,weather_code,wind_speed_10m,wind_gusts_10m,et0_fao_evapotranspiration` +
+        `&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,et0_fao_evapotranspiration` +
+        `&models=best_match,ecmwf_ifs025,gfs_seamless,icon_seamless` +
+        `&timezone=Asia%2FKolkata&forecast_days=7`;
+      const res = await fetch(url);
+      if (res.ok) {
+        const rawData = await res.json();
+        const clientAdv = clientComputeAdvisories(rawData.current || {}, rawData.daily || {}, rawData.hourly || {}, crop);
+        d = {
+          success: true,
+          fromCache: false,
+          cachedAt: Date.now(),
+          source: "Open-Meteo Meteorological Service",
+          coordinates: { lat, lon },
+          crop,
+          current: rawData.current || {},
+          hourly: rawData.hourly || {},
+          daily: rawData.daily || {},
+          ...clientAdv
+        };
+      }
+    } catch (openMeteoErr) {
+      console.warn("Direct Open-Meteo failed:", openMeteoErr);
+    }
+  }
+
+  if (!d && cachedPayload) {
+    d = cachedPayload.data;
+    fromCache = true;
+    cachedAt = cachedPayload.savedAt;
+  }
+
+  if (!d) {
+    d = DEMO_WX;
+  }
+
+  if (d && !d.demo) {
+    try {
+      localStorage.setItem(cacheKey, JSON.stringify({ data: d, savedAt: Date.now() }));
+    } catch (e) {}
+  }
+
+  const skip = d.irrigationAdvice ? d.irrigationAdvice.rainSkip : false;
+  try { if (DB) put("rain_skip", skip); } catch (e) {}
+
+  renderWxData(d, locName, fromCache, cachedAt);
+}
+
+function getGroundTruthLog() {
+  try {
+    const raw = localStorage.getItem("sfa_rain_ground_truth");
+    return raw ? JSON.parse(raw) : {};
+  } catch (e) { return {}; }
+}
+
+function recordGroundTruthRain(didRain) {
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const log = getGroundTruthLog();
+  const forecastRain = lastWxData ? (lastWxData.daily?.precipitation_probability_max?.[0] >= 50 || lastWxData.daily?.precipitation_sum?.[0] >= 2.5) : false;
+
+  log[todayKey] = {
+    forecastRain,
+    actualRain: didRain,
+    recordedAt: Date.now()
+  };
+
+  try {
+    localStorage.setItem("sfa_rain_ground_truth", JSON.stringify(log));
+    showToast(TRANSLATIONS[curLang].wx_accuracy_logged);
+    const el = $("wx_ground_truth_box");
+    if (el) el.outerHTML = renderGroundTruthWidget(lastWxData?.daily?.precipitation_probability_max?.[0] ?? 0);
+  } catch (e) {
+    showToast("Error saving: " + e.message);
+  }
+}
+
+function renderGroundTruthWidget(todayProb) {
+  const t = TRANSLATIONS[curLang];
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const log = getGroundTruthLog();
+  const entries = Object.entries(log);
+  const totalDays = entries.length;
+  const todayRecorded = log[todayKey] !== undefined;
+
+  let correctCount = 0;
+  entries.forEach(([_, val]) => {
+    if (val.forecastRain === val.actualRain) {
+      correctCount++;
+    }
+  });
+
+  let statsMessage = "";
+  if (totalDays < 5) {
+    statsMessage = t.wx_accuracy_need_more.replace("{count}", totalDays);
+  } else {
+    statsMessage = t.wx_accuracy_score.replace("{correct}", `<b>${correctCount}</b>`).replace("{total}", `<b>${totalDays}</b>`);
+  }
+
+  return `
+    <div class="wx-accuracy-card" id="wx_ground_truth_box">
+      <div style="font-weight:700;font-size:13px;display:flex;align-items:center;gap:6px;color:var(--text)">
+        <span>${t.wx_accuracy_title}</span>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px">
+        ${statsMessage}
+      </div>
+
+      <div style="margin-top:10px;padding-top:8px;border-top:1px dashed var(--bd)">
+        <div style="font-size:12px;font-weight:600;color:var(--text)">
+          ${todayRecorded ? `✅ ${curLang === 'te' ? 'ఈ రోజు వివరాలు నమోదయ్యాయి' : "Today's observation recorded"}: (${log[todayKey].actualRain ? (curLang === 'te' ? 'వర్షం పడింది' : 'Rained') : (curLang === 'te' ? 'పొడిగా ఉంది' : 'Dry')})` : t.wx_rain_question}
+        </div>
+        ${!todayRecorded ? `
+          <div class="wx-feedback-row">
+            <button class="wx-feedback-btn" onclick="recordGroundTruthRain(true)">${t.wx_rain_yes}</button>
+            <button class="wx-feedback-btn" onclick="recordGroundTruthRain(false)">${t.wx_rain_no}</button>
+          </div>
+        ` : ''}
+      </div>
+    </div>
+  `;
+}
+
+function renderWxData(d, locName = "", fromCache = false, cachedAt = Date.now()) {
+  lastWxData = d;
+  const t = TRANSLATIONS[curLang];
+  const c = d.current || {};
+  const y = d.daily || { time: [] };
+  const h = d.hourly || { time: [] };
+  const consensus = d.consensus || {};
+  const spray = d.sprayWindow || {};
+  const irrig = d.irrigationAdvice || {};
+  const alerts = d.diseaseAlerts || [];
+  const severe = d.severeWarnings || [];
+  const isDemo = d.demo || isDemoMode;
+
+  const currentTemp = Math.round(c.temperature_2m ?? 30);
+  const currentHum = Math.round(c.relative_humidity_2m ?? 60);
+  const currentRain = (c.precipitation ?? 0).toFixed(1);
+  const currentWind = (c.wind_speed_10m ?? 8).toFixed(1);
+  const currentGusts = (c.wind_gusts_10m ?? 12).toFixed(1);
+  const et0Today = (y.et0_fao_evapotranspiration?.[0] ?? 4.2).toFixed(1);
+  const curIcon = getWmoIcon(c.weather_code ?? 1, y.precipitation_probability_max?.[0] ?? 0);
+
+  let severeHtml = "";
+  if (severe.length > 0) {
+    severeHtml = severe.map(w => `
+      <div class="wx-banner-severe">
+        <div style="font-weight:700;font-size:13.5px;display:flex;align-items:center;gap:6px">
+          <span>🚨</span> <span>${curLang === 'te' ? (w.titleTe || w.titleEn) : w.titleEn}</span>
+        </div>
+        <div style="margin:4px 0 8px;font-size:12px">${curLang === 'te' ? (w.messageTe || w.messageEn) : w.messageEn}</div>
+        <div style="font-size:11px">
+          <a href="https://mausam.imd.gov.in" target="_blank" rel="noopener noreferrer">↗ ${t.wx_imd_link}</a>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  let consensusHtml = "";
+  if (consensus.messageEn || consensus.messageTe) {
+    let pillClass = "dry";
+    let icon = "☀️";
+    if (consensus.uncertainty) {
+      pillClass = "diverging";
+      icon = "⚠️";
+    } else if (consensus.consensusRain) {
+      pillClass = "rain";
+      icon = "🌧️";
+    }
+    const msg = curLang === 'te' ? (consensus.messageTe || consensus.messageEn) : (consensus.messageEn || consensus.messageTe);
+    consensusHtml = `
+      <div class="wx-consensus-pill ${pillClass}">
+        <span>${icon}</span>
+        <span>${msg}</span>
+      </div>
+    `;
+  }
+
+  const updateTimeStr = new Date(cachedAt).toLocaleTimeString(curLang === 'te' ? 'te-IN' : 'en-IN', { hour: '2-digit', minute: '2-digit' });
+  const statusBadge = isDemo
+    ? `<span class="wx-badge warn">${curLang === 'te' ? 'ఆఫ్‌లైన్ డెమో' : 'Offline Demo'}</span>`
+    : (fromCache
+      ? `<span class="wx-badge info">${curLang === 'te' ? 'కాష్ చేసిన సమాచారం' : 'Cached Forecast'} (${updateTimeStr})</span>`
+      : `<span class="wx-badge ok">${curLang === 'te' ? 'లైవ్ Open-Meteo' : 'Live Open-Meteo'} (${updateTimeStr})</span>`);
+
+  let hourlyCards = "";
+  if (h.time && h.time.length > 0) {
+    const count = Math.min(h.time.length, 24);
+    for (let i = 0; i < count; i++) {
+      const hDate = new Date(h.time[i]);
+      const hourLabel = i === 0
+        ? (curLang === 'te' ? 'ఇప్పుడు' : 'Now')
+        : hDate.toLocaleTimeString(curLang === 'te' ? 'te-IN' : 'en-IN', { hour: 'numeric' });
+      const hCode = h.weather_code?.[i] ?? 1;
+      const hProb = h.precipitation_probability?.[i] ?? 0;
+      const hRain = (h.precipitation?.[i] ?? 0).toFixed(1);
+      const hTemp = Math.round(h.temperature_2m?.[i] ?? 30);
+      const hWind = Math.round(h.wind_speed_10m?.[i] ?? 8);
+      const hIcon = getWmoIcon(hCode, hProb);
+
+      hourlyCards += `
+        <div class="wx-hour-card">
+          <div class="wx-hour-time">${hourLabel}</div>
+          <div class="wx-hour-icon">${hIcon}</div>
+          <div class="wx-hour-temp">${hTemp}°C</div>
+          <div class="wx-hour-rain">💧 ${hProb}%${hRain > 0 ? ` (${hRain}m)` : ''}</div>
+          <div class="wx-hour-wind">💨 ${hWind} km/h</div>
+        </div>
+      `;
+    }
+  }
+
+  let dailyRows = "";
+  if (y.time && y.time.length > 0) {
+    dailyRows = y.time.map((tm, i) => {
+      const dt = new Date(tm);
+      const dayName = dt.toLocaleDateString(curLang === 'te' ? 'te-IN' : 'en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
+      const minTemp = Math.round(y.temperature_2m_min?.[i] ?? 22);
+      const maxTemp = Math.round(y.temperature_2m_max?.[i] ?? 32);
+      const rainProb = y.precipitation_probability_max?.[i] ?? 0;
+      const rainSum = (y.precipitation_sum?.[i] ?? 0).toFixed(1);
+      const et0 = (y.et0_fao_evapotranspiration?.[i] ?? 4.0).toFixed(1);
+      const dayCode = (rainProb >= 60 || rainSum >= 5) ? 61 : 1;
+      const dayIcon = getWmoIcon(dayCode, rainProb);
+
+      return `
+        <tr>
+          <td><span style="font-size:16px;margin-right:4px">${dayIcon}</span> <b>${dayName}</b></td>
+          <td>${minTemp}–${maxTemp}°C</td>
+          <td><span style="font-weight:700;color:${rainProb >= 50 ? '#1565c0' : 'inherit'}">${rainProb}%</span></td>
+          <td>${rainSum} mm</td>
+          <td>${et0} mm</td>
+        </tr>
+      `;
+    }).join("");
+  }
+
+  let diseaseHtml = "";
+  if (alerts.length > 0) {
+    diseaseHtml = alerts.map(a => `
+      <div class="wx-adv-card" style="border-left:4px solid #f57c00">
+        <div class="wx-adv-head">
+          <div class="wx-adv-title">
+            <span>⚠️</span> <span>${curLang === 'te' ? (a.diseaseNameTe || a.diseaseNameEn) : a.diseaseNameEn}</span>
+          </div>
+          <span class="wx-badge warn">${a.riskLevel} RISK</span>
+        </div>
+        <div class="wx-adv-body">${curLang === 'te' ? (a.reasonTe || a.reasonEn) : a.reasonEn}</div>
+        <div class="wx-adv-sub">
+          <b>${t.wx_disease_disclaimer}</b> &middot; 
+          <a href="https://pjtau.edu.in" target="_blank" rel="noopener noreferrer" style="color:var(--pri);font-weight:600">PJTAU Portal ↗</a>
+        </div>
+      </div>
+    `).join("");
+  } else {
+    diseaseHtml = `
+      <div class="wx-adv-card">
+        <div class="wx-adv-head">
+          <div class="wx-adv-title">
+            <span>🛡️</span> <span>${t.wx_disease_card_title}</span>
+          </div>
+          <span class="wx-badge ok">LOW RISK</span>
+        </div>
+        <div class="wx-adv-body">
+          ${curLang === 'te' 
+            ? 'ప్రస్తుత వాతావరణంలో ప్రధాన తెగుళ్ల వ్యాప్తికి పరిస్థితులు అనుకూలంగా లేవు. సాధారణ పంట తనిఖీలు కొనసాగించండి.' 
+            : 'Microclimate conditions are not currently favorable for major epidemic outbreaks. Continue routine field scouting.'}
+        </div>
+        <div class="wx-adv-sub">${t.wx_disease_disclaimer}</div>
+      </div>
+    `;
+  }
+
+  const gtHtml = renderGroundTruthWidget(y.precipitation_probability_max?.[0] ?? 0);
+
+  $("w_out").innerHTML = `
+    ${severeHtml}
+    
+    <div class="wx-meta-row">
+      <div><b>${locName || (curLang === 'te' ? 'తెలంగాణ' : 'Telangana')}</b> &middot; <span class="muted">${t.wx_source}</span></div>
+      <div>${statusBadge}</div>
+    </div>
+
+    ${consensusHtml}
+
+    <div class="wx-current-hero">
+      <div class="wx-hero-top">
+        <div>
+          <div class="wx-hero-temp">${currentTemp}°C</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px">
+            ${curLang === 'te' ? 'కనిష్ట/గరిష్ట' : 'Min/Max'}: ${Math.round(y.temperature_2m_min?.[0] ?? currentTemp - 6)}°C – ${Math.round(y.temperature_2m_max?.[0] ?? currentTemp + 2)}°C
+          </div>
+        </div>
+        <div class="wx-hero-icon">${curIcon}</div>
+      </div>
+
+      <div class="wx-metrics-grid">
+        <div class="wx-metric-box">
+          <div class="wx-metric-lbl">${t.wx_hum}</div>
+          <div class="wx-metric-val">${currentHum}%</div>
+        </div>
+        <div class="wx-metric-box">
+          <div class="wx-metric-lbl">${t.wx_rain_now}</div>
+          <div class="wx-metric-val">${currentRain} mm</div>
+        </div>
+        <div class="wx-metric-box">
+          <div class="wx-metric-lbl">${t.wx_wind_label}</div>
+          <div class="wx-metric-val">${currentWind} <small style="font-size:10px;font-weight:normal">(${currentGusts}) km/h</small></div>
+        </div>
+        <div class="wx-metric-box">
+          <div class="wx-metric-lbl">${t.wx_et0_label}</div>
+          <div class="wx-metric-val">${et0Today} mm</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="wx-adv-container">
+      <div class="wx-adv-card">
+        <div class="wx-adv-head">
+          <div class="wx-adv-title">
+            <span>🎯</span> <span>${t.wx_spray_card_title}</span>
+          </div>
+          <span class="wx-badge ${spray.isOptimal ? 'ok' : 'warn'}">
+            ${spray.isOptimal ? t.wx_spray_safe : t.wx_spray_unsafe}
+          </span>
+        </div>
+        <div class="wx-adv-body">${curLang === 'te' ? (spray.reasonTe || spray.reasonEn) : spray.reasonEn}</div>
+        <div class="wx-adv-sub">${t.wx_spray_disclaimer}</div>
+      </div>
+
+      <div class="wx-adv-card">
+        <div class="wx-adv-head">
+          <div class="wx-adv-title">
+            <span>💧</span> <span>${t.wx_irrig_card_title}</span>
+          </div>
+          <span class="wx-badge ${irrig.rainSkip ? 'warn' : 'ok'}">
+            ${irrig.rainSkip ? t.wx_rain_skip_active : t.wx_rain_skip_normal}
+          </span>
+        </div>
+        <div class="wx-adv-body">${curLang === 'te' ? (irrig.reasonTe || irrig.reasonEn) : irrig.reasonEn}</div>
+        <div class="wx-adv-sub">
+          ${curLang === 'te' ? 'నీటి ఆవిరి నష్టం (ET0):' : 'Crop Evapotranspiration (ET0):'} <b>${et0Today} mm/day</b> &middot; 
+          ${irrig.rainSkip ? (curLang === 'te' ? 'పంపు మోటార్ ఆటోమేటిక్ నిలిపివేత' : 'Automated pump cut-off active') : (curLang === 'te' ? 'సాధారణ పారుదల' : 'Normal scheduled run')}
+        </div>
+      </div>
+
+      ${diseaseHtml}
+    </div>
+
+    <div class="wx-strip-wrap">
+      <h3 style="margin:0 0 8px;font-size:14px;color:var(--text)">⏰ ${t.wx_hourly_title}</h3>
+      <div class="wx-strip-scroll">
+        ${hourlyCards}
+      </div>
+    </div>
+
+    <div style="margin:16px 0">
+      <h3 style="margin:0 0 8px;font-size:14px;color:var(--text)">📅 ${t.wx_daily_title}</h3>
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>${t.wx_th_day}</th>
+              <th>${t.wx_th_temp}</th>
+              <th>${t.wx_th_prob}</th>
+              <th>${t.wx_th_rain}</th>
+              <th>${t.wx_th_et0}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${dailyRows}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    ${gtHtml}
+
+    <div style="margin-top:14px;padding:10px 12px;background:var(--bg);border:1px solid var(--bd);border-radius:var(--radius-sm);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;font-size:12px">
+      <span>🏛️ <b>Official Portals:</b></span>
+      <a href="https://mausam.imd.gov.in" target="_blank" rel="noopener noreferrer" style="color:var(--pri);font-weight:700">IMD Mausam ↗</a>
+      <a href="https://imdagrimet.gov.in" target="_blank" rel="noopener noreferrer" style="color:var(--pri);font-weight:700">IMD Agromet ↗</a>
+      <a href="https://pjtau.edu.in" target="_blank" rel="noopener noreferrer" style="color:var(--pri);font-weight:700">PJTAU Portal ↗</a>
+    </div>
+  `;
+}
+
+$("w_loc").onchange = handleWeatherLocationChange;
 
 // --- SEED RATE CALCULATOR LOGIC (PJTAU / ICAR Aligned) ---
 let lastSeedCalcResult = null;
