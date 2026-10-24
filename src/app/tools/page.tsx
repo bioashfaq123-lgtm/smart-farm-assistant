@@ -528,24 +528,58 @@ export default function ToolsPage() {
 
                   <div className="space-y-2">
                     <div className="flex items-center justify-between rounded-lg bg-white p-2.5 shadow-2xs dark:bg-stone-900">
-                      <span>DAP (50 kg bags)</span>
+                      <div>
+                        <span className="block font-semibold">DAP (50 kg bags)</span>
+                        <span className="text-[10px] text-stone-400">@ ₹1,350/bag MRP</span>
+                      </div>
                       <b className="text-agri-700 dark:text-agri-400 font-bold text-sm">
                         {fertResult.dapBags} bags
                       </b>
                     </div>
                     <div className="flex items-center justify-between rounded-lg bg-white p-2.5 shadow-2xs dark:bg-stone-900">
-                      <span>Urea (45 kg bags)</span>
+                      <div>
+                        <span className="block font-semibold">Urea (45 kg bags)</span>
+                        <span className="text-[10px] text-stone-400">@ ₹266.50/bag MRP</span>
+                      </div>
                       <b className="text-agri-700 dark:text-agri-400 font-bold text-sm">
                         {fertResult.ureaBags} bags
                       </b>
                     </div>
                     <div className="flex items-center justify-between rounded-lg bg-white p-2.5 shadow-2xs dark:bg-stone-900">
-                      <span>MOP (50 kg bags)</span>
+                      <div>
+                        <span className="block font-semibold">MOP (50 kg bags)</span>
+                        <span className="text-[10px] text-stone-400">@ ₹1,700/bag MRP</span>
+                      </div>
                       <b className="text-agri-700 dark:text-agri-400 font-bold text-sm">
                         {fertResult.mopBags} bags
                       </b>
                     </div>
                   </div>
+
+                  {/* Phase 2: Estimated Input Cost Card */}
+                  <div className="rounded-xl border border-amber-200 bg-amber-50/60 p-3 text-xs dark:border-amber-900/40 dark:bg-amber-950/20 space-y-1">
+                    <div className="flex items-center justify-between font-bold text-amber-900 dark:text-amber-200">
+                      <span>{t("fert_cost_title")}</span>
+                      <span className="text-sm font-extrabold text-stone-900 dark:text-stone-50">
+                        ₹{(
+                          fertResult.ureaBags * 266.5 +
+                          fertResult.dapBags * 1350 +
+                          fertResult.mopBags * 1700
+                        ).toLocaleString("en-IN", { maximumFractionDigits: 0 })}
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-amber-800/80 dark:text-amber-300">
+                      Estimated fertilizer procurement budget for {fertArea} {fertUnit} of {fertCrop}.
+                    </p>
+                  </div>
+
+                  {/* Print / Save Advisory Slip */}
+                  <button
+                    onClick={() => window.print()}
+                    className="w-full rounded-xl border border-stone-300 bg-white py-2 text-xs font-semibold text-stone-800 shadow-2xs hover:bg-stone-50 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-200"
+                  >
+                    📄 {t("fert_print_btn")}
+                  </button>
 
                   {/* Split stages */}
                   <div className="space-y-2 pt-2 border-t border-stone-200 dark:border-stone-800">

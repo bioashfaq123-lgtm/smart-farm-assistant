@@ -164,3 +164,28 @@ export interface CropTimelineStage {
   adviceEn: string;
   adviceTe: string;
 }
+
+export interface PestDiagnosticCase {
+  id: string;
+  cropEn: string;
+  cropTe: string;
+  pestNameEn: string;
+  pestNameTe: string;
+  severity: "high" | "medium" | "low";
+  symptomsEn: string;
+  symptomsTe: string;
+  recommendedSprayEn: string;
+  recommendedSprayTe: string;
+  dosageEn: string;
+  dosageTe: string;
+  organicAlternativeEn: string;
+  organicAlternativeTe: string;
+  ppePrecautionsEn: string;
+  ppePrecautionsTe: string;
+  sampleImageUrl: string;
+}
+
+export interface MandiPriceHistoryPoint {
+  date: string;
+  price: number;
+}

@@ -163,6 +163,53 @@ export const TRANSLATIONS = {
     insights_carbon_credits: "Carbon & Green Credits",
     insights_carbon_desc: "Telangana agricultural carbon verification audit standards are pending release. Real figures will be displayed once official auditing APIs connect.",
 
+    // Phase 2: Pest Diagnostics & AI Multimedia
+    diag_tab_title: "Leaf & Pest Photo Diagnosis",
+    diag_subtitle: "Upload a crop leaf picture or choose a sample to receive university-tested treatment",
+    diag_sample_btn: "Try Sample Diagnosis",
+    diag_upload_btn: "Upload Field Photo",
+    diag_analyzing: "Analyzing leaf image with PJTAU pathology rules...",
+    diag_identified: "Identified Diagnosis",
+    diag_symptoms: "Observed Symptoms",
+    diag_remedy: "PJTAU Chemical Treatment",
+    diag_dosage: "Recommended Dosage",
+    diag_organic: "Organic / Bio-control Option",
+    diag_safety: "Mandatory PPE & Safety Rules",
+    diag_helpline: "Toll-Free Kisan Call Centre",
+    diag_reset: "Scan Another Leaf",
+    voice_recording_title: "Audio Query Simulation",
+    voice_mic_btn: "Tap to Speak",
+    voice_sim_recording: "Listening to your spoken query...",
+    voice_sim_result: "Transcribed: 'When should I apply potash to RNR 15048 paddy in Jagtial?'",
+
+    // Phase 2: Market Enhancements
+    market_filter_crop: "Filter by Crop",
+    market_filter_all: "All Commodities",
+    market_price_analytics: "Telangana Price Range Overview",
+    market_highest_modal: "State Highest Price",
+    market_lowest_modal: "State Lowest Price",
+    market_price_spread: "Price Spread",
+    market_btn_trend: "View 15-Day Trend",
+    market_modal_trend_title: "15-Day Price Trend (₹/quintal)",
+
+    // Phase 2: IoT Field Moisture Simulation
+    sim_title: "Interactive Field Moisture Simulator",
+    sim_desc: "Simulate an automated drip run or a rainfall event to observe real-time telemetry changes across field zones.",
+    sim_btn_drip: "Simulate 15-min Drip Run",
+    sim_btn_rain: "Simulate 25mm Rainfall",
+    sim_btn_reset: "Reset to Dry Baseline",
+    sim_msg_drip: "Drip irrigation completed! Zone 1 moisture jumped from 17.4% to 34.2% (Optimal).",
+    sim_msg_rain: "Heavy shower simulated! All field zones refreshed to >38% moisture.",
+    sim_msg_reset: "Restored telemetry to baseline summer moisture readings.",
+
+    // Phase 2: Agronomic Calculator Enhancements
+    fert_cost_title: "Estimated Fertilizer Cost (Govt Subsidized MRP)",
+    fert_urea_rate: "Urea (45kg): ₹266.50",
+    fert_dap_rate: "DAP (50kg): ₹1,350.00",
+    fert_mop_rate: "MOP (50kg): ₹1,700.00",
+    fert_total_est: "Estimated Total Input Cost",
+    fert_print_btn: "Print / Save Advisory Slip",
+
     // Generic states
     loading_text: "Loading data...",
     empty_data: "No data available",
@@ -329,6 +376,53 @@ export const TRANSLATIONS = {
     insights_carbon_credits: "సేంద్రియ కర్బన క్రెడిట్లు",
     insights_carbon_desc: "వ్యవసాయ కర్బన ఆడిట్ ప్రమాణాలు ఖరారైన తర్వాత నిజమైన గణాంకాలు లైవ్ ద్వారా చూపబడతాయి.",
 
+    // Phase 2: Pest Diagnostics & AI Multimedia
+    diag_tab_title: "ఆకు & తెగుళ్ల ఫోటో గుర్తింపు",
+    diag_subtitle: "పంట ఆకు ఫోటోను అప్‌లోడ్ చేయండి లేదా ఎంచుకుని వ్యవసాయ వర్సిటీ సిఫారసుల నివారణ పొందండి",
+    diag_sample_btn: "నమూనా తెగులును పరీక్షించండి",
+    diag_upload_btn: "పొలం ఫోటోను అప్‌లోడ్ చేయండి",
+    diag_analyzing: "PJTAU శాస్త్రవేత్తల నిబంధనల ప్రకారం ఆకు పరిశీలించబడుతోంది...",
+    diag_identified: "గుర్తించిన తెగులు / వ్యాధి",
+    diag_symptoms: "పంటలో కనిపించిన లక్షణాలు",
+    diag_remedy: "సిఫారసు చేయబడిన రసాయన నివారణ",
+    diag_dosage: "పిచికారీ చేయవలసిన మోతాదు",
+    diag_organic: "సేంద్రియ / జీవ నియంత్రణ పద్ధతి",
+    diag_safety: "రసాయన భద్రతా జాగ్రత్తలు",
+    diag_helpline: "కిసాన్ కాల్ సెంటర్ (ఉచిత టోల్ ఫ్రీ)",
+    diag_reset: "మరొక ఫోటోను పరీక్షించండి",
+    voice_recording_title: "వాయిస్ ప్రశ్న అనుకరణ",
+    voice_mic_btn: "మాట్లాడటానికి నొక్కండి",
+    voice_sim_recording: "మీ ప్రశ్న రికార్డ్ అవుతోంది...",
+    voice_sim_result: "వాయిస్ అనువాదం: 'జగిత్యాలలో RNR 15048 వరికి పొటాష్ ఎప్పుడు వేయాలి?'",
+
+    // Phase 2: Market Enhancements
+    market_filter_crop: "పంటల వారీగా ఫిల్టర్",
+    market_filter_all: "అన్ని రకాల పంటలు",
+    market_price_analytics: "తెలంగాణ నేటి మార్కెట్ ధరల విశ్లేషణ",
+    market_highest_modal: "రాష్ట్రంలో గరిష్ట ధర",
+    market_lowest_modal: "రాష్ట్రంలో కనిష్ట ధర",
+    market_price_spread: "ధర వ్యత్యాసం",
+    market_btn_trend: "15 రోజుల ధరల గ్రాఫ్",
+    market_modal_trend_title: "15 రోజుల మార్కెట్ ధరల గ్రాఫ్ (రూ./క్వింటాల్)",
+
+    // Phase 2: IoT Field Moisture Simulation
+    sim_title: "పొలం తేమ మార్పుల అనుకరణ (Simulator)",
+    sim_desc: "డ్రిప్ తడి లేదా వర్షపాతం వల్ల పొలం మడులలో తేమ ఎలా మారుతుందో ప్రత్యక్షంగా పరీక్షించండి.",
+    sim_btn_drip: "15 నిమిషాల డ్రిప్ తడిని ప్రారంభించండి",
+    sim_btn_rain: "25 మి.మీ. వర్షపాతాన్ని రికార్డ్ చేయండి",
+    sim_btn_reset: "సాధారణ స్థితికి మార్చు",
+    sim_msg_drip: "డ్రిప్ తడి పూర్తయింది! జోన్ 1 నేల తేమ 17.4% నుండి 34.2% కి (అనుకూల స్థితికి) పెరిగింది.",
+    sim_msg_rain: "వర్షం నమోదైంది! పొలంలోని అన్ని మడులలో తేమ 38% పైగా పెరిగింది.",
+    sim_msg_reset: "రీడింగులు ప్రాథమిక స్థితికి మార్చబడ్డాయి.",
+
+    // Phase 2: Agronomic Calculator Enhancements
+    fert_cost_title: "అంచనా వేసిన ఎరువుల బస్తాల ఖర్చు (ప్రభుత్వ సబ్సిడీ ధరలు)",
+    fert_urea_rate: "యూరియా (45 కిలోల బస్తా): ₹266.50",
+    fert_dap_rate: "డి.ఎ.పి (50 కిలోల బస్తా): ₹1,350.00",
+    fert_mop_rate: "పొటాష్ / MOP (50 కిలోల బస్తా): ₹1,700.00",
+    fert_total_est: "మొత్తం అంచనా వ్యయం",
+    fert_print_btn: "సలహా చీటీని ప్రింట్ / సేవ్ చేయండి",
+
     // Generic states
     loading_text: "సమాచారం లోడ్ అవుతోంది...",
     empty_data: "డేటా అందుబాటులో లేదు",
@@ -336,3 +430,4 @@ export const TRANSLATIONS = {
     btn_retry: "మళ్ళీ ప్రయత్నించండి",
   },
 };
+
