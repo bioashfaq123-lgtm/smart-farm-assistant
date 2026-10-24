@@ -13,6 +13,7 @@ import {
   Sprout,
   MapPin,
   ShieldCheck,
+  Presentation,
 } from "lucide-react";
 import { useLanguage } from "../common/LanguageContext";
 import { SAMPLE_PROFILE } from "@/lib/data/sampleData";
@@ -52,6 +53,12 @@ export function DesktopSidebar() {
       href: "/insights",
       label: t("nav_insights"),
       icon: Sparkles,
+    },
+    {
+      href: "/demo",
+      label: "Conference Demo",
+      icon: Presentation,
+      badge: "LIVE",
     },
   ];
 
