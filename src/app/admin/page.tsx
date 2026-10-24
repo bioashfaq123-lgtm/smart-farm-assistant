@@ -65,6 +65,10 @@ export default function AdminPortalPage() {
 
   // Check saved session on mount
   useEffect(() => {
+    if (typeof document !== "undefined") {
+      document.title = "Smart Farm Assistant Admin";
+    }
+
     try {
       const savedAuth = localStorage.getItem("sf_admin_session_v1");
       if (savedAuth) {
@@ -173,7 +177,7 @@ export default function AdminPortalPage() {
             <span className="text-2xl">🌱</span>
           </div>
           <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight drop-shadow-sm">
-            Smart Farmer
+            Smart Farm Assistant Admin
           </h1>
           <p className="text-indigo-200 text-sm mt-0.5 tracking-wide font-medium">
             Administrator Access Portal
@@ -361,7 +365,7 @@ export default function AdminPortalPage() {
 
         {/* Footer */}
         <footer className="mt-8 text-center text-xs text-indigo-300/80 z-10">
-          © 2026 Smart Farmer Platform. All rights reserved.
+          © 2026 Smart Farm Assistant. All rights reserved.
         </footer>
 
         {/* Forgot Password Modal */}
@@ -417,7 +421,7 @@ export default function AdminPortalPage() {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-lg font-bold tracking-tight text-stone-900 dark:text-white">
-                  Smart Farmer Admin
+                  Smart Farm Assistant Admin
                 </h1>
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 border border-emerald-300/60">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />

@@ -137,9 +137,9 @@ export function DesktopSidebar() {
             href="/admin"
             className="flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg text-[11px] font-medium text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-white bg-stone-100/80 hover:bg-stone-200/80 dark:bg-stone-900/80 dark:hover:bg-stone-800 transition group"
           >
-            <span className="flex items-center gap-1.5">
-              <ShieldCheck className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform" />
-              Admin Portal
+            <span className="flex items-center gap-1.5 truncate">
+              <ShieldCheck className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform shrink-0" />
+              Farm Assistant Admin
             </span>
             <span className="text-[9px] uppercase tracking-wider font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/80 px-1.5 py-0.5 rounded border border-indigo-200/60 dark:border-indigo-800/60">
               Traffic

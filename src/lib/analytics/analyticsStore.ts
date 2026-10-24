@@ -259,7 +259,7 @@ export function getAnalyticsSummary(): AnalyticsSummary {
 export function exportAnalyticsCSV(summary: AnalyticsSummary): void {
   if (typeof window === "undefined") return;
 
-  let csv = "Smart Farmer Platform - Visitor Analytics Report\n";
+  let csv = "Smart Farm Assistant Admin - Visitor Analytics Report\n";
   csv += `Generated At,${new Date().toLocaleString()}\n`;
   csv += `Total Visitors,${summary.totalVisitors}\n`;
   csv += `Active Users Right Now,${summary.activeUsersNow}\n`;
@@ -284,7 +284,7 @@ export function exportAnalyticsCSV(summary: AnalyticsSummary): void {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.setAttribute("href", url);
-  link.setAttribute("download", `smart_farmer_analytics_${new Date().toISOString().slice(0, 10)}.csv`);
+  link.setAttribute("download", `smart_farm_assistant_admin_analytics_${new Date().toISOString().slice(0, 10)}.csv`);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
