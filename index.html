@@ -651,6 +651,118 @@ pre { white-space: pre-wrap; font: inherit; margin: 0; }
 #float_chat_btn { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 20px); right: 18px; width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #2e7d32, #1b5e20); color: #fff; border: 2.5px solid #fff; box-shadow: 0 4px 20px rgba(0,0,0,0.28); font-size: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 95; transition: transform .18s, box-shadow .18s; }
 #float_chat_btn:hover { transform: scale(1.08); box-shadow: 0 6px 24px rgba(0,0,0,0.35); }
 @keyframes pulseRed { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(1.08); } 100% { opacity: 1; transform: scale(1); } }
+
+/* --- SEED RATE CALCULATOR STYLES --- */
+.seed-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+  margin: 14px 0 10px;
+}
+.seed-stat-card {
+  background: var(--bg);
+  border: 1px solid var(--bd);
+  border-radius: var(--radius-md);
+  padding: 12px 10px;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+}
+.seed-stat-val {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--pri-dark);
+  margin-top: 4px;
+  line-height: 1.2;
+}
+:root[data-theme="dark"] .seed-stat-val {
+  color: #81c784;
+}
+.seed-stat-lbl {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.seed-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+.seed-btn-subtle {
+  background: var(--card);
+  border: 1px solid var(--bd);
+  color: var(--text);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font: 600 12px inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all .15s ease;
+  box-shadow: var(--shadow-sm);
+}
+.seed-btn-subtle:hover {
+  background: var(--pri-light);
+  border-color: var(--pri);
+  color: var(--pri-dark);
+}
+.seed-working-box {
+  margin-top: 12px;
+  padding: 12px;
+  background: var(--card);
+  border: 1px solid var(--bd);
+  border-radius: var(--radius-md);
+}
+.seed-working-step {
+  padding: 10px 12px;
+  background: var(--bg);
+  border-radius: 8px;
+  border-left: 3.5px solid var(--pri);
+  margin-bottom: 8px;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+.seed-working-step:last-child {
+  margin-bottom: 0;
+}
+.seed-working-title {
+  font-weight: 700;
+  color: var(--pri-dark);
+  margin-bottom: 4px;
+}
+:root[data-theme="dark"] .seed-working-title {
+  color: #a5d6a7;
+}
+.seed-hint {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+@media print {
+  header, nav, #sub_banner, #float_chat_btn, .no-print, .btn, .lang-toggle, .demo-pill, .seed-action-row, #s_reset {
+    display: none !important;
+  }
+  main {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  section {
+    display: none !important;
+  }
+  section.on {
+    display: block !important;
+  }
+  .card {
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+  }
+}
 </style></head><body>
 <div id="toast_box" class="toast-box"></div>
 <header>
@@ -672,7 +784,7 @@ pre { white-space: pre-wrap; font: inherit; margin: 0; }
  </div>
 </div>
 <nav id="nav">
-<button data-t="reg" class="on" data-i18n="tab_reg">Register</button><button data-t="wx" data-i18n="tab_wx">Weather</button><button data-t="fert" data-i18n="tab_fert">Fertilizer</button><button data-t="dis" data-i18n="tab_dis">Disease check</button><button data-t="chat" data-i18n="tab_chat">Krishi Sahayak 🌾</button><button data-t="mandi" data-i18n="tab_mandi">Mandi prices</button><button data-t="field" data-i18n="tab_field">Field control</button><button data-t="account" data-i18n="tab_account">Account & Plan</button>
+<button data-t="reg" class="on" data-i18n="tab_reg">Register</button><button data-t="wx" data-i18n="tab_wx">Weather</button><button data-t="seed" data-i18n="tab_seed">Seed rate</button><button data-t="fert" data-i18n="tab_fert">Fertilizer</button><button data-t="dis" data-i18n="tab_dis">Disease check</button><button data-t="chat" data-i18n="tab_chat">Krishi Sahayak 🌾</button><button data-t="mandi" data-i18n="tab_mandi">Mandi prices</button><button data-t="field" data-i18n="tab_field">Field control</button><button data-t="account" data-i18n="tab_account">Account & Plan</button>
 </nav></header>
 
 <!-- Authoritative Subscription & Trial Status Banner -->
@@ -780,6 +892,160 @@ pre { white-space: pre-wrap; font: inherit; margin: 0; }
 <section id="wx"><div class="card"><h2 data-i18n="wx_title">Weather and rain forecast</h2>
 <label data-i18n="wx_loc">Location</label><select id="w_loc"></select>
 <div id="w_out"><p class="muted" data-i18n="wx_loading">Loading…</p></div></div></section>
+
+<section id="seed"><div class="card">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px">
+    <h2 style="margin:0" data-i18n="seed_title">Seed rate calculator</h2>
+    <span class="demo-pill active" style="font-size:11px" data-i18n="seed_badge_indicative">PJTAU Indicative Defaults</span>
+  </div>
+
+  <!-- PJTAU Confirmation & Source Verification Badge -->
+  <div id="seed_pop_card" style="margin:8px 0 12px;padding:9px 12px;background:#edf7ed;border-left:4px solid #2e7d32;border-radius:6px;font-size:12px">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
+      <span style="font-weight:700;color:#1b5e20">🌾 <span data-i18n="seed_source_badge">PJTAU Package of Practices (Indicative)</span></span>
+      <a href="https://pjtau.edu.in" target="_blank" rel="noopener noreferrer" style="color:#2e7d32;font-weight:700;text-decoration:underline;display:inline-flex;align-items:center;gap:3px" title="Open official PJTAU portal">
+        <span data-i18n="seed_badge_verify">pjtau.edu.in</span> ↗
+      </a>
+    </div>
+    <div id="seed_crop_spec" style="margin-top:5px;color:var(--text);font-size:12px"></div>
+  </div>
+
+  <!-- Crop Selection -->
+  <label data-i18n="seed_crop">Crop</label>
+  <select id="s_crop"></select>
+
+  <!-- Custom Crop Name Input (shown only if Custom is selected) -->
+  <div id="s_custom_wrap" style="display:none;margin-top:10px">
+    <label data-i18n="seed_crop_custom">Custom crop name</label>
+    <input id="s_custom_name" type="text" placeholder="e.g. Sunflower">
+  </div>
+
+  <!-- Groundnut Seed Form & Shelling % (shown only for Groundnut) -->
+  <div id="s_groundnut_wrap" style="display:none;background:var(--bg);border:1px solid var(--bd);padding:12px;border-radius:10px;margin:10px 0 6px">
+    <div class="row">
+      <div>
+        <label data-i18n="seed_form">Seed form (Groundnut)</label>
+        <select id="s_seed_form">
+          <option value="kernels" data-i18n="form_kernels">Kernels / Shelled</option>
+          <option value="pods" data-i18n="form_pods">Pods / Unshelled</option>
+        </select>
+      </div>
+      <div>
+        <label data-i18n="seed_shelling_pct">Shelling percentage (%)</label>
+        <input id="s_shelling_pct" type="number" min="30" max="95" step="1" value="70">
+        <span class="seed-hint" data-i18n="seed_shelling_hint">Indicative: PJTAU standard ~70%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sowing Method (dynamically populated per crop) -->
+  <label data-i18n="seed_method">Sowing method</label>
+  <select id="s_method"></select>
+
+  <!-- Area & Unit -->
+  <div class="row">
+    <div>
+      <label data-i18n="seed_area">Area</label>
+      <input id="s_area" type="number" min="0.01" step="0.1" value="1">
+    </div>
+    <div>
+      <label data-i18n="seed_unit">Unit</label>
+      <select id="s_unit"></select>
+    </div>
+  </div>
+
+  <!-- Row Spacing & Plant Spacing -->
+  <div class="row">
+    <div>
+      <label data-i18n="seed_row_cm">Row spacing (cm)</label>
+      <input id="s_row" type="number" min="1" step="0.5" value="60">
+    </div>
+    <div>
+      <label data-i18n="seed_plant_cm">Plant or hill spacing (cm)</label>
+      <input id="s_plant" type="number" min="1" step="0.5" value="20">
+    </div>
+  </div>
+
+  <!-- Seeds per hill & Weight Basis with Test Weight -->
+  <div class="row">
+    <div>
+      <label data-i18n="seed_seeds_hill">Seeds per hill</label>
+      <input id="s_seeds_hill" type="number" min="1" step="1" value="1">
+      <span class="seed-hint" data-i18n="seed_seeds_hill_hint">Default 1</span>
+    </div>
+    <div>
+      <label data-i18n="seed_weight_basis">Weight basis</label>
+      <select id="s_weight_basis">
+        <option value="100" data-i18n="basis_100">100-seed weight (g)</option>
+        <option value="1000" data-i18n="basis_1000">1000-seed weight (g)</option>
+      </select>
+      <span class="seed-hint">100-seed wt default for bold crops</span>
+    </div>
+  </div>
+
+  <div class="row">
+    <div>
+      <label><span id="s_weight_label" data-i18n="seed_test_weight">Seed test weight (g)</span></label>
+      <input id="s_weight" type="number" min="0.1" step="0.1" value="25">
+      <span class="seed-hint" data-i18n="seed_test_weight_hint">From seed packet or label</span>
+    </div>
+    <div>
+      <label data-i18n="seed_germ">Germination (%)</label>
+      <input id="s_germ" type="number" min="1" max="100" step="1" value="90">
+      <span class="seed-hint" data-i18n="seed_germ_hint">From seed packet label</span>
+    </div>
+  </div>
+
+  <div class="row">
+    <div>
+      <label data-i18n="seed_purity">Physical purity (%)</label>
+      <input id="s_purity" type="number" min="1" max="100" step="1" value="98">
+      <span class="seed-hint" data-i18n="seed_purity_hint">From seed packet label</span>
+    </div>
+    <div>
+      <label data-i18n="seed_extra">Extra seed for gaps & field losses (%)</label>
+      <input id="s_extra" type="number" min="0" max="50" step="1" value="0">
+      <span class="seed-hint" data-i18n="seed_extra_hint">Default 0 (5% to 10% is common)</span>
+    </div>
+  </div>
+
+  <div class="row">
+    <div>
+      <label data-i18n="seed_price">Seed price per kg (₹, optional)</label>
+      <input id="s_price" type="number" min="0" step="1" placeholder="e.g. 350">
+      <span class="seed-hint" data-i18n="seed_price_hint">Optional for cost estimation</span>
+    </div>
+    <div></div>
+  </div>
+
+  <!-- Buttons: Calculate & Reset Defaults -->
+  <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+    <button class="btn" id="s_go" style="flex:1" data-i18n="seed_calc_btn">Calculate Seed Requirement</button>
+    <button class="seed-btn-subtle" id="s_reset" style="padding:12px 16px;border-radius:10px" data-i18n="seed_reset_defaults">↺ Reset Defaults</button>
+  </div>
+
+  <!-- Validation Errors & Warnings Containers -->
+  <div id="s_err_box" style="display:none;margin-top:12px"></div>
+  <div id="s_warn_box" style="display:none;margin-top:12px"></div>
+
+  <!-- Results Output Container -->
+  <div id="s_out" style="display:none;margin-top:16px"></div>
+
+  <!-- Seed Treatment Advisory -->
+  <div style="margin-top:16px;padding:12px 14px;background:#fff8e1;border-left:4px solid #fbc02d;border-radius:8px">
+    <div style="font-weight:700;color:#7c4a00;display:flex;align-items:center;gap:6px" data-i18n="seed_treatment_title">
+      🌱 Seed Treatment Advisory
+    </div>
+    <p style="margin:4px 0 0;font-size:12px;color:#5c3800;line-height:1.5" data-i18n="seed_treatment_text">
+      Treat seed strictly as per the product label and your local Agricultural Extension Officer (AEO) or PJTAU scientist advice. Do not mix unverified chemicals.
+    </p>
+  </div>
+
+  <!-- Indicative Disclaimer -->
+  <div class="note" style="margin-top:12px">
+    <span data-i18n="seed_disclaimer">Indicative values. Check the seed packet and confirm with your local agriculture or extension officer.</span>
+  </div>
+</div></section>
 
 <section id="fert"><div class="card"><h2 data-i18n="fert_title">Fertilizer dosage calculator</h2>
 <!-- PJTAU Confirmation & Source Verification Badge -->
@@ -1076,6 +1342,7 @@ pre { white-space: pre-wrap; font: inherit; margin: 0; }
 </div>
 </main>
 <script src="config.js?v=1.2"></script>
+<script src="seed_calculator.js?v=1.0"></script>
 <script>
 const $=id=>document.getElementById(id);
 
@@ -1090,6 +1357,7 @@ const TRANSLATIONS = {
     // tabs
     tab_reg: "Register",
     tab_wx: "Weather",
+    tab_seed: "Seed rate",
     tab_fert: "Fertilizer",
     tab_dis: "Disease check",
     tab_chat: "Krishi Sahayak 🌾",
@@ -1174,6 +1442,69 @@ const TRANSLATIONS = {
     wx_th_rain: "Rain",
     wx_sample_note: "Showing sample data because live weather could not be loaded (offline / demo mode).",
     wx_source: "Source: Open-Meteo",
+    // seed rate
+    seed_title: "Seed rate calculator",
+    seed_badge_indicative: "PJTAU Indicative Defaults",
+    seed_source_badge: "PJTAU Package of Practices (Indicative)",
+    seed_badge_verify: "pjtau.edu.in",
+    seed_crop: "Crop",
+    seed_crop_custom: "Custom crop",
+    seed_custom_placeholder: "e.g. Sunflower",
+    seed_method: "Sowing method",
+    method_line: "Line sowing / Dibbling",
+    method_transplant: "Transplanting",
+    method_broadcast: "Broadcasting",
+    seed_area: "Area",
+    seed_unit: "Unit",
+    seed_row_cm: "Row spacing (cm)",
+    seed_plant_cm: "Plant or hill spacing (cm)",
+    seed_seeds_hill: "Seeds per hill",
+    seed_test_weight: "Seed test weight (g)",
+    seed_test_weight_hint: "From seed packet or label",
+    seed_weight_basis: "Weight basis",
+    basis_100: "100-seed weight (g)",
+    basis_1000: "1000-seed weight (g)",
+    seed_form: "Seed form (Groundnut)",
+    form_kernels: "Kernels / Shelled",
+    form_pods: "Pods / Unshelled",
+    seed_shelling_pct: "Shelling percentage (%)",
+    seed_shelling_hint: "Indicative: PJTAU standard ~70%",
+    seed_res_kernels: "Clean Kernels Needed",
+    seed_res_pods: "Unshelled Pods Needed",
+    seed_germ: "Germination (%)",
+    seed_germ_hint: "From seed packet label",
+    seed_purity: "Physical purity (%)",
+    seed_purity_hint: "From seed packet label",
+    seed_extra: "Extra seed for gaps & field losses (%)",
+    seed_extra_hint: "Default 0 (5% to 10% is common)",
+    seed_price: "Seed price per kg (₹, optional)",
+    seed_price_hint: "Optional for cost estimation",
+    seed_calc_btn: "Calculate Seed Requirement",
+    seed_reset_defaults: "↺ Reset Defaults",
+    seed_results_title: "Seed Requirement Summary",
+    seed_res_for_area: "For Entered Area",
+    seed_res_per_acre: "Per Acre",
+    seed_res_per_ha: "Per Hectare",
+    seed_packet_select: "Packet size",
+    seed_packets_needed: "Packets needed",
+    seed_seeds_count: "Total seeds needed",
+    seed_plants_acre: "Target plants / acre",
+    seed_plants_ha: "Target plants / ha",
+    seed_estimated_cost: "Estimated seed cost",
+    seed_working_btn: "▼ Show step-by-step working",
+    seed_hide_working_btn: "▲ Hide step-by-step working",
+    seed_treatment_title: "🌱 Seed Treatment Advisory",
+    seed_treatment_text: "Treat seed strictly as per the product label and your local Agricultural Extension Officer (AEO) or PJTAU scientist advice. Do not mix unverified chemicals.",
+    seed_disclaimer: "Indicative values. Check the seed packet and confirm with your local agriculture or extension officer.",
+    seed_btn_copy: "📋 Copy Summary",
+    seed_btn_whatsapp: "📲 Share on WhatsApp",
+    seed_btn_print: "🖨️ Print",
+    seed_btn_next_fert: "Next: Fertilizer for this crop & area →",
+    seed_copied_toast: "Seed calculation summary copied to clipboard!",
+    seed_paddy_nursery_title: "🌾 Transplanted Paddy Nursery Advisory",
+    seed_paddy_nursery_req: "Nursery seed requirement per acre of main field:",
+    seed_paddy_nursery_area: "Approximate nursery area required:",
+    seed_paddy_diff_title: "How it differs from Direct Seeding (DSR):",
     // fertilizer
     fert_title: "Fertilizer dosage calculator",
     fert_crop: "Crop",
@@ -1268,6 +1599,8 @@ const TRANSLATIONS = {
     crop_Sesame: "Sesame",
     crop_Groundnut: "Groundnut",
     crop_Redgram: "Redgram",
+    crop_Chickpea: "Chickpea (Bengal gram)",
+    crop_Castor: "Castor",
     crop_Chilli: "Chilli",
     crop_Soybean: "Soybean"
   },
@@ -1280,6 +1613,7 @@ const TRANSLATIONS = {
     // tabs
     tab_reg: "నమోదు",
     tab_wx: "వాతావరణం",
+    tab_seed: "విత్తన మోతాదు",
     tab_fert: "ఎరువులు",
     tab_dis: "తెగుళ్ల నివారణ",
     tab_chat: "కృషి సహాయక్ 🌾",
@@ -1364,6 +1698,69 @@ const TRANSLATIONS = {
     wx_th_rain: "వర్షపాతం",
     wx_sample_note: "ఇంటర్నెట్ అందుబాటులో లేనందున నమూనా వాతావరణం చూపబడుతోంది (ఆఫ్‌లైన్ డెమో మోడ్).",
     wx_source: "మూలం: ఓపెన్-మెటియో (Open-Meteo)",
+    // seed rate
+    seed_title: "విత్తన మోతాదు కాలిక్యులేటర్",
+    seed_badge_indicative: "PJTAU సూచిక మార్గదర్శకాలు",
+    seed_source_badge: "PJTAU ప్రామాణిక పద్ధతులు (సూచిక విలువల మార్గదర్శకాలు)",
+    seed_badge_verify: "pjtau.edu.in",
+    seed_crop: "పంట",
+    seed_crop_custom: "ఇతర పంట (Custom)",
+    seed_custom_placeholder: "పంట పేరు నమోదు చేయండి...",
+    seed_method: "సాగు / విత్తే పద్ధతి",
+    method_line: "సాలు పద్ధతి / నాటడం (Line/Dibbling)",
+    method_transplant: "నారు నాటే పద్ధతి (Transplanting)",
+    method_broadcast: "వెదజల్లే పద్ధతి (Broadcasting)",
+    seed_area: "విస్తీర్ణం",
+    seed_unit: "కొలత ప్రమాణం",
+    seed_row_cm: "సాళ్ళ మధ్య దూరం (సెం.మీ.)",
+    seed_plant_cm: "మొక్కల / గుబుర్ల మధ్య దూరం (సెం.మీ.)",
+    seed_seeds_hill: "ప్రతి గుబురుకు విత్తనాలు",
+    seed_test_weight: "విత్తనాల బరువు (గ్రా.)",
+    seed_test_weight_hint: "విత్తన ప్యాకెట్ లేదా లేబుల్ పై చూడండి",
+    seed_weight_basis: "విత్తనాల బరువు ప్రమాణం",
+    basis_100: "100 విత్తనాల బరువు (గ్రా.)",
+    basis_1000: "1000 విత్తనాల బరువు (గ్రా.)",
+    seed_form: "విత్తన రూపం (వేరుశెనగ)",
+    form_kernels: "గింజలు / పప్పు (Kernels)",
+    form_pods: "కాయలు (Unshelled Pods)",
+    seed_shelling_pct: "కాయల నుండి పప్పు శాతం (Shelling %)",
+    seed_shelling_hint: "PJTAU ప్రామాణికం సుమారు 70%",
+    seed_res_kernels: "కావలసిన పప్పు (గింజలు)",
+    seed_res_pods: "కావలసిన కాయల పరిమాణం",
+    seed_germ: "మొలక శాతం (%)",
+    seed_germ_hint: "విత్తన లేబుల్ నుండి",
+    seed_purity: "స్వచ్ఛత శాతం (%)",
+    seed_purity_hint: "విత్తన లేబుల్ నుండి",
+    seed_extra: "గ్యాప్ ఫిల్లింగ్ & నష్టాల కోసం అదనపు విత్తనం (%)",
+    seed_extra_hint: "సాధారణంగా 0 (5% నుండి 10% వరకు సాధారణం)",
+    seed_price: "విత్తన ధర (రూ. కిలోకు, ఐచ్ఛికం)",
+    seed_price_hint: "అంచనా ఖర్చు కోసం ఐచ్ఛికం",
+    seed_calc_btn: "విత్తన మోతాదు లెక్కించండి",
+    seed_reset_defaults: "↺ సిఫారసు విలువలను పునరుద్ధరించండి",
+    seed_results_title: "విత్తన అవసరాల వివరాలు",
+    seed_res_for_area: "నమోదు చేసిన విస్తీర్ణానికి",
+    seed_res_per_acre: "ఎకరాకు",
+    seed_res_per_ha: "హెక్టారుకు",
+    seed_packet_select: "ప్యాకెట్ పరిమాణం",
+    seed_packets_needed: "కావలసిన ప్యాకెట్లు",
+    seed_seeds_count: "అంచనా విత్తనాల సంఖ్య",
+    seed_plants_acre: "ఎకరాకు మొక్కల సాంద్రత",
+    seed_plants_ha: "హెక్టారుకు మొక్కల సాంద్రత",
+    seed_estimated_cost: "అంచనా వ్యయం",
+    seed_working_btn: "▼ లెక్కించిన విధానం చూడండి (Show working)",
+    seed_hide_working_btn: "▲ వివరణను దాచండి",
+    seed_treatment_title: "🌱 విత్తన శుద్ధి సూచన",
+    seed_treatment_text: "విత్తే ముందు ప్యాకెట్ లేబుల్ సూచనల ప్రకారం మరియు మీ మండల వ్యవసాయ విస్తరణ అధికారి (AEO) లేదా PJTAU శాస్త్రవేత్త సలహా మేరకు మాత్రమే విత్తన శుద్ధి చేయండి. అనుమతి లేని రసాయనాలు వాడవద్దు.",
+    seed_disclaimer: "ఇవి సూచిక విలువలు మాత్రమే. మీ విత్తన ప్యాకెట్ వివరాలను సరిచూసుకొని, స్థానిక వ్యవసాయ విస్తరణ అధికారితో నిర్ధారించుకోండి.",
+    seed_btn_copy: "📋 వివరాలు కాపీ చేయండి",
+    seed_btn_whatsapp: "📲 వాట్సాప్‌లో పంపండి",
+    seed_btn_print: "🖨️ ప్రింట్",
+    seed_btn_next_fert: "తదుపరి: ఈ పంట & విస్తీర్ణానికి ఎరువులు →",
+    seed_copied_toast: "విత్తన మోతాదు వివరాలు క్లిప్‌బోర్డ్‌కు కాపీ చేయబడ్డాయి!",
+    seed_paddy_nursery_title: "🌾 నాటు వరి నారుమడి సూచనలు",
+    seed_paddy_nursery_req: "1 ఎకరం ప్రధాన పొలానికి కావలసిన నారు విత్తనం:",
+    seed_paddy_nursery_area: "అవసరమైన నారుమడి విస్తీర్ణం:",
+    seed_paddy_diff_title: "నేరుగా వెదజల్లే (DSR) పద్ధతికి, నాటు పద్ధతికి తేడా:",
     // fertilizer
     fert_title: "ఎరువుల మోతాదు కాలిక్యులేటర్",
     fert_crop: "పంట",
@@ -1458,6 +1855,8 @@ const TRANSLATIONS = {
     crop_Sesame: "నువ్వులు (Sesame)",
     crop_Groundnut: "వేరుశనగ (Groundnut)",
     crop_Redgram: "కందులు (Redgram)",
+    crop_Chickpea: "శనగ (Bengal gram)",
+    crop_Castor: "ఆముదం (Castor)",
     crop_Chilli: "మిర్చి (Chilli)",
     crop_Soybean: "సోయాబీన్ (Soybean)"
   }
@@ -1493,10 +1892,12 @@ function populateCrops(){
   if(typeof updateFertCropSpec==="function")updateFertCropSpec();
 }
 function populateUnits(){
-  const el=$("f_unit");if(!el)return;
-  const cur=el.value||"acre";
-  el.innerHTML=[["acre",TRANSLATIONS[curLang].unit_acre],["guntha",TRANSLATIONS[curLang].unit_guntha],["ha",TRANSLATIONS[curLang].unit_ha]].map(([v,l])=>`<option value="${v}">${l}</option>`).join("");
-  el.value=cur;
+  ["f_unit", "s_unit"].forEach(id => {
+    const el=$(id);if(!el)return;
+    const cur=el.value||"acre";
+    el.innerHTML=[["acre",TRANSLATIONS[curLang].unit_acre],["guntha",TRANSLATIONS[curLang].unit_guntha],["ha",TRANSLATIONS[curLang].unit_ha]].map(([v,l])=>`<option value="${v}">${l}</option>`).join("");
+    el.value=cur;
+  });
 }
 function populateSoil(){
   const el=$("f_soil");if(!el)return;
@@ -1549,11 +1950,17 @@ function setLang(lang){
   populateUnits();
   populateSoil();
   populateFiMode();
+  if (typeof populateSeedCrops === "function") populateSeedCrops();
+  if (typeof populateSeedMethods === "function") populateSeedMethods();
+  if (typeof updateSeedCropSpec === "function") updateSeedCropSpec();
   updateDemoBadge();
   applyP(getP());
   if(lastWxData)renderWxData(lastWxData);
   showMandi();
   renderCurrentChart();
+  if(typeof lastSeedCalcResult !== "undefined" && lastSeedCalcResult && lastSeedCalcResult.valid) {
+    renderSeedResults(lastSeedCalcResult);
+  }
   if($("d_lang"))$("d_lang").value=(curLang==="te"?"Telugu":"English");
   if($("c_text"))$("c_text").placeholder=TRANSLATIONS[curLang].chat_placeholder;
   if(typeof updateChatCropBadge==="function")updateChatCropBadge();
@@ -2245,8 +2652,12 @@ function applyP(p) {
     return;
   }
   if ($("hello")) $("hello").textContent = TRANSLATIONS[curLang].welcome + ", " + p.name + " · " + (p.village || p.district);
-  ["f_crop", "d_crop", "m_crop", "m_sample_crop"].forEach(i => { if ($(i)) $(i).value = p.crop; });
-  if (p.acres && $("f_area")) $("f_area").value = p.acres;
+  ["f_crop", "d_crop", "m_crop", "m_sample_crop", "s_crop"].forEach(i => { if ($(i)) $(i).value = p.crop; });
+  if (p.acres) {
+    if ($("f_area")) $("f_area").value = p.acres;
+    if ($("s_area")) $("s_area").value = p.acres;
+  }
+  if (typeof onSeedCropChange === "function") onSeedCropChange();
 }
 
 $("r_save").onclick = () => {
@@ -2317,6 +2728,531 @@ async function loadWx(){
   renderWxData(d);
 }
 $("w_loc").onchange=loadWx;
+
+// --- SEED RATE CALCULATOR LOGIC (PJTAU / ICAR Aligned) ---
+let lastSeedCalcResult = null;
+let isSeedWorkingExpanded = false;
+
+function populateSeedCrops() {
+  const el = $("s_crop");
+  if (!el) return;
+  const cur = el.value || "Maize";
+  const crops = ["Paddy", "Maize", "Cotton", "Sesame", "Groundnut", "Redgram", "Chickpea", "Castor", "Chilli", "Soybean", "Custom"];
+  const t = TRANSLATIONS[curLang];
+  el.innerHTML = crops.map(k => {
+    const lbl = (k === "Custom") ? t.seed_crop_custom : (t["crop_" + k] || k);
+    return `<option value="${k}">${lbl}</option>`;
+  }).join("");
+  el.value = cur;
+}
+
+function populateSeedMethods() {
+  const cropEl = $("s_crop");
+  const methodEl = $("s_method");
+  if (!cropEl || !methodEl) return;
+  const crop = cropEl.value || "Maize";
+  const def = (window.SeedCalc && SeedCalc.CROP_SEED_DEFAULTS[crop]) || { methods: ["line"], defaultMethod: "line" };
+  const t = TRANSLATIONS[curLang];
+
+  const curMethod = methodEl.value;
+  methodEl.innerHTML = def.methods.map(m => {
+    const label = t["method_" + m] || m;
+    return `<option value="${m}">${label}</option>`;
+  }).join("");
+
+  if (def.methods.includes(curMethod)) {
+    methodEl.value = curMethod;
+  } else {
+    methodEl.value = def.defaultMethod;
+  }
+}
+
+function updateSeedCropSpec() {
+  const el = $("seed_crop_spec");
+  if (!el) return;
+  const crop = $("s_crop") ? $("s_crop").value : "Maize";
+  const def = (window.SeedCalc && SeedCalc.CROP_SEED_DEFAULTS[crop]) || {};
+  const t = TRANSLATIONS[curLang];
+  const cropName = (crop === "Custom") ? t.seed_crop_custom : (t["crop_" + crop] || crop);
+  const min = def.standardRangeKgPerAcre ? def.standardRangeKgPerAcre.min : 0;
+  const max = def.standardRangeKgPerAcre ? def.standardRangeKgPerAcre.max : 0;
+
+  if (crop === "Custom") {
+    el.innerHTML = `<b>${cropName}</b> &mdash; ${t.seed_badge_indicative} (Custom Spacing & Test Weight)`;
+  } else {
+    const wtBasis = $("s_weight_basis") ? parseInt($("s_weight_basis").value, 10) : (def.defaultWeightBasis || 1000);
+    const dispWt = (wtBasis === 100) ? (def.testWeightG / 10) : def.testWeightG;
+    const wtUnit = (wtBasis === 100) ? "g / 100 seeds" : "g / 1000 seeds";
+    el.innerHTML = `<b>${cropName}</b> &mdash; Indicative PJTAU Benchmark: <b>${min}–${max} kg/acre</b> &middot; Typical test wt: <b>${dispWt} ${wtUnit}</b>`;
+  }
+}
+
+function applySeedCropDefaults(force = false) {
+  if (!window.SeedCalc) return;
+  const crop = $("s_crop") ? $("s_crop").value : "Maize";
+  const def = SeedCalc.CROP_SEED_DEFAULTS[crop] || SeedCalc.CROP_SEED_DEFAULTS.Custom;
+
+  // Toggle custom crop name input
+  if ($("s_custom_wrap")) {
+    $("s_custom_wrap").style.display = (crop === "Custom") ? "block" : "none";
+  }
+
+  // Toggle Groundnut specific options (seed form & shelling %)
+  if ($("s_groundnut_wrap")) {
+    $("s_groundnut_wrap").style.display = (crop === "Groundnut") ? "block" : "none";
+  }
+
+  // Sowing method
+  const method = $("s_method") ? $("s_method").value : def.defaultMethod;
+
+  // Weight basis (bold-seeded crops default to 100-seed weight)
+  const basisEl = $("s_weight_basis");
+  if (basisEl) {
+    basisEl.value = String(def.defaultWeightBasis || 1000);
+  }
+
+  // Spacing
+  const sp = (def.spacings && def.spacings[method]) || (def.spacings && def.spacings.line) || { row: 60, plant: 20, seeds: 1 };
+  if ($("s_row")) $("s_row").value = sp.row;
+  if ($("s_plant")) $("s_plant").value = sp.plant;
+  if ($("s_seeds_hill")) $("s_seeds_hill").value = sp.seeds || 1;
+
+  // Weight value based on current basis
+  const currentBasis = basisEl ? parseInt(basisEl.value, 10) : 1000;
+  const weightVal = (currentBasis === 100) ? (def.testWeightG / 10) : def.testWeightG;
+  if ($("s_weight")) $("s_weight").value = weightVal;
+
+  if ($("s_germ")) $("s_germ").value = def.germinationPct;
+  if ($("s_purity")) $("s_purity").value = def.purityPct;
+  if ($("s_extra")) $("s_extra").value = def.extraPct;
+  if ($("s_shelling_pct")) $("s_shelling_pct").value = def.defaultShellingPct || 70;
+  if ($("s_seed_form")) $("s_seed_form").value = def.defaultSeedForm || "kernels";
+
+  updateSeedCropSpec();
+}
+
+function onSeedCropChange() {
+  populateSeedMethods();
+  applySeedCropDefaults(true);
+}
+
+function onSeedMethodChange() {
+  if (!window.SeedCalc) return;
+  const crop = $("s_crop") ? $("s_crop").value : "Maize";
+  const method = $("s_method") ? $("s_method").value : "line";
+  const def = SeedCalc.CROP_SEED_DEFAULTS[crop] || SeedCalc.CROP_SEED_DEFAULTS.Custom;
+  const sp = (def.spacings && def.spacings[method]) || (def.spacings && def.spacings.line);
+  if (sp) {
+    if ($("s_row")) $("s_row").value = sp.row;
+    if ($("s_plant")) $("s_plant").value = sp.plant;
+    if ($("s_seeds_hill")) $("s_seeds_hill").value = sp.seeds || 1;
+  }
+}
+
+function onSeedWeightBasisChange() {
+  const basisEl = $("s_weight_basis");
+  const weightEl = $("s_weight");
+  if (!basisEl || !weightEl) return;
+  const newBasis = parseInt(basisEl.value, 10);
+  const curVal = parseFloat(weightEl.value) || 0;
+
+  if (newBasis === 100 && curVal > 50) {
+    weightEl.value = (curVal / 10).toFixed(1).replace(/\.0$/, "");
+  } else if (newBasis === 1000 && curVal < 50) {
+    weightEl.value = (curVal * 10).toFixed(1).replace(/\.0$/, "");
+  }
+  updateSeedCropSpec();
+}
+
+function runSeedCalculation() {
+  if (!window.SeedCalc) return;
+  const errBox = $("s_err_box");
+  const warnBox = $("s_warn_box");
+  const outBox = $("s_out");
+  const t = TRANSLATIONS[curLang];
+
+  if (errBox) errBox.style.display = "none";
+  if (warnBox) warnBox.style.display = "none";
+
+  const crop = $("s_crop") ? $("s_crop").value : "Maize";
+  const customName = $("s_custom_name") ? $("s_custom_name").value.trim() : "";
+  const sowingMethod = $("s_method") ? $("s_method").value : "line";
+  const area = parseFloat($("s_area") ? $("s_area").value : "1");
+  const unit = $("s_unit") ? $("s_unit").value : "acre";
+  const rowSpacingCm = parseFloat($("s_row") ? $("s_row").value : "60");
+  const plantSpacingCm = parseFloat($("s_plant") ? $("s_plant").value : "20");
+  const seedsPerHill = parseInt($("s_seeds_hill") ? $("s_seeds_hill").value : "1", 10);
+
+  const weightBasis = $("s_weight_basis") ? parseInt($("s_weight_basis").value, 10) : 1000;
+  const testWeightG = parseFloat($("s_weight") ? $("s_weight").value : "250");
+
+  const germinationPct = parseFloat($("s_germ") ? $("s_germ").value : "90");
+  const purityPct = parseFloat($("s_purity") ? $("s_purity").value : "98");
+  const extraPct = parseFloat($("s_extra") ? $("s_extra").value : "0");
+  const pricePerKg = parseFloat($("s_price") && $("s_price").value ? $("s_price").value : "0");
+  const packetSizeKg = parseFloat($("s_packet_size") ? $("s_packet_size").value : "1");
+
+  const seedForm = $("s_seed_form") ? $("s_seed_form").value : "kernels";
+  const shellingPct = parseFloat($("s_shelling_pct") ? $("s_shelling_pct").value : "70");
+
+  const params = {
+    crop,
+    customName,
+    sowingMethod,
+    area,
+    unit,
+    rowSpacingCm,
+    plantSpacingCm,
+    seedsPerHill,
+    weightBasis,
+    testWeightG,
+    germinationPct,
+    purityPct,
+    extraPct,
+    seedForm,
+    shellingPct,
+    pricePerKg,
+    packetSizeKg
+  };
+
+  const validation = SeedCalc.validateSeedInputs(params);
+
+  if (!validation.isValid) {
+    if (errBox) {
+      errBox.innerHTML = validation.errors.map(e => `<div class="note" style="background:var(--danger);color:var(--danger-t);border-color:rgba(183,28,28,0.2);margin:4px 0">⚠️ ${curLang === 'te' ? e.te : e.en}</div>`).join("");
+      errBox.style.display = "block";
+    }
+    if (outBox) outBox.style.display = "none";
+    return;
+  }
+
+  const calcResult = SeedCalc.calculateSeedRate(params);
+  if (!calcResult.valid) {
+    if (errBox) {
+      errBox.innerHTML = `<div class="note" style="background:var(--danger);color:var(--danger-t)">⚠️ ${calcResult.error}</div>`;
+      errBox.style.display = "block";
+    }
+    return;
+  }
+
+  // Plausible test-weight and 30% range deviation warnings
+  const valWithCalc = SeedCalc.validateSeedInputs(params, calcResult);
+  if (valWithCalc.warnings.length > 0 && warnBox) {
+    warnBox.innerHTML = valWithCalc.warnings.map(w => {
+      const isInfo = (w.type === "info");
+      return `<div class="note" style="margin:4px 0;background:${isInfo ? '#e8f5e9' : 'var(--warn)'};color:${isInfo ? '#1b5e20' : 'var(--warn-t)'};border-color:${isInfo ? '#a5d6a7' : 'rgba(255,213,79,0.3)'}">
+        <b>${isInfo ? 'ℹ️ PJTAU Reference:' : '⚠️ Agronomic Alert:'}</b> ${curLang === 'te' ? w.te : w.en}
+      </div>`;
+    }).join("");
+    warnBox.style.display = "block";
+  }
+
+  lastSeedCalcResult = calcResult;
+  renderSeedResults(calcResult);
+}
+
+function renderSeedResults(res) {
+  const outBox = $("s_out");
+  if (!outBox || !res || !res.valid) return;
+  const t = TRANSLATIONS[curLang];
+  const inp = res.inputs;
+  const r = res.results;
+  const crop = res.crop;
+  const def = (window.SeedCalc && SeedCalc.CROP_SEED_DEFAULTS[crop]) || {};
+
+  const currentPktSize = parseFloat($("s_packet_size") ? $("s_packet_size").value : (r.packetSizeKg || 1));
+  const packetsNeeded = Math.ceil(r.displayRateKgEntered / currentPktSize);
+
+  // Formatting strings
+  const isSmall = r.isSmallSeeded;
+  const qtyEnteredStr = isSmall 
+    ? `${r.displayRateKgEntered.toFixed(2)} kg <span style="font-size:14px;color:var(--muted)">(${r.seedRateGramsEntered.toLocaleString(curLang === 'te' ? 'te-IN' : 'en-IN')} g)</span>`
+    : `${r.displayRateKgEntered.toFixed(2)} kg`;
+
+  const qtyAcreStr = isSmall
+    ? `${r.displayRateKgPerAcre.toFixed(2)} kg <span style="font-size:12px;color:var(--muted)">(${r.seedRateGramsPerAcre} g)</span>`
+    : `${r.displayRateKgPerAcre.toFixed(2)} kg`;
+
+  const qtyHaStr = `${r.displayRateKgPerHa.toFixed(2)} kg`;
+
+  // Groundnut Pods & Kernels Summary banner
+  let groundnutCardHtml = "";
+  if (crop === "Groundnut") {
+    const isPods = (res.seedForm === "pods");
+    groundnutCardHtml = `
+      <div style="margin:12px 0;padding:12px 14px;background:#f1f8e9;border:1.5px solid #aed581;border-radius:10px;font-size:12.5px">
+        <div style="font-weight:700;color:#33691e;margin-bottom:6px">🥜 ${t.seed_form}: <b>${isPods ? t.form_pods : t.form_kernels}</b></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div>
+            <div class="muted">${t.seed_res_kernels}:</div>
+            <b style="color:#1b5e20;font-size:15px">${r.seedRateKgEntered.toFixed(1)} kg</b> (${r.seedRateKgPerAcre.toFixed(1)} kg/acre)
+          </div>
+          <div>
+            <div class="muted">${t.seed_res_pods} (@ ${r.shellingPct}% shelling):</div>
+            <b style="color:#558b2f;font-size:15px">${r.podsRateKgEntered.toFixed(1)} kg</b> (${r.podsRateKgPerAcre.toFixed(1)} kg/acre)
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // Transplanted paddy nursery card HTML
+  let nurseryCardHtml = "";
+  if (crop === "Paddy" && res.sowingMethod === "transplant" && def.nursery) {
+    nurseryCardHtml = `
+      <div style="margin:14px 0;padding:14px;background:#e8f5e9;border:1.5px solid #81c784;border-radius:12px">
+        <div style="font-weight:700;color:#1b5e20;display:flex;align-items:center;gap:6px;font-size:13.5px">
+          🌾 ${t.seed_paddy_nursery_title}
+        </div>
+        <div style="margin-top:8px;font-size:12.5px;color:#1b5e20">
+          <div><b>${t.seed_paddy_nursery_req}</b> ${def.nursery.seedRateKgPerAcreMain}</div>
+          <div style="margin-top:4px"><b>${t.seed_paddy_nursery_area}</b> ${def.nursery.nurseryAreaCents} cents (${def.nursery.nurseryAreaGuntha} gunthas / ~${def.nursery.nurseryAreaM2} m²) per acre of main field.</div>
+        </div>
+        <div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(46,125,50,0.2);font-size:11.5px;color:#2e7d32">
+          <b>${t.seed_paddy_diff_title}</b><br>
+          ${curLang === "te" ? def.nursery.differencesTe : def.nursery.differencesEn}
+        </div>
+      </div>
+    `;
+  }
+
+  // Cost HTML if price entered
+  let costHtml = "";
+  if (r.estimatedCost) {
+    costHtml = `
+      <div class="ok" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+        <div><b>${t.seed_estimated_cost}:</b> ₹${r.estimatedCost.toLocaleString(curLang === 'te' ? 'te-IN' : 'en-IN')} (@ ₹${inp.pricePerKg}/kg)</div>
+        <span style="font-size:11px;opacity:0.8">₹${Math.round(r.estimatedCost / (inp.areaAcre || 1)).toLocaleString('en-IN')} / acre</span>
+      </div>
+    `;
+  }
+
+  // Packet options
+  const packetSizes = [
+    { val: "0.45", label: "450 g (Bt Cotton)" },
+    { val: "0.5", label: "500 g" },
+    { val: "1", label: "1 kg" },
+    { val: "2", label: "2 kg" },
+    { val: "5", label: "5 kg" },
+    { val: "10", label: "10 kg" },
+    { val: "25", label: "25 kg" },
+    { val: "50", label: "50 kg" }
+  ];
+
+  const packetOptionsHtml = packetSizes.map(p => 
+    `<option value="${p.val}" ${Math.abs(parseFloat(p.val) - currentPktSize) < 0.01 ? 'selected' : ''}>${p.label}</option>`
+  ).join("");
+
+  // Working steps HTML
+  const steps = SeedCalc.getSeedCalculationWorking(res, curLang);
+  const stepsHtml = steps.map(s => `
+    <div class="seed-working-step">
+      <div class="seed-working-title">${curLang === 'te' ? s.titleTe : s.titleEn}</div>
+      <div style="white-space:pre-line">${curLang === 'te' ? s.textTe : s.textEn}</div>
+    </div>
+  `).join("");
+
+  outBox.innerHTML = `
+    <div style="border-top:2px dashed var(--bd);padding-top:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+        <h3 style="margin:0;font-size:15px;color:var(--text)">${t.seed_results_title}</h3>
+        <span style="font-size:11px;color:var(--muted)">${inp.area} ${t['unit_' + inp.unit] || inp.unit} &middot; ${t['method_' + res.sowingMethod] || res.sowingMethod}</span>
+      </div>
+
+      <!-- Groundnut Kernels & Pods Info Card (if Groundnut) -->
+      ${groundnutCardHtml}
+
+      <!-- Stat Cards Grid -->
+      <div class="seed-stat-grid">
+        <div class="seed-stat-card">
+          <div class="seed-stat-lbl">${t.seed_res_for_area}</div>
+          <div class="seed-stat-val">${qtyEnteredStr}</div>
+        </div>
+        <div class="seed-stat-card">
+          <div class="seed-stat-lbl">${t.seed_res_per_acre}</div>
+          <div class="seed-stat-val">${qtyAcreStr}</div>
+        </div>
+        <div class="seed-stat-card">
+          <div class="seed-stat-lbl">${t.seed_res_per_ha}</div>
+          <div class="seed-stat-val">${qtyHaStr}</div>
+        </div>
+        <div class="seed-stat-card">
+          <div class="seed-stat-lbl">${t.seed_plants_acre}</div>
+          <div class="seed-stat-val">${r.plantsPerAcre.toLocaleString(curLang === 'te' ? 'te-IN' : 'en-IN')}</div>
+        </div>
+      </div>
+
+      <!-- Packets Card -->
+      <div class="seed-stat-card" style="text-align:left;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px">
+        <div style="flex:1;min-width:140px">
+          <label style="margin:0 0 4px;font-size:11px" for="s_packet_size">${t.seed_packet_select}</label>
+          <select id="s_packet_size" style="padding:6px 10px;font-size:13px">${packetOptionsHtml}</select>
+        </div>
+        <div style="text-align:right">
+          <div class="seed-stat-lbl">${t.seed_packets_needed}</div>
+          <div class="seed-stat-val" id="s_packet_count_display" style="font-size:22px;color:var(--pri)">
+            ${packetsNeeded} <span style="font-size:13px;font-weight:600;color:var(--muted)">(${t.seed_packets_needed})</span>
+          </div>
+          <div style="font-size:11px;color:var(--muted)">${(packetsNeeded * currentPktSize).toFixed(1)} kg total</div>
+        </div>
+      </div>
+
+      <!-- Estimated Cost (if price was entered) -->
+      ${costHtml}
+
+      <!-- Nursery specifics for Transplanted Paddy -->
+      ${nurseryCardHtml}
+
+      <!-- Action Buttons Row -->
+      <div class="seed-action-row">
+        <button class="seed-btn-subtle" onclick="copySeedSummary()">${t.seed_btn_copy}</button>
+        <button class="seed-btn-subtle" onclick="shareSeedWhatsApp()">${t.seed_btn_whatsapp}</button>
+        <button class="seed-btn-subtle" onclick="window.print()">${t.seed_btn_print}</button>
+        <button class="seed-btn-subtle" style="border-color:var(--pri);color:var(--pri);font-weight:700" onclick="nextToFertilizer()">${t.seed_btn_next_fert}</button>
+      </div>
+
+      <!-- Show Working Drawer -->
+      <div style="margin-top:14px">
+        <button class="seed-btn-subtle" id="s_working_toggle" style="width:100%;justify-content:center" onclick="toggleSeedWorking()">
+          ${isSeedWorkingExpanded ? t.seed_hide_working_btn : t.seed_working_btn}
+        </button>
+        <div id="s_working_drawer" class="seed-working-box" style="display:${isSeedWorkingExpanded ? 'block' : 'none'}">
+          ${stepsHtml}
+        </div>
+      </div>
+    </div>
+  `;
+
+  outBox.style.display = "block";
+
+  // Re-bind packet size selector
+  const pktSelect = $("s_packet_size");
+  if (pktSelect) {
+    pktSelect.onchange = () => {
+      const pSize = parseFloat(pktSelect.value) || 1;
+      const count = Math.ceil(r.displayRateKgEntered / pSize);
+      const disp = $("s_packet_count_display");
+      if (disp) {
+        disp.innerHTML = `${count} <span style="font-size:13px;font-weight:600;color:var(--muted)">(${t.seed_packets_needed})</span>`;
+      }
+    };
+  }
+}
+
+function toggleSeedWorking() {
+  isSeedWorkingExpanded = !isSeedWorkingExpanded;
+  const drawer = $("s_working_drawer");
+  const btn = $("s_working_toggle");
+  const t = TRANSLATIONS[curLang];
+  if (drawer) drawer.style.display = isSeedWorkingExpanded ? "block" : "none";
+  if (btn) btn.innerHTML = isSeedWorkingExpanded ? t.seed_hide_working_btn : t.seed_working_btn;
+}
+
+function generateSeedSummaryText(res) {
+  if (!res || !res.valid) return "";
+  const t = TRANSLATIONS[curLang];
+  const inp = res.inputs;
+  const r = res.results;
+  const crop = res.crop;
+  const cropName = (crop === "Custom") ? (inp.customName || t.seed_crop_custom) : (t["crop_" + crop] || crop);
+  const method = t["method_" + res.sowingMethod] || res.sowingMethod;
+  const unit = t["unit_" + inp.unit] || inp.unit;
+  const pktSize = parseFloat($("s_packet_size") ? $("s_packet_size").value : (r.packetSizeKg || 1));
+  const packets = Math.ceil(r.displayRateKgEntered / pktSize);
+
+  let text = `🌾 Smart Farm Assistant — ${t.seed_title}\n` +
+    `----------------------------------------\n` +
+    `• ${t.seed_crop}: ${cropName}\n` +
+    `• ${t.seed_method}: ${method}\n` +
+    `• ${t.seed_area}: ${inp.area} ${unit}\n` +
+    `• ${t.seed_row_cm} × ${t.seed_plant_cm}: ${inp.rowSpacingCm} × ${inp.plantSpacingCm} cm (${inp.seedsPerHill} seed/hill)\n` +
+    `• ${t.seed_weight_basis}: ${inp.weightBasis}-seed weight = ${inp.rawWeight} g (${inp.testWeightG} g per 1000 seeds)\n`;
+
+  if (crop === "Groundnut") {
+    text += `• ${t.seed_form}: ${res.seedForm === "pods" ? t.form_pods : t.form_kernels}\n` +
+      `• ${t.seed_res_kernels}: ${r.seedRateKgEntered.toFixed(1)} kg (${r.seedRateKgPerAcre.toFixed(1)} kg/acre)\n` +
+      `• ${t.seed_res_pods} (@ ${r.shellingPct}%): ${r.podsRateKgEntered.toFixed(1)} kg (${r.podsRateKgPerAcre.toFixed(1)} kg/acre)\n`;
+  } else {
+    text += `• ${t.seed_res_for_area}: ${r.seedRateKgEntered.toFixed(2)} kg` + (r.isSmallSeeded ? ` (${r.seedRateGramsEntered.toLocaleString()} g)` : "") + `\n` +
+      `• ${t.seed_res_per_acre}: ${r.seedRateKgPerAcre.toFixed(2)} kg/acre\n`;
+  }
+
+  text += `• ${t.seed_plants_acre}: ${r.plantsPerAcre.toLocaleString()}\n` +
+    `• ${t.seed_packet_select} (${pktSize} kg): ${packets} ${t.seed_packets_needed}\n`;
+
+  if (r.estimatedCost) {
+    text += `• ${t.seed_estimated_cost}: ₹${r.estimatedCost.toLocaleString()} (@ ₹${inp.pricePerKg}/kg)\n`;
+  }
+
+  text += `----------------------------------------\n` +
+    `📌 ${t.seed_disclaimer}\n` +
+    `🌐 Verified with PJTAU Guidelines: https://pjtau.edu.in`;
+
+  return text;
+}
+
+function copySeedSummary() {
+  if (!lastSeedCalcResult || !lastSeedCalcResult.valid) return;
+  const text = generateSeedSummaryText(lastSeedCalcResult);
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast(TRANSLATIONS[curLang].seed_copied_toast || "Summary copied!");
+    }).catch(() => {
+      fallbackCopy(text);
+    });
+  } else {
+    fallbackCopy(text);
+  }
+}
+
+function fallbackCopy(text) {
+  try {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    document.body.removeChild(ta);
+    showToast(TRANSLATIONS[curLang].seed_copied_toast || "Summary copied!");
+  } catch (e) {}
+}
+
+function shareSeedWhatsApp() {
+  if (!lastSeedCalcResult || !lastSeedCalcResult.valid) return;
+  const text = generateSeedSummaryText(lastSeedCalcResult);
+  const url = "https://wa.me/?text=" + encodeURIComponent(text);
+  window.open(url, "_blank");
+}
+
+function nextToFertilizer() {
+  const crop = $("s_crop") ? $("s_crop").value : "Maize";
+  const area = $("s_area") ? $("s_area").value : "1";
+  const unit = $("s_unit") ? $("s_unit").value : "acre";
+
+  openTab("fert");
+
+  if ($("f_crop") && CROPS[crop]) {
+    $("f_crop").value = crop;
+  }
+  if ($("f_area")) $("f_area").value = area;
+  if ($("f_unit")) $("f_unit").value = unit;
+  if (typeof updateFertCropSpec === "function") updateFertCropSpec();
+}
+
+function initSeedCalculator() {
+  populateSeedCrops();
+  populateSeedMethods();
+  applySeedCropDefaults();
+
+  if ($("s_crop")) $("s_crop").onchange = onSeedCropChange;
+  if ($("s_method")) $("s_method").onchange = onSeedMethodChange;
+  if ($("s_weight_basis")) $("s_weight_basis").onchange = onSeedWeightBasisChange;
+  if ($("s_seed_form")) $("s_seed_form").onchange = () => {
+    if (lastSeedCalcResult) runSeedCalculation();
+  };
+  if ($("s_reset")) $("s_reset").onclick = () => applySeedCropDefaults(true);
+  if ($("s_go")) $("s_go").onclick = runSeedCalculation;
+}
 
 // fertilizer (PJTAU Package of Practices)
 function updateFertCropSpec(){
@@ -3245,7 +4181,8 @@ function initFirebaseAuth() {
   }
 }
 
-// Initialize language, demo states, and Firebase auth on load
+// Initialize language, demo states, seed calculator, and Firebase auth on load
+initSeedCalculator();
 setLang(curLang);
 initFirebaseAuth();
 
