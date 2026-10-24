@@ -138,18 +138,10 @@ export default function AdminPortalPage() {
     localStorage.removeItem("sf_admin_session_v1");
   };
 
-  const handleRefreshStats = async () => {
+  const handleRefreshStats = () => {
     setIsRefreshing(true);
-    try {
-      const res = await fetch("/api/analytics/stats");
-      if (res.ok) {
-        await res.json();
-      }
-    } catch {
-      // fallback
-    }
     setStats(getAnalyticsSummary());
-    setTimeout(() => setIsRefreshing(false), 600);
+    setTimeout(() => setIsRefreshing(false), 400);
   };
 
   const handleSimulateVisitor = () => {

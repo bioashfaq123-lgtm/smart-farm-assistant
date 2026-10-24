@@ -15,35 +15,8 @@ export function AnalyticsTracker() {
     // Do not track admin portal internal navigation as external farmer visits
     if (pathname.startsWith("/admin")) return;
 
-    // 1. Record client-side
+    // Record client-side visitor event
     recordClientPageview(pathname);
-
-    // 2. Non-blocking ping to serverless analytics endpoint
-    try {
-      const payload = {
-        path: pathname,
-        device: detectDevice(),
-        sessionId: getOrCreateSessionId(),
-        visitorId: getOrCreateVisitorId(),
-        referrer: typeof document !== "undefined" ? document.referrer || "direct" : "direct",
-        timestamp: Date.now(),
-      };
-
-      if (typeof navigator !== "undefined" && navigator.sendBeacon) {
-        navigator.sendBeacon("/api/analytics/track", JSON.stringify(payload));
-      } else {
-        fetch("/api/analytics/track", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-          keepalive: true,
-        }).catch(() => {
-          // ignore tracking errors silently
-        });
-      }
-    } catch {
-      // ignore
-    }
   }, [pathname]);
 
   return null;
