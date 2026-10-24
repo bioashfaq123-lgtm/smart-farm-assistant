@@ -19,6 +19,9 @@ import {
   Leaf,
   Layers,
   ArrowRight,
+  Share2,
+  Copy,
+  Check,
 } from "lucide-react";
 import { useLanguage } from "@/components/common/LanguageContext";
 import { DemoBadge } from "@/components/common/DemoBadge";
@@ -31,6 +34,11 @@ import {
   SAMPLE_PEST_DIAGNOSTICS,
 } from "@/lib/data/sampleData";
 import { ChatMessage, PestDiagnosticCase } from "@/lib/types";
+import {
+  formatPestMessage,
+  generateWhatsAppUrl,
+  copyToClipboard,
+} from "@/lib/utils/kisanShare";
 
 export default function AdvisoryPage() {
   const { lang, t } = useLanguage();
@@ -41,6 +49,7 @@ export default function AdvisoryPage() {
   const [activeTab, setActiveTab] = useState<"chat" | "diagnostics">("chat");
   const [selectedCase, setSelectedCase] = useState<PestDiagnosticCase>(SAMPLE_PEST_DIAGNOSTICS[0]);
   const [isAnalyzingPhoto, setIsAnalyzingPhoto] = useState(false);
+  const [copiedPest, setCopiedPest] = useState(false);
 
   const sampleSuggestions = [
     {
@@ -505,22 +514,83 @@ export default function AdvisoryPage() {
                   </div>
                 </div>
 
-                {/* Action buttons */}
+                {/* Action buttons with WhatsApp and SMS Sharing */}
                 <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-                  <button
-                    onClick={() => {
-                      setActiveTab("chat");
-                      handleSend(
-                        lang === "te"
-                          ? `నా పొలంలో ${selectedCase.pestNameTe} గుర్తించబడింది. మరింత సలహా ఇవ్వండి.`
-                          : `Detected ${selectedCase.pestNameEn} in field. Please give step-by-step guidance.`
-                      );
-                    }}
-                    className="inline-flex items-center gap-2 rounded-xl bg-agri-700 px-4 py-2.5 text-xs font-semibold text-white shadow-xs transition hover:bg-agri-800"
-                  >
-                    <span>{lang === "te" ? "ఈ తెగులు గురించి చాట్‌లో మాట్లాడండి" : "Discuss in AI Chat"}</span>
-                    <ArrowRight className="h-4 w-4" />
-                  </button>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      onClick={() => {
+                        setActiveTab("chat");
+                        handleSend(
+                          lang === "te"
+                            ? `నా పొలంలో ${selectedCase.pestNameTe} గుర్తించబడింది. మరింత సలహా ఇవ్వండి.`
+                            : `Detected ${selectedCase.pestNameEn} in field. Please give step-by-step guidance.`
+                        );
+                      }}
+                      className="inline-flex items-center gap-2 rounded-xl bg-agri-700 px-4 py-2.5 text-xs font-semibold text-white shadow-xs transition hover:bg-agri-800"
+                    >
+                      <span>{lang === "te" ? "ఈ తెగులు గురించి చాట్‌లో మాట్లాడండి" : "Discuss in AI Chat"}</span>
+                      <ArrowRight className="h-4 w-4" />
+                    </button>
+
+                    <a
+                      href={generateWhatsAppUrl(
+                        formatPestMessage(
+                          {
+                            crop: selectedCase.cropEn,
+                            cropTe: selectedCase.cropTe,
+                            pestName: selectedCase.pestNameEn,
+                            pestNameTe: selectedCase.pestNameTe,
+                            remedy: selectedCase.recommendedSprayEn,
+                            remedyTe: selectedCase.recommendedSprayTe,
+                            dosage: selectedCase.dosageEn,
+                            dosageTe: selectedCase.dosageTe,
+                            organic: selectedCase.organicAlternativeEn,
+                            organicTe: selectedCase.organicAlternativeTe,
+                            ppe: selectedCase.ppePrecautionsEn,
+                            ppeTe: selectedCase.ppePrecautionsTe,
+                          },
+                          lang
+                        )
+                      )}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-emerald-700 transition"
+                    >
+                      <Share2 className="h-3.5 w-3.5" />
+                      <span>WhatsApp Share</span>
+                    </a>
+
+                    <button
+                      onClick={async () => {
+                        const txt = formatPestMessage(
+                          {
+                            crop: selectedCase.cropEn,
+                            cropTe: selectedCase.cropTe,
+                            pestName: selectedCase.pestNameEn,
+                            pestNameTe: selectedCase.pestNameTe,
+                            remedy: selectedCase.recommendedSprayEn,
+                            remedyTe: selectedCase.recommendedSprayTe,
+                            dosage: selectedCase.dosageEn,
+                            dosageTe: selectedCase.dosageTe,
+                            organic: selectedCase.organicAlternativeEn,
+                            organicTe: selectedCase.organicAlternativeTe,
+                            ppe: selectedCase.ppePrecautionsEn,
+                            ppeTe: selectedCase.ppePrecautionsTe,
+                          },
+                          lang
+                        );
+                        const ok = await copyToClipboard(txt);
+                        if (ok) {
+                          setCopiedPest(true);
+                          setTimeout(() => setCopiedPest(false), 2000);
+                        }
+                      }}
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-xs font-semibold text-stone-700 hover:bg-stone-100 dark:border-stone-800 dark:bg-stone-850 dark:text-stone-300 transition"
+                    >
+                      {copiedPest ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
+                      <span>{copiedPest ? "Copied Prescription!" : "Copy SMS"}</span>
+                    </button>
+                  </div>
 
                   <a
                     href="tel:18001801551"

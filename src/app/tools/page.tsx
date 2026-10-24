@@ -12,6 +12,9 @@ import {
   Package,
   Layers,
   Sparkles,
+  Share2,
+  Copy,
+  Check,
 } from "lucide-react";
 import { useLanguage } from "@/components/common/LanguageContext";
 import { Card, CardHeader } from "@/components/ui/Card";
@@ -26,10 +29,16 @@ import {
   CROP_NPK_PJTAU,
   FertResult,
 } from "@/lib/calculators/fertCalc";
+import {
+  formatFertilizerMessage,
+  generateWhatsAppUrl,
+  copyToClipboard,
+} from "@/lib/utils/kisanShare";
 
 export default function ToolsPage() {
   const { lang, t } = useLanguage();
   const [activeTab, setActiveTab] = useState<"seed" | "fert">("seed");
+  const [copiedFert, setCopiedFert] = useState(false);
 
   // --- Seed Calculator State ---
   const [seedCrop, setSeedCrop] = useState("Maize");
@@ -571,6 +580,68 @@ export default function ToolsPage() {
                     <p className="text-[10px] text-amber-800/80 dark:text-amber-300">
                       Estimated fertilizer procurement budget for {fertArea} {fertUnit} of {fertCrop}.
                     </p>
+                  </div>
+
+                  {/* WhatsApp & SMS Sharing Action Bar */}
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                    <a
+                      href={generateWhatsAppUrl(
+                        formatFertilizerMessage(
+                          {
+                            crop: fertCrop,
+                            cropTe: CROP_NPK_PJTAU[fertCrop]?.nameTe,
+                            area: fertArea,
+                            unit: fertUnit,
+                            ureaBags: fertResult.ureaBags,
+                            dapBags: fertResult.dapBags,
+                            mopBags: fertResult.mopBags,
+                            estCost:
+                              fertResult.ureaBags * 266.5 +
+                              fertResult.dapBags * 1350 +
+                              fertResult.mopBags * 1700,
+                            splits: fertResult.splits,
+                          },
+                          lang
+                        )
+                      )}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-3 py-2 text-xs font-semibold text-white shadow-xs hover:bg-emerald-700 transition"
+                    >
+                      <Share2 className="h-3.5 w-3.5" />
+                      <span>WhatsApp Share</span>
+                    </a>
+
+                    <button
+                      onClick={async () => {
+                        const txt = formatFertilizerMessage(
+                          {
+                            crop: fertCrop,
+                            cropTe: CROP_NPK_PJTAU[fertCrop]?.nameTe,
+                            area: fertArea,
+                            unit: fertUnit,
+                            ureaBags: fertResult.ureaBags,
+                            dapBags: fertResult.dapBags,
+                            mopBags: fertResult.mopBags,
+                            estCost:
+                              fertResult.ureaBags * 266.5 +
+                              fertResult.dapBags * 1350 +
+                              fertResult.mopBags * 1700,
+                            splits: fertResult.splits,
+                          },
+                          lang
+                        );
+                        const ok = await copyToClipboard(txt);
+                        if (ok) {
+                          setCopiedFert(true);
+                          setTimeout(() => setCopiedFert(false), 2000);
+                        }
+                      }}
+                      className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 text-xs font-semibold text-stone-700 hover:bg-stone-100 dark:border-stone-800 dark:bg-stone-900 dark:text-stone-300 transition"
+                    >
+                      {copiedFert ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
+                      <span>{copiedFert ? "Copied SMS!" : "Copy SMS"}</span>
+                    </button>
                   </div>
 
                   {/* Print / Save Advisory Slip */}
