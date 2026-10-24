@@ -113,15 +113,46 @@ export interface MandiPriceItem {
   marketNameTe: string;
   districtEn: string;
   districtTe: string;
+  minPrice: number;
+  maxPrice: number;
   modalPrice: number;
   prevPrice: number;
   changeAmount: number;
   changePct: number;
+  arrivalsQtl: number;
+  mspPrice: number;
+  govtBonus?: number;
   priceDate: string;
   unit: string;
   distanceKm: number;
   status: "open" | "closed";
+  secretaryPhone?: string;
   mapsQuery: string;
+}
+
+export interface CommunityPost {
+  id: string;
+  authorName: string;
+  authorVillage: string;
+  authorDistrict: string;
+  authorCrop: string;
+  timeAgoEn: string;
+  timeAgoTe: string;
+  category: "pest" | "market" | "seeds" | "schemes" | "machinery";
+  questionEn: string;
+  questionTe: string;
+  upvotes: number;
+  hasUserUpvoted?: boolean;
+  repliesCount: number;
+  officialAnswer?: {
+    expertName: string;
+    designationEn: string;
+    designationTe: string;
+    institution: string;
+    answerEn: string;
+    answerTe: string;
+    answeredAt: string;
+  };
 }
 
 export interface AdvisoryTip {
