@@ -72,6 +72,7 @@ export default function AdminPortalPage() {
     mandi: "Checking...",
     chat: "Checking...",
     pwa: "Checking...",
+    iot: "Checking...",
   });
 
   // Check API health
@@ -92,6 +93,17 @@ export default function AdminPortalPage() {
       .then((r) => r.json())
       .then((d) => setApiHealth((prev) => ({ ...prev, chat: d.source || "Operational" })))
       .catch(() => setApiHealth((prev) => ({ ...prev, chat: "Offline Fallback" })));
+
+    // Check IoT Firebase RTDB
+    fetch("/api/iot")
+      .then((r) => r.json())
+      .then((d) =>
+        setApiHealth((prev) => ({
+          ...prev,
+          iot: d.isOnline ? "Connected (ESP32 Online)" : "Connected (ESP32 Standby)",
+        }))
+      )
+      .catch(() => setApiHealth((prev) => ({ ...prev, iot: "RTDB Error" })));
 
     // Check PWA
     if (typeof window !== "undefined" && "serviceWorker" in navigator) {
@@ -569,7 +581,7 @@ export default function AdminPortalPage() {
             </div>
 
             {/* API Health Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
               <div className="bg-white dark:bg-stone-900 rounded-2xl p-5 border border-stone-200 dark:border-stone-800 shadow-xs">
                 <span className="text-xs font-bold text-stone-500 block mb-1">Open-Meteo Weather API</span>
                 <span className="text-sm font-black text-emerald-600 dark:text-emerald-400 block my-1">
@@ -592,6 +604,14 @@ export default function AdminPortalPage() {
                   {apiHealth.chat}
                 </span>
                 <span className="text-[11px] text-stone-400">/api/chat Gemini Grounding</span>
+              </div>
+
+              <div className="bg-white dark:bg-stone-900 rounded-2xl p-5 border border-stone-200 dark:border-stone-800 shadow-xs">
+                <span className="text-xs font-bold text-stone-500 block mb-1">Firebase RTDB & ESP32</span>
+                <span className="text-sm font-black text-amber-600 dark:text-amber-400 block my-1 truncate" title={apiHealth.iot}>
+                  {apiHealth.iot}
+                </span>
+                <span className="text-[11px] text-stone-400">/api/iot REST Sync (/field)</span>
               </div>
 
               <div className="bg-white dark:bg-stone-900 rounded-2xl p-5 border border-stone-200 dark:border-stone-800 shadow-xs">

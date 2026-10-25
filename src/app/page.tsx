@@ -28,6 +28,7 @@ import { Card, CardHeader } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { StatCard } from "@/components/ui/StatCard";
 import { fetchLiveDistrictWeather, LiveWeatherData } from "@/lib/weather/openMeteo";
+import { useIoTTelemetry } from "@/lib/iot/useIoTTelemetry";
 import {
   SAMPLE_SENSOR_TELEMETRY,
   SAMPLE_IOT_ALERTS,
@@ -37,6 +38,7 @@ import {
 export default function DashboardPage() {
   const { lang, t } = useLanguage();
   const { profile, openProfileModal, resetToSample } = useFarmerProfile();
+  const { telemetry } = useIoTTelemetry(8000);
 
   const [weather, setWeather] = useState<LiveWeatherData | null>(null);
   const [loadingWeather, setLoadingWeather] = useState(true);
@@ -246,48 +248,99 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      {/* 3. Key Stat KPI Cards Grid (4 Columns) */}
+      {/* 3. Key Stat KPI Cards Grid (4 Columns) with Real IoT Data */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Real ESP32 Soil Moisture */}
         <StatCard
           title={t("stat_soil_moisture")}
-          value={`${SAMPLE_SENSOR_TELEMETRY.soilMoisturePct}%`}
-          normalRange={SAMPLE_SENSOR_TELEMETRY.soilMoistureRange}
-          statusBadge={{
-            label: t("status_critical"),
-            variant: "critical",
-          }}
-          icon={<Droplets className="h-5 w-5 text-rose-500" />}
+          value={
+            telemetry.moisture !== null
+              ? `${telemetry.moisture}%`
+              : telemetry.isOnline
+              ? "Reading..."
+              : "Standby"
+          }
+          unit={telemetry.moisture !== null ? "VWC" : ""}
+          normalRange={`Threshold: ${telemetry.threshold}%`}
+          statusBadge={
+            telemetry.moisture !== null
+              ? {
+                  label:
+                    telemetry.moisture < telemetry.threshold
+                      ? "Needs Water"
+                      : "Optimal Moisture",
+                  variant:
+                    telemetry.moisture < telemetry.threshold ? "critical" : "normal",
+                }
+              : {
+                  label: telemetry.isOnline ? "Awaiting Sync" : "ESP32 Offline",
+                  variant: "outline",
+                }
+          }
+          icon={
+            <Droplets
+              className={`h-5 w-5 ${
+                telemetry.moisture !== null && telemetry.moisture < telemetry.threshold
+                  ? "text-rose-500 animate-pulse"
+                  : "text-sky-500"
+              }`}
+            />
+          }
         />
 
+        {/* Real Open-Meteo Ambient Temperature */}
         <StatCard
           title={t("stat_soil_temp")}
-          value={`${SAMPLE_SENSOR_TELEMETRY.soilTempC}°C`}
-          normalRange={SAMPLE_SENSOR_TELEMETRY.soilTempRange}
+          value={weather ? `${weather.temperatureC}°C` : "—°C"}
+          normalRange="Open-Meteo Ambient"
           statusBadge={{
-            label: t("status_normal"),
+            label: "Open-Meteo Live",
             variant: "normal",
           }}
           icon={<Thermometer className="h-5 w-5 text-emerald-500" />}
         />
 
+        {/* Honest Flow Meter Requirement: No Flow Meter Installed */}
         <StatCard
           title={t("stat_water_used")}
-          value="1,250"
-          unit="Liters"
-          trendText="-8% vs yesterday"
-          trendPositive={true}
-          icon={<Activity className="h-5 w-5 text-agri-600" />}
+          value="No flow meter"
+          unit=""
+          normalRange="Sensor uninstalled"
+          statusBadge={{
+            label: "Hardware Pending",
+            variant: "outline",
+          }}
+          icon={<Activity className="h-5 w-5 text-stone-400" />}
         />
 
+        {/* Real ESP32 Pump State from Firebase RTDB */}
         <StatCard
           title={t("stat_pump_status")}
-          value="AUTO"
-          unit="Standby"
-          statusBadge={{
-            label: "Rain-Skip Standby",
-            variant: "warning",
-          }}
-          icon={<Power className="h-5 w-5 text-amber-500" />}
+          value={
+            telemetry.pumpState
+              ? "RUNNING"
+              : telemetry.mode === "auto"
+              ? "AUTO"
+              : "STANDBY"
+          }
+          unit={telemetry.pumpState ? "5 HP Relay ON" : "Relay OFF"}
+          statusBadge={
+            telemetry.pumpState
+              ? {
+                  label: "Pumping Active",
+                  variant: "critical",
+                }
+              : telemetry.rainSkip
+              ? {
+                  label: "Rain-Skip Standby",
+                  variant: "warning",
+                }
+              : {
+                  label: telemetry.isOnline ? "Standby" : "Offline",
+                  variant: "normal",
+                }
+          }
+          icon={<Power className={`h-5 w-5 ${telemetry.pumpState ? "text-rose-500 animate-pulse" : "text-amber-500"}`} />}
         />
       </div>
 
