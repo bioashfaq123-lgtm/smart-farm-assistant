@@ -1,7 +1,9 @@
 // Smart Farm Assistant - Service Worker for Offline PWA Capabilities
-const CACHE_NAME = "smart-farm-v1";
+const CACHE_NAME = "smart-farm-v2";
 const OFFLINE_URLS = [
   "/",
+  "/demo",
+  "/offline-demo.html",
   "/tools",
   "/advisory",
   "/iot",

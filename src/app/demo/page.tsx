@@ -5,25 +5,17 @@ import Link from "next/link";
 import {
   Presentation,
   ShieldCheck,
-  Wifi,
-  WifiOff,
-  RefreshCw,
-  Play,
   RotateCcw,
   CheckCircle2,
   AlertTriangle,
-  User,
-  MapPin,
-  Calendar,
-  Layers,
   Droplets,
   CloudRain,
   Sun,
   Activity,
-  Sliders,
   Power,
   Microscope,
   Volume2,
+  VolumeX,
   TrendingUp,
   Calculator,
   Share2,
@@ -32,149 +24,381 @@ import {
   Sparkles,
   Info,
   Check,
-  Smartphone,
-  ExternalLink,
+  Download,
+  Layers,
   ChevronRight,
-  Eye,
-  Edit3,
+  Maximize2,
+  Minimize2,
+  HelpCircle,
+  Clock,
+  Sparkle,
 } from "lucide-react";
-import {
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  Tooltip,
-} from "recharts";
-import { useLanguage } from "@/components/common/LanguageContext";
-import {
-  SAMPLE_PROFILE,
-  SAMPLE_WEATHER,
-  SAMPLE_MANDI_PRICES as SAMPLE_MANDI_ITEMS,
-} from "@/lib/data/sampleData";
 import { calculateFertilizer } from "@/lib/calculators/fertCalc";
+import { calculateSeedRate, CROP_CONFIGS } from "@/lib/calculators/seedCalc";
 
-// 7 Conference Stages
-const STAGES = [
-  { id: 1, nameEn: "Farmer Profile", nameTe: "రైతు ప్రొఫైల్", icon: User },
-  { id: 2, nameEn: "Weather & Rain-Skip", nameTe: "వాతావరణం & రెయిన్-స్కిప్", icon: CloudRain },
-  { id: 3, nameEn: "IoT Soil & Pump", nameTe: "ESP32 నేల తేమ & పంపు", icon: Activity },
-  { id: 4, nameEn: "AI Disease Doctor", nameTe: "AI పంట వైద్యుడు", icon: Microscope },
-  { id: 5, nameEn: "Mandi Rates & MSP", nameTe: "మార్కెట్ ధరలు & ₹500 బోనస్", icon: TrendingUp },
-  { id: 6, nameEn: "PJTAU Fertilizer", nameTe: "PJTAU ఎరువుల లెక్క", icon: Calculator },
-  { id: 7, nameEn: "Rythu WhatsApp Share", nameTe: "వాట్సాప్ రైతు షేర్", icon: Share2 },
+// 7 Conference Presentation Steps
+const DEMO_STEPS = [
+  {
+    id: 1,
+    titleEn: "Low Moisture Alert",
+    titleTe: "నేల తేమ హెచ్చరిక",
+    descEn: "Capacitive sensor triggers sub-20% deficit alert",
+    descTe: "20% కంటే తక్కువ తేమ ఉన్నప్పుడు హెచ్చరిక",
+  },
+  {
+    id: 2,
+    titleEn: "Pump ON Animation",
+    titleTe: "పంపు ఆటో ఆన్",
+    descEn: "Submersible pump hums, moisture animates to 31.5%",
+    descTe: "పంపు నడచి తేమ 31.5%కి చేరుకుంటుంది",
+  },
+  {
+    id: 3,
+    titleEn: "Rain-Skip Pauses Pump",
+    titleTe: "రెయిన్-స్కిప్ ఇంటర్‌లాక్",
+    descEn: "Tomorrow's 85% rain forecast pauses irrigation",
+    descTe: "రేపటి వర్ష సూచనతో పంపు ఆపివేయబడుతుంది",
+  },
+  {
+    id: 4,
+    titleEn: "Offline PJTAU Calculators",
+    titleTe: "ఎరువులు & విత్తనాల లెక్క",
+    descEn: "Pure TypeScript fertilizer & seed dosage",
+    descTe: "ఇంటర్నెట్ లేకుండా ఖచ్చితమైన మోతాదు",
+  },
+  {
+    id: 5,
+    titleEn: "Krishi Sahayak Q&A",
+    titleTe: "కృషి సహాయక్ ప్రశ్నలు",
+    descEn: "4 bundled agronomy answers with statutory disclaimer",
+    descTe: "4 ముఖ్యమైన రైతు ప్రశ్నలు మరియు సమాధానాలు",
+  },
+  {
+    id: 6,
+    titleEn: "Sample Leaf Disease Scanner",
+    titleTe: "పంట తెగుళ్ల గుర్తింపు",
+    descEn: "3 recorded sample leaves with vector graphics",
+    descTe: "3 రికార్డ్ చేసిన ఆకు తెగుళ్ల నమూనాలు",
+  },
+  {
+    id: 7,
+    titleEn: "Sample Mandi Prices",
+    titleTe: "మార్కెట్ ధరలు & ₹500 బోనస్",
+    descEn: "Telangana APMC rates, MSP + ₹500 bonus & WhatsApp share",
+    descTe: "తెలంగాణ మార్కెట్ ధరలు మరియు వాట్సాప్ షేర్",
+  },
+];
+
+// Bundled Krishi Sahayak Q&A for Step 5
+const BUNDLED_QA = [
+  {
+    id: 1,
+    qEn: "How much DAP and Urea should I apply for Paddy at panicle initiation?",
+    qTe: "వరిలో చిరుపొట్ట దశలో ఎంత డీఏపీ మరియు యూరియా వేయాలి?",
+    aEn: "At panicle initiation (PI stage, ~55-60 days for RNR 15048), DO NOT apply DAP (phosphorus should be basal only). Apply the 2nd/3rd split of Urea at 25-30 kg/acre along with MOP (Potash) at 15-20 kg/acre for bold grain filling. Maintain 2-3 cm thin water layer during application.",
+    aTe: "వరిలో చిరుపొట్ట దశలో డీఏపీ అస్సలు వేయరాదు (భాస్వరం దుక్కిలోనే వేయాలి). ఎకరానికి 25-30 కిలోల యూరియా మరియు 15-20 కిలోల పొటాష్ (MOP) కలిపి వేయాలి. దీనివల్ల గింజ బరువు మరియు నాణ్యత పెరుగుతుంది. పొలంలో పలుచగా నీరు ఉండాలి.",
+    badge: "Paddy • వరి",
+  },
+  {
+    id: 2,
+    qEn: "Yellowing on lower leaves in cotton - is it magnesium deficiency or nitrogen?",
+    qTe: "పత్తిలో క్రింది ఆకులు పసుపుగా మారడం - మెగ్నీషియం లోపమా లేక నత్రజని లోపమా?",
+    aEn: "Check leaf venation: Nitrogen deficiency shows uniform pale yellowing starting from leaf tips of older lower leaves. Magnesium deficiency causes interveinal chlorosis (veins stay green while leaf tissue turns yellow, later purplish-red). For Mg deficiency, spray Magnesium Sulphate (MgSO4) @ 10g/L water twice at 15-day interval.",
+    aTe: "నత్రజని లోపమైతే ముదిరిన ఆకుల చివర్ల నుండి మొత్తం ఆకు లేత పసుపు రంగులోకి మారుతుంది. మెగ్నీషియం లోపమైతే ఆకు ఈనెలు పచ్చగా ఉండి, ఈనెల మధ్య భాగం పసుపు లేదా ఎరుపు రంగులోకి మారుతుంది. మెగ్నీషియం లోపానికి ఎకరానికి 1 కిలో మెగ్నీషియం సల్ఫేట్ 100 లీటర్ల నీటిలో కలిపి పిచికారీ చేయాలి.",
+    badge: "Cotton • పత్తి",
+  },
+  {
+    id: 3,
+    qEn: "Water is scarce in borewell - how many days interval for maize?",
+    qTe: "బోరుబావిలో నీరు తక్కువగా ఉంది - మొక్కజొన్నకు ఎన్ని రోజులకోసారి నీరు పెట్టాలి?",
+    aEn: "Maize has two non-negotiable critical moisture periods: Tasseling (పూత దశ, 45-55 DAS) and Silking/Grain Filling (గింజ పాలుపోసుకునే దశ, 60-75 DAS). During early vegetative stage, alternate furrow irrigation can stretch the interval to 10-12 days in red soils. But do not allow water stress during silking as yield drops by up to 40%.",
+    aTe: "మొక్కజొన్నలో పూత దశ (45-55 రోజులు) మరియు గింజ పాలుపోసుకునే దశ (60-75 రోజులు) అత్యంత కీలకమైనవి. ఈ దశలలో తేమ లోపిస్తే 40% దిగుబడి తగ్గుతుంది. నీటి కొరత ఉన్నప్పుడు ఒక సాలు విడిచి ఒక సాలుకు (Alternate furrow) నీరు పారించడం ద్వారా 35% నీటిని ఆదా చేయవచ్చు.",
+    badge: "Maize • మొక్కజొన్న",
+  },
+  {
+    id: 4,
+    qEn: "How to claim the ₹500/quintal Telangana Fine Rice bonus?",
+    qTe: "తెలంగాణ సన్నవడ్ల ₹500/క్వింటాల్ బోనస్ ఎలా పొందాలి?",
+    aEn: "To receive the ₹500/quintal State Bonus for Fine Paddy (సన్న రకాలు like RNR 15048, BPT 5204): 1. Ensure crop is recorded in Rythu Bandhu / crop booking portal by your AEO. 2. Bring Aadhaar, Pattadar Passbook, and Bank Account linked to NPCI to the APMC procurement center (PPC/IKP). 3. Moisture must be below 17%. Payout is ₹2,320 MSP + ₹500 bonus = ₹2,820/quintal directly into your bank account.",
+    aTe: "తెలంగాణ ప్రభుత్వ సన్నవడ్ల బోనస్ ₹500/క్వింటాల్ పొందడానికి: 1. ఏఈఓ వద్ద పంట నమోదు (Crop Booking) చేయించాలి. 2. ఆధార్, పట్టాదారు పాస్ పుస్తకం, ఆధార్ లింక్ అయిన బ్యాంక్ ఖాతా వివరాలు ఐకేపీ/పీపీసీ కొనుగోలు కేంద్రానికి తీసుకెళ్లాలి. 3. ధాన్యంలో తేమ 17% కంటే తక్కువగా ఉండాలి. కేంద్ర మద్దతు ధర ₹2,320 + రాష్ట్ర బోనస్ ₹500 కలిపి క్వింటాలుకు ₹2,820 జమ అవుతుంది.",
+    badge: "MSP Bonus • బోనస్",
+  },
+];
+
+// Bundled Sample Leaf Diseases for Step 6
+const SAMPLE_LEAF_DISEASES = [
+  {
+    id: "paddy_blast",
+    cropEn: "Paddy (Rice)",
+    cropTe: "వరి",
+    diseaseEn: "Paddy Leaf Blast",
+    diseaseTe: "వరి అగ్గితెగులు",
+    pathogen: "Pyricularia oryzae (Magnaporthe grisea)",
+    severity: "High (Severe Defoliation Risk)",
+    confidence: "94.2%",
+    symptomsEn:
+      "Spindle-shaped or diamond-shaped lesions with grey or whitish centers and dark reddish-brown borders. Lesions enlarge and coalesce, burning entire leaf blades.",
+    symptomsTe:
+      "ఆకులపై కంటి లేదా నూలుకండె ఆకారపు మచ్చలు ఏర్పడతాయి. మచ్చల మధ్య భాగం బూడిద రంగులో, అంచులు ముదురు గోధుమ రంగులో ఉంటాయి. క్రమంగా ఆకులు ఎండిపోయి అగ్ని తగిలినట్లు కాలిపోతాయి.",
+    recommendationsEn: [
+      "Avoid excessive top-dressing with Nitrogen (Urea) during cool humid weather.",
+      "Spray Tricyclazole 75% WP @ 0.6 g/L water OR Isoprothiolane 40% EC @ 1.5 mL/L.",
+      "Maintain adequate water depth (2-3 cm) in the field to moderate microclimate.",
+    ],
+    recommendationsTe: [
+      "మంచు మరియు తేమ అధికంగా ఉన్నప్పుడు నత్రజని (యూరియా) ఎరువులను అధికంగా వాడరాదు.",
+      "ట్రైసైక్లాజోల్ 75% WP @ 0.6 గ్రాములు లేదా ఐసోప్రోథియోలేన్ 40% EC @ 1.5 మి.లీ లీటరు నీటికి కలిపి పిచికారీ చేయాలి.",
+      "వరి మడిలో 2-3 సెం.మీ నీటి నిల్వ ఉంచడం ద్వారా తెగులు తీవ్రతను తగ్గించవచ్చు.",
+    ],
+    svgType: "blast",
+  },
+  {
+    id: "cotton_bollworm",
+    cropEn: "Cotton",
+    cropTe: "పత్తి",
+    diseaseEn: "Pink Bollworm Infestation",
+    diseaseTe: "గులాబీ రంగు పురుగు ఉధృతి",
+    pathogen: "Pectinophora gossypiella",
+    severity: "Critical (ETL Exceeded: >10% Damaged Bolls)",
+    confidence: "91.8%",
+    symptomsEn:
+      "Rosetted flowers that fail to open fully ('rosette bloom'). Small entry boreholes on squares and young green bolls. Larvae feed on developing seeds inside locules, staining lint brownish.",
+    symptomsTe:
+      "గుడ్డి పూలు లేదా ముడుచుకుపోయిన పూలు (Rosetted flowers) కనిపిస్తాయి. లేత కాయలపై సన్నని రంధ్రాలు ఉంటాయి. గులాబీ రంగు లార్వా కాయ లోపలి గింజలను తింటూ పత్తి దూదిని పాడుచేస్తుంది.",
+    recommendationsEn: [
+      "Install 8-10 Pink Bollworm pheromone traps per acre for continuous monitoring.",
+      "Spray Profenofos 50% EC @ 2.0 mL/L OR Emamectin Benzoate 5% SG @ 5 g per 10 L water.",
+      "Collect and destroy fallen rosetted flowers and dropped squares twice weekly.",
+    ],
+    recommendationsTe: [
+      "ఎకరానికి 8-10 లింగాకర్షక బుట్టలు (Pheromone Traps) అమర్చి పురుగు ఉధృతిని గమనించాలి.",
+      "ప్రొఫెనోఫాస్ 50% EC @ 2 మి.లీ లేదా ఇమామెక్టిన్ బెంజోయేట్ 5% SG @ 5 గ్రాములు 10 లీటర్ల నీటికి కలిపి పిచికారీ చేయాలి.",
+      "రాలిన గుడ్డి పూలు మరియు పిందెలను ఏరివేసి నాశనం చేయాలి.",
+    ],
+    svgType: "bollworm",
+  },
+  {
+    id: "chilli_curl",
+    cropEn: "Chilli",
+    cropTe: "మిరప",
+    diseaseEn: "Chilli Leaf Curl Virus",
+    diseaseTe: "మిరప బొబ్బర తెగులు (ఆకుముడుత)",
+    pathogen: "Begomovirus (Transmitted by Whitefly Bemisia tabaci)",
+    severity: "Moderate-High (Vector Control Urgently Needed)",
+    confidence: "96.5%",
+    symptomsEn:
+      "Upward curling, cupping, and puckering of leaves. Vein clearing and thickening on leaf undersides. Severe plant stunting with shortened internodes and flower drop.",
+    symptomsTe:
+      "ఆకులు పైకి దోనెలా ముడుచుకుపోవడం (Upward curling), ఆకుల అంచులు ముడుతలు పడటం. మొక్కల ఎదుగుదల ఆగిపోయి గిడసబారిపోతాయి. తెల్లదోమ ద్వారా ఈ వైరస్ వేగంగా వ్యాపిస్తుంది.",
+    recommendationsEn: [
+      "Install 15-20 yellow sticky traps per acre to capture whitefly vectors early.",
+      "Spray Diafenthiuron 50% WP @ 1.25 g/L OR Acetamiprid 20% SP @ 0.2 g/L to suppress whiteflies.",
+      "Spray Neem Oil 10,000 ppm @ 2 mL/L as an eco-friendly repellent and anti-feedant.",
+    ],
+    recommendationsTe: [
+      "తెల్లదోమ నివారణకు ఎకరానికి 15-20 పసుపు రంగు జిగురు అట్టలను (Yellow Sticky Traps) అమర్చాలి.",
+      "డయాఫెంతియురాన్ 50% WP @ 1.25 గ్రా లేదా ఎసిటామైప్రిడ్ 20% SP @ 0.2 గ్రా లీటరు నీటికి కలిపి పిచికారీ చేయాలి.",
+      "వేపనూనె (10,000 ppm) @ 2 మి.లీ లీటరు నీటికి కలిపి పిచికారీ చేయడం వల్ల దోమల ఉధృతి తగ్గుతుంది.",
+    ],
+    svgType: "leafcurl",
+  },
+];
+
+// Sample APMC Mandi Data for Step 7
+const SAMPLE_MANDI_DATA = [
+  {
+    yardEn: "Jagtial APMC",
+    yardTe: "జగిత్యాల మార్కెట్ యార్డ్",
+    commodityEn: "Paddy (RNR 15048 / Telangana Sona)",
+    commodityTe: "సన్న వడ్లు (RNR 15048)",
+    msp: 2320,
+    tsBonus: 500,
+    totalPrice: 2820,
+    arrivals: "3,450 Qtl",
+    trend: "+₹50/Qtl",
+    status: "Active MSP Procurement",
+  },
+  {
+    yardEn: "Warangal APMC (Enmamula)",
+    yardTe: "వరంగల్ ఏనుమాముల మార్కెట్",
+    commodityEn: "Cotton (Bunny / Medium-Long Staple)",
+    commodityTe: "పత్తి (మధ్యస్థ-పొడవు పింజ)",
+    msp: 7521,
+    tsBonus: 0,
+    totalPrice: 7780,
+    arrivals: "6,200 Qtl",
+    trend: "+₹110/Qtl",
+    status: "Private Mandi Trade",
+  },
+  {
+    yardEn: "Nizamabad APMC",
+    yardTe: "నిజామాబాద్ మార్కెట్ యార్డ్",
+    commodityEn: "Maize (Hybrid Yellow)",
+    commodityTe: "మొక్కజొన్న (హైబ్రిడ్ పసుపు)",
+    msp: 2225,
+    tsBonus: 0,
+    totalPrice: 2310,
+    arrivals: "4,180 Qtl",
+    trend: "+₹35/Qtl",
+    status: "Poultry Feed Demand",
+  },
+  {
+    yardEn: "Suryapet APMC",
+    yardTe: "సూర్యాపేట మార్కెట్ యార్డ్",
+    commodityEn: "Paddy (BPT 5204 / Samba Mahsuri)",
+    commodityTe: "వరి (సాంబ మసూరి)",
+    msp: 2320,
+    tsBonus: 500,
+    totalPrice: 2820,
+    arrivals: "2,890 Qtl",
+    trend: "+₹45/Qtl",
+    status: "Bonus Disbursed via DBT",
+  },
+  {
+    yardEn: "Khammam APMC",
+    yardTe: "ఖమ్మం మార్కెట్ యార్డ్",
+    commodityEn: "Chilli (Teja / Red Dry)",
+    commodityTe: "మిరప (తేజ / ఎండు మిర్చి)",
+    msp: 0, // No Central MSP for Chilli
+    tsBonus: 0,
+    totalPrice: 19450,
+    arrivals: "1,420 Qtl",
+    trend: "+₹250/Qtl",
+    status: "Spices Board Benchmark",
+  },
 ];
 
 export default function ConferenceDemoPage() {
-  const { lang, setLang } = useLanguage();
+  // Navigation & Settings State
+  const [activeStep, setActiveStep] = useState<number>(1);
+  const [lang, setLang] = useState<"en" | "te">("en");
+  const [isProjectorMode, setIsProjectorMode] = useState<boolean>(false);
+  const [soundEnabled, setSoundEnabled] = useState<boolean>(false);
 
-  // Core Demo States
-  const [mode, setMode] = useState<"demo" | "live">("demo");
-  const [activeStage, setActiveStage] = useState<number>(1);
-  const [viewAll, setViewAll] = useState<boolean>(false);
-
-  // Stage 1: Farmer Profile (Mallesham Goud)
-  const [farmer, setFarmer] = useState({
-    name: "Mallesham Goud",
-    nameTe: "మల్లేశం గౌడ్",
-    village: "Mallapur",
-    villageTe: "మల్లాపూర్",
-    mandal: "Dharmapuri",
-    mandalTe: "ధర్మపురి",
-    district: "Jagtial",
-    districtTe: "జగిత్యాల",
-    acres: 4.5,
-    crop: "Paddy (RNR 15048 / Telangana Sona)",
-    cropTe: "వరి (RNR 15048 / తెలంగాణ సోనా)",
-    soil: "Red Sandy Loam (చల్కా నేలలు)",
-    sowingDays: 101,
-    phone: "+91 98480 12345",
-    rythuId: "TG-JAG-2026-0842",
-  });
-  const [isEditingFarmer, setIsEditingFarmer] = useState(false);
-
-  // Stage 2: Weather & Rain Simulation
-  const [isRaining, setIsRaining] = useState(false);
-
-  // Stage 3: ESP32 IoT Soil & Pump
+  // Step 1 & 2: Soil Moisture & Pump Animation
   const [soilMoisture, setSoilMoisture] = useState<number>(17.4);
-  const [pumpStatus, setPumpStatus] = useState<"ON" | "OFF" | "AUTO">("ON");
-  const [pumpSecondsLeft, setPumpSecondsLeft] = useState<number>(274); // 4m 34s
-  const [autoControlEnabled, setAutoControlEnabled] = useState<boolean>(true);
+  const [pumpRunning, setPumpRunning] = useState<boolean>(false);
+  const [pumpTimerSeconds, setPumpTimerSeconds] = useState<number>(274); // 4m 34s
 
-  // Stage 4: AI Disease Scanner
-  const [selectedDisease, setSelectedDisease] = useState<"paddy_blast" | "cotton_curl">("paddy_blast");
-  const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
-  const [isPlayingAudio, setIsPlayingAudio] = useState<boolean>(false);
+  // Step 3: Rain-Skip Interlock
+  const [rainSkipActive, setRainSkipActive] = useState<boolean>(false);
 
-  // Stage 5: Mandi MSP Calculator
-  const [yieldQuintals, setYieldQuintals] = useState<number>(110); // for 4.5 acres
+  // Step 4: Live Offline Calculators
+  const [calcCrop, setCalcCrop] = useState<"Paddy" | "Maize" | "Cotton">("Paddy");
+  const [calcAcres, setCalcAcres] = useState<number>(4.5);
+  const [calcGuntas, setCalcGuntas] = useState<number>(0);
 
-  // Stage 7: WhatsApp Share copied state
-  const [copiedShare, setCopiedShare] = useState<boolean>(false);
+  // Step 5: Krishi Sahayak Selected Question
+  const [selectedQaId, setSelectedQaId] = useState<number>(1);
+  const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
 
-  // Moisture history chart data
-  const [moistureHistory, setMoistureHistory] = useState([
-    { time: "06:00", moisture: 14.2 },
-    { time: "08:00", moisture: 15.1 },
-    { time: "10:00", moisture: 16.3 },
-    { time: "12:00", moisture: 16.8 },
-    { time: "14:00", moisture: 17.1 },
-    { time: "Now", moisture: soilMoisture },
-  ]);
+  // Step 6: Sample Leaf Disease Selection
+  const [selectedDiseaseId, setSelectedDiseaseId] = useState<string>("paddy_blast");
 
-  // Keep moisture history updated
-  useEffect(() => {
-    setMoistureHistory((prev) => {
-      const copy = [...prev];
-      copy[copy.length - 1] = { time: "Now", moisture: soilMoisture };
-      return copy;
-    });
+  // Step 7: Yield Payout Calculator
+  const [expectedYieldQtl, setExpectedYieldQtl] = useState<number>(110);
+  const [copiedShareText, setCopiedShareText] = useState<boolean>(false);
 
-    // Automatic Irrigation Threshold Logic
-    if (autoControlEnabled) {
-      if (isRaining) {
-        setPumpStatus("OFF");
-      } else if (soilMoisture < 20.0) {
-        setPumpStatus("ON");
-      } else if (soilMoisture > 32.0) {
-        setPumpStatus("OFF");
+  // Audio Context ref for synthesized mechanical pump hum
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const oscillatorRef = useRef<OscillatorNode | null>(null);
+  const gainNodeRef = useRef<GainNode | null>(null);
+
+  // Setup / Teardown Pump Hum Sound
+  const startPumpHum = () => {
+    if (!soundEnabled || typeof window === "undefined") return;
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!audioCtxRef.current) {
+        audioCtxRef.current = new AudioCtx();
       }
-    }
-  }, [soilMoisture, isRaining, autoControlEnabled]);
+      if (audioCtxRef.current.state === "suspended") {
+        audioCtxRef.current.resume();
+      }
+      if (oscillatorRef.current) return;
 
-  // Pump countdown timer when ON
+      const osc = audioCtxRef.current.createOscillator();
+      const gain = audioCtxRef.current.createGain();
+
+      // 60Hz mechanical drone with soft harmonic
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(65, audioCtxRef.current.currentTime);
+      gain.gain.setValueAtTime(0.04, audioCtxRef.current.currentTime);
+
+      osc.connect(gain);
+      gain.connect(audioCtxRef.current.destination);
+      osc.start();
+
+      oscillatorRef.current = osc;
+      gainNodeRef.current = gain;
+    } catch (e) {
+      // AudioContext unavailable or blocked by autoplay
+    }
+  };
+
+  const stopPumpHum = () => {
+    try {
+      if (oscillatorRef.current) {
+        oscillatorRef.current.stop();
+        oscillatorRef.current.disconnect();
+        oscillatorRef.current = null;
+      }
+    } catch (e) {}
+  };
+
+  // Sync Pump Sound with state
+  useEffect(() => {
+    if (pumpRunning && soundEnabled) {
+      startPumpHum();
+    } else {
+      stopPumpHum();
+    }
+    return () => stopPumpHum();
+  }, [pumpRunning, soundEnabled]);
+
+  // Pump Simulation Effect: smoothly brings moisture from 17.4% up to 31.5%
   useEffect(() => {
     let interval: any;
-    if (pumpStatus === "ON") {
+    if (pumpRunning) {
       interval = setInterval(() => {
-        setPumpSecondsLeft((prev) => {
-          if (prev <= 1) {
-            setPumpStatus("OFF");
-            return 300;
+        setSoilMoisture((prev) => {
+          if (prev >= 31.5) {
+            setPumpRunning(false);
+            return 31.5;
           }
-          return prev - 1;
+          return parseFloat((prev + 0.4).toFixed(1));
         });
-      }, 1000);
-    } else {
-      setPumpSecondsLeft(300);
+        setPumpTimerSeconds((prev) => (prev > 0 ? prev - 1 : 0));
+      }, 300);
     }
     return () => clearInterval(interval);
-  }, [pumpStatus]);
+  }, [pumpRunning]);
 
-  // Keyboard Navigation for Presenter
+  // Rain-Skip Interlock Logic: When Step 3 is active, rain forecast forces pump OFF
+  useEffect(() => {
+    if (activeStep === 3) {
+      setRainSkipActive(true);
+      setPumpRunning(false);
+    }
+  }, [activeStep]);
+
+  // Keyboard navigation for conference presenter
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement ||
+        e.target instanceof HTMLSelectElement
+      ) {
+        return;
+      }
 
       if (e.key === "ArrowRight" || e.key === "n" || e.key === "N") {
-        setActiveStage((prev) => Math.min(STAGES.length, prev + 1));
+        setActiveStep((prev) => Math.min(DEMO_STEPS.length, prev + 1));
       } else if (e.key === "ArrowLeft" || e.key === "p" || e.key === "P") {
-        setActiveStage((prev) => Math.max(1, prev - 1));
-      } else if (e.key === "d" || e.key === "D") {
-        setMode((prev) => (prev === "demo" ? "live" : "demo"));
+        setActiveStep((prev) => Math.max(1, prev - 1));
       } else if (e.key === "r" || e.key === "R") {
-        resetDemo();
+        handleReset();
       }
     };
 
@@ -182,216 +406,246 @@ export default function ConferenceDemoPage() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  const resetDemo = () => {
-    setFarmer({
-      name: "Mallesham Goud",
-      nameTe: "మల్లేశం గౌడ్",
-      village: "Mallapur",
-      villageTe: "మల్లాపూర్",
-      mandal: "Dharmapuri",
-      mandalTe: "ధర్మపురి",
-      district: "Jagtial",
-      districtTe: "జగిత్యాల",
-      acres: 4.5,
-      crop: "Paddy (RNR 15048 / Telangana Sona)",
-      cropTe: "వరి (RNR 15048 / తెలంగాణ సోనా)",
-      soil: "Red Sandy Loam (చల్కా నేలలు)",
-      sowingDays: 101,
-      phone: "+91 98480 12345",
-      rythuId: "TG-JAG-2026-0842",
-    });
+  const handleReset = () => {
+    setActiveStep(1);
     setSoilMoisture(17.4);
-    setIsRaining(false);
-    setPumpStatus("ON");
-    setAutoControlEnabled(true);
-    setSelectedDisease("paddy_blast");
-    setYieldQuintals(110);
-    setActiveStage(1);
+    setPumpRunning(false);
+    setPumpTimerSeconds(274);
+    setRainSkipActive(false);
+    setCalcCrop("Paddy");
+    setCalcAcres(4.5);
+    setCalcGuntas(0);
+    setSelectedQaId(1);
+    setSelectedDiseaseId("paddy_blast");
+    setExpectedYieldQtl(110);
+    stopPumpHum();
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+    }
   };
 
-  const handleTeluguAudio = (text: string) => {
+  // Text to Speech for Q&A
+  const handleSpeak = (text: string, voiceLang: "en-IN" | "te-IN") => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
 
-    if (isPlayingAudio) {
+    if (isSpeaking) {
       window.speechSynthesis.cancel();
-      setIsPlayingAudio(false);
+      setIsSpeaking(false);
       return;
     }
 
-    const utter = new SpeechSynthesisUtterance(text);
-    utter.lang = "te-IN";
-    utter.rate = 0.95;
-    utter.onend = () => setIsPlayingAudio(false);
-    utter.onerror = () => setIsPlayingAudio(false);
-    setIsPlayingAudio(true);
-    window.speechSynthesis.speak(utter);
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = voiceLang;
+    utterance.rate = 0.95;
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+    setIsSpeaking(true);
+    window.speechSynthesis.speak(utterance);
   };
 
-  // Fertilizer calculation for Mallesham Goud's 4.5 acres
-  const fert = calculateFertilizer({
-    crop: "Paddy",
-    area: farmer.acres,
+  // Calculated Fertilizer for Step 4
+  const totalAreaInAcres = calcAcres + calcGuntas / 40;
+  const fertOutput = calculateFertilizer({
+    crop: calcCrop,
+    area: totalAreaInAcres,
     unit: "acre",
   });
 
-  // Mandi MSP calculations
-  const centralMsp = 2320;
-  const tsBonus = 500;
-  const totalRatePerQ = centralMsp + tsBonus; // 2820
-  const totalPayout = yieldQuintals * totalRatePerQ;
-  const bonusPayout = yieldQuintals * tsBonus;
+  // Calculated Seed Rate for Step 4
+  const seedOutput = calculateSeedRate({
+    crop: calcCrop,
+    sowingMethod: calcCrop === "Paddy" ? "transplant" : calcCrop === "Cotton" ? "dibble" : "line",
+    area: totalAreaInAcres,
+    unit: "acre",
+    rowSpacingCm: calcCrop === "Paddy" ? 20 : calcCrop === "Cotton" ? 90 : 60,
+    plantSpacingCm: calcCrop === "Paddy" ? 15 : calcCrop === "Cotton" ? 60 : 20,
+    seedsPerHill: calcCrop === "Paddy" ? 2 : 1,
+    weightBasis: 1000,
+    testWeightG: calcCrop === "Paddy" ? 22 : calcCrop === "Cotton" ? 90 : 280,
+    germinationPct: 85,
+    purityPct: 98,
+    extraPct: 10,
+  });
 
-  // WhatsApp formatted message
-  const whatsappText = `🌾 *Smart Farm Assistant — Rythu Advisory* 🌾\n👤 రైతు: ${farmer.nameTe} (${farmer.villageTe}, ${farmer.districtTe})\n🌱 పంట: ${farmer.cropTe} (${farmer.acres} ఎకరాలు)\n💧 నేల తేమ: ${soilMoisture.toFixed(1)}% (${soilMoisture < 20 ? "పంపు నడుస్తోంది" : "తేమ సరిపడా ఉంది"})\n🌧️ వాతావరణం: ${isRaining ? "భారీ వర్షం హెచ్చరిక - నీటిపారుదల నిలిపివేయబడింది" : "అనుకూలం"}\n💰 జగిత్యాల మార్కెట్ MSP రేటు: ₹${totalRatePerQ}/క్వింటాల్ (కేంద్ర MSP ₹${centralMsp} + తెలంగాణ బోనస్ ₹${tsBonus})\n🌐 పోర్టల్: https://smartfarming-web.vercel.app`;
+  // Active QA Item for Step 5
+  const activeQa = BUNDLED_QA.find((q) => q.id === selectedQaId) || BUNDLED_QA[0];
 
-  const copyToClipboard = () => {
+  // Active Disease for Step 6
+  const activeDisease =
+    SAMPLE_LEAF_DISEASES.find((d) => d.id === selectedDiseaseId) || SAMPLE_LEAF_DISEASES[0];
+
+  // WhatsApp share text generator for Step 7
+  const whatsappAdvisory = `🌾 *Smart Farm Assistant — Conference Demo* 🌾
+📍 రైతు: మల్లేశం గౌడ్ (మల్లాపూర్, జగిత్యాల జిల్లా)
+🌱 పంట: వరి RNR 15048 (${calcAcres} ఎకరాలు)
+💧 నేల తేమ: ${soilMoisture.toFixed(1)}% (${soilMoisture < 20 ? "⚠️ తక్కువ తేమ - పంపు అవసరం" : "✅ సరిపడా తేమ"})
+🌧️ వర్ష సూచన: ${rainSkipActive ? "🌧️ రేపు 32mm భారీ వర్షం - రెయిన్ స్కిప్ ఆన్" : "ఎండ/పొడి వాతావరణం"}
+💰 జగిత్యాల APMC రేటు: ₹2,820/క్వింటాల్ (MSP ₹2,320 + తెలంగాణ బోనస్ ₹500)
+📊 అంచనా చెల్లింపు: ${expectedYieldQtl} క్వింటాళ్లు = ₹${(expectedYieldQtl * 2820).toLocaleString("en-IN")}
+🌐 లైవ్ సైట్: https://smartfarming-web.vercel.app`;
+
+  const copyWhatsAppAdvisory = () => {
     if (typeof navigator !== "undefined" && navigator.clipboard) {
-      navigator.clipboard.writeText(whatsappText);
-      setCopiedShare(true);
-      setTimeout(() => setCopiedShare(false), 2500);
+      navigator.clipboard.writeText(whatsappAdvisory);
+      setCopiedShareText(true);
+      setTimeout(() => setCopiedShareText(false), 2500);
     }
   };
 
   return (
-    <div className="min-h-screen bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100 font-sans pb-20">
-      {/* -------------------------------------------------------- */}
-      {/* Top Conference Command Bar */}
-      {/* -------------------------------------------------------- */}
-      <div className="sticky top-0 z-40 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 shadow-xs px-4 md:px-8 py-3">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3">
-          {/* Left Title & Conference Badge */}
+    <div
+      className={`min-h-screen bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100 font-sans pb-24 transition-all ${
+        isProjectorMode ? "text-lg md:text-xl font-medium" : "text-sm md:text-base"
+      }`}
+    >
+      {/* ======================================================== */}
+      {/* 1. PERMANENT NON-REMOVABLE TOP RIBBON                   */}
+      {/* ======================================================== */}
+      <aside
+        aria-label="Demo mode announcement"
+        className="w-full bg-amber-400 dark:bg-amber-500 text-stone-950 font-bold px-4 py-2.5 text-center text-xs md:text-sm tracking-wide shadow-md sticky top-0 z-50 border-b-2 border-amber-600 flex flex-col sm:flex-row items-center justify-between gap-2"
+      >
+        <div className="flex items-center gap-2 text-left">
+          <span className="w-3 h-3 rounded-full bg-red-600 animate-ping shrink-0" />
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+            <span className="font-extrabold uppercase tracking-wider">
+              SIMULATED DEMO — no internet or sensor needed
+            </span>
+            <span className="opacity-50 hidden sm:inline">•</span>
+            <span className="font-semibold text-stone-900">
+              అనుకరణ డెమో — ఇంటర్నెట్ లేదా సెన్సార్ అవసరం లేదు
+            </span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 shrink-0">
+          <a
+            href="/offline-demo.html"
+            download="smart-farm-offline-demo.html"
+            className="px-3 py-1 bg-stone-900 hover:bg-stone-800 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-xs"
+            title="Download 100% self-contained single HTML demo file"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>Download offline copy</span>
+          </a>
+          <Link
+            href="/"
+            className="px-3 py-1 bg-amber-700 hover:bg-amber-800 text-white rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-xs"
+            title="Return to live connected website"
+          >
+            <span>Back to live site</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+      </aside>
+
+      {/* ======================================================== */}
+      {/* 2. PRESENTER COMMAND BAR & PROJECTOR CONTROLS            */}
+      {/* ======================================================== */}
+      <header className="bg-white dark:bg-stone-900 border-b border-stone-200 dark:border-stone-800 px-4 md:px-8 py-3.5 shadow-xs">
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+          {/* Conference Info */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-600 to-green-700 text-white flex items-center justify-center font-bold shadow-sm shadow-emerald-500/20">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-600 to-green-700 text-white flex items-center justify-center font-bold shadow-md shadow-emerald-600/20 shrink-0">
               <Presentation className="w-5 h-5" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-base md:text-lg font-bold text-stone-900 dark:text-white flex items-center gap-2">
-                  Conference Live Demo
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-base md:text-lg font-extrabold text-stone-900 dark:text-white">
+                  PJTAU Conference Walkthrough
                 </h1>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300/60">
-                  ADSAUF-2047 PJTAU
+                <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300">
+                  ADSAUF-2047 (2-4 Dec 2026)
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[11px] font-mono font-semibold bg-stone-100 text-stone-700 dark:bg-stone-800 dark:text-stone-300">
+                  Step {activeStep} of 7
                 </span>
               </div>
-              <p className="text-xs text-stone-500 dark:text-stone-400">
-                Full-Lifecycle Farmer Journey: <span className="font-semibold text-emerald-700 dark:text-emerald-400">{farmer.name} ({farmer.district})</span>
+              <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
+                Farmer Case Study: <span className="font-semibold text-stone-800 dark:text-stone-200">Mallesham Goud</span> • Mallapur, Jagtial District (4.5 Acres Paddy RNR 15048)
               </p>
             </div>
           </div>
 
-          {/* Center / Right: Dual-Mode Switcher & Presenter Controls */}
+          {/* Presenter Action Controls */}
           <div className="flex flex-wrap items-center gap-2">
-            {/* Dual Mode Switcher */}
-            <div className="flex items-center rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-100 dark:bg-stone-800 p-1">
-              <button
-                onClick={() => setMode("demo")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-                  mode === "demo"
-                    ? "bg-amber-500 text-white shadow-xs"
-                    : "text-stone-600 dark:text-stone-300 hover:text-stone-900"
-                }`}
-                title="Pre-cached conference datasets with zero latency"
-              >
-                <ShieldCheck className="w-3.5 h-3.5" />
-                <span>Pre-Cached Demo (Fail-Safe)</span>
-              </button>
-              <button
-                onClick={() => setMode("live")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-                  mode === "live"
-                    ? "bg-emerald-600 text-white shadow-xs"
-                    : "text-stone-600 dark:text-stone-300 hover:text-stone-900"
-                }`}
-                title="Live hardware & API telemetry"
-              >
-                <Wifi className="w-3.5 h-3.5" />
-                <span>Live Cloud Sync</span>
-              </button>
-            </div>
+            {/* Projector Mode Toggle */}
+            <button
+              onClick={() => setIsProjectorMode(!isProjectorMode)}
+              className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition flex items-center gap-1.5 ${
+                isProjectorMode
+                  ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
+                  : "bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-700 hover:bg-stone-50"
+              }`}
+              title="Scale typography and contrast for lecture hall projector"
+            >
+              {isProjectorMode ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+              <span>{isProjectorMode ? "Standard View" : "Projector View"}</span>
+            </button>
 
-            {/* Language Switch */}
+            {/* Language Toggle */}
             <button
               onClick={() => setLang(lang === "en" ? "te" : "en")}
-              className="px-2.5 py-1.5 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-xs font-semibold text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition"
+              className="px-3 py-1.5 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-xs font-bold text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition"
               title="Toggle Telugu / English language"
             >
-              {lang === "en" ? "తెలుగు UI" : "English UI"}
+              {lang === "en" ? "తెలుగు మోడ్" : "English Mode"}
+            </button>
+
+            {/* Sound Hum Toggle */}
+            <button
+              onClick={() => setSoundEnabled(!soundEnabled)}
+              className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition flex items-center gap-1.5 ${
+                soundEnabled
+                  ? "bg-emerald-600 text-white border-emerald-600"
+                  : "bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-700 hover:bg-stone-50"
+              }`}
+              title="Synthesizes client-side 60Hz mechanical pump hum"
+            >
+              {soundEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
+              <span>{soundEnabled ? "Pump Audio ON" : "Mute Sound"}</span>
             </button>
 
             {/* Reset Button */}
             <button
-              onClick={resetDemo}
-              className="px-2.5 py-1.5 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-xs font-medium text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition flex items-center gap-1"
-              title="Reset all values to Mallesham Goud defaults"
+              onClick={handleReset}
+              className="px-3 py-1.5 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-xs font-bold text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition flex items-center gap-1"
+              title="Reset simulation to initial state (Shortcut: R)"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Reset</span>
+              <span>Reset [R]</span>
             </button>
           </div>
         </div>
-      </div>
+      </header>
 
-      {/* -------------------------------------------------------- */}
-      {/* Fail-Safe Guard Banner */}
-      {/* -------------------------------------------------------- */}
-      <div className="max-w-7xl mx-auto px-4 md:px-8 pt-4">
-        <div className="bg-gradient-to-r from-emerald-800 via-teal-900 to-emerald-950 text-white rounded-2xl p-4 shadow-sm border border-emerald-700/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-start sm:items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-emerald-500/30 flex items-center justify-center shrink-0 border border-emerald-400/40">
-              <ShieldCheck className="w-4 h-4 text-emerald-300" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-emerald-300">
-                  Zero Glitch Conference Guard
-                </span>
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              </div>
-              <p className="text-xs text-emerald-100/90 mt-0.5">
-                {mode === "demo"
-                  ? "Operating in Pre-Cached Stage Mode. All agronomy formulas, Mandi prices, and AI leaf diagnostics are cached locally for 100% offline reliability."
-                  : "Live Mode Enabled. Attempting real-time synchronization with Jagtial ESP32 Soil Kit and APMC Agmarknet servers."}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <span className="text-[11px] text-emerald-200/80 bg-white/10 px-2.5 py-1 rounded-lg font-mono">
-              Shortcuts: [← / →] Navigate • [D] Dual-Mode • [R] Reset
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* -------------------------------------------------------- */}
-      {/* 7-Stage Interactive Stepper */}
-      {/* -------------------------------------------------------- */}
-      <div className="max-w-7xl mx-auto px-4 md:px-8 pt-5">
+      {/* ======================================================== */}
+      {/* 3. GUIDED 7-STEP INTERACTIVE PROGRESS STEPPER            */}
+      {/* ======================================================== */}
+      <nav aria-label="Demo flow steps" className="max-w-7xl mx-auto px-4 md:px-8 pt-5">
         <div className="bg-white dark:bg-stone-900 rounded-2xl p-3 border border-stone-200 dark:border-stone-800 shadow-xs">
-          <div className="flex items-center justify-between gap-2 overflow-x-auto pb-1 scrollbar-none">
-            {STAGES.map((s) => {
-              const Icon = s.icon;
-              const isActive = activeStage === s.id;
-              const isPast = activeStage > s.id;
+          <div className="flex items-center justify-between gap-1 sm:gap-2 overflow-x-auto pb-1 scrollbar-none">
+            {DEMO_STEPS.map((s) => {
+              const isActive = activeStep === s.id;
+              const isPast = activeStep > s.id;
 
               return (
                 <button
                   key={s.id}
-                  onClick={() => {
-                    setActiveStage(s.id);
-                    setViewAll(false);
-                  }}
+                  onClick={() => setActiveStep(s.id)}
                   className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all shrink-0 ${
                     isActive
-                      ? "bg-agri-700 text-white shadow-sm"
+                      ? "bg-emerald-700 text-white shadow-sm ring-2 ring-emerald-500/30"
                       : isPast
-                      ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/60"
+                      ? "bg-emerald-50 text-emerald-900 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60"
                       : "bg-stone-50 dark:bg-stone-800/60 text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-700"
                   }`}
                 >
                   <span
                     className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
                       isActive
-                        ? "bg-white text-agri-800"
+                        ? "bg-white text-emerald-800"
                         : isPast
                         ? "bg-emerald-600 text-white"
                         : "bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-300"
@@ -399,946 +653,1339 @@ export default function ConferenceDemoPage() {
                   >
                     {isPast ? <Check className="w-3 h-3" /> : s.id}
                   </span>
-                  <span>{lang === "te" ? s.nameTe : s.nameEn}</span>
+                  <span>{lang === "te" ? s.titleTe : s.titleEn}</span>
                 </button>
               );
             })}
+          </div>
 
-            {/* Toggle View All */}
-            <button
-              onClick={() => setViewAll(!viewAll)}
-              className={`px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition border ${
-                viewAll
-                  ? "bg-indigo-600 text-white border-indigo-600"
-                  : "border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-50"
-              }`}
-            >
-              {viewAll ? "Single Stage View" : "View All Stages"}
-            </button>
+          {/* Stepper Progress bar */}
+          <div className="w-full bg-stone-100 dark:bg-stone-800 h-1.5 rounded-full mt-3 overflow-hidden">
+            <div
+              className="bg-emerald-600 h-full transition-all duration-300 ease-out"
+              style={{ width: `${(activeStep / DEMO_STEPS.length) * 100}%` }}
+            />
           </div>
         </div>
-      </div>
+      </nav>
 
-      {/* -------------------------------------------------------- */}
-      {/* Main Content Area */}
-      {/* -------------------------------------------------------- */}
-      <main className="max-w-7xl mx-auto px-4 md:px-8 pt-6 space-y-6">
-        {/* ======================================================== */}
-        {/* STAGE 1: Farmer Profile Creation (Mallesham Goud) */}
-        {/* ======================================================== */}
-        {(viewAll || activeStage === 1) && (
-          <section className="bg-white dark:bg-stone-900 rounded-3xl p-6 border border-stone-200 dark:border-stone-800 shadow-sm transition hover:shadow-md">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-stone-100 dark:border-stone-800">
-              <div className="flex items-center gap-3">
-                <span className="w-8 h-8 rounded-xl bg-agri-100 text-agri-800 dark:bg-agri-950 dark:text-agri-300 font-bold flex items-center justify-center text-sm">
-                  1
+      {/* ======================================================== */}
+      {/* 4. MAIN STEP PRESENTATION VIEWPORTS                      */}
+      {/* ======================================================== */}
+      <main className="max-w-7xl mx-auto px-4 md:px-8 pt-6">
+        {/* ====================================================== */}
+        {/* STEP 1: LOW MOISTURE ALERT (<20%)                      */}
+        {/* ====================================================== */}
+        {activeStep === 1 && (
+          <section className="bg-white dark:bg-stone-900 rounded-3xl p-6 md:p-8 border border-stone-200 dark:border-stone-800 shadow-sm animate-fadeIn">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-5 border-b border-stone-200 dark:border-stone-800 mb-6">
+              <div>
+                <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300 border border-red-300 inline-block mb-2">
+                  Step 1 of 7: Telemetry Alert Trigger
                 </span>
-                <div>
-                  <h2 className="text-base md:text-lg font-bold text-stone-900 dark:text-white flex items-center gap-2">
-                    {lang === "te" ? "స్టేజ్ 1: రైతు ప్రొఫైల్ & వివరాలు" : "Stage 1: Verified Farmer Onboarding Profile"}
-                  </h2>
-                  <p className="text-xs text-stone-500 dark:text-stone-400">
-                    Mallesham Goud • Mallapur, Dharmapuri, Jagtial District
-                  </p>
-                </div>
+                <h2 className="text-xl md:text-2xl font-extrabold text-stone-900 dark:text-white">
+                  {lang === "te" ? "నేల తేమ ప్రమాదకర స్థాయి హెచ్చరిక (17.4%)" : "Low Moisture Alert: Soil Moisture at 17.4%"}
+                </h2>
+                <p className="text-xs md:text-sm text-stone-500 dark:text-stone-400 mt-1">
+                  Capacitive Soil Sensor (ESP32 ADC Pin 34) in Jagtial Field #2 detected root zone depletion below critical 20.0% threshold.
+                </p>
               </div>
 
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setIsEditingFarmer(!isEditingFarmer)}
-                  className="px-3 py-1.5 rounded-xl border border-stone-200 dark:border-stone-700 text-xs font-semibold text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 flex items-center gap-1.5 transition"
+                  onClick={() => setActiveStep(2)}
+                  className="px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs md:text-sm font-bold shadow-md flex items-center gap-2 transition"
                 >
-                  <Edit3 className="w-3.5 h-3.5 text-agri-600" />
-                  {isEditingFarmer ? "Close Editor" : "Edit Details Live"}
+                  <span>Next: Pump ON (Step 2)</span>
+                  <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
             </div>
 
-            {/* Live Profile Editor (if toggled) */}
-            {isEditingFarmer && (
-              <div className="mb-6 p-4 rounded-2xl bg-stone-50 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700 text-xs space-y-3">
-                <span className="font-bold text-stone-800 dark:text-stone-200 block">
-                  Interactive Profile Customizer (Demonstrate real-time adaptation):
-                </span>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div>
-                    <label className="text-stone-500 block mb-1">Farmer Name:</label>
-                    <input
-                      type="text"
-                      value={farmer.name}
-                      onChange={(e) => setFarmer({ ...farmer, name: e.target.value })}
-                      className="w-full px-3 py-1.5 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-900 text-xs font-semibold"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-stone-500 block mb-1">Land Area (Acres):</label>
-                    <input
-                      type="number"
-                      step="0.5"
-                      value={farmer.acres}
-                      onChange={(e) => setFarmer({ ...farmer, acres: parseFloat(e.target.value) || 1 })}
-                      className="w-full px-3 py-1.5 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-900 text-xs font-semibold"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-stone-500 block mb-1">Village & District:</label>
-                    <input
-                      type="text"
-                      value={`${farmer.village}, ${farmer.district}`}
-                      onChange={(e) => {
-                        const parts = e.target.value.split(",");
-                        setFarmer({
-                          ...farmer,
-                          village: parts[0]?.trim() || farmer.village,
-                          district: parts[1]?.trim() || farmer.district,
-                        });
-                      }}
-                      className="w-full px-3 py-1.5 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-900 text-xs font-semibold"
-                    />
-                  </div>
+            {/* Critical Alert Card */}
+            <div className="bg-red-50 dark:bg-red-950/40 border-2 border-red-500 rounded-2xl p-5 mb-8 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-red-600 text-white flex items-center justify-center shrink-0 shadow-md">
+                  <AlertTriangle className="w-6 h-6 animate-bounce" />
                 </div>
-              </div>
-            )}
-
-            {/* Farmer Card Display */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Profile Avatar & Contact */}
-              <div className="p-5 rounded-2xl bg-gradient-to-br from-agri-50 to-stone-50 dark:from-agri-950/40 dark:to-stone-900 border border-agri-200/60 dark:border-agri-800/40 flex flex-col justify-between">
-                <div className="flex items-center gap-3.5">
-                  <div className="w-14 h-14 rounded-2xl bg-agri-700 text-white font-extrabold text-xl flex items-center justify-center shadow-md">
-                    MG
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-stone-900 dark:text-white leading-tight">
-                      {farmer.name}
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base md:text-lg font-bold text-red-900 dark:text-red-200">
+                      {lang === "te"
+                        ? "అత్యవసర నీటి తడి అవసరం — తేమ 17.4% (<20% పరిమితి)"
+                        : "CRITICAL MOISTURE DEFICIT — Immediate Irrigation Required"}
                     </h3>
-                    <p className="text-xs font-semibold text-agri-700 dark:text-agri-400">
-                      {farmer.nameTe}
-                    </p>
-                    <span className="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-agri-200/70 text-agri-900 dark:bg-agri-900/60 dark:text-agri-200">
-                      ID: {farmer.rythuId}
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-red-600 text-white">
+                      DEFICIT: -2.6%
                     </span>
                   </div>
-                </div>
-
-                <div className="mt-4 pt-4 border-t border-agri-200/50 dark:border-agri-800/40 space-y-2 text-xs text-stone-600 dark:text-stone-300">
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-3.5 h-3.5 text-red-500 shrink-0" />
-                    <span>{farmer.village}, {farmer.mandal}, {farmer.district} (Telangana)</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Smartphone className="w-3.5 h-3.5 text-stone-500 shrink-0" />
-                    <span>{farmer.phone} (WhatsApp Registered)</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    <span>Rythu Bandhu & Rythu Bima Verified</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Agronomic Profile & Land Specifics */}
-              <div className="md:col-span-2 grid grid-cols-2 sm:grid-cols-3 gap-3.5">
-                <div className="p-3.5 rounded-xl bg-stone-50 dark:bg-stone-800/60 border border-stone-200/60 dark:border-stone-700/60">
-                  <span className="text-[11px] text-stone-400 block mb-1">Land Holding</span>
-                  <span className="text-lg font-extrabold text-stone-900 dark:text-white">
-                    {farmer.acres} Acres
-                  </span>
-                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold block mt-0.5">
-                    18 Guntas (సొంత భూమి)
-                  </span>
-                </div>
-
-                <div className="p-3.5 rounded-xl bg-stone-50 dark:bg-stone-800/60 border border-stone-200/60 dark:border-stone-700/60">
-                  <span className="text-[11px] text-stone-400 block mb-1">Primary Crop</span>
-                  <span className="text-sm font-bold text-stone-900 dark:text-white truncate block">
-                    Paddy (RNR 15048)
-                  </span>
-                  <span className="text-[10px] text-stone-500 block mt-0.5">
-                    తెలంగాణ సోనా (Super Fine)
-                  </span>
-                </div>
-
-                <div className="p-3.5 rounded-xl bg-stone-50 dark:bg-stone-800/60 border border-stone-200/60 dark:border-stone-700/60">
-                  <span className="text-[11px] text-stone-400 block mb-1">Soil Classification</span>
-                  <span className="text-sm font-bold text-stone-900 dark:text-white">
-                    Red Sandy Loam
-                  </span>
-                  <span className="text-[10px] text-stone-500 block mt-0.5">
-                    చల్కా నేలలు (pH 6.8 Optimal)
-                  </span>
-                </div>
-
-                <div className="p-3.5 rounded-xl bg-stone-50 dark:bg-stone-800/60 border border-stone-200/60 dark:border-stone-700/60">
-                  <span className="text-[11px] text-stone-400 block mb-1">Irrigation System</span>
-                  <span className="text-sm font-bold text-stone-900 dark:text-white">
-                    Drip + ESP32 Pump
-                  </span>
-                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 block mt-0.5">
-                    Borewell 5HP Solar Unit
-                  </span>
-                </div>
-
-                <div className="p-3.5 rounded-xl bg-stone-50 dark:bg-stone-800/60 border border-stone-200/60 dark:border-stone-700/60">
-                  <span className="text-[11px] text-stone-400 block mb-1">Crop Stage</span>
-                  <span className="text-sm font-bold text-stone-900 dark:text-white">
-                    Day {farmer.sowingDays}
-                  </span>
-                  <span className="text-[10px] text-stone-500 block mt-0.5">
-                    Panicle Initiation (వెన్ను దశ)
-                  </span>
-                </div>
-
-                <div className="p-3.5 rounded-xl bg-stone-50 dark:bg-stone-800/60 border border-stone-200/60 dark:border-stone-700/60">
-                  <span className="text-[11px] text-stone-400 block mb-1">IoT Telemetry Node</span>
-                  <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    Node 01 Online
-                  </span>
-                  <span className="text-[10px] text-stone-500 block mt-0.5">
-                    ESP32 + Capacitive Soil v2
-                  </span>
-                </div>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* ======================================================== */}
-        {/* STAGE 2: Hyperlocal Weather & Rain-Skip Automation */}
-        {/* ======================================================== */}
-        {(viewAll || activeStage === 2) && (
-          <section className="bg-white dark:bg-stone-900 rounded-3xl p-6 border border-stone-200 dark:border-stone-800 shadow-sm transition hover:shadow-md">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-stone-100 dark:border-stone-800">
-              <div className="flex items-center gap-3">
-                <span className="w-8 h-8 rounded-xl bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300 font-bold flex items-center justify-center text-sm">
-                  2
-                </span>
-                <div>
-                  <h2 className="text-base md:text-lg font-bold text-stone-900 dark:text-white">
-                    {lang === "te" ? "స్టేజ్ 2: వాతావరణం & ఆటోమేటిక్ రెయిన్-స్కిప్" : "Stage 2: Hyperlocal Weather & Automated Rain-Skip Advisory"}
-                  </h2>
-                  <p className="text-xs text-stone-500 dark:text-stone-400">
-                    Jagtial IMD Radar Grid • Precipitation Forecast & Irrigation Suspension
+                  <p className="text-xs md:text-sm text-red-800 dark:text-red-300 mt-1">
+                    {lang === "te"
+                      ? "వరి పిలకల దశలో (Active Tillering Stage) నేల తేమ 20% కంటే తగ్గడం వల్ల పిలకల సంఖ్య మరియు ధాన్యపు దిగుబడి 25% వరకు తగ్గే ప్రమాదం ఉంది."
+                      : "Paddy crop is at day 42 (active tillering). Soil moisture below 20% triggers stress hormones and restricts tiller formation. Immediate 30 mm irrigation cycle recommended."}
                   </p>
                 </div>
               </div>
 
-              {/* Rain Simulation Trigger Button */}
               <button
-                onClick={() => setIsRaining(!isRaining)}
-                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-sm ${
-                  isRaining
-                    ? "bg-blue-600 text-white hover:bg-blue-700 animate-pulse"
-                    : "bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-200"
-                }`}
+                onClick={() => {
+                  setPumpRunning(true);
+                  setActiveStep(2);
+                }}
+                className="px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs md:text-sm font-bold shadow-md shrink-0 flex items-center justify-center gap-2 transition"
               >
-                <CloudRain className="w-4 h-4" />
-                <span>{isRaining ? "Simulating Heavy Rain (Active)" : "Simulate 15mm Rainfall Event"}</span>
+                <Power className="w-4 h-4" />
+                <span>Simulate Pump Start →</span>
               </button>
             </div>
 
-            {/* Rain-Skip Active Alert Banner */}
-            {isRaining ? (
-              <div className="mb-6 p-4 rounded-2xl bg-blue-50 dark:bg-blue-950/60 border border-blue-300 dark:border-blue-700 text-blue-900 dark:text-blue-200 flex items-start gap-3">
-                <CloudRain className="w-6 h-6 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5 animate-bounce" />
-                <div>
-                  <h4 className="text-sm font-bold flex items-center gap-2">
-                    🌧️ Rain-Skip Activated: ESP32 Irrigation Automatically Suspended!
-                  </h4>
-                  <p className="text-xs text-blue-700 dark:text-blue-300 mt-1 leading-relaxed">
-                    Heavy shower predicted (15mm, 85% probability). The Smart Farm Assistant automatically sent an MQTT override command to Mallesham Goud&apos;s ESP32 unit to turn the pump <strong>OFF</strong>. Saved <strong>4,200 Litres</strong> of ground water and prevented root rot (వేరుకుళ్లు).
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="mb-6 p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200 flex items-center justify-between text-xs">
-                <span className="flex items-center gap-2 font-medium">
-                  <Sun className="w-4 h-4 text-amber-500 shrink-0" />
-                  Clear Sky Forecast. Standard automated soil moisture threshold protocol is active.
+            {/* Moisture Telemetry Gauge & Threshold Visualization */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Radial / Bar Gauge */}
+              <div className="bg-stone-50 dark:bg-stone-800/60 rounded-2xl p-6 border border-stone-200 dark:border-stone-700 flex flex-col items-center justify-center text-center">
+                <span className="text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">
+                  Root Zone Volumetric Water Content
                 </span>
-                <span className="text-stone-500 dark:text-stone-400 hidden sm:inline">
-                  Next rain window: 4 days away
-                </span>
-              </div>
-            )}
-
-            {/* 5-Day Forecast Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-              {SAMPLE_WEATHER.forecast5Day.map((day, i) => (
-                <div
-                  key={i}
-                  className={`p-3.5 rounded-2xl border text-center transition ${
-                    i === 0 && isRaining
-                      ? "bg-blue-100/70 border-blue-400 text-blue-950 dark:bg-blue-950 dark:border-blue-700 dark:text-blue-200"
-                      : "bg-stone-50 dark:bg-stone-800/60 border-stone-200/60 dark:border-stone-700/60"
-                  }`}
-                >
-                  <span className="text-xs font-bold text-stone-700 dark:text-stone-300 block">
-                    {lang === "te" ? day.dayTe : day.dayEn}
-                  </span>
-                  <div className="my-2 flex justify-center">
-                    {i === 0 && isRaining ? (
-                      <CloudRain className="w-6 h-6 text-blue-600 animate-bounce" />
-                    ) : day.rainChance > 50 ? (
-                      <CloudRain className="w-6 h-6 text-blue-500" />
-                    ) : (
-                      <Sun className="w-6 h-6 text-amber-500" />
-                    )}
+                <div className="relative w-40 h-40 flex items-center justify-center my-2">
+                  <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="40"
+                      className="stroke-stone-200 dark:stroke-stone-700"
+                      strokeWidth="10"
+                      fill="transparent"
+                    />
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="40"
+                      className="stroke-red-500 transition-all duration-1000"
+                      strokeWidth="10"
+                      strokeDasharray="251.2"
+                      strokeDashoffset={251.2 - (251.2 * soilMoisture) / 100}
+                      strokeLinecap="round"
+                      fill="transparent"
+                    />
+                  </svg>
+                  <div className="absolute flex flex-col items-center">
+                    <span className="text-3xl font-black text-red-600 dark:text-red-400">
+                      {soilMoisture.toFixed(1)}%
+                    </span>
+                    <span className="text-[10px] font-bold text-red-700 dark:text-red-300 uppercase">
+                      CRITICAL LOW
+                    </span>
                   </div>
-                  <span className="text-base font-extrabold block text-stone-900 dark:text-white">
-                    {day.temp}°C
-                  </span>
-                  <span className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 mt-1 block">
-                    {i === 0 && isRaining ? "85% Rain" : `${day.rainChance}% Rain`}
-                  </span>
                 </div>
-              ))}
+                <p className="text-xs text-stone-500 dark:text-stone-400 mt-2">
+                  Optimal Target: <span className="font-bold text-emerald-600">25.0% – 35.0%</span>
+                </p>
+              </div>
+
+              {/* Threshold Range Breakdown */}
+              <div className="bg-stone-50 dark:bg-stone-800/60 rounded-2xl p-6 border border-stone-200 dark:border-stone-700 flex flex-col justify-between">
+                <div>
+                  <h4 className="text-sm font-bold text-stone-900 dark:text-white mb-3">
+                    PJTAU Agronomy Moisture Thresholds
+                  </h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between text-xs p-2.5 rounded-xl bg-red-100 dark:bg-red-950/60 border border-red-300 dark:border-red-800 font-medium">
+                      <span className="text-red-900 dark:text-red-300 font-bold">Wilting Risk (&lt;20.0%)</span>
+                      <span className="px-2 py-0.5 rounded bg-red-600 text-white font-bold text-[10px]">CURRENT: 17.4%</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-300">
+                      <span>Low Caution (20.0% – 25.0%)</span>
+                      <span className="font-mono">Pump Standby</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-900 dark:text-emerald-300 font-semibold">
+                      <span>Optimal Rice Root (25.0% – 35.0%)</span>
+                      <span className="font-mono">Target Saturation</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs p-2.5 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-blue-900 dark:text-blue-300">
+                      <span>Field Capacity (&gt;35.0%)</span>
+                      <span className="font-mono">Pump Auto-Cutoff</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-stone-200 dark:border-stone-700 text-xs text-stone-500">
+                  Telemetry Frequency: <span className="font-mono font-semibold">Every 60 seconds (ESP32 Mesh)</span>
+                </div>
+              </div>
+
+              {/* Field Metadata */}
+              <div className="bg-stone-50 dark:bg-stone-800/60 rounded-2xl p-6 border border-stone-200 dark:border-stone-700 flex flex-col justify-between">
+                <div>
+                  <h4 className="text-sm font-bold text-stone-900 dark:text-white mb-3">
+                    Field #2 Profile
+                  </h4>
+                  <dl className="space-y-2 text-xs">
+                    <div className="flex justify-between py-1 border-b border-stone-200 dark:border-stone-700">
+                      <dt className="text-stone-500">Farmer Name:</dt>
+                      <dd className="font-bold text-stone-900 dark:text-white">Mallesham Goud</dd>
+                    </div>
+                    <div className="flex justify-between py-1 border-b border-stone-200 dark:border-stone-700">
+                      <dt className="text-stone-500">Location:</dt>
+                      <dd className="font-bold text-stone-900 dark:text-white">Mallapur, Jagtial</dd>
+                    </div>
+                    <div className="flex justify-between py-1 border-b border-stone-200 dark:border-stone-700">
+                      <dt className="text-stone-500">Soil Classification:</dt>
+                      <dd className="font-bold text-stone-900 dark:text-white">Red Sandy Loam (చల్కా నేలలు)</dd>
+                    </div>
+                    <div className="flex justify-between py-1 border-b border-stone-200 dark:border-stone-700">
+                      <dt className="text-stone-500">Crop & Variety:</dt>
+                      <dd className="font-bold text-emerald-700 dark:text-emerald-400">Paddy (RNR 15048)</dd>
+                    </div>
+                    <div className="flex justify-between py-1">
+                      <dt className="text-stone-500">Irrigation Source:</dt>
+                      <dd className="font-bold text-stone-900 dark:text-white">3 HP Submersible Borewell</dd>
+                    </div>
+                  </dl>
+                </div>
+
+                <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-[11px] text-amber-800 dark:text-amber-300 flex items-center gap-1.5 mt-3">
+                  <Info className="w-3.5 h-3.5 shrink-0" />
+                  <span>Presenter hint: Click "Next" to watch pump activate and moisture replenish.</span>
+                </div>
+              </div>
             </div>
           </section>
         )}
 
-        {/* ======================================================== */}
-        {/* STAGE 3: ESP32 IoT Soil Moisture & Solar Pump Unit */}
-        {/* ======================================================== */}
-        {(viewAll || activeStage === 3) && (
-          <section className="bg-white dark:bg-stone-900 rounded-3xl p-6 border border-stone-200 dark:border-stone-800 shadow-sm transition hover:shadow-md">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-stone-100 dark:border-stone-800">
-              <div className="flex items-center gap-3">
-                <span className="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 font-bold flex items-center justify-center text-sm">
-                  3
+        {/* ====================================================== */}
+        {/* STEP 2: PUMP ON ANIMATION (Moisture rises to 31.5%)    */}
+        {/* ====================================================== */}
+        {activeStep === 2 && (
+          <section className="bg-white dark:bg-stone-900 rounded-3xl p-6 md:p-8 border border-stone-200 dark:border-stone-800 shadow-sm animate-fadeIn">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-5 border-b border-stone-200 dark:border-stone-800 mb-6">
+              <div>
+                <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 inline-block mb-2">
+                  Step 2 of 7: Autonomous Irrigation Cycle
                 </span>
+                <h2 className="text-xl md:text-2xl font-extrabold text-stone-900 dark:text-white">
+                  {lang === "te" ? "పంపు ఆటోమేటిక్ ఆన్ & తేమ పెరుగుదల (31.5%)" : "Pump ON Animation: Water Replenishment to 31.5%"}
+                </h2>
+                <p className="text-xs md:text-sm text-stone-500 dark:text-stone-400 mt-1">
+                  Relay engaged 3 HP submersible pump. Soil moisture is animating from 17.4% to optimal saturation (31.5%).
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setActiveStep(1)}
+                  className="px-4 py-2 border border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 rounded-xl text-xs md:text-sm font-semibold hover:bg-stone-50 transition"
+                >
+                  ← Back
+                </button>
+                <button
+                  onClick={() => setActiveStep(3)}
+                  className="px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs md:text-sm font-bold shadow-md flex items-center gap-2 transition"
+                >
+                  <span>Next: Rain-Skip (Step 3)</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Main Pump Interactive Deck */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Pump Hardware & Spinning Impeller Animation */}
+              <div className="bg-gradient-to-br from-emerald-900 via-teal-900 to-stone-900 text-white rounded-3xl p-6 shadow-md flex flex-col justify-between">
                 <div>
-                  <h2 className="text-base md:text-lg font-bold text-stone-900 dark:text-white">
-                    {lang === "te" ? "స్టేజ్ 3: ESP32 నేల తేమ & పంపు కంట్రోల్" : "Stage 3: ESP32 IoT Soil Moisture & Solar Pump Automation"}
-                  </h2>
-                  <p className="text-xs text-stone-500 dark:text-stone-400">
-                    Capacitive Soil Sensor v2 • 5HP Solar Pump Relay • 5-Minute Safety Dry-Run Limit
-                  </p>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-xs uppercase font-mono tracking-wider text-emerald-300">
+                      ESP32 RELAY CHANNEL #1
+                    </span>
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 ${
+                        pumpRunning
+                          ? "bg-emerald-500 text-stone-950 animate-pulse"
+                          : soilMoisture >= 31.5
+                          ? "bg-emerald-400 text-stone-950"
+                          : "bg-stone-700 text-stone-300"
+                      }`}
+                    >
+                      <Power className="w-3.5 h-3.5" />
+                      <span>{pumpRunning ? "PUMP ACTIVE" : soilMoisture >= 31.5 ? "CYCLE COMPLETE" : "PUMP IDLE"}</span>
+                    </span>
+                  </div>
+
+                  {/* Spinning Impeller Animation */}
+                  <div className="flex flex-col items-center justify-center my-6">
+                    <div className="relative w-36 h-36 flex items-center justify-center">
+                      {/* Outer pulsing ring */}
+                      <div
+                        className={`absolute inset-0 rounded-full border-4 border-emerald-400/30 ${
+                          pumpRunning ? "animate-ping" : ""
+                        }`}
+                      />
+                      {/* Spinning impeller wheel */}
+                      <div
+                        className={`w-28 h-28 rounded-full border-4 border-dashed border-emerald-300 flex items-center justify-center transition-all ${
+                          pumpRunning ? "animate-spin" : ""
+                        }`}
+                        style={{ animationDuration: "1.2s" }}
+                      >
+                        <div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                          <Droplets className="w-8 h-8 text-emerald-300" />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="text-center mt-3">
+                      <span className="text-2xl font-mono font-black text-white">
+                        {pumpRunning ? "420 Litres/min" : soilMoisture >= 31.5 ? "Target Achieved" : "0 L/min"}
+                      </span>
+                      <p className="text-xs text-emerald-200/80">3 HP Submersible • 2.2 kW Active Load</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Manual Start / Pause Trigger */}
+                <div className="pt-4 border-t border-emerald-800/80 flex items-center justify-between">
+                  <button
+                    onClick={() => {
+                      if (soilMoisture >= 31.5) setSoilMoisture(17.4);
+                      setPumpRunning(!pumpRunning);
+                    }}
+                    className={`w-full py-2.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 ${
+                      pumpRunning
+                        ? "bg-red-500 hover:bg-red-600 text-white"
+                        : "bg-emerald-400 hover:bg-emerald-300 text-stone-950 shadow-md"
+                    }`}
+                  >
+                    <Power className="w-4 h-4" />
+                    <span>{pumpRunning ? "Pause Pump Simulation" : "Restart 17.4% → 31.5% Cycle"}</span>
+                  </button>
                 </div>
               </div>
 
-              {/* Pump Toggle Button */}
+              {/* Live Moisture Rise Display */}
+              <div className="bg-stone-50 dark:bg-stone-800/60 rounded-3xl p-6 border border-stone-200 dark:border-stone-700 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs font-bold text-stone-500 uppercase">Real-Time Soil Sensor</span>
+                    <span className="text-xs font-mono text-emerald-700 dark:text-emerald-400 font-bold">
+                      ADC Channel 34
+                    </span>
+                  </div>
+
+                  <div className="flex items-baseline gap-3 my-2">
+                    <span className="text-5xl font-black text-emerald-600 dark:text-emerald-400">
+                      {soilMoisture.toFixed(1)}%
+                    </span>
+                    <span
+                      className={`text-xs font-bold px-2 py-0.5 rounded-md ${
+                        soilMoisture >= 25.0
+                          ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+                          : "bg-red-100 text-red-800"
+                      }`}
+                    >
+                      {soilMoisture >= 30.0 ? "OPTIMAL" : soilMoisture >= 20.0 ? "RECOVERING" : "DEFICIT"}
+                    </span>
+                  </div>
+
+                  {/* Horizontal Bar with Target Marker */}
+                  <div className="mt-4">
+                    <div className="flex justify-between text-xs text-stone-500 mb-1">
+                      <span>Start: 17.4%</span>
+                      <span className="font-bold text-emerald-600">Target: 31.5%</span>
+                      <span>Max: 40%</span>
+                    </div>
+                    <div className="w-full bg-stone-200 dark:bg-stone-700 h-4 rounded-full overflow-hidden p-0.5 relative">
+                      <div
+                        className="bg-gradient-to-r from-amber-500 via-emerald-500 to-green-600 h-full rounded-full transition-all duration-300"
+                        style={{ width: `${(soilMoisture / 40) * 100}%` }}
+                      />
+                      {/* Target notch */}
+                      <div
+                        className="absolute top-0 bottom-0 w-1 bg-stone-900 dark:bg-white"
+                        style={{ left: `${(31.5 / 40) * 100}%` }}
+                        title="Optimal Cutoff Target: 31.5%"
+                      />
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-stone-500 dark:text-stone-400 mt-4 leading-relaxed">
+                    {soilMoisture >= 31.5 ? (
+                      <span className="text-emerald-700 dark:text-emerald-400 font-semibold flex items-center gap-1.5">
+                        <CheckCircle2 className="w-4 h-4 shrink-0" />
+                        Target 31.5% reached! Soil pore space is optimally balanced with 50% water and 50% aeration.
+                      </span>
+                    ) : (
+                      `Injecting 420 L/min across lateral drip line #2. Moisture increment: +0.4% per step.`
+                    )}
+                  </p>
+                </div>
+
+                <div className="p-3 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 mt-4">
+                  <div className="flex items-center justify-between text-xs font-mono">
+                    <span className="text-stone-500">Auto Shutoff Timer:</span>
+                    <span className="font-bold text-stone-800 dark:text-stone-200">
+                      {Math.floor(pumpTimerSeconds / 60)}m {pumpTimerSeconds % 60}s
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Water Volume & Agronomic Metrics */}
+              <div className="bg-stone-50 dark:bg-stone-800/60 rounded-3xl p-6 border border-stone-200 dark:border-stone-700 flex flex-col justify-between">
+                <div>
+                  <h4 className="text-sm font-bold text-stone-900 dark:text-white mb-3">
+                    Calculated Irrigation Metrics
+                  </h4>
+                  <div className="space-y-3 text-xs">
+                    <div className="p-3 rounded-xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 flex items-center justify-between">
+                      <span className="text-stone-500">Water Discharged:</span>
+                      <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                        {pumpRunning ? "1,890 Litres" : soilMoisture >= 31.5 ? "2,520 Litres" : "0 L"}
+                      </span>
+                    </div>
+                    <div className="p-3 rounded-xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 flex items-center justify-between">
+                      <span className="text-stone-500">Effective Root Depth:</span>
+                      <span className="font-mono font-bold text-stone-800 dark:text-stone-200">18.5 cm</span>
+                    </div>
+                    <div className="p-3 rounded-xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 flex items-center justify-between">
+                      <span className="text-stone-500">Electricity Consumed:</span>
+                      <span className="font-mono font-bold text-stone-800 dark:text-stone-200">0.22 kWh</span>
+                    </div>
+                    <div className="p-3 rounded-xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 flex items-center justify-between">
+                      <span className="text-stone-500">Power Factor:</span>
+                      <span className="font-mono font-bold text-stone-800 dark:text-stone-200">0.91 (Healthy)</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs text-emerald-900 dark:text-emerald-300 mt-4">
+                  <div className="flex items-center gap-1.5 font-bold mb-1">
+                    <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Presenter Speaking Point:</span>
+                  </div>
+                  <p className="text-[11px] leading-tight">
+                    "Notice how the ESP32 closed-loop logic prevents waterlogging. Once 31.5% is detected, pump cuts off without requiring manual farmer intervention."
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* ====================================================== */}
+        {/* STEP 3: RAIN-SKIP PAUSES IRRIGATION (85% Rain, 32mm)   */}
+        {/* ====================================================== */}
+        {activeStep === 3 && (
+          <section className="bg-white dark:bg-stone-900 rounded-3xl p-6 md:p-8 border border-stone-200 dark:border-stone-800 shadow-sm animate-fadeIn">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-5 border-b border-stone-200 dark:border-stone-800 mb-6">
+              <div>
+                <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300 border border-blue-300 inline-block mb-2">
+                  Step 3 of 7: Predictive Weather Interlock
+                </span>
+                <h2 className="text-xl md:text-2xl font-extrabold text-stone-900 dark:text-white">
+                  {lang === "te"
+                    ? "రెయిన్-స్కిప్ ఇంటర్‌లాక్: రేపు 32 మి.మీ భారీ వర్ష సూచన (85%)"
+                    : "Rain-Skip Interlock: Forecast 85% Rain Tomorrow (32 mm)"}
+                </h2>
+                <p className="text-xs md:text-sm text-stone-500 dark:text-stone-400 mt-1">
+                  Doppler radar & Open-Meteo AWS model indicates heavy monsoon showers tomorrow. Smart interlock suppresses pump to conserve groundwater.
+                </p>
+              </div>
+
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => {
-                    setAutoControlEnabled(false);
-                    setPumpStatus(pumpStatus === "ON" ? "OFF" : "ON");
-                  }}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-sm ${
-                    pumpStatus === "ON"
-                      ? "bg-emerald-600 hover:bg-emerald-700 text-white"
-                      : "bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-300"
-                  }`}
+                  onClick={() => setActiveStep(2)}
+                  className="px-4 py-2 border border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 rounded-xl text-xs md:text-sm font-semibold hover:bg-stone-50 transition"
                 >
-                  <Power className="w-4 h-4" />
-                  <span>{pumpStatus === "ON" ? "Pump PUMPING (ON)" : "Pump STOPPED (OFF)"}</span>
+                  ← Back
                 </button>
+                <button
+                  onClick={() => setActiveStep(4)}
+                  className="px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs md:text-sm font-bold shadow-md flex items-center gap-2 transition"
+                >
+                  <span>Next: Calculators (Step 4)</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Weather Alert & Interlock Hero */}
+            <div className="bg-gradient-to-r from-blue-900 via-sky-900 to-indigo-950 text-white rounded-3xl p-6 md:p-8 shadow-md mb-8 border border-sky-800/60">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                <div className="flex items-start gap-5">
+                  <div className="w-16 h-16 rounded-2xl bg-sky-500/20 border border-sky-400/40 flex items-center justify-center shrink-0">
+                    <CloudRain className="w-9 h-9 text-sky-300 animate-pulse" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-sky-400 text-stone-950">
+                        Active Rain-Skip Interlock
+                      </span>
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                    </div>
+                    <h3 className="text-lg md:text-2xl font-black mt-2">
+                      {lang === "te"
+                        ? "భారీ వర్ష సూచన — పంపు ఆటోమేటిక్‌గా నిలిపివేయబడింది"
+                        : "Heavy Rain Warning Tomorrow: 32 mm Precipitation (85% Probability)"}
+                    </h3>
+                    <p className="text-xs md:text-sm text-sky-200/90 mt-1 max-w-2xl leading-relaxed">
+                      {lang === "te"
+                        ? "రేపు ఉదయం 08:00 నుండి జగిత్యాల పరిసర ప్రాంతాల్లో 32 మి.మీ వర్షపాతం నమోదయ్యే అవకాశం ఉంది. నేల ఇప్పటికే తగినంత తేమతో ఉన్నందున మరియు రేపు వర్షం కురవనున్నందున, పంపును ఆపివేసి 38,000 లీటర్ల భూగర్భ జలాలను ఆదా చేయడం జరిగింది."
+                        : "Irrigation scheduled for tonight is bypassed automatically. Pumping water before a 32 mm downpour causes nutrient leaching, lodging, and root suffocation. Smart rain-skip protects crop yield and power costs."}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Rain Probability Badge */}
+                <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20 text-center shrink-0">
+                  <span className="text-xs text-sky-200 uppercase font-bold tracking-wider">Rain Probability</span>
+                  <div className="text-4xl font-black text-sky-300 my-1">85%</div>
+                  <span className="text-xs font-semibold text-white/90">32 mm Expected</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Interlock Metrics & Resource Conservation */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Groundwater Saved */}
+              <div className="bg-stone-50 dark:bg-stone-800/60 rounded-2xl p-6 border border-stone-200 dark:border-stone-700">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 flex items-center justify-center font-bold">
+                    <Droplets className="w-5 h-5" />
+                  </div>
+                  <h4 className="text-sm font-bold text-stone-900 dark:text-white">Groundwater Saved</h4>
+                </div>
+                <div className="text-3xl font-black text-blue-600 dark:text-blue-400 my-2">
+                  ~38,000 Litres
+                </div>
+                <p className="text-xs text-stone-500 dark:text-stone-400">
+                  Equivalent to 3 full hours of continuous 3 HP submersible borewell pumping saved on 4.5 acres.
+                </p>
+              </div>
+
+              {/* Electricity & Cost Savings */}
+              <div className="bg-stone-50 dark:bg-stone-800/60 rounded-2xl p-6 border border-stone-200 dark:border-stone-700">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 flex items-center justify-center font-bold">
+                    <Activity className="w-5 h-5" />
+                  </div>
+                  <h4 className="text-sm font-bold text-stone-900 dark:text-white">Power & Equipment Life</h4>
+                </div>
+                <div className="text-3xl font-black text-emerald-600 dark:text-emerald-400 my-2">
+                  6.6 kWh Saved
+                </div>
+                <p className="text-xs text-stone-500 dark:text-stone-400">
+                  Prevents dry run motor heating and unnecessary transformer load on Telangana agricultural feeders.
+                </p>
+              </div>
+
+              {/* Agronomic Protection */}
+              <div className="bg-stone-50 dark:bg-stone-800/60 rounded-2xl p-6 border border-stone-200 dark:border-stone-700">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 flex items-center justify-center font-bold">
+                    <ShieldCheck className="w-5 h-5" />
+                  </div>
+                  <h4 className="text-sm font-bold text-stone-900 dark:text-white">Root Health Preservation</h4>
+                </div>
+                <div className="text-2xl font-black text-amber-600 dark:text-amber-400 my-2">
+                  Zero Leaching
+                </div>
+                <p className="text-xs text-stone-500 dark:text-stone-400">
+                  Eliminates nitrate runoff and anaerobic root rot caused by irrigation immediately prior to rainfall.
+                </p>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* ====================================================== */}
+        {/* STEP 4: LIVE OFFLINE PJTAU INPUT CALCULATORS           */}
+        {/* ====================================================== */}
+        {activeStep === 4 && (
+          <section className="bg-white dark:bg-stone-900 rounded-3xl p-6 md:p-8 border border-stone-200 dark:border-stone-800 shadow-sm animate-fadeIn">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-5 border-b border-stone-200 dark:border-stone-800 mb-6">
+              <div>
+                <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 inline-block mb-2">
+                  Step 4 of 7: Zero-Latency Client Calculators
+                </span>
+                <h2 className="text-xl md:text-2xl font-extrabold text-stone-900 dark:text-white">
+                  {lang === "te"
+                    ? "PJTAU ఎరువులు & విత్తనాల మోతాదు కాలిక్యులేటర్ (100% ఆఫ్‌లైన్)"
+                    : "Live Offline Calculators: PJTAU Fertilizer & Seed Rate"}
+                </h2>
+                <p className="text-xs md:text-sm text-stone-500 dark:text-stone-400 mt-1">
+                  Pure TypeScript mathematical models aligned with PJTAU Package of Practices. Change inputs below to see instant dosage recalculation.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setActiveStep(3)}
+                  className="px-4 py-2 border border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 rounded-xl text-xs md:text-sm font-semibold hover:bg-stone-50 transition"
+                >
+                  ← Back
+                </button>
+                <button
+                  onClick={() => setActiveStep(5)}
+                  className="px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs md:text-sm font-bold shadow-md flex items-center gap-2 transition"
+                >
+                  <span>Next: Krishi Sahayak (Step 5)</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Interactive Inputs Strip */}
+            <div className="bg-stone-50 dark:bg-stone-800/60 rounded-2xl p-5 border border-stone-200 dark:border-stone-700 mb-8">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-stone-500 mb-4">
+                Interactive Farm Parameters (Try altering values during presentation)
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {/* Crop Selection */}
+                <div>
+                  <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1">
+                    Select Crop / పంట ఎంచుకోండి:
+                  </label>
+                  <select
+                    value={calcCrop}
+                    onChange={(e) => setCalcCrop(e.target.value as any)}
+                    className="w-full px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-sm font-semibold focus:ring-2 focus:ring-emerald-500 outline-none"
+                  >
+                    <option value="Paddy">Paddy / వరి (Rice)</option>
+                    <option value="Maize">Maize / మొక్కజొన్న</option>
+                    <option value="Cotton">Cotton / పత్తి</option>
+                  </select>
+                </div>
+
+                {/* Land Area Acres */}
+                <div>
+                  <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1">
+                    Area in Acres / ఎకరాలు:
+                  </label>
+                  <input
+                    type="number"
+                    min="0.5"
+                    max="50"
+                    step="0.5"
+                    value={calcAcres}
+                    onChange={(e) => setCalcAcres(parseFloat(e.target.value) || 1)}
+                    className="w-full px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-sm font-semibold focus:ring-2 focus:ring-emerald-500 outline-none font-mono"
+                  />
+                </div>
+
+                {/* Guntas */}
+                <div>
+                  <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1">
+                    Additional Guntas / గుంటలు:
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="39"
+                    step="5"
+                    value={calcGuntas}
+                    onChange={(e) => setCalcGuntas(parseInt(e.target.value) || 0)}
+                    className="w-full px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-sm font-semibold focus:ring-2 focus:ring-emerald-500 outline-none font-mono"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Dual Results: Fertilizer Bags & Seed Rate */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Fertilizer Dosage Result */}
+              <div className="bg-white dark:bg-stone-800 rounded-2xl p-6 border border-stone-200 dark:border-stone-700 shadow-xs">
+                <div className="flex items-center justify-between mb-4 pb-3 border-b border-stone-200 dark:border-stone-700">
+                  <div className="flex items-center gap-2">
+                    <Calculator className="w-5 h-5 text-emerald-600" />
+                    <h3 className="text-base font-bold text-stone-900 dark:text-white">
+                      Fertilizer Requirement ({totalAreaInAcres.toFixed(2)} Acres)
+                    </h3>
+                  </div>
+                  <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                    PJTAU NPK Rec.
+                  </span>
+                </div>
+
+                {/* 3 Key Bags Badges */}
+                <div className="grid grid-cols-3 gap-3 my-4">
+                  <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-center">
+                    <span className="text-xs font-bold text-amber-800 dark:text-amber-300 block">DAP (18-46-0)</span>
+                    <span className="text-2xl font-black text-stone-900 dark:text-white my-1 block">
+                      {fertOutput.dapBags}
+                    </span>
+                    <span className="text-[10px] text-stone-500">50kg bags (Basal)</span>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-center">
+                    <span className="text-xs font-bold text-blue-800 dark:text-blue-300 block">Urea (46% N)</span>
+                    <span className="text-2xl font-black text-stone-900 dark:text-white my-1 block">
+                      {fertOutput.ureaBags}
+                    </span>
+                    <span className="text-[10px] text-stone-500">50kg bags (Splits)</span>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-center">
+                    <span className="text-xs font-bold text-rose-800 dark:text-rose-300 block">MOP (60% K)</span>
+                    <span className="text-2xl font-black text-stone-900 dark:text-white my-1 block">
+                      {fertOutput.mopBags}
+                    </span>
+                    <span className="text-[10px] text-stone-500">50kg bags (Potash)</span>
+                  </div>
+                </div>
+
+                {/* Split Schedule Table */}
+                <div className="mt-4">
+                  <h5 className="text-xs font-bold text-stone-700 dark:text-stone-300 mb-2">
+                    Application Split Schedule:
+                  </h5>
+                  <div className="space-y-2 text-xs">
+                    {fertOutput.splits.map((s, idx) => (
+                      <div
+                        key={idx}
+                        className="p-2.5 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 flex items-center justify-between"
+                      >
+                        <div>
+                          <span className="font-bold text-stone-800 dark:text-stone-200">
+                            {lang === "te" ? s.stageTe : s.stageEn}
+                          </span>
+                          <p className="text-[10px] text-stone-500">{lang === "te" ? s.notesTe : s.notesEn}</p>
+                        </div>
+                        <span className="font-mono text-emerald-700 dark:text-emerald-400 font-bold text-[11px]">
+                          {s.dapPct > 0 ? `DAP: ${s.dapPct}% ` : ""}
+                          {s.ureaPct > 0 ? `Urea: ${s.ureaPct}% ` : ""}
+                          {s.mopPct > 0 ? `MOP: ${s.mopPct}%` : ""}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Seed Rate & Hill Spacing Result */}
+              <div className="bg-white dark:bg-stone-800 rounded-2xl p-6 border border-stone-200 dark:border-stone-700 shadow-xs">
+                <div className="flex items-center justify-between mb-4 pb-3 border-b border-stone-200 dark:border-stone-700">
+                  <div className="flex items-center gap-2">
+                    <Layers className="w-5 h-5 text-emerald-600" />
+                    <h3 className="text-base font-bold text-stone-900 dark:text-white">
+                      Seed Requirement & Spacing
+                    </h3>
+                  </div>
+                  <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300">
+                    Spacing Model
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 my-4">
+                  <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-center">
+                    <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300 block">Total Seed (kg)</span>
+                    <span className="text-3xl font-black text-stone-900 dark:text-white my-1 block">
+                      {seedOutput.seedRateKgEntered.toFixed(1)} kg
+                    </span>
+                    <span className="text-[10px] text-stone-500">
+                      ({seedOutput.seedRateKgPerAcre.toFixed(1)} kg/acre)
+                    </span>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 text-center">
+                    <span className="text-xs font-bold text-indigo-800 dark:text-indigo-300 block">Standard Packets</span>
+                    <span className="text-3xl font-black text-stone-900 dark:text-white my-1 block">
+                      {seedOutput.packetsNeeded}
+                    </span>
+                    <span className="text-[10px] text-stone-500">Packets recommended</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2 mt-4 text-xs">
+                  <div className="p-2.5 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 flex justify-between">
+                    <span className="text-stone-500">Plant Population per Acre:</span>
+                    <span className="font-mono font-bold text-stone-800 dark:text-stone-200">
+                      {seedOutput.plantsPerAcre.toLocaleString()} hills/acre
+                    </span>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 flex justify-between">
+                    <span className="text-stone-500">Recommended Spacing:</span>
+                    <span className="font-mono font-bold text-stone-800 dark:text-stone-200">
+                      {calcCrop === "Paddy" ? "20 cm × 15 cm (2 seedlings/hill)" : calcCrop === "Cotton" ? "90 cm × 60 cm (Dibbling)" : "60 cm × 20 cm"}
+                    </span>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 flex justify-between">
+                    <span className="text-stone-500">Standard Test Weight:</span>
+                    <span className="font-mono font-bold text-stone-800 dark:text-stone-200">
+                      {calcCrop === "Paddy" ? "22g per 1000 grains (RNR 15048)" : calcCrop === "Cotton" ? "90g per 1000 seeds" : "280g per 1000 seeds"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* ====================================================== */}
+        {/* STEP 5: KRISHI SAHAYAK BUNDLED Q&A                     */}
+        {/* ====================================================== */}
+        {activeStep === 5 && (
+          <section className="bg-white dark:bg-stone-900 rounded-3xl p-6 md:p-8 border border-stone-200 dark:border-stone-800 shadow-sm animate-fadeIn">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-5 border-b border-stone-200 dark:border-stone-800 mb-6">
+              <div>
+                <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300 inline-block mb-2">
+                  Step 5 of 7: Pre-Cached Agronomy Intelligence
+                </span>
+                <h2 className="text-xl md:text-2xl font-extrabold text-stone-900 dark:text-white">
+                  {lang === "te"
+                    ? "కృషి సహాయక్: ముఖ్యమైన రైతు ప్రశ్నలు & సమాధానాలు"
+                    : "Krishi Sahayak Bundled Q&A: Offline Farmer Advisory"}
+                </h2>
+                <p className="text-xs md:text-sm text-stone-500 dark:text-stone-400 mt-1">
+                  4 validated conference agronomy answers in Telugu and English. Click questions to display immediate verified response.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setActiveStep(4)}
+                  className="px-4 py-2 border border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 rounded-xl text-xs md:text-sm font-semibold hover:bg-stone-50 transition"
+                >
+                  ← Back
+                </button>
+                <button
+                  onClick={() => setActiveStep(6)}
+                  className="px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs md:text-sm font-bold shadow-md flex items-center gap-2 transition"
+                >
+                  <span>Next: Leaf Scanner (Step 6)</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Statutory Safety Disclaimer */}
+            <div className="bg-amber-50 dark:bg-amber-950/40 border-l-4 border-amber-500 p-4 rounded-r-2xl mb-6 shadow-xs flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+              <div className="text-xs md:text-sm text-amber-900 dark:text-amber-200 leading-relaxed">
+                <span className="font-bold">⚠️ Statutory Safety Disclaimer:</span> AI advice is indicative agronomic guidance aligned with PJTAU Package of Practices. Always consult your Mandal Agricultural Officer (MAO) or Agricultural Extension Officer (AEO) before spraying chemicals.
               </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Moisture Gauge & Slider Controller */}
-              <div className="p-5 rounded-2xl bg-stone-50 dark:bg-stone-800/60 border border-stone-200/80 dark:border-stone-700/80 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-semibold text-stone-500">
-                      Real-Time Soil Moisture Gauge
-                    </span>
-                    <span
-                      className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                        soilMoisture < 20
-                          ? "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300"
-                          : soilMoisture > 32
-                          ? "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300"
-                          : "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
+              {/* Question Selection List */}
+              <div className="space-y-3">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-stone-500 mb-2">
+                  Select Question to Ask:
+                </h4>
+                {BUNDLED_QA.map((q) => {
+                  const isSelected = q.id === selectedQaId;
+                  return (
+                    <button
+                      key={q.id}
+                      onClick={() => setSelectedQaId(q.id)}
+                      className={`w-full text-left p-4 rounded-2xl border transition-all ${
+                        isSelected
+                          ? "bg-emerald-50 dark:bg-emerald-950/60 border-emerald-500 shadow-sm"
+                          : "bg-stone-50 dark:bg-stone-800/60 border-stone-200 dark:border-stone-700 hover:bg-stone-100"
                       }`}
                     >
-                      {soilMoisture < 20 ? "DRY (నీరు అవసరం)" : soilMoisture > 32 ? "WET (సంతృప్త)" : "OPTIMAL (అనుకూలం)"}
-                    </span>
-                  </div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300">
+                          {q.badge}
+                        </span>
+                        {isSelected && <CheckCircle2 className="w-4 h-4 text-emerald-600" />}
+                      </div>
+                      <p className="text-xs md:text-sm font-bold text-stone-900 dark:text-white leading-snug">
+                        {lang === "te" ? q.qTe : q.qEn}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
 
-                  <div className="flex items-baseline gap-2 my-3">
-                    <span className="text-4xl font-extrabold text-stone-900 dark:text-white">
-                      {soilMoisture.toFixed(1)}%
-                    </span>
-                    <span className="text-xs text-stone-400">Volumetric Water Content (VWC)</span>
-                  </div>
+              {/* Verified Agronomic Response Deck */}
+              <div className="lg:col-span-2 bg-stone-50 dark:bg-stone-800/60 rounded-3xl p-6 md:p-8 border border-stone-200 dark:border-stone-700 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between pb-4 border-b border-stone-200 dark:border-stone-700 mb-4">
+                    <div className="flex items-center gap-2">
+                      <span className="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs">
+                        AI
+                      </span>
+                      <div>
+                        <h4 className="text-sm font-bold text-stone-900 dark:text-white">
+                          Krishi Sahayak Agronomic Response
+                        </h4>
+                        <span className="text-[10px] text-stone-500">Verified PJTAU Practice • Zero Network Call</span>
+                      </div>
+                    </div>
 
-                  {/* Visual Progress Bar */}
-                  <div className="w-full bg-stone-200 dark:bg-stone-700 h-3 rounded-full overflow-hidden flex">
-                    <div
-                      style={{ width: `${Math.min(100, soilMoisture * 2)}%` }}
-                      className={`h-full transition-all duration-300 ${
-                        soilMoisture < 20
-                          ? "bg-red-500"
-                          : soilMoisture > 32
-                          ? "bg-blue-500"
-                          : "bg-emerald-500"
+                    {/* Speech Synthesis Audio Button */}
+                    <button
+                      onClick={() =>
+                        handleSpeak(
+                          lang === "te" ? activeQa.aTe : activeQa.aEn,
+                          lang === "te" ? "te-IN" : "en-IN"
+                        )
+                      }
+                      className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition flex items-center gap-1.5 ${
+                        isSpeaking
+                          ? "bg-red-600 text-white border-red-600 animate-pulse"
+                          : "bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300 border-stone-300 hover:bg-stone-100"
                       }`}
-                    />
-                  </div>
-                  <div className="flex justify-between text-[10px] text-stone-400 mt-1">
-                    <span>0% (Parched)</span>
-                    <span className="font-semibold text-emerald-600">Threshold: 20%</span>
-                    <span>50% (Saturated)</span>
+                      title="Read answer aloud using local speech synthesis"
+                    >
+                      <Volume2 className="w-3.5 h-3.5" />
+                      <span>{isSpeaking ? "Stop Voice" : lang === "te" ? "వినండి (Telugu Voice)" : "Read Aloud"}</span>
+                    </button>
                   </div>
 
-                  {/* Interactive Slider */}
-                  <div className="mt-5 pt-4 border-t border-stone-200/60 dark:border-stone-700/60">
-                    <label className="text-xs font-semibold text-stone-700 dark:text-stone-300 flex items-center justify-between mb-1.5">
-                      <span className="flex items-center gap-1.5">
-                        <Sliders className="w-3.5 h-3.5 text-indigo-600" />
-                        Simulate Soil Moisture Level:
-                      </span>
-                      <span className="font-mono text-indigo-600 dark:text-indigo-400 font-bold">
-                        {soilMoisture.toFixed(1)}%
-                      </span>
-                    </label>
-                    <input
-                      type="range"
-                      min="10"
-                      max="45"
-                      step="0.5"
-                      value={soilMoisture}
-                      onChange={(e) => setSoilMoisture(parseFloat(e.target.value))}
-                      className="w-full h-2 bg-stone-200 dark:bg-stone-700 rounded-lg appearance-none cursor-pointer accent-indigo-600"
-                    />
-                    <p className="text-[11px] text-stone-400 mt-1">
-                      Drag below 20% to watch the pump trigger automatically!
+                  {/* Question Asked */}
+                  <div className="mb-4">
+                    <span className="text-xs font-bold text-stone-500 uppercase tracking-wider block mb-1">
+                      Farmer Inquiry:
+                    </span>
+                    <p className="text-base font-extrabold text-stone-900 dark:text-white">
+                      "{lang === "te" ? activeQa.qTe : activeQa.qEn}"
+                    </p>
+                  </div>
+
+                  {/* Verified Answer Body */}
+                  <div className="bg-white dark:bg-stone-900 rounded-2xl p-5 border border-stone-200 dark:border-stone-700 shadow-xs">
+                    <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider block mb-2">
+                      Agronomic Solution:
+                    </span>
+                    <p className="text-sm md:text-base text-stone-800 dark:text-stone-200 leading-relaxed whitespace-pre-line">
+                      {lang === "te" ? activeQa.aTe : activeQa.aEn}
                     </p>
                   </div>
                 </div>
 
-                {/* 5-Minute Countdown Safety Box */}
-                <div className="mt-4 p-3 rounded-xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 text-xs">
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-stone-700 dark:text-stone-300">
-                      Pump Run Timer:
-                    </span>
-                    <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
-                      {Math.floor(pumpSecondsLeft / 60)}m {pumpSecondsLeft % 60}s remaining
-                    </span>
-                  </div>
-                  <p className="text-[10px] text-stone-400 mt-0.5">
-                    Hardware protection: Automatic relay cut-off after 5 mins to prevent borewell dry running.
-                  </p>
-                </div>
-              </div>
-
-              {/* Live Telemetry History Chart (2 columns) */}
-              <div className="lg:col-span-2 p-5 rounded-2xl bg-stone-50 dark:bg-stone-800/60 border border-stone-200/80 dark:border-stone-700/80 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <div>
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-stone-500">
-                        24-Hour Soil Moisture Trend Line
-                      </h4>
-                      <p className="text-xs text-stone-600 dark:text-stone-400">
-                        ESP32 Analog Pin 34 • Capacitive Reading Stream
-                      </p>
-                    </div>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
-                      Live Stream Active
-                    </span>
-                  </div>
-
-                  <div className="h-44 w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={moistureHistory} margin={{ top: 5, right: 10, left: -25, bottom: 0 }}>
-                        <defs>
-                          <linearGradient id="moistGrad" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
-                            <stop offset="95%" stopColor="#10b981" stopOpacity={0.0} />
-                          </linearGradient>
-                        </defs>
-                        <XAxis dataKey="time" stroke="#9ca3af" fontSize={11} />
-                        <YAxis domain={[10, 30]} stroke="#9ca3af" fontSize={11} />
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: "#1f2937",
-                            borderColor: "#374151",
-                            borderRadius: "0.75rem",
-                            color: "#fff",
-                            fontSize: "11px",
-                          }}
-                        />
-                        <Area
-                          type="monotone"
-                          dataKey="moisture"
-                          stroke="#10b981"
-                          strokeWidth={2.5}
-                          fill="url(#moistGrad)"
-                        />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-
-                <div className="pt-3 border-t border-stone-200/60 dark:border-stone-700/60 flex items-center justify-between text-xs text-stone-500">
-                  <span>ESP32 Wi-Fi Signal: -62 dBm</span>
-                  <span>Battery: 88% (Solar Charging)</span>
-                  <span>Firmware: v2.4.1 ADSAUF</span>
+                <div className="mt-6 pt-4 border-t border-stone-200 dark:border-stone-700 flex flex-wrap items-center justify-between text-xs text-stone-500">
+                  <span>Source: PJTAU Vyavasaya Panchangam (2025-26)</span>
+                  <span className="font-mono text-emerald-600 font-semibold">Latency: 0 ms (Pre-cached)</span>
                 </div>
               </div>
             </div>
           </section>
         )}
 
-        {/* ======================================================== */}
-        {/* STAGE 4: AI Crop Pathology Diagnostic (AI Doctor) */}
-        {/* ======================================================== */}
-        {(viewAll || activeStage === 4) && (
-          <section className="bg-white dark:bg-stone-900 rounded-3xl p-6 border border-stone-200 dark:border-stone-800 shadow-sm transition hover:shadow-md">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-stone-100 dark:border-stone-800">
-              <div className="flex items-center gap-3">
-                <span className="w-8 h-8 rounded-xl bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300 font-bold flex items-center justify-center text-sm">
-                  4
+        {/* ====================================================== */}
+        {/* STEP 6: SAMPLE LEAF DISEASE SCANNER                    */}
+        {/* ====================================================== */}
+        {activeStep === 6 && (
+          <section className="bg-white dark:bg-stone-900 rounded-3xl p-6 md:p-8 border border-stone-200 dark:border-stone-800 shadow-sm animate-fadeIn">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-5 border-b border-stone-200 dark:border-stone-800 mb-6">
+              <div>
+                <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300 border border-purple-300 inline-block mb-2">
+                  Step 6 of 7: Computer Vision Diagnostics
                 </span>
-                <div>
-                  <h2 className="text-base md:text-lg font-bold text-stone-900 dark:text-white">
-                    {lang === "te" ? "స్టేజ్ 4: AI పంట వైద్యుడు & వ్యాధి నిర్ధారణ" : "Stage 4: AI Crop Pathology Diagnostic (Computer Vision)"}
-                  </h2>
-                  <p className="text-xs text-stone-500 dark:text-stone-400">
-                    Google Gemini 1.5/Flash Vision • PJTAU Scientific Remedies • Telugu Audio Synthesis
-                  </p>
-                </div>
+                <h2 className="text-xl md:text-2xl font-extrabold text-stone-900 dark:text-white">
+                  {lang === "te"
+                    ? "నమూనా ఆకు తెగుళ్ల స్కానర్ (3 రికార్డ్ చేసిన ఫలితాలు)"
+                    : "Sample Leaf Disease Scanner: 3 Recorded Leaves"}
+                </h2>
+                <p className="text-xs md:text-sm text-stone-500 dark:text-stone-400 mt-1">
+                  Instant diagnostic cards with custom inline SVG leaf vectors, symptoms, and PJTAU dosage recommendations.
+                </p>
               </div>
 
-              {/* Sample Disease Switcher */}
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setSelectedDisease("paddy_blast")}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition ${
-                    selectedDisease === "paddy_blast"
-                      ? "bg-purple-600 text-white shadow-xs"
-                      : "bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300"
-                  }`}
+                  onClick={() => setActiveStep(5)}
+                  className="px-4 py-2 border border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 rounded-xl text-xs md:text-sm font-semibold hover:bg-stone-50 transition"
                 >
-                  Paddy Blast (వరి అగ్గి తెగులు)
+                  ← Back
                 </button>
                 <button
-                  onClick={() => setSelectedDisease("cotton_curl")}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition ${
-                    selectedDisease === "cotton_curl"
-                      ? "bg-purple-600 text-white shadow-xs"
-                      : "bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300"
-                  }`}
+                  onClick={() => setActiveStep(7)}
+                  className="px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs md:text-sm font-bold shadow-md flex items-center gap-2 transition"
                 >
-                  Cotton Leaf Curl (పత్తి ఆకుముడత)
+                  <span>Next: Mandi Prices (Step 7)</span>
+                  <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
             </div>
 
-            {/* Diagnostic Result Card */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Leaf Visual & Diagnostic Match */}
-              <div className="p-5 rounded-2xl bg-stone-50 dark:bg-stone-800/60 border border-stone-200/80 dark:border-stone-700/80 flex flex-col justify-between">
-                <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400 block mb-2">
-                    Scanned Leaf Sample
-                  </span>
-                  <div className="w-full h-36 rounded-xl bg-gradient-to-br from-green-800 to-stone-900 flex items-center justify-center text-4xl shadow-inner relative overflow-hidden">
-                    <span>{selectedDisease === "paddy_blast" ? "🌾" : "🌱"}</span>
-                    <div className="absolute inset-0 bg-stone-900/30 flex items-end p-2.5">
-                      <span className="px-2 py-0.5 bg-black/70 text-white rounded text-[10px] font-mono">
-                        Camera Scan #0492
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="mt-3">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-semibold text-stone-700 dark:text-stone-300">
-                        AI Confidence Score:
-                      </span>
-                      <span className="font-bold text-emerald-600">94.8% Match</span>
-                    </div>
-                    <div className="w-full bg-stone-200 dark:bg-stone-700 h-2 rounded-full overflow-hidden mt-1">
-                      <div className="bg-emerald-500 h-full w-[94.8%]" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Audio Button */}
-                <button
-                  onClick={() =>
-                    handleTeluguAudio(
-                      selectedDisease === "paddy_blast"
-                        ? "రైతు సోదరులారా, మీ వరి పంటలో అగ్గి తెగులు లక్షణాలు కనిపించాయి. ట్రైసైక్లాజోల్ డెబ్భై అయిదు శాతం మందును లీటరు నీటికి సున్నా బిందువు ఆరు గ్రాములు కలిపి పిచికారీ చేయండి."
-                        : "రైతు సోదరులారా, పత్తిలో ఆకుముడత వైరస్ గమనించబడింది. వేపనూనె లేదా ఇమిడాక్లోప్రిడ్ తో పిచికారీ చేయండి."
-                    )
-                  }
-                  className="mt-4 w-full py-2.5 px-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-sm transition active:scale-95"
-                >
-                  <Volume2 className="w-4 h-4" />
-                  <span>{isPlayingAudio ? "Playing Telugu Advice..." : "తెలుగులో వినండి (Telugu Audio)"}</span>
-                </button>
-              </div>
-
-              {/* Diagnosis Details & Dual-Treatment Protocols */}
-              <div className="md:col-span-2 space-y-4">
-                <div>
-                  <span className="text-xs font-semibold text-stone-500">Identified Pathogen:</span>
-                  <h3 className="text-lg font-bold text-stone-900 dark:text-white">
-                    {selectedDisease === "paddy_blast"
-                      ? "Paddy Leaf Blast (వరి అగ్గి తెగులు / Pyricularia oryzae)"
-                      : "Cotton Leaf Curl Virus (పత్తి ఆకుముడత తెగులు)"}
-                  </h3>
-                  <p className="text-xs text-stone-600 dark:text-stone-400 mt-1">
-                    {selectedDisease === "paddy_blast"
-                      ? "Spindle-shaped elliptical lesions with greyish center and brownish margins observed on leaves. Panicle blast risk high during humid morning conditions."
-                      : "Upward leaf curling, thickening of veins, and enation under leaf blades caused by whitefly vector (Bemisia tabaci)."}
-                  </p>
-                </div>
-
-                {/* Treatment Comparison Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                  {/* Organic Treatment */}
-                  <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800">
-                    <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5 mb-1.5">
-                      🌱 Organic / Eco-Friendly Protocol
-                    </span>
-                    <ul className="text-xs text-stone-700 dark:text-stone-300 space-y-1 list-disc pl-4">
-                      <li>Spray 5% Neem Seed Kernel Extract (NSKE).</li>
-                      <li>10,000 ppm Cold-pressed Neem Oil @ 3 ml per Litre.</li>
-                      <li>Avoid excess Urea split application during humid weeks.</li>
-                    </ul>
-                  </div>
-
-                  {/* Chemical Treatment */}
-                  <div className="p-4 rounded-xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800">
-                    <span className="text-xs font-bold text-purple-800 dark:text-purple-300 flex items-center gap-1.5 mb-1.5">
-                      🧪 PJTAU Recommended Chemical Dosage
-                    </span>
-                    <ul className="text-xs text-stone-700 dark:text-stone-300 space-y-1 list-disc pl-4">
-                      <li><strong>Tricyclazole 75% WP</strong> @ 0.6 g / Litre of water.</li>
-                      <li>Alternative: <strong>Isoprothiolane 40% EC</strong> @ 1.5 ml / Litre.</li>
-                      <li>Spray during evening hours (4:00 PM – 6:00 PM).</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* ======================================================== */}
-        {/* STAGE 5: Live Telangana APMC Mandi Rates & ₹500 Bonus */}
-        {/* ======================================================== */}
-        {(viewAll || activeStage === 5) && (
-          <section className="bg-white dark:bg-stone-900 rounded-3xl p-6 border border-stone-200 dark:border-stone-800 shadow-sm transition hover:shadow-md">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-stone-100 dark:border-stone-800">
-              <div className="flex items-center gap-3">
-                <span className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 font-bold flex items-center justify-center text-sm">
-                  5
-                </span>
-                <div>
-                  <h2 className="text-base md:text-lg font-bold text-stone-900 dark:text-white">
-                    {lang === "te" ? "స్టేజ్ 5: మార్కెట్ ధరలు & ₹500 రైతు బోనస్" : "Stage 5: Live APMC Mandi Rates, MSP & Telangana ₹500 Rythu Bonus"}
-                  </h2>
-                  <p className="text-xs text-stone-500 dark:text-stone-400">
-                    Jagtial & Karimnagar APMC Hub • Central MSP ₹2,320 + Telangana State Bonus ₹500
-                  </p>
-                </div>
-              </div>
-
-              {/* Verified Badge */}
-              <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300/60 flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                Agmarknet Verified Feed
+            {/* Permanent Label Badge */}
+            <div className="bg-stone-100 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2.5 mb-6 flex items-center justify-between">
+              <span className="text-xs md:text-sm font-bold text-stone-800 dark:text-stone-200 flex items-center gap-2">
+                <Info className="w-4 h-4 text-emerald-600" />
+                Recorded sample result, not a live AI diagnosis / రికార్డ్ చేయబడిన నమూనా ఫలితం, ప్రత్యక్ష AI నిర్ధారణ కాదు
+              </span>
+              <span className="text-[11px] font-mono font-bold bg-white dark:bg-stone-900 px-2.5 py-1 rounded-md border border-stone-200 dark:border-stone-700">
+                100% Vector Rendered
               </span>
             </div>
 
-            {/* Mandi Cards & Net Payout Breakdown */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Paddy Grade-A Rate Highlight */}
-              <div className="p-5 rounded-2xl bg-gradient-to-br from-emerald-50 to-stone-50 dark:from-emerald-950/40 dark:to-stone-900 border border-emerald-200/80 dark:border-emerald-800/80 flex flex-col justify-between">
-                <div>
-                  <span className="text-[11px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
-                    Jagtial APMC Yard (జగిత్యాల మార్కెట్)
-                  </span>
-                  <h3 className="text-lg font-bold text-stone-900 dark:text-white">
-                    Paddy Grade-A (వరి గ్రేడ్-ఎ)
-                  </h3>
-
-                  <div className="mt-4 space-y-2 text-xs">
-                    <div className="flex justify-between py-1 border-b border-stone-200/50 dark:border-stone-800">
-                      <span className="text-stone-500">Central Government MSP:</span>
-                      <span className="font-semibold text-stone-900 dark:text-white">₹{centralMsp} / Q</span>
-                    </div>
-                    <div className="flex justify-between py-1 border-b border-stone-200/50 dark:border-stone-800 text-emerald-700 dark:text-emerald-400 font-semibold">
-                      <span>Telangana Fine Rice Bonus:</span>
-                      <span>+₹{tsBonus} / Q</span>
-                    </div>
-                    <div className="flex justify-between pt-1 font-bold text-sm text-stone-900 dark:text-white">
-                      <span>Net Farmer Price:</span>
-                      <span className="text-emerald-600 text-base">₹{totalRatePerQ} / Quintal</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-4 pt-3 border-t border-emerald-200/60 dark:border-emerald-800/60 text-[11px] text-stone-500">
-                  Daily Arrivals: 1,420 Quintals • Demand: High
-                </div>
-              </div>
-
-              {/* Mallesham Goud Expected Farm Income Calculator (2 columns) */}
-              <div className="md:col-span-2 p-5 rounded-2xl bg-stone-50 dark:bg-stone-800/60 border border-stone-200/80 dark:border-stone-700/80 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="text-sm font-bold text-stone-900 dark:text-white flex items-center gap-2">
-                      <Calculator className="w-4 h-4 text-emerald-600" />
-                      Mallesham Goud Revenue Projection (4.5 Acres)
-                    </h4>
-                    <span className="text-xs text-stone-400">Harvest: Nov 2026</span>
-                  </div>
-
-                  {/* Yield slider */}
-                  <div className="mt-3">
-                    <div className="flex justify-between text-xs mb-1">
-                      <span className="text-stone-600 dark:text-stone-400">Estimated Total Harvest:</span>
-                      <span className="font-bold text-stone-900 dark:text-white font-mono">
-                        {yieldQuintals} Quintals (~24.4 Q/acre)
-                      </span>
-                    </div>
-                    <input
-                      type="range"
-                      min="60"
-                      max="160"
-                      step="5"
-                      value={yieldQuintals}
-                      onChange={(e) => setYieldQuintals(parseInt(e.target.value, 10))}
-                      className="w-full h-2 bg-stone-200 dark:bg-stone-700 rounded-lg appearance-none cursor-pointer accent-emerald-600"
-                    />
-                  </div>
-
-                  {/* Revenue Outcome Banner */}
-                  <div className="grid grid-cols-2 gap-4 mt-5">
-                    <div className="p-3.5 rounded-xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700">
-                      <span className="text-[11px] text-stone-400 block mb-1">Total Gross Realization</span>
-                      <span className="text-2xl font-extrabold text-stone-900 dark:text-white">
-                        ₹{totalPayout.toLocaleString()}
-                      </span>
-                      <span className="text-[10px] text-stone-400 block mt-0.5">
-                        {yieldQuintals} Q × ₹2,820/Q
-                      </span>
-                    </div>
-
-                    <div className="p-3.5 rounded-xl bg-emerald-100/60 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800">
-                      <span className="text-[11px] text-emerald-800 dark:text-emerald-300 block mb-1 font-semibold">
-                        Telangana ₹500 Bonus Extra
-                      </span>
-                      <span className="text-2xl font-extrabold text-emerald-700 dark:text-emerald-400">
-                        +₹{bonusPayout.toLocaleString()}
-                      </span>
-                      <span className="text-[10px] text-emerald-600 dark:text-emerald-500 block mt-0.5 font-medium">
-                        Pure profit addition to farmer pocket
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-4 pt-3 border-t border-stone-200/60 dark:border-stone-700/60 text-[11px] text-stone-400 flex items-center justify-between">
-                  <span>Procurement Center: Mallapur IKP Center (2.5 km away)</span>
-                  <span className="text-emerald-600 font-semibold">Direct DBT to Bank Account</span>
-                </div>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* ======================================================== */}
-        {/* STAGE 6: PJTAU Fertilizer & Seed Calculator */}
-        {/* ======================================================== */}
-        {(viewAll || activeStage === 6) && (
-          <section className="bg-white dark:bg-stone-900 rounded-3xl p-6 border border-stone-200 dark:border-stone-800 shadow-sm transition hover:shadow-md">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-stone-100 dark:border-stone-800">
-              <div className="flex items-center gap-3">
-                <span className="w-8 h-8 rounded-xl bg-teal-100 text-teal-800 dark:bg-teal-950 dark:text-teal-300 font-bold flex items-center justify-center text-sm">
-                  6
-                </span>
-                <div>
-                  <h2 className="text-base md:text-lg font-bold text-stone-900 dark:text-white">
-                    {lang === "te" ? "స్టేజ్ 6: PJTAU సిఫార్సు చేసిన ఎరువుల లెక్క" : "Stage 6: PJTAU Package of Practices Fertilizer Dosage"}
-                  </h2>
-                  <p className="text-xs text-stone-500 dark:text-stone-400">
-                    Scientific N-P-K recommendation calibrated for Mallesham Goud&apos;s 4.5 Acres of Paddy
-                  </p>
-                </div>
-              </div>
-
-              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-teal-50 text-teal-800 dark:bg-teal-950 dark:text-teal-300 border border-teal-200/80">
-                120:60:40 kg/ha Standard Ratio
-              </span>
-            </div>
-
-            {/* Bag Requirements Grid */}
+            {/* 3 Sample Buttons */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-              <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-800/60 border border-stone-200/60 dark:border-stone-700/60">
-                <span className="text-xs font-semibold text-stone-500 block mb-1">
-                  Urea Requirement (యూరియా)
+              {SAMPLE_LEAF_DISEASES.map((d) => {
+                const isSelected = d.id === selectedDiseaseId;
+                return (
+                  <button
+                    key={d.id}
+                    onClick={() => setSelectedDiseaseId(d.id)}
+                    className={`p-4 rounded-2xl border text-left transition-all ${
+                      isSelected
+                        ? "bg-emerald-50 dark:bg-emerald-950/60 border-emerald-600 shadow-md ring-2 ring-emerald-500/20"
+                        : "bg-stone-50 dark:bg-stone-800/60 border-stone-200 dark:border-stone-700 hover:bg-stone-100"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">
+                        {lang === "te" ? d.cropTe : d.cropEn}
+                      </span>
+                      {isSelected && <Check className="w-4 h-4 text-emerald-600" />}
+                    </div>
+                    <h4 className="text-sm font-bold text-stone-900 dark:text-white">
+                      {lang === "te" ? d.diseaseTe : d.diseaseEn}
+                    </h4>
+                    <span className="text-[10px] text-stone-500 font-mono mt-1 block">
+                      Confidence: {d.confidence}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Selected Disease Details Dossier */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 bg-stone-50 dark:bg-stone-800/60 rounded-3xl p-6 border border-stone-200 dark:border-stone-700">
+              {/* Inline SVG Leaf Graphic */}
+              <div className="bg-white dark:bg-stone-900 rounded-2xl p-6 border border-stone-200 dark:border-stone-700 flex flex-col items-center justify-center">
+                <span className="text-xs font-bold text-stone-500 uppercase tracking-wider mb-4">
+                  Visual Symptom Vector
                 </span>
-                <span className="text-2xl font-extrabold text-stone-900 dark:text-white">
-                  {fert.ureaBags} Bags
-                </span>
-                <span className="text-[11px] text-stone-400 block mt-0.5">
-                  50kg bags (~{fert.nReqKg.toFixed(1)} kg pure Nitrogen)
-                </span>
+
+                {/* Paddy Blast SVG */}
+                {activeDisease.svgType === "blast" && (
+                  <svg className="w-44 h-44" viewBox="0 0 200 200" fill="none">
+                    {/* Leaf Blade */}
+                    <path
+                      d="M100 20 C140 60 160 120 100 180 C40 120 60 60 100 20 Z"
+                      fill="#4ade80"
+                      stroke="#16a34a"
+                      strokeWidth="3"
+                    />
+                    <path d="M100 20 L100 180" stroke="#15803d" strokeWidth="2" strokeDasharray="3 3" />
+                    {/* Spindle lesions with grey centers and brown borders */}
+                    <ellipse cx="100" cy="70" rx="14" ry="32" fill="#78350f" transform="rotate(-15 100 70)" />
+                    <ellipse cx="100" cy="70" rx="9" ry="24" fill="#cbd5e1" transform="rotate(-15 100 70)" />
+                    <ellipse cx="115" cy="120" rx="10" ry="22" fill="#78350f" transform="rotate(20 115 120)" />
+                    <ellipse cx="115" cy="120" rx="6" ry="16" fill="#cbd5e1" transform="rotate(20 115 120)" />
+                    <ellipse cx="85" cy="135" rx="8" ry="18" fill="#78350f" transform="rotate(-10 85 135)" />
+                    <ellipse cx="85" cy="135" rx="5" ry="12" fill="#cbd5e1" transform="rotate(-10 85 135)" />
+                  </svg>
+                )}
+
+                {/* Cotton Bollworm SVG */}
+                {activeDisease.svgType === "bollworm" && (
+                  <svg className="w-44 h-44" viewBox="0 0 200 200" fill="none">
+                    {/* Cotton Boll Base */}
+                    <circle cx="100" cy="110" r="45" fill="#f8fafc" stroke="#475569" strokeWidth="3" />
+                    {/* Calyx Leaves */}
+                    <path d="M100 50 L115 75 L100 85 L85 75 Z" fill="#22c55e" stroke="#15803d" strokeWidth="2" />
+                    <path d="M50 110 L75 125 L85 110 L75 95 Z" fill="#22c55e" stroke="#15803d" strokeWidth="2" />
+                    <path d="M150 110 L125 125 L115 110 L125 95 Z" fill="#22c55e" stroke="#15803d" strokeWidth="2" />
+                    {/* Entry Hole & Stained Area */}
+                    <circle cx="110" cy="115" r="14" fill="#92400e" opacity="0.3" />
+                    <circle cx="110" cy="115" r="6" fill="#1e293b" />
+                    {/* Small Pinkish Larva Graphic */}
+                    <path
+                      d="M90 135 Q105 145 120 135"
+                      stroke="#f43f5e"
+                      strokeWidth="5"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                )}
+
+                {/* Chilli Leaf Curl SVG */}
+                {activeDisease.svgType === "leafcurl" && (
+                  <svg className="w-44 h-44" viewBox="0 0 200 200" fill="none">
+                    {/* Curled, Puckered Leaf Blade */}
+                    <path
+                      d="M100 30 C130 50 145 90 120 160 C95 180 80 140 85 90 C85 60 90 40 100 30 Z"
+                      fill="#86efac"
+                      stroke="#15803d"
+                      strokeWidth="3"
+                    />
+                    {/* Thickened Crinkled Veins */}
+                    <path d="M100 30 Q105 100 105 170" stroke="#166534" strokeWidth="3" />
+                    <path d="M102 70 Q125 65 130 80" stroke="#166534" strokeWidth="2.5" />
+                    <path d="M103 105 Q125 105 120 125" stroke="#166534" strokeWidth="2.5" />
+                    <path d="M100 85 Q85 80 86 100" stroke="#166534" strokeWidth="2.5" />
+                    {/* Puckering Crinkles */}
+                    <circle cx="115" cy="85" r="4" fill="#15803d" opacity="0.6" />
+                    <circle cx="110" cy="120" r="5" fill="#15803d" opacity="0.6" />
+                    <circle cx="95" cy="130" r="4" fill="#15803d" opacity="0.6" />
+                  </svg>
+                )}
+
+                <div className="mt-4 text-center">
+                  <span className="text-xs font-mono font-bold text-stone-700 dark:text-stone-300">
+                    Confidence: {activeDisease.confidence}
+                  </span>
+                  <p className="text-[10px] text-stone-500 font-italic mt-0.5">{activeDisease.pathogen}</p>
+                </div>
               </div>
 
-              <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-800/60 border border-stone-200/60 dark:border-stone-700/60">
-                <span className="text-xs font-semibold text-stone-500 block mb-1">
-                  DAP Requirement (డి.ఎ.పి)
+              {/* Symptoms & PJTAU Prescription */}
+              <div className="lg:col-span-2 space-y-4">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300">
+                      {activeDisease.severity}
+                    </span>
+                  </div>
+                  <h3 className="text-lg font-bold text-stone-900 dark:text-white">
+                    {lang === "te" ? activeDisease.diseaseTe : activeDisease.diseaseEn}
+                  </h3>
+                  <p className="text-xs md:text-sm text-stone-600 dark:text-stone-300 mt-2 leading-relaxed">
+                    {lang === "te" ? activeDisease.symptomsTe : activeDisease.symptomsEn}
+                  </p>
+                </div>
+
+                {/* Treatment Recommendations */}
+                <div className="bg-white dark:bg-stone-900 rounded-2xl p-4 border border-stone-200 dark:border-stone-700">
+                  <h5 className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider mb-2">
+                    PJTAU Package of Practices Recommended Treatment:
+                  </h5>
+                  <ul className="space-y-2 text-xs md:text-sm">
+                    {(lang === "te" ? activeDisease.recommendationsTe : activeDisease.recommendationsEn).map(
+                      (rec, i) => (
+                        <li key={i} className="flex items-start gap-2 text-stone-800 dark:text-stone-200">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                          <span>{rec}</span>
+                        </li>
+                      )
+                    )}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* ====================================================== */}
+        {/* STEP 7: SAMPLE MANDI PRICES & TELANGANA BONUS          */}
+        {/* ====================================================== */}
+        {activeStep === 7 && (
+          <section className="bg-white dark:bg-stone-900 rounded-3xl p-6 md:p-8 border border-stone-200 dark:border-stone-800 shadow-sm animate-fadeIn">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-5 border-b border-stone-200 dark:border-stone-800 mb-6">
+              <div>
+                <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 inline-block mb-2">
+                  Step 7 of 7: Market Economics & DBT Bonus
                 </span>
-                <span className="text-2xl font-extrabold text-stone-900 dark:text-white">
-                  {fert.dapBags} Bags
-                </span>
-                <span className="text-[11px] text-stone-400 block mt-0.5">
-                  50kg bags (~{fert.pReqKg.toFixed(1)} kg pure P2O5)
-                </span>
+                <h2 className="text-xl md:text-2xl font-extrabold text-stone-900 dark:text-white">
+                  {lang === "te"
+                    ? "మార్కెట్ ధరలు & తెలంగాణ ₹500 సన్నవడ్ల బోనస్"
+                    : "Sample Mandi Prices: Telangana MSP + ₹500/Qtl State Bonus"}
+                </h2>
+                <p className="text-xs md:text-sm text-stone-500 dark:text-stone-400 mt-1">
+                  Recorded October 2026 APMC dataset demonstrating direct farmer realization (₹2,820/quintal) and WhatsApp sharing.
+                </p>
               </div>
 
-              <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-800/60 border border-stone-200/60 dark:border-stone-700/60">
-                <span className="text-xs font-semibold text-stone-500 block mb-1">
-                  MOP Potash (పొటాష్)
-                </span>
-                <span className="text-2xl font-extrabold text-stone-900 dark:text-white">
-                  {fert.mopBags} Bags
-                </span>
-                <span className="text-[11px] text-stone-400 block mt-0.5">
-                  50kg bags (~{fert.kReqKg.toFixed(1)} kg pure K2O)
-                </span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setActiveStep(6)}
+                  className="px-4 py-2 border border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 rounded-xl text-xs md:text-sm font-semibold hover:bg-stone-50 transition"
+                >
+                  ← Back
+                </button>
+                <button
+                  onClick={handleReset}
+                  className="px-4 py-2 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 text-stone-700 dark:text-stone-300 rounded-xl text-xs md:text-sm font-bold transition flex items-center gap-1.5"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Restart Presentation</span>
+                </button>
               </div>
             </div>
 
-            {/* Split Schedule Table */}
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs text-left">
-                <thead className="bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 uppercase text-[10px] tracking-wider font-semibold">
+            {/* Permanent Sample Label */}
+            <div className="bg-stone-100 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2.5 mb-6 flex items-center justify-between">
+              <span className="text-xs md:text-sm font-bold text-stone-800 dark:text-stone-200 flex items-center gap-2">
+                <Info className="w-4 h-4 text-emerald-600" />
+                Sample prices — Conference recorded snapshot (October 2026) / నమూనా ధరలు — కాన్ఫరెన్స్ కోసం రికార్డ్ చేసిన ధరలు
+              </span>
+              <span className="text-[11px] font-mono font-bold bg-white dark:bg-stone-900 px-2 py-0.5 rounded border border-stone-200 dark:border-stone-700">
+                APMC Dataset
+              </span>
+            </div>
+
+            {/* Mandi Prices Table */}
+            <div className="overflow-x-auto rounded-2xl border border-stone-200 dark:border-stone-800 mb-8">
+              <table className="w-full text-left text-xs md:text-sm">
+                <thead className="bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 font-bold border-b border-stone-200 dark:border-stone-700">
                   <tr>
-                    <th className="py-2.5 px-3 rounded-l-lg">Growth Stage</th>
-                    <th className="py-2.5 px-3">Urea Share</th>
-                    <th className="py-2.5 px-3">DAP Share</th>
-                    <th className="py-2.5 px-3">MOP Share</th>
-                    <th className="py-2.5 px-3 rounded-r-lg">Application Method</th>
+                    <th className="py-3 px-4">Market Yard</th>
+                    <th className="py-3 px-4">Commodity & Variety</th>
+                    <th className="py-3 px-4">Central MSP</th>
+                    <th className="py-3 px-4">TS State Bonus</th>
+                    <th className="py-3 px-4 text-emerald-700 dark:text-emerald-400">Total Farmer Rate</th>
+                    <th className="py-3 px-4">Market Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-stone-100 dark:divide-stone-800">
-                  {fert.splits.map((s, i) => (
-                    <tr key={i} className="hover:bg-stone-50/50 dark:hover:bg-stone-800/40">
-                      <td className="py-2.5 px-3 font-semibold text-stone-800 dark:text-stone-200">
-                        {lang === "te" ? s.stageTe : s.stageEn}
+                <tbody className="divide-y divide-stone-200 dark:divide-stone-800 bg-white dark:bg-stone-900">
+                  {SAMPLE_MANDI_DATA.map((row, idx) => (
+                    <tr
+                      key={idx}
+                      className={row.tsBonus > 0 ? "bg-emerald-50/40 dark:bg-emerald-950/20 font-semibold" : ""}
+                    >
+                      <td className="py-3 px-4 font-bold text-stone-900 dark:text-white">
+                        {lang === "te" ? row.yardTe : row.yardEn}
                       </td>
-                      <td className="py-2.5 px-3 font-mono">{s.ureaPct}%</td>
-                      <td className="py-2.5 px-3 font-mono">{s.dapPct}%</td>
-                      <td className="py-2.5 px-3 font-mono">{s.mopPct}%</td>
-                      <td className="py-2.5 px-3 text-stone-500">{lang === "te" ? s.notesTe : s.notesEn}</td>
+                      <td className="py-3 px-4">
+                        {lang === "te" ? row.commodityTe : row.commodityEn}
+                      </td>
+                      <td className="py-3 px-4 font-mono">
+                        {row.msp > 0 ? `₹${row.msp.toLocaleString()}` : "N/A"}
+                      </td>
+                      <td className="py-3 px-4 font-mono">
+                        {row.tsBonus > 0 ? (
+                          <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 font-bold">
+                            +₹{row.tsBonus}
+                          </span>
+                        ) : (
+                          "—"
+                        )}
+                      </td>
+                      <td className="py-3 px-4 font-mono font-black text-emerald-700 dark:text-emerald-400 text-sm md:text-base">
+                        ₹{row.totalPrice.toLocaleString()} / Qtl
+                      </td>
+                      <td className="py-3 px-4 text-stone-500 text-[11px]">{row.status}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-          </section>
-        )}
 
-        {/* ======================================================== */}
-        {/* STAGE 7: Rythu Community & WhatsApp Share Engine */}
-        {/* ======================================================== */}
-        {(viewAll || activeStage === 7) && (
-          <section className="bg-white dark:bg-stone-900 rounded-3xl p-6 border border-stone-200 dark:border-stone-800 shadow-sm transition hover:shadow-md">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-stone-100 dark:border-stone-800">
-              <div className="flex items-center gap-3">
-                <span className="w-8 h-8 rounded-xl bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300 font-bold flex items-center justify-center text-sm">
-                  7
-                </span>
-                <div>
-                  <h2 className="text-base md:text-lg font-bold text-stone-900 dark:text-white">
-                    {lang === "te" ? "స్టేజ్ 7: రైతు సమాజం & వాట్సాప్ షేరింగ్" : "Stage 7: Rythu Community Hub & WhatsApp Share Engine"}
-                  </h2>
-                  <p className="text-xs text-stone-500 dark:text-stone-400">
-                    1-Click Verified Agronomic WhatsApp Dispatch for Village Farmer Groups
-                  </p>
+            {/* Interactive Yield Payout Deck & WhatsApp Share */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Payout Calculator */}
+              <div className="bg-stone-50 dark:bg-stone-800/60 rounded-2xl p-6 border border-stone-200 dark:border-stone-700">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-sm font-bold text-stone-900 dark:text-white">
+                    Mallesham Goud's Paddy Payout Calculator
+                  </h4>
+                  <span className="text-xs font-mono font-bold text-emerald-700">RNR 15048 (4.5 Acres)</span>
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1">
+                    Expected Yield in Quintals / దిగుబడి (క్వింటాళ్లు):
+                  </label>
+                  <input
+                    type="number"
+                    min="10"
+                    max="500"
+                    value={expectedYieldQtl}
+                    onChange={(e) => setExpectedYieldQtl(parseInt(e.target.value) || 0)}
+                    className="w-full px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-base font-bold font-mono outline-none"
+                  />
+                  <span className="text-[11px] text-stone-500 mt-1 block">
+                    Average ~24.4 Quintals/acre for RNR 15048 under optimal irrigation.
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 mt-4">
+                  <div className="p-3.5 rounded-xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700">
+                    <span className="text-xs text-stone-500 block">Total Realized Value:</span>
+                    <span className="text-xl font-black text-stone-900 dark:text-white font-mono mt-1 block">
+                      ₹{(expectedYieldQtl * 2820).toLocaleString("en-IN")}
+                    </span>
+                    <span className="text-[10px] text-stone-400">@ ₹2,820/quintal</span>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800">
+                    <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300 block">
+                      TS Bonus Component:
+                    </span>
+                    <span className="text-xl font-black text-emerald-700 dark:text-emerald-400 font-mono mt-1 block">
+                      +₹{(expectedYieldQtl * 500).toLocaleString("en-IN")}
+                    </span>
+                    <span className="text-[10px] text-emerald-600">Direct DBT to Rythu Account</span>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={copyToClipboard}
-                  className="px-3.5 py-1.5 rounded-xl border border-stone-200 dark:border-stone-700 text-xs font-semibold text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 flex items-center gap-1.5 transition"
-                >
-                  {copiedShare ? (
-                    <>
-                      <Check className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>Copied!</span>
-                    </>
-                  ) : (
-                    <>
-                      <Share2 className="w-3.5 h-3.5 text-stone-500" />
-                      <span>Copy Text</span>
-                    </>
-                  )}
-                </button>
+              {/* WhatsApp Share Advisory Generator */}
+              <div className="bg-stone-50 dark:bg-stone-800/60 rounded-2xl p-6 border border-stone-200 dark:border-stone-700 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Share2 className="w-4 h-4 text-emerald-600" />
+                      <h4 className="text-sm font-bold text-stone-900 dark:text-white">
+                        WhatsApp Rythu Advisory Formatter
+                      </h4>
+                    </div>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300">
+                      Bilingual Text
+                    </span>
+                  </div>
 
-                <a
-                  href={`https://api.whatsapp.com/send?text=${encodeURIComponent(whatsappText)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-2 shadow-sm transition active:scale-95"
-                >
-                  <Share2 className="w-3.5 h-3.5" />
-                  <span>Send to WhatsApp</span>
-                </a>
+                  <div className="bg-white dark:bg-stone-900 rounded-xl p-3 border border-stone-200 dark:border-stone-700 font-mono text-[11px] text-stone-700 dark:text-stone-300 whitespace-pre-line max-h-40 overflow-y-auto">
+                    {whatsappAdvisory}
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-stone-200 dark:border-stone-700 flex items-center justify-between">
+                  <button
+                    onClick={copyWhatsAppAdvisory}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs ${
+                      copiedShareText
+                        ? "bg-emerald-600 text-white"
+                        : "bg-emerald-700 hover:bg-emerald-800 text-white"
+                    }`}
+                  >
+                    {copiedShareText ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
+                    <span>{copiedShareText ? "Copied to Clipboard!" : "Copy WhatsApp Advisory"}</span>
+                  </button>
+
+                  <span className="text-[11px] text-stone-500">Ready for Rythu WhatsApp Groups</span>
+                </div>
               </div>
-            </div>
-
-            {/* WhatsApp Preview Card */}
-            <div className="p-5 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-800/80 font-mono text-xs text-stone-800 dark:text-stone-200 whitespace-pre-wrap leading-relaxed shadow-inner">
-              {whatsappText}
-            </div>
-
-            <div className="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-stone-400">
-              <span>Ready for real-time demonstration during Q&A panel at ADSAUF-2047.</span>
-              <span className="text-emerald-600 font-semibold">Zero SMS costs • Direct WhatsApp integration</span>
             </div>
           </section>
         )}
-
-        {/* -------------------------------------------------------- */}
-        {/* Bottom Presenter Stepper Controls */}
-        {/* -------------------------------------------------------- */}
-        <div className="flex items-center justify-between pt-4 border-t border-stone-200 dark:border-stone-800">
-          <button
-            onClick={() => {
-              setActiveStage((prev) => Math.max(1, prev - 1));
-              setViewAll(false);
-            }}
-            disabled={activeStage === 1 && !viewAll}
-            className="px-4 py-2 rounded-xl border border-stone-200 dark:border-stone-700 text-xs font-semibold text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 disabled:opacity-40 transition flex items-center gap-1.5"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Previous Stage</span>
-          </button>
-
-          <span className="text-xs font-semibold text-stone-500 font-mono">
-            Stage {activeStage} of {STAGES.length}
-          </span>
-
-          <button
-            onClick={() => {
-              if (activeStage < STAGES.length) {
-                setActiveStage((prev) => prev + 1);
-                setViewAll(false);
-              }
-            }}
-            disabled={activeStage === STAGES.length && !viewAll}
-            className="px-4 py-2 rounded-xl bg-agri-700 hover:bg-agri-800 text-white text-xs font-semibold shadow-sm disabled:opacity-40 transition flex items-center gap-1.5"
-          >
-            <span>Next Stage</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
       </main>
+
+      {/* ======================================================== */}
+      {/* 5. BOTTOM PERSISTENT STEPPER NAVIGATION                  */}
+      {/* ======================================================== */}
+      <footer className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border-t border-stone-200 dark:border-stone-800 px-4 md:px-8 py-3 shadow-lg">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setActiveStep((prev) => Math.max(1, prev - 1))}
+              disabled={activeStep === 1}
+              className="px-4 py-2 rounded-xl border border-stone-200 dark:border-stone-700 text-xs md:text-sm font-bold text-stone-700 dark:text-stone-300 hover:bg-stone-50 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-1.5"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Previous Step</span>
+            </button>
+
+            <button
+              onClick={() => setActiveStep((prev) => Math.min(DEMO_STEPS.length, prev + 1))}
+              disabled={activeStep === DEMO_STEPS.length}
+              className="px-5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs md:text-sm font-bold shadow-md disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-1.5"
+            >
+              <span>Next Step</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="hidden sm:flex items-center gap-4 text-xs text-stone-500 font-mono">
+            <span>Keyboard shortcuts: [←] Prev • [→] Next • [R] Reset</span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <a
+              href="/offline-demo.html"
+              download="smart-farm-offline-demo.html"
+              className="px-3 py-1.5 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-stone-200 text-xs font-bold hover:bg-stone-200 transition flex items-center gap-1.5"
+              title="Download standalone file for emergency backup"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span className="hidden md:inline">Offline HTML</span>
+            </a>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

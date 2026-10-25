@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Farm Assistant — PJTAU Conference Offline Demo</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --emerald-600: #059669;
+      --emerald-700: #047857;
+      --emerald-800: #065f46;
+      --emerald-50: #ecfdf5;
+      --emerald-100: #d1fae5;
+      --amber-500: #f59e0b;
+      --amber-50: #fffbeb;
+      --red-600: #dc2626;
+      --red-50: #fef2f2;
+      --blue-600: #2563eb;
+      --blue-50: #eff6ff;
+      --font-scale: 1;
+    }
+
+    body.projector {
+      --font-scale: 1.25;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-size: calc(14px * var(--font-scale));
+      line-height: 1.5;
+      padding-bottom: 90px;
+    }
+
+    /* 1. Permanent Non-Removable Ribbon */
+    .top-ribbon {
+      background-color: #fbbf24;
+      color: #000;
+      font-weight: 700;
+      padding: 10px 16px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      border-bottom: 2px solid #d97706;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      font-size: calc(12px * var(--font-scale));
+    }
+    .top-ribbon-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .pulse-dot {
+      width: 10px;
+      height: 10px;
+      background: #dc2626;
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.4); opacity: 0.6; }
+    }
+    .ribbon-btn {
+      background: #0f172a;
+      color: #fff;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      border: none;
+      cursor: pointer;
+    }
+
+    /* 2. Command Header */
+    .command-header {
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      padding: 14px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .conf-badge {
+      background: var(--emerald-100);
+      color: var(--emerald-800);
+      padding: 2px 8px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 700;
+      margin-left: 8px;
+    }
+    .controls-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .btn {
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #fff;
+      font-size: calc(12px * var(--font-scale));
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+    .btn:hover {
+      background: #f1f5f9;
+    }
+    .btn-primary {
+      background: var(--emerald-700);
+      color: #fff;
+      border-color: var(--emerald-800);
+    }
+    .btn-primary:hover {
+      background: var(--emerald-800);
+    }
+    .btn-active {
+      background: #4f46e5;
+      color: #fff;
+      border-color: #4338ca;
+    }
+
+    /* 3. Stepper */
+    .stepper-container {
+      max-width: 1200px;
+      margin: 16px auto 0;
+      padding: 0 16px;
+    }
+    .stepper {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 10px;
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+    }
+    .step-pill {
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: none;
+      background: #f1f5f9;
+      color: var(--text-muted);
+      font-size: calc(11px * var(--font-scale));
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .step-pill.active {
+      background: var(--emerald-700);
+      color: #fff;
+    }
+    .step-pill.done {
+      background: var(--emerald-50);
+      color: var(--emerald-800);
+      border: 1px solid var(--emerald-100);
+    }
+    .step-num {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.1);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+    }
+    .step-pill.active .step-num {
+      background: #fff;
+      color: var(--emerald-800);
+    }
+
+    /* 4. Main Stage */
+    .stage-container {
+      max-width: 1200px;
+      margin: 20px auto 0;
+      padding: 0 16px;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      margin-bottom: 20px;
+    }
+    .card-title {
+      font-size: calc(18px * var(--font-scale));
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+    .card-desc {
+      color: var(--text-muted);
+      font-size: calc(12px * var(--font-scale));
+      margin-bottom: 18px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .badge-red { background: var(--red-50); color: var(--red-600); border: 1px solid #fca5a5; }
+    .badge-emerald { background: var(--emerald-50); color: var(--emerald-700); border: 1px solid #a7f3d0; }
+    .badge-blue { background: var(--blue-50); color: var(--blue-600); border: 1px solid #bfdbfe; }
+    .badge-amber { background: var(--amber-50); color: #b45309; border: 1px solid #fde68a; }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 16px;
+    }
+
+    /* Step 1 Alert */
+    .alert-box {
+      border: 2px solid var(--red-600);
+      background: var(--red-50);
+      border-radius: 14px;
+      padding: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .gauge-circle {
+      width: 140px;
+      height: 140px;
+      margin: 10px auto;
+    }
+
+    /* Step 2 Pump Visual */
+    .pump-deck {
+      background: linear-gradient(135deg, #064e3b, #0f172a);
+      color: #fff;
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+    }
+    .impeller {
+      width: 90px;
+      height: 90px;
+      border: 4px dashed #6ee7b7;
+      border-radius: 50%;
+      margin: 20px auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .impeller.spinning {
+      animation: spin 1.2s linear infinite;
+    }
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Step 4 Calculator */
+    .calc-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+      background: #f8fafc;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+    .calc-col {
+      flex: 1;
+      min-width: 160px;
+    }
+    .calc-col label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .calc-col input, .calc-col select {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .result-box {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      text-align: center;
+    }
+    .result-val {
+      font-size: 26px;
+      font-weight: 900;
+      margin: 4px 0;
+    }
+
+    /* Step 5 Q&A */
+    .qa-btn {
+      width: 100%;
+      text-align: left;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      margin-bottom: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: calc(12px * var(--font-scale));
+    }
+    .qa-btn.active {
+      background: var(--emerald-50);
+      border-color: var(--emerald-600);
+      color: var(--emerald-800);
+    }
+    .disclaimer-banner {
+      background: #fffbeb;
+      border-left: 4px solid #f59e0b;
+      padding: 12px 16px;
+      border-radius: 0 8px 8px 0;
+      font-size: 11px;
+      color: #92400e;
+      margin-bottom: 16px;
+    }
+
+    /* Step 6 Scanner */
+    .leaf-btn {
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      cursor: pointer;
+      text-align: left;
+    }
+    .leaf-btn.active {
+      background: var(--emerald-50);
+      border-color: var(--emerald-600);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+    }
+
+    /* Step 7 Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: calc(12px * var(--font-scale));
+    }
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+    }
+    th {
+      background: #f8fafc;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+    tr.highlight {
+      background: #f0fdf4;
+      font-weight: 600;
+    }
+
+    /* 5. Bottom Nav */
+    .bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255,255,255,0.95);
+      border-top: 1px solid var(--border);
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 90;
+      backdrop-filter: blur(8px);
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <!-- 1. Top Ribbon -->
+  <aside aria-label="Demo mode announcement" class="top-ribbon">
+    <div class="top-ribbon-left">
+      <div class="pulse-dot"></div>
+      <span id="ribbon-en">SIMULATED DEMO — no internet or sensor needed</span>
+      <span>|</span>
+      <span id="ribbon-te">అనుకరణ డెమో — ఇంటర్నెట్ లేదా సెన్సార్ అవసరం లేదు</span>
+    </div>
+    <div>
+      <span style="font-size:10px; font-weight:700; background:#000; color:#fff; padding:3px 8px; border-radius:4px;">
+        100% OFFLINE FILE
+      </span>
+    </div>
+  </aside>
+
+  <!-- 2. Command Header -->
+  <header class="command-header">
+    <div>
+      <h1 style="font-size:16px; font-weight:800; display:inline-flex; align-items:center;">
+        Smart Farm Assistant — PJTAU Conference Demo
+        <span class="conf-badge">ADSAUF-2047 PJTAU</span>
+      </h1>
+      <p style="font-size:11px; color:var(--text-muted); margin-top:2px;">
+        Farmer: <strong>Mallesham Goud</strong> • Mallapur, Jagtial (4.5 Acres Paddy RNR 15048)
+      </p>
+    </div>
+
+    <div class="controls-group">
+      <button class="btn" id="btn-projector" onclick="toggleProjector()">
+        🖥️ <span id="lbl-projector">Projector Mode</span>
+      </button>
+      <button class="btn" id="btn-lang" onclick="toggleLang()">
+        🌐 <span id="lbl-lang">తెలుగు</span>
+      </button>
+      <button class="btn" id="btn-sound" onclick="toggleSound()">
+        🔊 <span id="lbl-sound">Pump Audio OFF</span>
+      </button>
+      <button class="btn" onclick="resetAll()">
+        🔄 Reset [R]
+      </button>
+    </div>
+  </header>
+
+  <!-- 3. Guided Stepper -->
+  <nav aria-label="Demo flow steps" class="stepper-container">
+    <div class="stepper" id="stepper-nav">
+      <!-- Injected via JS -->
+    </div>
+  </nav>
+
+  <!-- 4. Stage Container -->
+  <main class="stage-container">
+    <!-- STEP 1: LOW MOISTURE ALERT -->
+    <div id="step-1" class="card">
+      <span class="badge badge-red">Step 1 of 7: Telemetry Alert Trigger</span>
+      <h2 class="card-title" id="s1-title">Low Moisture Alert: Soil Moisture at 17.4%</h2>
+      <p class="card-desc" id="s1-desc">
+        Capacitive Soil Sensor (ESP32 ADC Pin 34) in Jagtial Field #2 detected root zone depletion below critical 20.0% threshold.
+      </p>
+
+      <div class="alert-box">
+        <div>
+          <strong style="color:var(--red-600); font-size:14px; display:block;" id="s1-alert-h">
+            CRITICAL MOISTURE DEFICIT — Immediate Irrigation Required (&lt;20.0%)
+          </strong>
+          <span style="font-size:12px; color:#991b1b;" id="s1-alert-p">
+            Paddy crop is at active tillering stage. Deficit restricts tiller formation and reduces final grain yield by 25%.
+          </span>
+        </div>
+        <button class="btn btn-primary" onclick="goToStep(2); startPump();">
+          Simulate Pump Start (Step 2) →
+        </button>
+      </div>
+
+      <div class="grid-3">
+        <div class="result-box">
+          <span style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">
+            Volumetric Water Content
+          </span>
+          <div class="result-val" style="color:var(--red-600);" id="s1-moist-val">17.4%</div>
+          <span class="badge badge-red">CRITICAL LOW DEFICIT</span>
+          <p style="font-size:11px; color:var(--text-muted); margin-top:8px;">Target Zone: 25.0% – 35.0%</p>
+        </div>
+
+        <div class="result-box" style="text-align:left;">
+          <strong style="font-size:12px; display:block; margin-bottom:8px;">Threshold Criteria:</strong>
+          <div style="font-size:11px; line-height:1.8;">
+            <div style="color:var(--red-600); font-weight:700;">• &lt;20.0% : Critical Stress (Pump Required)</div>
+            <div style="color:#b45309;">• 20.0% - 25.0% : Caution Standby</div>
+            <div style="color:var(--emerald-700); font-weight:700;">• 25.0% - 35.0% : Optimal Root Saturation</div>
+            <div style="color:var(--blue-600);">• &gt;35.0% : Field Capacity Cutoff</div>
+          </div>
+        </div>
+
+        <div class="result-box" style="text-align:left;">
+          <strong style="font-size:12px; display:block; margin-bottom:8px;">Field Telemetry Profile:</strong>
+          <div style="font-size:11px; line-height:1.8; color:var(--text-muted);">
+            <div>Farmer: <strong>Mallesham Goud</strong></div>
+            <div>Village: <strong>Mallapur, Jagtial</strong></div>
+            <div>Crop: <strong>Paddy (RNR 15048)</strong></div>
+            <div>Soil: <strong>Red Sandy Loam (చల్కా నేలలు)</strong></div>
+            <div>Pump: <strong>3 HP Submersible Borewell</strong></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: PUMP ON ANIMATION -->
+    <div id="step-2" class="card hidden">
+      <span class="badge badge-emerald">Step 2 of 7: Autonomous Irrigation Cycle</span>
+      <h2 class="card-title" id="s2-title">Pump ON Animation: Water Replenishment to 31.5%</h2>
+      <p class="card-desc" id="s2-desc">
+        Relay engaged 3 HP submersible pump. Soil moisture is animating upward from 17.4% to optimal saturation (31.5%).
+      </p>
+
+      <div class="grid-3">
+        <div class="pump-deck">
+          <span style="font-size:10px; font-weight:700; letter-spacing:1px; color:#6ee7b7;">ESP32 RELAY CHANNEL #1</span>
+          <div class="impeller" id="impeller-wheel">
+            <span style="font-size:24px;">💧</span>
+          </div>
+          <div style="font-size:22px; font-weight:900;" id="pump-flow-val">420 Litres/min</div>
+          <span style="font-size:11px; color:#a7f3d0;">3 HP Submersible • 2.2 kW Load</span>
+          <div style="margin-top:16px;">
+            <button class="btn" style="background:#fff; color:#000;" onclick="togglePump()">
+              <span id="pump-toggle-lbl">Pause Pump</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="result-box">
+          <span style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">
+            Current Soil Moisture
+          </span>
+          <div class="result-val" style="color:var(--emerald-600);" id="s2-moist-display">17.4%</div>
+          <span class="badge badge-emerald" id="s2-status-badge">PUMP ACTIVE</span>
+          <div style="margin-top:16px; background:#e2e8f0; height:10px; border-radius:5px; overflow:hidden;">
+            <div id="s2-moist-bar" style="background:var(--emerald-600); height:100%; width:43%; transition:width 0.3s;"></div>
+          </div>
+          <p style="font-size:11px; color:var(--text-muted); margin-top:8px;">
+            Target Saturation: <strong>31.5%</strong>
+          </p>
+        </div>
+
+        <div class="result-box" style="text-align:left;">
+          <strong style="font-size:12px; display:block; margin-bottom:8px;">Telemetry Metrics:</strong>
+          <div style="font-size:11px; line-height:2;">
+            <div>Water Pumped: <strong id="s2-litres">1,890 Litres</strong></div>
+            <div>Effective Depth: <strong>18.5 cm</strong></div>
+            <div>Energy Used: <strong>0.22 kWh</strong></div>
+            <div>Power Factor: <strong>0.91 (Healthy)</strong></div>
+          </div>
+          <div style="background:var(--emerald-50); padding:8px; border-radius:8px; margin-top:10px; font-size:10px; color:var(--emerald-800);">
+            💡 <strong>Presenter Point:</strong> Closed-loop control shuts pump off as soon as 31.5% is reached.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: RAIN-SKIP INTERLOCK -->
+    <div id="step-3" class="card hidden">
+      <span class="badge badge-blue">Step 3 of 7: Predictive Weather Interlock</span>
+      <h2 class="card-title" id="s3-title">Rain-Skip Interlock: Forecast 85% Rain Tomorrow (32 mm)</h2>
+      <p class="card-desc" id="s3-desc">
+        Doppler radar & Open-Meteo AWS model indicates heavy monsoon showers tomorrow. Smart interlock suppresses pump to conserve groundwater.
+      </p>
+
+      <div style="background:linear-gradient(135deg, #1e3a8a, #0f172a); color:#fff; border-radius:16px; padding:20px; margin-bottom:20px;">
+        <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:16px;">
+          <div>
+            <span class="badge" style="background:#38bdf8; color:#000;">ACTIVE RAIN-SKIP INTERLOCK</span>
+            <h3 style="font-size:18px; font-weight:800; margin-top:6px;" id="s3-hero-h">
+              Heavy Rain Expected: 32 mm Precipitation (85% Probability)
+            </h3>
+            <p style="font-size:12px; color:#bae6fd; max-width:650px; margin-top:4px;" id="s3-hero-p">
+              Tonight's pump cycle is automatically skipped. Pumping water before a 32 mm downpour causes root rot, nutrient leaching, and wastes groundwater.
+            </p>
+          </div>
+          <div style="text-align:center; background:rgba(255,255,255,0.1); padding:12px 18px; border-radius:12px;">
+            <div style="font-size:28px; font-weight:900; color:#38bdf8;">85%</div>
+            <span style="font-size:11px;">Rain Probability</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <div class="result-box">
+          <span style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">
+            Groundwater Conserved
+          </span>
+          <div class="result-val" style="color:var(--blue-600);">~38,000 L</div>
+          <p style="font-size:11px; color:var(--text-muted);">Saved 3 hours of continuous borewell pumping.</p>
+        </div>
+
+        <div class="result-box">
+          <span style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">
+            Electricity Saved
+          </span>
+          <div class="result-val" style="color:var(--emerald-600);">6.6 kWh</div>
+          <p style="font-size:11px; color:var(--text-muted);">Reduces peak transformer agricultural load.</p>
+        </div>
+
+        <div class="result-box">
+          <span style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">
+            Agronomic Protection
+          </span>
+          <div class="result-val" style="color:#b45309;">Zero Leaching</div>
+          <p style="font-size:11px; color:var(--text-muted);">Prevents nitrogen runoff from soil root zone.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 4: OFFLINE CALCULATORS -->
+    <div id="step-4" class="card hidden">
+      <span class="badge badge-emerald">Step 4 of 7: Zero-Latency Client Calculators</span>
+      <h2 class="card-title" id="s4-title">Live Offline PJTAU Calculators: Fertilizer & Seed Dosage</h2>
+      <p class="card-desc" id="s4-desc">
+        Pure client mathematical models aligned with PJTAU Package of Practices. Modify values below for instant recalculation.
+      </p>
+
+      <div class="calc-row">
+        <div class="calc-col">
+          <label>Crop / పంట:</label>
+          <select id="calc-crop" onchange="runCalculators()">
+            <option value="Paddy">Paddy / వరి (Rice)</option>
+            <option value="Maize">Maize / మొక్కజొన్న</option>
+            <option value="Cotton">Cotton / పత్తి</option>
+          </select>
+        </div>
+        <div class="calc-col">
+          <label>Acres / ఎకరాలు:</label>
+          <input type="number" id="calc-acres" value="4.5" step="0.5" min="0.5" max="50" oninput="runCalculators()">
+        </div>
+        <div class="calc-col">
+          <label>Guntas / గుంటలు:</label>
+          <input type="number" id="calc-guntas" value="0" step="5" min="0" max="39" oninput="runCalculators()">
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card" style="padding:16px;">
+          <h3 style="font-size:14px; font-weight:800; margin-bottom:12px;">Fertilizer Dosage (50kg Bags)</h3>
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:14px;">
+            <div class="result-box" style="background:#fffbeb;">
+              <span style="font-size:10px; font-weight:700; color:#b45309;">DAP (Basal)</span>
+              <div class="result-val" id="res-dap">6</div>
+              <span style="font-size:10px;">Bags</span>
+            </div>
+            <div class="result-box" style="background:#eff6ff;">
+              <span style="font-size:10px; font-weight:700; color:var(--blue-600);">Urea (Splits)</span>
+              <div class="result-val" id="res-urea">10</div>
+              <span style="font-size:10px;">Bags</span>
+            </div>
+            <div class="result-box" style="background:#fef2f2;">
+              <span style="font-size:10px; font-weight:700; color:#dc2626;">MOP (Potash)</span>
+              <div class="result-val" id="res-mop">3</div>
+              <span style="font-size:10px;">Bags</span>
+            </div>
+          </div>
+          <p style="font-size:11px; color:var(--text-muted);" id="calc-fert-note">
+            Basal: 100% DAP + 25% Urea + 50% MOP. Top-dress remaining in 2 splits at tillering & panicle initiation.
+          </p>
+        </div>
+
+        <div class="card" style="padding:16px;">
+          <h3 style="font-size:14px; font-weight:800; margin-bottom:12px;">Seed Requirement & Population</h3>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;">
+            <div class="result-box" style="background:#ecfdf5;">
+              <span style="font-size:10px; font-weight:700; color:var(--emerald-700);">Total Seed Required</span>
+              <div class="result-val" id="res-seed-kg">54.0 kg</div>
+              <span style="font-size:10px;" id="res-seed-acre">12.0 kg/acre</span>
+            </div>
+            <div class="result-box" style="background:#f8fafc;">
+              <span style="font-size:10px; font-weight:700; color:#4f46e5;">Standard Packets</span>
+              <div class="result-val" id="res-packets">3</div>
+              <span style="font-size:10px;">Packets</span>
+            </div>
+          </div>
+          <div style="font-size:11px; line-height:1.8; color:var(--text-muted);" id="calc-seed-note">
+            Spacing: 20 cm × 15 cm • 133,333 hills/acre • Test wt: 22g per 1000 grains.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 5: KRISHI SAHAYAK Q&A -->
+    <div id="step-5" class="card hidden">
+      <span class="badge badge-amber">Step 5 of 7: Pre-Cached Agronomy Intelligence</span>
+      <h2 class="card-title" id="s5-title">Krishi Sahayak Bundled Q&A: Offline Farmer Advisory</h2>
+      <p class="card-desc" id="s5-desc">
+        4 validated conference agronomy answers in Telugu and English with statutory safety disclaimer.
+      </p>
+
+      <div class="disclaimer-banner">
+        <strong>⚠️ Statutory Safety Disclaimer:</strong> AI advice is indicative agronomic guidance based on PJTAU Package of Practices. Always consult your Mandal Agricultural Officer (MAO) or Agricultural Extension Officer (AEO) before applying chemical sprays.
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <button class="qa-btn active" onclick="selectQA(0)">
+            <span style="font-size:10px; color:var(--emerald-700); font-weight:700;">PADDY</span><br>
+            <span id="qa-q0">How much DAP and Urea should I apply for Paddy at panicle initiation?</span>
+          </button>
+          <button class="qa-btn" onclick="selectQA(1)">
+            <span style="font-size:10px; color:#4f46e5; font-weight:700;">COTTON</span><br>
+            <span id="qa-q1">Yellowing on lower leaves in cotton - is it magnesium deficiency or nitrogen?</span>
+          </button>
+          <button class="qa-btn" onclick="selectQA(2)">
+            <span style="font-size:10px; color:#b45309; font-weight:700;">MAIZE</span><br>
+            <span id="qa-q2">Water is scarce in borewell - how many days interval for maize?</span>
+          </button>
+          <button class="qa-btn" onclick="selectQA(3)">
+            <span style="font-size:10px; color:var(--emerald-700); font-weight:700;">TELANGANA BONUS</span><br>
+            <span id="qa-q3">How to claim the ₹500/quintal Telangana Fine Rice bonus?</span>
+          </button>
+        </div>
+
+        <div class="card" style="background:#f8fafc; padding:20px;">
+          <span style="font-size:10px; font-weight:700; color:var(--emerald-700); letter-spacing:1px;">
+            VERIFIED AGRONOMIC SOLUTION
+          </span>
+          <h4 style="font-size:14px; font-weight:800; margin:8px 0;" id="qa-active-q">
+            How much DAP and Urea should I apply for Paddy at panicle initiation?
+          </h4>
+          <p style="font-size:13px; line-height:1.6; color:#334155;" id="qa-active-a">
+            At panicle initiation (PI stage, ~55-60 days for RNR 15048), DO NOT apply DAP (phosphorus should be basal only). Apply the 2nd/3rd split of Urea at 25-30 kg/acre along with MOP (Potash) at 15-20 kg/acre for bold grain filling. Maintain 2-3 cm thin water layer during application.
+          </p>
+          <div style="margin-top:16px; pt-2; border-top:1px solid var(--border); font-size:10px; color:var(--text-muted); display:flex; justify-content:space-between;">
+            <span>Source: PJTAU Vyavasaya Panchangam</span>
+            <span>Latency: 0 ms</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 6: SAMPLE LEAF SCANNER -->
+    <div id="step-6" class="card hidden">
+      <span class="badge" style="background:#f3e8ff; color:#7e22ce;">Step 6 of 7: Computer Vision Diagnostics</span>
+      <h2 class="card-title" id="s6-title">Sample Leaf Disease Scanner: 3 Recorded Leaves</h2>
+      <p class="card-desc" id="s6-desc">
+        Instant diagnostic cards with custom inline SVG leaf vectors, symptoms, and PJTAU dosage recommendations.
+      </p>
+
+      <div style="background:#f1f5f9; padding:10px 14px; border-radius:10px; font-size:12px; font-weight:700; margin-bottom:16px;">
+        ℹ️ Recorded sample result, not a live AI diagnosis / రికార్డ్ చేయబడిన నమూనా ఫలితం, ప్రత్యక్ష AI నిర్ధారణ కాదు
+      </div>
+
+      <div class="grid-3" style="margin-bottom:16px;">
+        <div class="leaf-btn active" id="leaf-btn-0" onclick="selectLeaf(0)">
+          <span style="font-size:10px; font-weight:700; color:var(--emerald-700);">PADDY</span>
+          <div style="font-weight:800; font-size:13px;">Paddy Leaf Blast</div>
+          <span style="font-size:10px; color:var(--text-muted);">Pyricularia oryzae</span>
+        </div>
+        <div class="leaf-btn" id="leaf-btn-1" onclick="selectLeaf(1)">
+          <span style="font-size:10px; font-weight:700; color:#4f46e5;">COTTON</span>
+          <div style="font-weight:800; font-size:13px;">Pink Bollworm</div>
+          <span style="font-size:10px; color:var(--text-muted);">Pectinophora gossypiella</span>
+        </div>
+        <div class="leaf-btn" id="leaf-btn-2" onclick="selectLeaf(2)">
+          <span style="font-size:10px; font-weight:700; color:#b45309;">CHILLI</span>
+          <div style="font-weight:800; font-size:13px;">Chilli Leaf Curl Virus</div>
+          <span style="font-size:10px; color:var(--text-muted);">Begomovirus (Whitefly)</span>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="result-box" style="padding:24px;">
+          <span style="font-size:11px; font-weight:700; color:var(--text-muted);">INLINE VECTOR DIAGNOSTIC</span>
+          <div id="leaf-svg-container" style="margin:16px 0;">
+            <!-- Injected via JS -->
+          </div>
+          <span class="badge badge-emerald" id="leaf-conf-badge">Confidence: 94.2%</span>
+        </div>
+
+        <div class="card" style="padding:16px; background:#f8fafc;">
+          <span class="badge badge-red" id="leaf-sev-badge">High Severity</span>
+          <h3 style="font-size:16px; font-weight:800;" id="leaf-name-h">Paddy Leaf Blast</h3>
+          <p style="font-size:12px; color:#475569; margin:8px 0 14px;" id="leaf-sym-p">
+            Spindle-shaped lesions with grey/white centers and dark brown borders. Lesions coalesce, burning leaf blades.
+          </p>
+
+          <div style="background:#fff; border:1px solid var(--border); border-radius:10px; padding:12px;">
+            <strong style="font-size:11px; color:var(--emerald-800); text-transform:uppercase; display:block; margin-bottom:6px;">
+              PJTAU Treatment Recommendation:
+            </strong>
+            <div style="font-size:12px; line-height:1.6;" id="leaf-treat-p">
+              • Spray Tricyclazole 75% WP @ 0.6 g/L water OR Isoprothiolane 40% EC @ 1.5 mL/L.<br>
+              • Avoid excess urea top-dressing during humid overcast days.<br>
+              • Maintain 2-3 cm thin water layer in field.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 7: SAMPLE MANDI PRICES -->
+    <div id="step-7" class="card hidden">
+      <span class="badge badge-emerald">Step 7 of 7: Market Economics & DBT Bonus</span>
+      <h2 class="card-title" id="s7-title">Sample Mandi Prices: Telangana MSP + ₹500/Qtl State Bonus</h2>
+      <p class="card-desc" id="s7-desc">
+        Recorded October 2026 APMC dataset demonstrating direct farmer realization (₹2,820/quintal) and WhatsApp sharing.
+      </p>
+
+      <div style="background:#f1f5f9; padding:10px 14px; border-radius:10px; font-size:12px; font-weight:700; margin-bottom:16px;">
+        ℹ️ Sample prices — Conference recorded dataset (October 2026) / నమూనా ధరలు
+      </div>
+
+      <div style="overflow-x:auto; margin-bottom:20px;">
+        <table>
+          <thead>
+            <tr>
+              <th>APMC Market Yard</th>
+              <th>Commodity & Variety</th>
+              <th>Central MSP</th>
+              <th>TS State Bonus</th>
+              <th style="color:var(--emerald-700);">Total Realized Rate</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="highlight">
+              <td><strong>Jagtial APMC</strong></td>
+              <td>Paddy (RNR 15048 / Telangana Sona)</td>
+              <td>₹2,320</td>
+              <td><span class="badge badge-emerald">+₹500</span></td>
+              <td><strong style="color:var(--emerald-700); font-size:15px;">₹2,820 / Qtl</strong></td>
+              <td>Active MSP Procurement</td>
+            </tr>
+            <tr>
+              <td><strong>Warangal APMC</strong></td>
+              <td>Cotton (Bunny / Medium-Long Staple)</td>
+              <td>₹7,521</td>
+              <td>—</td>
+              <td><strong>₹7,780 / Qtl</strong></td>
+              <td>Private Mandi Trade</td>
+            </tr>
+            <tr>
+              <td><strong>Nizamabad APMC</strong></td>
+              <td>Maize (Hybrid Yellow)</td>
+              <td>₹2,225</td>
+              <td>—</td>
+              <td><strong>₹2,310 / Qtl</strong></td>
+              <td>Feed Industry Demand</td>
+            </tr>
+            <tr class="highlight">
+              <td><strong>Suryapet APMC</strong></td>
+              <td>Paddy (BPT 5204 / Samba Mahsuri)</td>
+              <td>₹2,320</td>
+              <td><span class="badge badge-emerald">+₹500</span></td>
+              <td><strong style="color:var(--emerald-700); font-size:15px;">₹2,820 / Qtl</strong></td>
+              <td>DBT Disbursal Active</td>
+            </tr>
+            <tr>
+              <td><strong>Khammam APMC</strong></td>
+              <td>Chilli (Teja / Red Dry)</td>
+              <td>Market Rate</td>
+              <td>—</td>
+              <td><strong>₹19,450 / Qtl</strong></td>
+              <td>Spices Board Benchmark</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="grid-2">
+        <div class="card" style="padding:16px; background:#f8fafc;">
+          <h4 style="font-size:13px; font-weight:800; margin-bottom:10px;">Yield Payout Calculator (RNR 15048)</h4>
+          <label style="font-size:11px; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">
+            Expected Production (Quintals):
+          </label>
+          <input type="number" id="payout-qtl" value="110" min="10" max="500" style="padding:8px; border-radius:8px; border:1px solid var(--border); width:100%; font-weight:700;" oninput="updatePayout()">
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px;">
+            <div class="result-box">
+              <span style="font-size:10px; color:var(--text-muted);">Total Revenue:</span>
+              <div class="result-val" style="font-size:18px;" id="payout-total">₹3,10,200</div>
+              <span style="font-size:10px;">@ ₹2,820/qtl</span>
+            </div>
+            <div class="result-box" style="background:#ecfdf5;">
+              <span style="font-size:10px; color:var(--emerald-800); font-weight:700;">TS Bonus:</span>
+              <div class="result-val" style="font-size:18px; color:var(--emerald-700);" id="payout-bonus">+₹55,000</div>
+              <span style="font-size:10px;">Direct DBT</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="padding:16px; background:#f8fafc;">
+          <h4 style="font-size:13px; font-weight:800; margin-bottom:10px;">Rythu WhatsApp Share Advisory</h4>
+          <textarea id="share-txt" readonly style="width:100%; height:110px; padding:8px; font-size:11px; font-family:monospace; border-radius:8px; border:1px solid var(--border); resize:none;"></textarea>
+          <div style="margin-top:10px;">
+            <button class="btn btn-primary" onclick="copyWhatsApp()">
+              📋 <span id="copy-btn-lbl">Copy WhatsApp Advisory</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- 5. Bottom Stepper Navigation -->
+  <footer class="bottom-bar">
+    <div>
+      <button class="btn" id="btn-prev" onclick="prevStep()">
+        ← Previous Step
+      </button>
+      <button class="btn btn-primary" id="btn-next" onclick="nextStep()" style="margin-left:6px;">
+        Next Step →
+      </button>
+    </div>
+    <div style="font-size:11px; color:var(--text-muted); font-family:monospace;">
+      Shortcuts: [←] Prev • [→] Next • [R] Reset
+    </div>
+  </footer>
+
+  <!-- Embedded JavaScript Logic -->
+  <script>
+    // State
+    let currentStep = 1;
+    let isTelugu = false;
+    let isProjector = false;
+    let isSoundOn = false;
+    let soilMoisture = 17.4;
+    let pumpActive = false;
+    let pumpInterval = null;
+    let audioCtx = null;
+    let osc = null;
+
+    const STEPS = [
+      { id: 1, titleEn: "Moisture Alert", titleTe: "తేమ హెచ్చరిక" },
+      { id: 2, titleEn: "Pump ON", titleTe: "పంపు ఆన్" },
+      { id: 3, titleEn: "Rain-Skip", titleTe: "రెయిన్-స్కిప్" },
+      { id: 4, titleEn: "Calculators", titleTe: "లెక్కలు" },
+      { id: 5, titleEn: "Krishi Q&A", titleTe: "ప్రశ్నోత్తరాలు" },
+      { id: 6, titleEn: "Leaf Scanner", titleTe: "ఆకు స్కానర్" },
+      { id: 7, titleEn: "Mandi Rates", titleTe: "మార్కెట్ ధరలు" }
+    ];
+
+    const QA_DATA = [
+      {
+        qEn: "How much DAP and Urea should I apply for Paddy at panicle initiation?",
+        qTe: "వరిలో చిరుపొట్ట దశలో ఎంత డీఏపీ మరియు యూరియా వేయాలి?",
+        aEn: "At panicle initiation (PI stage, ~55-60 days for RNR 15048), DO NOT apply DAP (phosphorus should be basal only). Apply the 2nd split of Urea at 25-30 kg/acre along with MOP (Potash) at 15-20 kg/acre for bold grain filling. Maintain 2-3 cm thin water layer during application.",
+        aTe: "వరిలో చిరుపొట్ట దశలో డీఏపీ అస్సలు వేయరాదు (భాస్వరం దుక్కిలోనే వేయాలి). ఎకరానికి 25-30 కిలోల యూరియా మరియు 15-20 కిలోల పొటాష్ (MOP) కలిపి వేయాలి. దీనివల్ల గింజ బరువు మరియు నాణ్యత పెరుగుతుంది."
+      },
+      {
+        qEn: "Yellowing on lower leaves in cotton - is it magnesium deficiency or nitrogen?",
+        qTe: "పత్తిలో క్రింది ఆకులు పసుపుగా మారడం - మెగ్నీషియం లోపమా లేక నత్రజని లోపమా?",
+        aEn: "Check leaf venation: Nitrogen deficiency shows uniform pale yellowing starting from leaf tips of older lower leaves. Magnesium deficiency causes interveinal chlorosis (veins stay green while leaf tissue turns yellow, later purplish-red). For Mg deficiency, spray Magnesium Sulphate (MgSO4) @ 10g/L water twice at 15-day interval.",
+        aTe: "నత్రజని లోపమైతే ముదిరిన ఆకుల చివర్ల నుండి మొత్తం ఆకు లేత పసుపు రంగులోకి మారుతుంది. మెగ్నీషియం లోపమైతే ఆకు ఈనెలు పచ్చగా ఉండి, ఈనెల మధ్య భాగం పసుపు లేదా ఎరుపు రంగులోకి మారుతుంది. ఎకరానికి 1 కిలో మెగ్నీషియం సల్ఫేట్ 100 లీటర్ల నీటిలో కలిపి పిచికారీ చేయాలి."
+      },
+      {
+        qEn: "Water is scarce in borewell - how many days interval for maize?",
+        qTe: "బోరుబావిలో నీరు తక్కువగా ఉంది - మొక్కజొన్నకు ఎన్ని రోజులకోసారి నీరు పెట్టాలి?",
+        aEn: "Maize has critical moisture periods: Tasseling (పూత దశ) and Silking/Grain Filling (గింజ పాలుపోసుకునే దశ). During vegetative stage, alternate furrow irrigation can stretch interval to 10-12 days in red soils. But do not allow water stress during silking as yield drops by up to 40%.",
+        aTe: "మొక్కజొన్నలో పూత దశ మరియు గింజ పాలుపోసుకునే దశ అత్యంత కీలకమైనవి. ఈ దశలలో తేమ లోపిస్తే 40% దిగుబడి తగ్గుతుంది. నీటి కొరత ఉన్నప్పుడు ఒక సాలు విడిచి ఒక సాలుకు నీరు పారించడం ద్వారా 35% నీటిని ఆదా చేయవచ్చు."
+      },
+      {
+        qEn: "How to claim the ₹500/quintal Telangana Fine Rice bonus?",
+        qTe: "తెలంగాణ సన్నవడ్ల ₹500/క్వింటాల్ బోనస్ ఎలా పొందాలి?",
+        aEn: "To receive the ₹500/quintal State Bonus for Fine Paddy (సన్న రకాలు like RNR 15048, BPT 5204): 1. Ensure crop is recorded in Rythu Bandhu / crop booking portal by AEO. 2. Bring Aadhaar, Pattadar Passbook, and Bank Account linked to NPCI to APMC procurement center (PPC/IKP). 3. Moisture must be below 17%. Payout is ₹2,320 MSP + ₹500 bonus = ₹2,820/quintal directly into your bank account.",
+        aTe: "తెలంగాణ ప్రభుత్వ సన్నవడ్ల బోనస్ ₹500/క్వింటాల్ పొందడానికి: 1. ఏఈఓ వద్ద పంట నమోదు (Crop Booking) చేయించాలి. 2. ఆధార్, పట్టాదారు పాస్ పుస్తకం వివరాలు ఐకేపీ/పీపీసీ కొనుగోలు కేంద్రానికి తీసుకెళ్లాలి. 3. ధాన్యంలో తేమ 17% కంటే తక్కువగా ఉండాలి. కేంద్ర మద్దతు ధర ₹2,320 + రాష్ట్ర బోనస్ ₹500 కలిపి క్వింటాలుకు ₹2,820 జమ అవుతుంది."
+      }
+    ];
+
+    const LEAF_DATA = [
+      {
+        nameEn: "Paddy Leaf Blast",
+        nameTe: "వరి అగ్గితెగులు",
+        pathogen: "Pyricularia oryzae",
+        conf: "94.2%",
+        sev: "High Severity",
+        symEn: "Spindle-shaped or diamond lesions with grey/white centers and dark brown borders on leaf blades.",
+        symTe: "ఆకులపై కంటి లేదా నూలుకండె ఆకారపు మచ్చలు ఏర్పడతాయి. మచ్చల మధ్య భాగం బూడిద రంగులో, అంచులు ముదురు గోధుమ రంగులో ఉంటాయి.",
+        treatEn: "• Spray Tricyclazole 75% WP @ 0.6 g/L water OR Isoprothiolane 40% EC @ 1.5 mL/L.<br>• Avoid excess nitrogen top-dressing.<br>• Maintain 2-3 cm thin water layer in field.",
+        treatTe: "• ట్రైసైక్లాజోల్ 75% WP @ 0.6 గ్రాములు లేదా ఐసోప్రోథియోలేన్ 40% EC @ 1.5 మి.లీ లీటరు నీటికి కలిపి పిచికారీ చేయాలి.<br>• నత్రజని ఎరువులను తగ్గించాలి.<br>• పొలంలో పలుచగా నీరు ఉంచాలి.",
+        svg: `<svg width="120" height="120" viewBox="0 0 200 200">
+          <path d="M100 20 C140 60 160 120 100 180 C40 120 60 60 100 20 Z" fill="#4ade80" stroke="#16a34a" stroke-width="3"/>
+          <ellipse cx="100" cy="70" rx="14" ry="32" fill="#78350f" transform="rotate(-15 100 70)"/>
+          <ellipse cx="100" cy="70" rx="9" ry="24" fill="#cbd5e1" transform="rotate(-15 100 70)"/>
+          <ellipse cx="115" cy="120" rx="10" ry="22" fill="#78350f" transform="rotate(20 115 120)"/>
+          <ellipse cx="115" cy="120" rx="6" ry="16" fill="#cbd5e1" transform="rotate(20 115 120)"/>
+        </svg>`
+      },
+      {
+        nameEn: "Pink Bollworm Infestation",
+        nameTe: "గులాబీ రంగు పురుగు",
+        pathogen: "Pectinophora gossypiella",
+        conf: "91.8%",
+        sev: "Critical (ETL Exceeded)",
+        symEn: "Rosetted flowers that fail to open fully. Entry boreholes on young bolls. Larvae feed on seeds inside locules.",
+        symTe: "గుడ్డి పూలు (Rosetted flowers) కనిపిస్తాయి. లేత కాయలపై సన్నని రంధ్రాలు ఉంటాయి. గులాబీ రంగు లార్వా కాయ లోపలి గింజలను తింటుంది.",
+        treatEn: "• Install 8-10 pheromone traps per acre.<br>• Spray Profenofos 50% EC @ 2 mL/L OR Emamectin Benzoate 5% SG @ 5g/10L.<br>• Destroy fallen rosetted flowers weekly.",
+        treatTe: "• ఎకరానికి 8-10 లింగాకర్షక బుట్టలు అమర్చాలి.<br>• ప్రొఫెనోఫాస్ 50% EC @ 2 మి.లీ లేదా ఇమామెక్టిన్ బెంజోయేట్ 5% SG @ 5 గ్రాములు 10 లీటర్ల నీటికి కలిపి పిచికారీ చేయాలి.",
+        svg: `<svg width="120" height="120" viewBox="0 0 200 200">
+          <circle cx="100" cy="110" r="45" fill="#f8fafc" stroke="#475569" stroke-width="3"/>
+          <path d="M100 50 L115 75 L100 85 L85 75 Z" fill="#22c55e" stroke="#15803d" stroke-width="2"/>
+          <circle cx="110" cy="115" r="14" fill="#92400e" opacity="0.3"/>
+          <circle cx="110" cy="115" r="6" fill="#1e293b"/>
+          <path d="M90 135 Q105 145 120 135" stroke="#f43f5e" stroke-width="6" stroke-linecap="round"/>
+        </svg>`
+      },
+      {
+        nameEn: "Chilli Leaf Curl Virus",
+        nameTe: "మిరప బొబ్బర తెగులు",
+        pathogen: "Begomovirus (Whitefly)",
+        conf: "96.5%",
+        sev: "Moderate-High",
+        symEn: "Upward curling and puckering of leaves. Vein thickening and stunting of plants transmitted by whitefly.",
+        symTe: "ఆకులు పైకి దోనెలా ముడుచుకుపోవడం (Upward curling), ఆకుల అంచులు ముడుతలు పడటం. తెల్లదోమ ద్వారా ఈ వైరస్ వేగంగా వ్యాపిస్తుంది.",
+        treatEn: "• Install 15-20 yellow sticky traps per acre.<br>• Spray Diafenthiuron 50% WP @ 1.25 g/L OR Acetamiprid 20% SP @ 0.2 g/L.<br>• Spray Neem Oil 10,000 ppm @ 2 mL/L.",
+        treatTe: "• ఎకరానికి 15-20 పసుపు రంగు జిగురు అట్టలను అమర్చాలి.<br>• డయాఫెంతియురాన్ 50% WP @ 1.25 గ్రా లేదా ఎసిటామైప్రిడ్ 20% SP @ 0.2 గ్రా లీటరు నీటికి పిచికారీ చేయాలి.",
+        svg: `<svg width="120" height="120" viewBox="0 0 200 200">
+          <path d="M100 30 C130 50 145 90 120 160 C95 180 80 140 85 90 C85 60 90 40 100 30 Z" fill="#86efac" stroke="#15803d" stroke-width="3"/>
+          <path d="M100 30 Q105 100 105 170" stroke="#166534" stroke-width="3"/>
+          <circle cx="115" cy="85" r="5" fill="#15803d" opacity="0.6"/>
+          <circle cx="110" cy="120" r="5" fill="#15803d" opacity="0.6"/>
+        </svg>`
+      }
+    ];
+
+    // Initialize Stepper Nav
+    function initStepper() {
+      const container = document.getElementById("stepper-nav");
+      container.innerHTML = "";
+      STEPS.forEach(s => {
+        const btn = document.createElement("button");
+        btn.className = `step-pill ${s.id === currentStep ? "active" : s.id < currentStep ? "done" : ""}`;
+        btn.id = `pill-${s.id}`;
+        btn.onclick = () => goToStep(s.id);
+        btn.innerHTML = `<span class="step-num">${s.id}</span> <span>${isTelugu ? s.titleTe : s.titleEn}</span>`;
+        container.appendChild(btn);
+      });
+    }
+
+    function goToStep(step) {
+      if (step < 1 || step > 7) return;
+      currentStep = step;
+
+      // Hide all steps, show current
+      for (let i = 1; i <= 7; i++) {
+        const el = document.getElementById(`step-${i}`);
+        if (el) el.classList.toggle("hidden", i !== currentStep);
+      }
+
+      // Update stepper pills
+      STEPS.forEach(s => {
+        const pill = document.getElementById(`pill-${s.id}`);
+        if (pill) {
+          pill.className = `step-pill ${s.id === currentStep ? "active" : s.id < currentStep ? "done" : ""}`;
+        }
+      });
+
+      // Update bottom buttons
+      document.getElementById("btn-prev").disabled = (currentStep === 1);
+      document.getElementById("btn-next").disabled = (currentStep === 7);
+
+      // Trigger step specifics
+      if (currentStep === 2 && !pumpActive && soilMoisture < 31.5) {
+        startPump();
+      } else if (currentStep === 3) {
+        stopPump();
+      } else if (currentStep === 4) {
+        runCalculators();
+      } else if (currentStep === 7) {
+        updatePayout();
+      }
+    }
+
+    function prevStep() { goToStep(currentStep - 1); }
+    function nextStep() { goToStep(currentStep + 1); }
+
+    // Pump & Audio Simulation
+    function togglePump() {
+      if (pumpActive) stopPump();
+      else startPump();
+    }
+
+    function startPump() {
+      if (soilMoisture >= 31.5) soilMoisture = 17.4;
+      pumpActive = true;
+      document.getElementById("impeller-wheel").classList.add("spinning");
+      document.getElementById("pump-flow-val").innerText = "420 Litres/min";
+      document.getElementById("pump-toggle-lbl").innerText = "Pause Pump";
+      document.getElementById("s2-status-badge").innerText = "PUMP ACTIVE";
+
+      if (isSoundOn) playPumpHum();
+
+      clearInterval(pumpInterval);
+      pumpInterval = setInterval(() => {
+        if (soilMoisture >= 31.5) {
+          soilMoisture = 31.5;
+          stopPump();
+          document.getElementById("s2-status-badge").innerText = "CYCLE COMPLETE";
+        } else {
+          soilMoisture = parseFloat((soilMoisture + 0.4).toFixed(1));
+        }
+        document.getElementById("s2-moist-display").innerText = soilMoisture.toFixed(1) + "%";
+        document.getElementById("s2-moist-bar").style.width = ((soilMoisture / 40) * 100) + "%";
+      }, 300);
+    }
+
+    function stopPump() {
+      pumpActive = false;
+      clearInterval(pumpInterval);
+      document.getElementById("impeller-wheel").classList.remove("spinning");
+      document.getElementById("pump-flow-val").innerText = "0 L/min";
+      document.getElementById("pump-toggle-lbl").innerText = "Start Pump";
+      stopPumpHum();
+    }
+
+    function playPumpHum() {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!audioCtx) audioCtx = new AudioContext();
+        if (audioCtx.state === "suspended") audioCtx.resume();
+        if (osc) return;
+        osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(65, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+      } catch (e) {}
+    }
+
+    function stopPumpHum() {
+      try {
+        if (osc) {
+          osc.stop();
+          osc.disconnect();
+          osc = null;
+        }
+      } catch (e) {}
+    }
+
+    function toggleSound() {
+      isSoundOn = !isSoundOn;
+      document.getElementById("lbl-sound").innerText = isSoundOn ? "Pump Audio ON" : "Pump Audio OFF";
+      if (pumpActive) {
+        if (isSoundOn) playPumpHum();
+        else stopPumpHum();
+      }
+    }
+
+    // Calculators
+    function runCalculators() {
+      const crop = document.getElementById("calc-crop").value;
+      const acres = parseFloat(document.getElementById("calc-acres").value) || 1;
+      const guntas = parseFloat(document.getElementById("calc-guntas").value) || 0;
+      const totalAcres = acres + (guntas / 40);
+      const ha = totalAcres * 0.4047;
+
+      let n=120, p=60, k=40;
+      let seedRatePerAcre = 12.0;
+
+      if (crop === "Maize") {
+        n = 180; p = 60; k = 50;
+        seedRatePerAcre = 8.0;
+      } else if (crop === "Cotton") {
+        n = 150; p = 60; k = 60;
+        seedRatePerAcre = 1.8;
+      }
+
+      const pReq = p * ha;
+      const dapBags = Math.ceil(pReq / 23);
+      const nFromDap = dapBags * 9;
+      const nReq = n * ha;
+      const nRem = Math.max(0, nReq - nFromDap);
+      const ureaBags = Math.ceil(nRem / 23);
+      const kReq = k * ha;
+      const mopBags = Math.ceil(kReq / 30);
+
+      document.getElementById("res-dap").innerText = dapBags;
+      document.getElementById("res-urea").innerText = ureaBags;
+      document.getElementById("res-mop").innerText = mopBags;
+
+      const totalSeedKg = (seedRatePerAcre * totalAcres).toFixed(1);
+      document.getElementById("res-seed-kg").innerText = totalSeedKg + " kg";
+      document.getElementById("res-seed-acre").innerText = seedRatePerAcre.toFixed(1) + " kg/acre";
+      document.getElementById("res-packets").innerText = Math.ceil(totalSeedKg / (crop === "Cotton" ? 0.45 : 10));
+    }
+
+    // Krishi Q&A
+    function selectQA(idx) {
+      const btns = document.querySelectorAll(".qa-btn");
+      btns.forEach((b, i) => b.classList.toggle("active", i === idx));
+
+      const item = QA_DATA[idx];
+      document.getElementById("qa-active-q").innerText = isTelugu ? item.qTe : item.qEn;
+      document.getElementById("qa-active-a").innerText = isTelugu ? item.aTe : item.aEn;
+    }
+
+    // Leaf Scanner
+    function selectLeaf(idx) {
+      for (let i = 0; i < 3; i++) {
+        document.getElementById(`leaf-btn-${i}`).classList.toggle("active", i === idx);
+      }
+      const item = LEAF_DATA[idx];
+      document.getElementById("leaf-svg-container").innerHTML = item.svg;
+      document.getElementById("leaf-conf-badge").innerText = "Confidence: " + item.conf;
+      document.getElementById("leaf-sev-badge").innerText = item.sev;
+      document.getElementById("leaf-name-h").innerText = isTelugu ? item.nameTe : item.nameEn;
+      document.getElementById("leaf-sym-p").innerText = isTelugu ? item.symTe : item.symEn;
+      document.getElementById("leaf-treat-p").innerHTML = isTelugu ? item.treatTe : item.treatEn;
+    }
+
+    // Step 7 Payout & WhatsApp
+    function updatePayout() {
+      const qtl = parseFloat(document.getElementById("payout-qtl").value) || 0;
+      const rate = 2820;
+      const bonusRate = 500;
+      const total = qtl * rate;
+      const bonus = qtl * bonusRate;
+
+      document.getElementById("payout-total").innerText = "₹" + total.toLocaleString("en-IN");
+      document.getElementById("payout-bonus").innerText = "+₹" + bonus.toLocaleString("en-IN");
+
+      const txt = `🌾 *Smart Farm Assistant — Conference Demo* 🌾
+📍 రైతు: మల్లేశం గౌడ్ (మల్లాపూర్, జగిత్యాల జిల్లా)
+🌱 పంట: వరి RNR 15048 (4.5 ఎకరాలు)
+💧 నేల తేమ: ${soilMoisture.toFixed(1)}% (సరిపడా తేమ)
+🌧️ వర్ష సూచన: రేపు 32mm భారీ వర్షం - రెయిన్ స్కిప్ ఆన్
+💰 జగిత్యాల APMC రేటు: ₹2,820/క్వింటాల్ (MSP ₹2,320 + తెలంగాణ బోనస్ ₹500)
+📊 అంచనా చెల్లింపు: ${qtl} క్వింటాళ్లు = ₹${total.toLocaleString("en-IN")}
+🌐 లైవ్ సైట్: https://smartfarming-web.vercel.app`;
+
+      document.getElementById("share-txt").value = txt;
+    }
+
+    function copyWhatsApp() {
+      const txt = document.getElementById("share-txt");
+      txt.select();
+      navigator.clipboard.writeText(txt.value).then(() => {
+        document.getElementById("copy-btn-lbl").innerText = "Copied to Clipboard!";
+        setTimeout(() => {
+          document.getElementById("copy-btn-lbl").innerText = "Copy WhatsApp Advisory";
+        }, 2000);
+      });
+    }
+
+    // Toggle Projector
+    function toggleProjector() {
+      isProjector = !isProjector;
+      document.body.classList.toggle("projector", isProjector);
+      document.getElementById("btn-projector").classList.toggle("btn-active", isProjector);
+      document.getElementById("lbl-projector").innerText = isProjector ? "Standard Mode" : "Projector Mode";
+    }
+
+    // Toggle Language
+    function toggleLang() {
+      isTelugu = !isTelugu;
+      document.getElementById("lbl-lang").innerText = isTelugu ? "English" : "తెలుగు";
+      initStepper();
+
+      // Update Q&A
+      for (let i = 0; i < 4; i++) {
+        document.getElementById(`qa-q${i}`).innerText = isTelugu ? QA_DATA[i].qTe : QA_DATA[i].qEn;
+      }
+      selectQA(0);
+      selectLeaf(0);
+    }
+
+    // Reset Demo
+    function resetAll() {
+      stopPump();
+      soilMoisture = 17.4;
+      document.getElementById("s1-moist-val").innerText = "17.4%";
+      document.getElementById("s2-moist-display").innerText = "17.4%";
+      document.getElementById("s2-moist-bar").style.width = "43%";
+      document.getElementById("calc-crop").value = "Paddy";
+      document.getElementById("calc-acres").value = "4.5";
+      document.getElementById("calc-guntas").value = "0";
+      document.getElementById("payout-qtl").value = "110";
+      goToStep(1);
+    }
+
+    // Keyboard navigation
+    window.addEventListener("keydown", (e) => {
+      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA" || e.target.tagName === "SELECT") return;
+      if (e.key === "ArrowRight" || e.key === "n" || e.key === "N") nextStep();
+      else if (e.key === "ArrowLeft" || e.key === "p" || e.key === "P") prevStep();
+      else if (e.key === "r" || e.key === "R") resetAll();
+    });
+
+    // Boot
+    initStepper();
+    selectQA(0);
+    selectLeaf(0);
+    runCalculators();
+    updatePayout();
+  </script>
+</body>
+</html>
