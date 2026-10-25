@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { LanguageProvider } from "@/components/common/LanguageContext";
 import { ThemeProvider } from "@/components/common/ThemeContext";
+import { FarmerProfileProvider } from "@/components/common/FarmerProfileContext";
 import { AppShell } from "@/components/layout/AppShell";
 import { PWARegister } from "@/components/common/PWARegister";
 import { AnalyticsTracker } from "@/components/common/AnalyticsTracker";
@@ -55,9 +56,11 @@ export default function RootLayout({
       <body className="min-h-screen font-sans antialiased bg-stone-50 text-stone-900 dark:bg-stone-950 dark:text-stone-100 selection:bg-agri-200 selection:text-agri-900">
         <ThemeProvider>
           <LanguageProvider>
-            <PWARegister />
-            <AnalyticsTracker />
-            <AppShell>{children}</AppShell>
+            <FarmerProfileProvider>
+              <PWARegister />
+              <AnalyticsTracker />
+              <AppShell>{children}</AppShell>
+            </FarmerProfileProvider>
           </LanguageProvider>
         </ThemeProvider>
       </body>

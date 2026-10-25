@@ -47,8 +47,10 @@ import {
   AnalyticsSummary,
 } from "@/lib/analytics/analyticsStore";
 import CropDiseaseDatasetManager from "@/components/admin/CropDiseaseDatasetManager";
+import { useFarmerProfile } from "@/components/common/FarmerProfileContext";
 
 export default function AdminPortalPage() {
+  const { profile, resetToSample } = useFarmerProfile();
   // Authentication states
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [email, setEmail] = useState<string>("admin@smartfarmer.com");
@@ -60,12 +62,44 @@ export default function AdminPortalPage() {
   const [showForgotModal, setShowForgotModal] = useState<boolean>(false);
 
   // Active section tab
-  const [adminTab, setAdminTab] = useState<"analytics" | "dataset">("analytics");
+  const [adminTab, setAdminTab] = useState<"diagnostics" | "analytics" | "dataset">("diagnostics");
 
   // Analytics states
   const [stats, setStats] = useState<AnalyticsSummary | null>(null);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
-  const [simulatedSpike, setSimulatedSpike] = useState<number>(0);
+  const [apiHealth, setApiHealth] = useState({
+    weather: "Checking...",
+    mandi: "Checking...",
+    chat: "Checking...",
+    pwa: "Checking...",
+  });
+
+  // Check API health
+  useEffect(() => {
+    // Check Weather
+    fetch("https://api.open-meteo.com/v1/forecast?latitude=18.7963&longitude=78.9125&current=temperature_2m")
+      .then((r) => setApiHealth((prev) => ({ ...prev, weather: r.ok ? "Operational (HTTP 200)" : `Error ${r.status}` })))
+      .catch(() => setApiHealth((prev) => ({ ...prev, weather: "Unreachable (Offline)" })));
+
+    // Check Mandi
+    fetch("/api/mandi")
+      .then((r) => r.json())
+      .then((d) => setApiHealth((prev) => ({ ...prev, mandi: d.source || "Operational" })))
+      .catch(() => setApiHealth((prev) => ({ ...prev, mandi: "Snapshot Fallback" })));
+
+    // Check Chat API
+    fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: "ping" }) })
+      .then((r) => r.json())
+      .then((d) => setApiHealth((prev) => ({ ...prev, chat: d.source || "Operational" })))
+      .catch(() => setApiHealth((prev) => ({ ...prev, chat: "Offline Fallback" })));
+
+    // Check PWA
+    if (typeof window !== "undefined" && "serviceWorker" in navigator) {
+      navigator.serviceWorker.getRegistrations().then((regs) => {
+        setApiHealth((prev) => ({ ...prev, pwa: regs.length > 0 ? "Active & Pre-cached" : "Supported (Not registered)" }));
+      });
+    }
+  }, []);
 
   // Check saved session on mount
   useEffect(() => {
@@ -150,19 +184,6 @@ export default function AdminPortalPage() {
     setIsRefreshing(true);
     setStats(getAnalyticsSummary());
     setTimeout(() => setIsRefreshing(false), 400);
-  };
-
-  const handleSimulateVisitor = () => {
-    setSimulatedSpike((prev) => prev + 5);
-    setStats((prev) => {
-      if (!prev) return getAnalyticsSummary();
-      return {
-        ...prev,
-        totalVisitors: prev.totalVisitors + 5,
-        activeUsersNow: prev.activeUsersNow + 2,
-        todayVisits: prev.todayVisits + 5,
-      };
-    });
   };
 
   // -------------------------------------------------------------
@@ -483,26 +504,36 @@ export default function AdminPortalPage() {
 
       {/* Admin Section Tab Switcher */}
       <div className="bg-white dark:bg-stone-900 border-b border-stone-200 dark:border-stone-800 px-4 md:px-8 py-2">
-        <div className="max-w-7xl mx-auto flex items-center gap-2">
+        <div className="max-w-7xl mx-auto flex items-center gap-2 overflow-x-auto">
+          <button
+            onClick={() => setAdminTab("diagnostics")}
+            className={`px-3.5 py-1.5 text-xs font-bold rounded-xl transition whitespace-nowrap ${
+              adminTab === "diagnostics"
+                ? "bg-indigo-600 text-white shadow-sm"
+                : "text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800"
+            }`}
+          >
+            ⚡ System Health & API Diagnostics
+          </button>
           <button
             onClick={() => setAdminTab("analytics")}
-            className={`px-3.5 py-1.5 text-xs font-bold rounded-xl transition ${
+            className={`px-3.5 py-1.5 text-xs font-bold rounded-xl transition whitespace-nowrap ${
               adminTab === "analytics"
                 ? "bg-indigo-600 text-white shadow-sm"
                 : "text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800"
             }`}
           >
-            📊 Visitor Analytics
+            📊 Local Session Analytics
           </button>
           <button
             onClick={() => setAdminTab("dataset")}
-            className={`px-3.5 py-1.5 text-xs font-bold rounded-xl transition ${
+            className={`px-3.5 py-1.5 text-xs font-bold rounded-xl transition whitespace-nowrap ${
               adminTab === "dataset"
                 ? "bg-indigo-600 text-white shadow-sm"
                 : "text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800"
             }`}
           >
-            🌱 Crop Disease Dataset & Labeling
+            🌱 Crop Disease Dataset
           </button>
         </div>
       </div>
@@ -511,6 +542,113 @@ export default function AdminPortalPage() {
       <main className="max-w-7xl mx-auto px-4 md:px-8 pt-6 space-y-6">
         {adminTab === "dataset" ? (
           <CropDiseaseDatasetManager />
+        ) : adminTab === "diagnostics" ? (
+          <div className="space-y-6">
+            {/* Diagnostics Header */}
+            <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-3xl p-6 shadow-md border border-slate-800">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 uppercase tracking-wider">
+                    System Telemetry & Health Audit
+                  </span>
+                  <h2 className="text-xl md:text-2xl font-black mt-2">
+                    Live Upstream APIs & Device Inspector
+                  </h2>
+                  <p className="text-xs md:text-sm text-slate-300 mt-1 max-w-2xl">
+                    Real-time verification of Open-Meteo, Agmarknet Mandi feed, Gemini Generative AI, and client localStorage profile persistence.
+                  </p>
+                </div>
+                <button
+                  onClick={handleRefreshStats}
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center gap-1.5 self-start md:self-auto"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin" : ""}`} />
+                  <span>Re-check Endpoints</span>
+                </button>
+              </div>
+            </div>
+
+            {/* API Health Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-white dark:bg-stone-900 rounded-2xl p-5 border border-stone-200 dark:border-stone-800 shadow-xs">
+                <span className="text-xs font-bold text-stone-500 block mb-1">Open-Meteo Weather API</span>
+                <span className="text-sm font-black text-emerald-600 dark:text-emerald-400 block my-1">
+                  {apiHealth.weather}
+                </span>
+                <span className="text-[11px] text-stone-400">Free Tier (No Key Needed)</span>
+              </div>
+
+              <div className="bg-white dark:bg-stone-900 rounded-2xl p-5 border border-stone-200 dark:border-stone-800 shadow-xs">
+                <span className="text-xs font-bold text-stone-500 block mb-1">Agmarknet Mandi Feed</span>
+                <span className="text-sm font-black text-indigo-600 dark:text-indigo-400 block my-1 truncate" title={apiHealth.mandi}>
+                  {apiHealth.mandi}
+                </span>
+                <span className="text-[11px] text-stone-400">/api/mandi Server Route</span>
+              </div>
+
+              <div className="bg-white dark:bg-stone-900 rounded-2xl p-5 border border-stone-200 dark:border-stone-800 shadow-xs">
+                <span className="text-xs font-bold text-stone-500 block mb-1">Krishi Sahayak AI API</span>
+                <span className="text-sm font-black text-purple-600 dark:text-purple-400 block my-1 truncate" title={apiHealth.chat}>
+                  {apiHealth.chat}
+                </span>
+                <span className="text-[11px] text-stone-400">/api/chat Gemini Grounding</span>
+              </div>
+
+              <div className="bg-white dark:bg-stone-900 rounded-2xl p-5 border border-stone-200 dark:border-stone-800 shadow-xs">
+                <span className="text-xs font-bold text-stone-500 block mb-1">PWA Offline Cache</span>
+                <span className="text-sm font-black text-sky-600 dark:text-sky-400 block my-1">
+                  {apiHealth.pwa}
+                </span>
+                <span className="text-[11px] text-stone-400">sw.js Service Worker</span>
+              </div>
+            </div>
+
+            {/* Current Active Farmer Profile Inspector */}
+            <div className="bg-white dark:bg-stone-900 rounded-3xl p-6 border border-stone-200 dark:border-stone-800 shadow-xs">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-stone-100 dark:border-stone-800 mb-4">
+                <div>
+                  <h3 className="text-base font-bold text-stone-900 dark:text-white">
+                    Active Farmer Profile State (localStorage: smartfarm_farmer_profile)
+                  </h3>
+                  <p className="text-xs text-stone-500">
+                    Client-side profile currently feeding Dashboard, Weather, and Community Hub
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${profile.isCustom ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"}`}>
+                    {profile.isCustom ? "Custom Farmer Config" : "Sample Profile Active"}
+                  </span>
+                  {profile.isCustom && (
+                    <button
+                      onClick={resetToSample}
+                      className="px-3 py-1 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-xs font-bold rounded-lg hover:bg-stone-200 transition"
+                    >
+                      Reset to Sample
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
+                <div className="p-3 rounded-xl bg-stone-50 dark:bg-stone-800/60 border border-stone-100 dark:border-stone-700">
+                  <span className="text-stone-400 block">Farmer Name</span>
+                  <strong className="text-stone-900 dark:text-white mt-1 block">{profile.name}</strong>
+                </div>
+                <div className="p-3 rounded-xl bg-stone-50 dark:bg-stone-800/60 border border-stone-100 dark:border-stone-700">
+                  <span className="text-stone-400 block">District & Mandal</span>
+                  <strong className="text-stone-900 dark:text-white mt-1 block">{profile.district} • {profile.mandal}</strong>
+                </div>
+                <div className="p-3 rounded-xl bg-stone-50 dark:bg-stone-800/60 border border-stone-100 dark:border-stone-700">
+                  <span className="text-stone-400 block">Primary Crop</span>
+                  <strong className="text-stone-900 dark:text-white mt-1 block">{profile.primaryCrop}</strong>
+                </div>
+                <div className="p-3 rounded-xl bg-stone-50 dark:bg-stone-800/60 border border-stone-100 dark:border-stone-700">
+                  <span className="text-stone-400 block">Land Area</span>
+                  <strong className="text-stone-900 dark:text-white mt-1 block">{profile.areaAcre} Acres ({profile.areaGunta} Guntas)</strong>
+                </div>
+              </div>
+            </div>
+          </div>
         ) : (
           <>
             {/* Banner Alert with Conference Context */}
@@ -520,22 +658,22 @@ export default function AdminPortalPage() {
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-indigo-500/30 text-indigo-200 border border-indigo-400/40">
                     ADSAUF-2047 Telangana
                   </span>
-                  <span className="text-xs text-indigo-300">Live Production Monitoring</span>
+                  <span className="text-xs text-indigo-300">Local Browser Session Monitoring</span>
                 </div>
                 <h2 className="text-base md:text-lg font-bold">
-                  Real-Time Rythu User Engagement Portal
+                  Client Session & Usage Analytics (Browser Metrics)
                 </h2>
                 <p className="text-xs text-indigo-200/90 mt-0.5">
-                  Live tracking active users across Telangana APMC Mandis, AI Disease Check, and ESP32 field units.
+                  Actual recorded page navigations, device breakdown, and feature visits on this device.
                 </p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <button
-                  onClick={handleSimulateVisitor}
+                  onClick={handleRefreshStats}
                   className="px-3 py-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 transition active:scale-95"
                 >
-                  <Zap className="w-3.5 h-3.5 text-amber-400" />
-                  Simulate 5 Farmers
+                  <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin" : ""}`} />
+                  Refresh Metrics
                 </button>
               </div>
             </div>

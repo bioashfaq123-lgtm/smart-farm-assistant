@@ -24,7 +24,7 @@ import {
   Check,
 } from "lucide-react";
 import { useLanguage } from "@/components/common/LanguageContext";
-import { DemoBadge } from "@/components/common/DemoBadge";
+import { useFarmerProfile } from "@/components/common/FarmerProfileContext";
 import { SafetyNotice } from "@/components/common/SafetyNotice";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
@@ -42,6 +42,7 @@ import {
 
 export default function AdvisoryPage() {
   const { lang, t } = useLanguage();
+  const { profile } = useFarmerProfile();
   const [messages, setMessages] = useState<ChatMessage[]>(INITIAL_CHAT_MESSAGES);
   const [inputText, setInputText] = useState("");
   const [isRecording, setIsRecording] = useState(false);
@@ -50,26 +51,42 @@ export default function AdvisoryPage() {
   const [selectedCase, setSelectedCase] = useState<PestDiagnosticCase>(SAMPLE_PEST_DIAGNOSTICS[0]);
   const [isAnalyzingPhoto, setIsAnalyzingPhoto] = useState(false);
   const [copiedPest, setCopiedPest] = useState(false);
+  const [chatSource, setChatSource] = useState<string>("PJTAU Knowledge Base");
+  const [errorMessage, setErrorMessage] = useState<string>("");
+
+  const initials = profile.name
+    ? profile.name
+        .split(" ")
+        .map((w) => w[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase()
+    : "YOU";
 
   const sampleSuggestions = [
     {
-      en: "How to identify yellow stem borer in paddy?",
-      te: "వరిలో కాండం తొలిచే పురుగును ఎలా గుర్తించాలి?",
+      en: "How to identify and treat Paddy Blast?",
+      te: "వరిలో అగ్గితెగులు నివారణకు మందు ఏమిటి?",
     },
     {
-      en: "Optimal drip irrigation schedule during flowering stage?",
-      te: "పూత దశలో డ్రిప్ ద్వారా నీటి తడులు ఎలా ఇవ్వాలి?",
+      en: "How to claim the ₹500/quintal Telangana Fine Rice bonus?",
+      te: "తెలంగాణ సన్నవడ్ల ₹500/క్వింటాల్ బోనస్ ఎలా పొందాలి?",
     },
     {
-      en: "Can I spray bio-fungicides before tomorrow's rain?",
-      te: "రేపు వర్షం పడే ముందు మందుల పిచికారీ చేయవచ్చా?",
+      en: "How much DAP and Urea should I apply at tillering stage?",
+      te: "పిలకల దశలో ఎంత డీఏపీ మరియు యూరియా వేయాలి?",
+    },
+    {
+      en: "Yellowing on lower leaves in cotton - deficiency or pest?",
+      te: "పత్తిలో ఆకులు పసుపు రంగులోకి మారడానికి నివారణ ఏమిటి?",
     },
   ];
 
-  const handleSend = (textToSend?: string) => {
+  const handleSend = async (textToSend?: string) => {
     const text = textToSend || inputText;
     if (!text.trim()) return;
 
+    setErrorMessage("");
     const userMsg: ChatMessage = {
       id: `user-${Date.now()}`,
       sender: "user",
@@ -82,37 +99,58 @@ export default function AdvisoryPage() {
     setInputText("");
     setIsSending(true);
 
-    // Simulate AI response with Chatbot Safety Rules adhered to
-    setTimeout(() => {
-      let replyEn = "Based on PJTAU guidelines, ensure field moisture is adequate. For chemical dosages or specific brand formulations, always check the physical product container label and confirm with your village Agriculture Extension Officer (AEO). Always wear rubber gloves, mask, and goggles during spray application.";
-      let replyTe = "PJTAU వ్యవసాయ మార్గదర్శకాల ప్రకారం పొలంలో తగినంత తేమ ఉండేలా చూసుకోండి. రసాయన మందుల మోతాదులు మరియు బ్రాండ్ల వివరాల కోసం తప్పనిసరిగా మందు సీసాపై ఉన్న లేబుల్ చదవండి మరియు మీ గ్రామ వ్యవసాయ అధికారి (AEO)ని సంప్రదించండి. పిచికారీ సమయంలో తప్పనిసరిగా చేతి తొడుగులు, మాస్క్ ధరించండి.";
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: text,
+          lang,
+        }),
+      });
 
-      const lower = text.toLowerCase();
-      if (lower.includes("borer") || text.includes("పురుగు")) {
-        replyEn = "Yellow stem borer causes dead hearts in vegetative stage and white ears at panicle stage. Install 4 pheromone traps per acre. For chemical interventions, please consult your local Mandal Agriculture Officer (MAO) for approved active ingredients and follow label directions strictly. Always wear full protective equipment.";
-        replyTe = "కాండం తొలిచే పురుగు ఆశిస్తే పిలక దశలో ఎండిన పిలకలు, వెన్ను దశలో తెల్ల కంకులు వస్తాయి. ఎకరాకు 4 లింగాకర్షక బుట్టలు పెట్టండి. మందుల పిచికారీ కోసం మీ స్థానిక వ్యవసాయ అధికారి (MAO) సూచించిన మందును మాత్రమే లేబుల్ మోతాదు ప్రకారం వాడండి. రక్షణ తొడుగులు తప్పనిసరి.";
-      } else if (lower.includes("rain") || text.includes("వర్షం")) {
-        replyEn = "With 70% rain probability forecasted, postpone all foliar nutrient and chemical sprays. Rain will wash off the active chemicals, leading to economic loss and chemical runoff into waterways.";
-        replyTe = "రేపు 70% వర్షం పడే అవకాశం ఉన్నందున ఎటువంటి రసాయన లేదా సేంద్రియ పిచికారీలను వాయిదా వేయండి. వర్షానికి మందు కొట్టుకుపోయి వృథా అవుతుంది.";
-      } else if (lower.includes("blast") || text.includes("అగ్గితెగులు")) {
-        replyEn = "Leaf Blast symptoms detected. University recommendation: Spray Tricyclazole 75% WP @ 0.6g/liter of water. Avoid excess nitrogenous fertilizer (Urea). Confirm active chemical label before spraying and use protective goggles.";
-        replyTe = "అగ్గితెగులు లక్షణాలు గమనించబడ్డాయి. వర్సిటీ సిఫారసు: ట్రైసైక్లజోల్ 75% WP లీటరు నీటికి 0.6 గ్రాముల చొప్పున కలిపి పిచికారీ చేయండి. యూరియా అధికంగా వేయవద్దు. రక్షణ కళ్ళజోడు ధరించండి.";
-      } else if (lower.includes("bollworm") || text.includes("గులాబీ")) {
-        replyEn = "Pink Bollworm in cotton: Install 8 pheromone traps per acre. For rosette flowers, release Trichogramma egg parasitoids @ 60,000/acre. For chemical control, consult local AEO for Emamectin Benzoate active ingredient dosage.";
-        replyTe = "పత్తిలో గులాబీ రంగు పురుగు నివారణకు ఎకరాకు 8 లింగాకర్షక బుట్టలు అమర్చండి. ట్రైకోగ్రామా గుడ్ల పరాన్నజీవులను విడుదల చేయండి. మందుల పిచికారీ కోసం గ్రామ వ్యవసాయ విస్తరణ అధికారి (AEO)ని సంప్రదించండి.";
+      if (res.status === 429) {
+        setErrorMessage("AI rate limit reached. Please wait a moment or ask a specific PJTAU topic.");
+      }
+
+      const data = await res.json();
+      const reply = data.reply || "Based on PJTAU guidelines, ensure adequate moisture and consult your local Mandal Agricultural Officer before spraying.";
+
+      if (data.source) {
+        setChatSource(data.source);
       }
 
       const botMsg: ChatMessage = {
         id: `bot-${Date.now()}`,
         sender: "assistant",
-        textEn: replyEn,
-        textTe: replyTe,
+        textEn: reply,
+        textTe: reply,
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
 
       setMessages((prev) => [...prev, botMsg]);
+    } catch (err) {
+      setErrorMessage("Network error. Using offline PJTAU advisory.");
+      const botMsg: ChatMessage = {
+        id: `bot-${Date.now()}`,
+        sender: "assistant",
+        textEn: "Based on PJTAU Package of Practices, maintain 2-3 cm thin water layer and monitor pest ETL thresholds. Consult your Mandal Agricultural Officer before spraying.",
+        textTe: "PJTAU మార్గదర్శకాల ప్రకారం పొలంలో పలుచని నీటి నిల్వ ఉంచండి మరియు పురుగు ఉధృతిని గమనించండి. మందుల పిచికారీ కోసం మండల వ్యవసాయ అధికారి (MAO)ని సంప్రదించండి.",
+        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      };
+      setMessages((prev) => [...prev, botMsg]);
+    } finally {
       setIsSending(false);
-    }, 900);
+    }
+  };
+
+  const speakText = (text: string) => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = lang === "te" ? "te-IN" : "en-IN";
+    utter.rate = 0.95;
+    window.speechSynthesis.speak(utter);
   };
 
   const toggleVoiceRecording = () => {
@@ -149,7 +187,9 @@ export default function AdvisoryPage() {
               {t("advisory_title")}
             </h1>
             <Badge variant="normal">{t("advisory_badge_ai")}</Badge>
-            <DemoBadge subtle />
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300">
+              {chatSource}
+            </span>
           </div>
           <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 mt-0.5">
             {t("advisory_subtitle")}
@@ -199,11 +239,11 @@ export default function AdvisoryPage() {
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100">
-                    Krishi-GPT Assistant
+                    Krishi Sahayak Assistant
                   </h3>
                   <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    Bilingual PJTAU Agronomic Knowledge Base
+                    PJTAU Vyavasaya Panchangam Knowledge Engine
                   </p>
                 </div>
               </div>
@@ -238,7 +278,7 @@ export default function AdvisoryPage() {
                           : "bg-agri-700 text-white"
                       }`}
                     >
-                      <p>{lang === "te" && msg.textTe ? msg.textTe : msg.textEn}</p>
+                      <p className="whitespace-pre-line">{lang === "te" && msg.textTe ? msg.textTe : msg.textEn}</p>
                       <div
                         className={`mt-2 flex items-center justify-between text-[10px] ${
                           isBot ? "text-stone-400 dark:text-stone-500" : "text-white/80"
@@ -247,11 +287,12 @@ export default function AdvisoryPage() {
                         <span>{msg.timestamp}</span>
                         {isBot && (
                           <button
-                            onClick={() => alert("Audio playback simulated for demo.")}
-                            className="hover:text-agri-600 dark:hover:text-agri-400 transition"
+                            onClick={() => speakText(lang === "te" && msg.textTe ? msg.textTe : msg.textEn)}
+                            className="hover:text-agri-600 dark:hover:text-agri-400 transition flex items-center gap-1 font-medium"
                             title="Listen to audio"
                           >
                             <Volume2 className="h-3.5 w-3.5" />
+                            <span>{lang === "te" ? "వినండి" : "Listen"}</span>
                           </button>
                         )}
                       </div>
@@ -259,7 +300,7 @@ export default function AdvisoryPage() {
 
                     {!isBot && (
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-stone-800 text-white text-xs font-bold">
-                        MG
+                        {initials}
                       </div>
                     )}
                   </div>
@@ -269,7 +310,13 @@ export default function AdvisoryPage() {
               {isSending && (
                 <div className="flex items-center gap-2 text-xs text-stone-500 dark:text-stone-400">
                   <span className="flex h-2 w-2 rounded-full bg-agri-600 animate-ping" />
-                  <span>Formulating university-tested agronomic advice...</span>
+                  <span>Consulting PJTAU agronomic intelligence...</span>
+                </div>
+              )}
+
+              {errorMessage && (
+                <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200">
+                  {errorMessage}
                 </div>
               )}
             </div>
@@ -402,7 +449,7 @@ export default function AdvisoryPage() {
               title={t("diag_tab_title")}
               subtitle={t("diag_subtitle")}
               icon={<Camera className="h-5 w-5 text-rose-500" />}
-              action={<DemoBadge subtle />}
+              action={<Badge variant="outline" className="text-xs">PJTAU Reference Cases</Badge>}
             />
 
             {/* Step 1: Select Sample Crop Leaf or Upload */}

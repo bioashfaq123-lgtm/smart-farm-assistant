@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   TrendingUp,
   TrendingDown,
@@ -44,6 +44,7 @@ import {
   Tooltip,
 } from "recharts";
 import { useLanguage } from "@/components/common/LanguageContext";
+import { useFarmerProfile } from "@/components/common/FarmerProfileContext";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import {
@@ -58,6 +59,7 @@ import { generateWhatsAppUrl, copyToClipboard } from "@/lib/utils/kisanShare";
 
 export default function MarketPage() {
   const { lang, t } = useLanguage();
+  const { profile } = useFarmerProfile();
   const [activeMainTab, setActiveMainTab] = useState<"market" | "community">("market");
   const [selectedCropFilter, setSelectedCropFilter] = useState<string>("all");
   const [selectedVarietyFilter, setSelectedVarietyFilter] = useState<string>("all");
@@ -65,6 +67,37 @@ export default function MarketPage() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeTrendItem, setActiveTrendItem] = useState<MandiPriceItem | null>(null);
+
+  // Live Mandi State from /api/mandi
+  const [mandiPrices, setMandiPrices] = useState<MandiPriceItem[]>(SAMPLE_MANDI_PRICES);
+  const [mandiSource, setMandiSource] = useState<string>("APMC Daily Snapshot");
+  const [mandiNotice, setMandiNotice] = useState<string>("");
+  const [isLiveMandi, setIsLiveMandi] = useState<boolean>(false);
+
+  // Fetch from /api/mandi
+  const fetchMandiData = async () => {
+    try {
+      setIsRefreshing(true);
+      const res = await fetch("/api/mandi");
+      if (res.ok) {
+        const json = await res.json();
+        if (json.data && Array.isArray(json.data) && json.data.length > 0) {
+          setMandiPrices(json.data);
+          setMandiSource(json.source || "APMC Snapshot");
+          setMandiNotice(json.notice || "");
+          setIsLiveMandi(!!json.isLive);
+        }
+      }
+    } catch (e) {
+      // Keep existing sample
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMandiData();
+  }, []);
 
   // Community Hub State
   const [communityPosts, setCommunityPosts] = useState<CommunityPost[]>(SAMPLE_COMMUNITY_POSTS);
@@ -91,12 +124,12 @@ export default function MarketPage() {
 
   // List of all distinct APMC markets for dropdown
   const allApmcMarkets = useMemo(() => {
-    return Array.from(new Set(SAMPLE_MANDI_PRICES.map((p) => p.marketNameEn))).sort();
-  }, []);
+    return Array.from(new Set(mandiPrices.map((p) => p.marketNameEn))).sort();
+  }, [mandiPrices]);
 
   // Filtered mandi prices
   const filteredPrices = useMemo(() => {
-    return SAMPLE_MANDI_PRICES.filter((item) => {
+    return mandiPrices.filter((item) => {
       // 1. Crop filter
       if (selectedCropFilter !== "all" && item.cropKey !== selectedCropFilter) {
         return false;
@@ -204,10 +237,10 @@ export default function MarketPage() {
 
     const newPost: CommunityPost = {
       id: `post-${Date.now()}`,
-      authorName: "Mallesham Goud",
-      authorVillage: "Mallapur",
-      authorDistrict: "Jagtial",
-      authorCrop: "Paddy (RNR 15048)",
+      authorName: profile.name,
+      authorVillage: profile.village,
+      authorDistrict: profile.district,
+      authorCrop: profile.primaryCrop,
       timeAgoEn: "Just now",
       timeAgoTe: "ఇప్పుడే",
       category: newQuestionCategory,
@@ -232,13 +265,20 @@ export default function MarketPage() {
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-900 dark:text-stone-50">
               {t("market_title")}
             </h1>
-            <Badge variant="online" className="py-1 px-3 gap-1.5 font-bold shadow-2xs">
-              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>{t("market_live_badge")}</span>
+            <Badge
+              variant={isLiveMandi ? "online" : "normal"}
+              className="py-1 px-3 gap-1.5 font-bold shadow-2xs"
+            >
+              <span
+                className={`h-2 w-2 rounded-full ${
+                  isLiveMandi ? "bg-emerald-500 animate-pulse" : "bg-amber-500"
+                }`}
+              />
+              <span>{mandiSource}</span>
             </Badge>
           </div>
           <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 mt-0.5">
-            {t("market_subtitle")} • Source: <b>Telangana State Agricultural Marketing Dept & Agmarknet Feed</b>
+            {t("market_subtitle")} • Source: <b>{mandiSource}</b>
           </p>
         </div>
 

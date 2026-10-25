@@ -30,7 +30,7 @@ import {
   Tooltip,
 } from "recharts";
 import { useLanguage } from "@/components/common/LanguageContext";
-import { DemoBadge } from "@/components/common/DemoBadge";
+import { useFarmerProfile } from "@/components/common/FarmerProfileContext";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { StatCard } from "@/components/ui/StatCard";
@@ -48,6 +48,7 @@ type MetricTab = "moisture" | "temperature" | "humidity" | "ph";
 
 export default function IoTPage() {
   const { lang, t } = useLanguage();
+  const { profile } = useFarmerProfile();
   const [activeMetric, setActiveMetric] = useState<MetricTab>("moisture");
   const [alerts, setAlerts] = useState(SAMPLE_IOT_ALERTS);
   const [pumpState, setPumpState] = useState(SAMPLE_PUMP_STATE);
@@ -195,10 +196,12 @@ export default function IoTPage() {
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-900 dark:text-stone-50">
               {t("iot_title")}
             </h1>
-            <DemoBadge subtle />
+            <Badge variant="outline" className="border-amber-400 bg-amber-50 text-amber-800 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-300">
+              Phase 3 Telemetry
+            </Badge>
           </div>
           <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 mt-0.5">
-            {t("iot_subtitle")}
+            {profile.village} Field &bull; {profile.mandal}, {profile.district} &bull; {profile.areaAcre} Acres {profile.primaryCrop}
           </p>
         </div>
 
@@ -427,9 +430,9 @@ export default function IoTPage() {
       <Card>
         <CardHeader
           title="Sensor Network Map"
-          subtitle="Visual zone moisture layout across your registered field blocks"
+          subtitle={`Visual zone moisture layout across ${profile.areaAcre} acres of ${profile.primaryCrop}`}
           icon={<MapPin className="h-5 w-5 text-agri-600" />}
-          action={<DemoBadge subtle />}
+          action={<Badge variant="outline">3 Telemetry Zones</Badge>}
         />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">

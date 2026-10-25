@@ -15,7 +15,7 @@ import {
   Leaf,
 } from "lucide-react";
 import { useLanguage } from "@/components/common/LanguageContext";
-import { DemoBadge } from "@/components/common/DemoBadge";
+import { useFarmerProfile } from "@/components/common/FarmerProfileContext";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import {
@@ -27,7 +27,8 @@ import {
 
 export default function InsightsPage() {
   const { lang, t } = useLanguage();
-  const [sowingDate, setSowingDate] = useState(SAMPLE_PROFILE.sowingDate);
+  const { profile } = useFarmerProfile();
+  const [sowingDate, setSowingDate] = useState(profile.sowingDate || SAMPLE_PROFILE.sowingDate);
 
   return (
     <div className="space-y-6">
@@ -38,10 +39,12 @@ export default function InsightsPage() {
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-900 dark:text-stone-50">
               {t("insights_title")}
             </h1>
-            <DemoBadge subtle />
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300">
+              {profile.district} Farm Insights
+            </span>
           </div>
           <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 mt-0.5">
-            {t("insights_subtitle")}
+            {t("insights_subtitle")} • {profile.primaryCrop} ({profile.areaAcre} Acres)
           </p>
         </div>
       </div>
@@ -52,7 +55,7 @@ export default function InsightsPage() {
           title={t("insights_zones_title")}
           subtitle="Real-time moisture color-coding across your active management units"
           icon={<Layers className="h-5 w-5 text-agri-600" />}
-          action={<DemoBadge subtle />}
+          action={<Badge variant="outline">3 Zones</Badge>}
         />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">

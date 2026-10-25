@@ -1,13 +1,30 @@
 "use client";
 
-import React from "react";
-import { Moon, Sun, Globe, Sprout } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Moon, Sun, Globe, Sprout, MapPin, Wifi, WifiOff } from "lucide-react";
 import { useLanguage } from "../common/LanguageContext";
 import { useTheme } from "../common/ThemeContext";
+import { useFarmerProfile } from "../common/FarmerProfileContext";
 
 export function Header() {
   const { lang, setLang, t } = useLanguage();
   const { theme, toggleTheme } = useTheme();
+  const { profile, openProfileModal } = useFarmerProfile();
+  const [isOnline, setIsOnline] = useState(true);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setIsOnline(navigator.onLine);
+      const handleOnline = () => setIsOnline(true);
+      const handleOffline = () => setIsOnline(false);
+      window.addEventListener("online", handleOnline);
+      window.addEventListener("offline", handleOffline);
+      return () => {
+        window.removeEventListener("online", handleOnline);
+        window.removeEventListener("offline", handleOffline);
+      };
+    }
+  }, []);
 
   return (
     <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-stone-200/80 bg-white/80 px-4 backdrop-blur-md md:px-8 dark:border-stone-800/80 dark:bg-stone-950/80">
@@ -17,15 +34,30 @@ export function Header() {
           <Sprout className="h-5 w-5" />
         </div>
         <div>
-          <h2 className="text-base font-bold text-stone-900 md:hidden dark:text-stone-50 truncate max-w-[180px]">
+          <h2 className="text-base font-bold text-stone-900 md:hidden dark:text-stone-50 truncate max-w-[150px]">
             {t("app_title")}
           </h2>
-          <div className="hidden items-center gap-2 text-xs text-stone-500 md:flex dark:text-stone-400">
-            <span className="inline-block h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="font-semibold text-emerald-700 dark:text-emerald-400">
-              {t("live_badge")}
-            </span>
-            <span>• Jagtial, Telangana</span>
+          {/* Network Status Chip & District Indicator */}
+          <div className="flex items-center gap-2 text-xs">
+            {isOnline ? (
+              <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-bold bg-emerald-50 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-300/80 text-[11px]">
+                <span className="inline-block h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span>Live (Online)</span>
+              </span>
+            ) : (
+              <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-bold bg-amber-50 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300 border border-amber-300/80 text-[11px]">
+                <span className="inline-block h-2 w-2 rounded-full bg-amber-500" />
+                <span>Offline (Pre-cached)</span>
+              </span>
+            )}
+            <button
+              onClick={openProfileModal}
+              className="hidden sm:inline-flex items-center gap-1 text-stone-600 dark:text-stone-300 hover:text-emerald-700 font-semibold"
+              title="Click to change your farm district"
+            >
+              <MapPin className="h-3.5 w-3.5 text-emerald-600" />
+              <span>{profile.district}, Telangana</span>
+            </button>
           </div>
         </div>
       </div>
