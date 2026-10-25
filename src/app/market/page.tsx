@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   TrendingUp,
   TrendingDown,
@@ -27,6 +27,12 @@ import {
   Building2,
   Truck,
   Award,
+  Search,
+  Filter,
+  Check,
+  Layers,
+  Tag,
+  Info,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -41,6 +47,8 @@ import { useLanguage } from "@/components/common/LanguageContext";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import {
+  COMMODITY_CROPS,
+  VARIETIES_CATALOG,
   SAMPLE_MANDI_PRICES,
   SAMPLE_MANDI_PRICE_TRENDS,
   SAMPLE_COMMUNITY_POSTS,
@@ -52,16 +60,11 @@ export default function MarketPage() {
   const { lang, t } = useLanguage();
   const [activeMainTab, setActiveMainTab] = useState<"market" | "community">("market");
   const [selectedCropFilter, setSelectedCropFilter] = useState<string>("all");
+  const [selectedVarietyFilter, setSelectedVarietyFilter] = useState<string>("all");
+  const [selectedMarketFilter, setSelectedMarketFilter] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeTrendItem, setActiveTrendItem] = useState<MandiPriceItem | null>(null);
-  const [alerts, setAlerts] = useState([
-    { id: "al-1", crop: "Paddy (Common / Sona)", condition: "Above ₹2,350 / qtl", active: true },
-    { id: "al-2", crop: "Cotton (Medium Staple)", condition: "Above ₹7,500 / qtl", active: true },
-    { id: "al-3", crop: "Chilli (Teja Red)", condition: "Above ₹16,000 / qtl", active: false },
-  ]);
-  const [showAddAlert, setShowAddAlert] = useState(false);
-  const [newCropName, setNewCropName] = useState("Maize");
-  const [newTargetPrice, setNewTargetPrice] = useState("2300");
 
   // Community Hub State
   const [communityPosts, setCommunityPosts] = useState<CommunityPost[]>(SAMPLE_COMMUNITY_POSTS);
@@ -70,22 +73,89 @@ export default function MarketPage() {
   const [newQuestionText, setNewQuestionText] = useState("");
   const [newQuestionCategory, setNewQuestionCategory] = useState<"pest" | "market" | "seeds" | "schemes" | "machinery">("seeds");
 
-  const cropFilters = [
-    { key: "all", labelEn: "All Commodities", labelTe: "అన్ని రకాల పంటలు" },
-    { key: "paddy", labelEn: "Paddy", labelTe: "వరి" },
-    { key: "cotton", labelEn: "Cotton", labelTe: "పత్తి" },
-    { key: "chilli", labelEn: "Chilli", labelTe: "మిరప" },
-    { key: "turmeric", labelEn: "Turmeric", labelTe: "పసుపు" },
-    { key: "maize", labelEn: "Maize", labelTe: "మొక్కజొన్న" },
-    { key: "groundnut", labelEn: "Groundnut", labelTe: "వేరుశెనగ" },
-    { key: "redgram", labelEn: "Redgram", labelTe: "కందులు" },
-    { key: "soybean", labelEn: "Soybean", labelTe: "సోయాబీన్" },
-  ];
+  // Reset variety when crop changes
+  const handleSelectCrop = (cropKey: string) => {
+    setSelectedCropFilter(cropKey);
+    setSelectedVarietyFilter("all");
+  };
 
-  const filteredPrices = SAMPLE_MANDI_PRICES.filter((item) => {
-    if (selectedCropFilter === "all") return true;
-    return item.id.toLowerCase().includes(selectedCropFilter);
-  });
+  // Varieties belonging to the active crop
+  const availableVarieties = useMemo(() => {
+    if (selectedCropFilter === "all") return VARIETIES_CATALOG;
+    return VARIETIES_CATALOG.filter((v) => v.cropKey === selectedCropFilter);
+  }, [selectedCropFilter]);
+
+  const selectedVarietyInfo = useMemo(() => {
+    return VARIETIES_CATALOG.find((v) => v.varietyKey === selectedVarietyFilter);
+  }, [selectedVarietyFilter]);
+
+  // List of all distinct APMC markets for dropdown
+  const allApmcMarkets = useMemo(() => {
+    return Array.from(new Set(SAMPLE_MANDI_PRICES.map((p) => p.marketNameEn))).sort();
+  }, []);
+
+  // Filtered mandi prices
+  const filteredPrices = useMemo(() => {
+    return SAMPLE_MANDI_PRICES.filter((item) => {
+      // 1. Crop filter
+      if (selectedCropFilter !== "all" && item.cropKey !== selectedCropFilter) {
+        return false;
+      }
+      // 2. Variety filter
+      if (selectedVarietyFilter !== "all" && item.varietyKey !== selectedVarietyFilter) {
+        return false;
+      }
+      // 3. APMC Market filter
+      if (selectedMarketFilter !== "all" && item.marketNameEn !== selectedMarketFilter) {
+        return false;
+      }
+      // 4. Search query
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase().trim();
+        const matchVariety =
+          item.variety.toLowerCase().includes(q) ||
+          (item.varietyTe && item.varietyTe.toLowerCase().includes(q));
+        const matchCommodity =
+          item.commodityEn.toLowerCase().includes(q) ||
+          item.commodityTe.toLowerCase().includes(q);
+        const matchMarket =
+          item.marketNameEn.toLowerCase().includes(q) ||
+          item.marketNameTe.toLowerCase().includes(q);
+        const matchDistrict =
+          item.districtEn.toLowerCase().includes(q) ||
+          item.districtTe.toLowerCase().includes(q);
+        if (!matchVariety && !matchCommodity && !matchMarket && !matchDistrict) {
+          return false;
+        }
+      }
+      return true;
+    });
+  }, [selectedCropFilter, selectedVarietyFilter, selectedMarketFilter, searchQuery]);
+
+  // Dynamic price metrics based on filtered results
+  const metrics = useMemo(() => {
+    if (filteredPrices.length === 0) {
+      return {
+        highest: null,
+        lowest: null,
+        totalArrivals: 0,
+        uniqueYardsCount: 0,
+        hasBonusPaddy: false,
+      };
+    }
+    const sorted = [...filteredPrices].sort((a, b) => b.modalPrice - a.modalPrice);
+    const totalArrivals = filteredPrices.reduce((sum, p) => sum + p.arrivalsQtl, 0);
+    const uniqueYards = new Set(filteredPrices.map((p) => p.marketNameEn)).size;
+    const hasBonus = filteredPrices.some((p) => (p.govtBonus || 0) > 0);
+
+    return {
+      highest: sorted[0],
+      lowest: sorted[sorted.length - 1],
+      totalArrivals,
+      uniqueYardsCount: uniqueYards,
+      hasBonusPaddy: hasBonus,
+    };
+  }, [filteredPrices]);
 
   const filteredCommunity = communityPosts.filter((post) => {
     if (communityFilter === "all") return true;
@@ -96,27 +166,21 @@ export default function MarketPage() {
     setIsRefreshing(true);
     setTimeout(() => {
       setIsRefreshing(false);
-    }, 700);
+    }, 600);
   };
 
-  const toggleAlert = (id: string) => {
-    setAlerts((prev) =>
-      prev.map((a) => (a.id === id ? { ...a, active: !a.active } : a))
-    );
+  const handleClearAllFilters = () => {
+    setSelectedCropFilter("all");
+    setSelectedVarietyFilter("all");
+    setSelectedMarketFilter("all");
+    setSearchQuery("");
   };
 
-  const handleCreateAlert = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newTargetPrice) return;
-    const newEntry = {
-      id: `al-${Date.now()}`,
-      crop: newCropName,
-      condition: `Above ₹${Number(newTargetPrice).toLocaleString("en-IN")} / qtl`,
-      active: true,
-    };
-    setAlerts((prev) => [newEntry, ...prev]);
-    setShowAddAlert(false);
-  };
+  const hasActiveFilter =
+    selectedCropFilter !== "all" ||
+    selectedVarietyFilter !== "all" ||
+    selectedMarketFilter !== "all" ||
+    searchQuery.trim() !== "";
 
   const handleUpvote = (postId: string) => {
     setCommunityPosts((prev) =>
@@ -174,7 +238,7 @@ export default function MarketPage() {
             </Badge>
           </div>
           <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 mt-0.5">
-            {t("market_subtitle")} • Source: <b>Telangana State Agricultural Marketing Dept & Agmarknet</b>
+            {t("market_subtitle")} • Source: <b>Telangana State Agricultural Marketing Dept & Agmarknet Feed</b>
           </p>
         </div>
 
@@ -218,232 +282,432 @@ export default function MarketPage() {
 
       {activeMainTab === "market" ? (
         /* ================= TAB 1: REAL MARKET DATA VIEW ================= */
-        <div className="space-y-6">
-          {/* Commodity Filter Chips */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1">
-            <SlidersHorizontal className="h-4 w-4 text-stone-400 shrink-0 hidden sm:block" />
-            {cropFilters.map((flt) => (
-              <button
-                key={flt.key}
-                onClick={() => setSelectedCropFilter(flt.key)}
-                className={`shrink-0 rounded-xl px-3.5 py-1.5 text-xs font-semibold transition ${
-                  selectedCropFilter === flt.key
-                    ? "bg-agri-700 text-white shadow-xs"
-                    : "border border-stone-200 bg-white text-stone-600 hover:bg-stone-50 dark:border-stone-800 dark:bg-stone-900 dark:text-stone-300"
-                }`}
-              >
-                {lang === "te" ? flt.labelTe : flt.labelEn}
-              </button>
-            ))}
+        <div className="space-y-5">
+          {/* 1. Primary Commodity Chips Bar */}
+          <div>
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+              <SlidersHorizontal className="h-4 w-4 text-stone-400 shrink-0 hidden sm:block" />
+              {COMMODITY_CROPS.map((crop) => {
+                const isActive = selectedCropFilter === crop.key;
+                return (
+                  <button
+                    key={crop.key}
+                    onClick={() => handleSelectCrop(crop.key)}
+                    className={`shrink-0 inline-flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-semibold transition ${
+                      isActive
+                        ? "bg-agri-700 text-white shadow-xs"
+                        : "border border-stone-200 bg-white text-stone-600 hover:bg-stone-50 dark:border-stone-800 dark:bg-stone-900 dark:text-stone-300"
+                    }`}
+                  >
+                    <span>{crop.icon}</span>
+                    <span>{lang === "te" ? crop.labelTe : crop.labelEn}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
-          {/* Real Price Analytics Cards */}
+          {/* 2. Variety Selector Bar: Choose Specific Crop Variety */}
+          <div className="rounded-2xl border border-agri-200/90 bg-gradient-to-r from-agri-50/70 via-white to-agri-50/30 p-4 shadow-2xs dark:border-stone-800 dark:bg-stone-900/90 dark:from-stone-900 dark:to-stone-900">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-agri-100 dark:border-stone-800 pb-3">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-agri-600 dark:text-agri-400" />
+                <span className="text-xs font-bold uppercase tracking-wider text-agri-950 dark:text-agri-200">
+                  {lang === "te" ? "రకం ఎంచుకోండి (Choose Variety):" : "Choose Variety / Commercial Grade:"}
+                </span>
+                <span className="text-[11px] text-stone-500">
+                  ({availableVarieties.length} {lang === "te" ? "రకాలు" : "varieties in catalogue"})
+                </span>
+              </div>
+              {selectedVarietyFilter !== "all" && (
+                <button
+                  onClick={() => setSelectedVarietyFilter("all")}
+                  className="text-[11px] font-semibold text-agri-700 hover:text-agri-900 dark:text-agri-400 flex items-center gap-1 self-start sm:self-auto"
+                >
+                  <X className="h-3 w-3" />
+                  <span>{lang === "te" ? "అన్ని రకాలు చూపించు" : "Show All Varieties"}</span>
+                </button>
+              )}
+            </div>
+
+            {/* Variety Quick Pills */}
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <button
+                onClick={() => setSelectedVarietyFilter("all")}
+                className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition ${
+                  selectedVarietyFilter === "all"
+                    ? "bg-agri-700 text-white shadow-xs"
+                    : "border border-stone-200 bg-white text-stone-700 hover:bg-stone-50 dark:border-stone-800 dark:bg-stone-850 dark:text-stone-300"
+                }`}
+              >
+                <span>{lang === "te" ? "అన్ని రకాలు (All Varieties)" : "All Varieties"}</span>
+              </button>
+              {availableVarieties.map((v) => {
+                const isSelected = selectedVarietyFilter === v.varietyKey;
+                return (
+                  <button
+                    key={v.varietyKey}
+                    onClick={() => setSelectedVarietyFilter(isSelected ? "all" : v.varietyKey)}
+                    className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold transition ${
+                      isSelected
+                        ? "bg-agri-700 text-white shadow-xs ring-2 ring-agri-500"
+                        : "border border-stone-200 bg-white text-stone-700 hover:bg-stone-50 dark:border-stone-800 dark:bg-stone-850 dark:text-stone-300"
+                    }`}
+                  >
+                    <span>{lang === "te" ? v.nameTe : v.nameEn}</span>
+                    {v.bonusEligible && (
+                      <span
+                        className={`rounded-md px-1.5 py-0.5 text-[9px] font-extrabold ${
+                          isSelected
+                            ? "bg-white/20 text-white"
+                            : "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+                        }`}
+                      >
+                        +₹500 Govt Bonus
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Active Variety Information Banner */}
+            {selectedVarietyInfo && (
+              <div className="mt-3 rounded-xl bg-white/95 p-3 text-xs border border-agri-200/70 dark:bg-stone-850 dark:border-stone-800 shadow-2xs">
+                <div className="flex flex-wrap items-center gap-2 font-bold text-stone-900 dark:text-stone-100">
+                  <Tag className="h-3.5 w-3.5 text-agri-600" />
+                  <span>{lang === "te" ? selectedVarietyInfo.nameTe : selectedVarietyInfo.nameEn}</span>
+                  {selectedVarietyInfo.bonusEligible && (
+                    <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200 dark:bg-emerald-950 dark:border-emerald-800 dark:text-emerald-300">
+                      {lang === "te"
+                        ? "తెలంగాణ ప్రభుత్వం +₹500 సన్న వడ్ల బోనస్ అర్హత"
+                        : "Eligible for +₹500/qtl Telangana State Fine Paddy Bonus"}
+                    </span>
+                  )}
+                </div>
+                <p className="mt-1 text-stone-600 dark:text-stone-300 text-[11px] leading-relaxed">
+                  {lang === "te" ? selectedVarietyInfo.featuresTe : selectedVarietyInfo.featuresEn}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* 3. Search and Secondary APMC Market Yard Selector */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            {/* APMC Yard / District Dropdown */}
+            <div className="flex items-center gap-2 flex-1 max-w-sm">
+              <MapPin className="h-4 w-4 text-stone-400 shrink-0" />
+              <select
+                value={selectedMarketFilter}
+                onChange={(e) => setSelectedMarketFilter(e.target.value)}
+                className="w-full rounded-xl border border-stone-200 bg-white p-2.5 text-xs font-semibold text-stone-800 shadow-2xs focus:border-agri-500 focus:outline-hidden dark:border-stone-800 dark:bg-stone-900 dark:text-stone-200"
+              >
+                <option value="all">
+                  {lang === "te"
+                    ? "తెలంగాణలోని అన్ని మార్కెట్ యార్డులు (All APMCs)"
+                    : "All Telangana APMC Yards"}
+                </option>
+                {allApmcMarkets.map((mkt) => (
+                  <option key={mkt} value={mkt}>
+                    {mkt}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Instant Search Bar */}
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-stone-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={t("market_search_placeholder")}
+                className="w-full rounded-xl border border-stone-200 bg-white pl-9 pr-8 py-2.5 text-xs text-stone-900 placeholder-stone-400 shadow-2xs focus:border-agri-500 focus:outline-hidden dark:border-stone-800 dark:bg-stone-900 dark:text-stone-100"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 dark:hover:text-stone-200"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+
+            {/* Clear All Filters Button */}
+            {hasActiveFilter && (
+              <button
+                onClick={handleClearAllFilters}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-stone-200 bg-stone-100 px-3 py-2 text-xs font-semibold text-stone-600 hover:bg-stone-200 dark:border-stone-800 dark:bg-stone-850 dark:text-stone-300 self-start sm:self-auto"
+              >
+                <RefreshCw className="h-3 w-3" />
+                <span>{t("market_reset_filters")}</span>
+              </button>
+            )}
+          </div>
+
+          {/* 4. Real Price Analytics Cards (Dynamic Based on Active Selection) */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <Card className="p-4 bg-gradient-to-br from-emerald-500/10 to-transparent border-emerald-200 dark:border-emerald-900/50">
               <div className="flex items-center justify-between">
                 <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
-                  {t("market_highest_modal")}
+                  {selectedVarietyFilter !== "all"
+                    ? (lang === "te" ? "ఈ రకానికి గరిష్ట ధర" : "Highest for Selected Variety")
+                    : t("market_highest_modal")}
                 </p>
                 <Award className="h-4 w-4 text-emerald-600" />
               </div>
               <div className="mt-1 flex items-baseline gap-1">
-                <span className="text-2xl font-black text-stone-900 dark:text-stone-50">₹16,500</span>
+                <span className="text-2xl font-black text-stone-900 dark:text-stone-50">
+                  {metrics.highest ? `₹${metrics.highest.modalPrice.toLocaleString("en-IN")}` : "---"}
+                </span>
                 <span className="text-xs text-stone-500">/ quintal</span>
               </div>
-              <p className="mt-1 text-xs text-stone-600 dark:text-stone-400">
-                Chilli (Teja Export Grade) at Khammam APMC
+              <p className="mt-1 text-xs text-stone-600 dark:text-stone-400 truncate">
+                {metrics.highest
+                  ? `${metrics.highest.variety} at ${
+                      lang === "te" ? metrics.highest.marketNameTe : metrics.highest.marketNameEn
+                    }`
+                  : "No market arrivals"}
               </p>
             </Card>
 
             <Card className="p-4 bg-gradient-to-br from-sky-500/10 to-transparent border-sky-200 dark:border-sky-900/50">
               <div className="flex items-center justify-between">
                 <p className="text-[11px] font-bold uppercase tracking-wider text-sky-800 dark:text-sky-300">
-                  Telangana Sona Paddy (RNR 15048)
+                  {metrics.hasBonusPaddy
+                    ? (lang === "te" ? "తెలంగాణ సోనా / సన్న బియ్యం" : "Telangana Fine Rice Bonus")
+                    : (lang === "te" ? "కనీస మద్దతు ధర (MSP)" : "Govt MSP Benchmark")}
                 </p>
-                <span className="rounded-md bg-sky-100 px-1.5 py-0.5 text-[9px] font-bold text-sky-800 dark:bg-sky-950 dark:text-sky-300">
-                  +₹500 Govt Bonus
-                </span>
+                {metrics.hasBonusPaddy ? (
+                  <span className="rounded-md bg-sky-100 px-1.5 py-0.5 text-[9px] font-bold text-sky-800 dark:bg-sky-950 dark:text-sky-300">
+                    +₹500 Govt Bonus
+                  </span>
+                ) : (
+                  <Building2 className="h-4 w-4 text-sky-600" />
+                )}
               </div>
               <div className="mt-1 flex items-baseline gap-1">
-                <span className="text-2xl font-black text-stone-900 dark:text-stone-50">₹2,320</span>
-                <span className="text-xs text-stone-500">/ quintal</span>
+                <span className="text-2xl font-black text-stone-900 dark:text-stone-50">
+                  {metrics.hasBonusPaddy ? "₹2,300 + ₹500" : "MSP Protected"}
+                </span>
+                <span className="text-xs text-stone-500">
+                  {metrics.hasBonusPaddy ? "= ₹2,800/qtl" : "as per FAQ norms"}
+                </span>
               </div>
-              <p className="mt-1 text-xs text-stone-600 dark:text-stone-400">
-                MSP ₹2,300 + State Bonus at Jagtial Yard (8 km away)
+              <p className="mt-1 text-xs text-stone-600 dark:text-stone-400 truncate">
+                {metrics.hasBonusPaddy
+                  ? "Telangana Rythu Fine Grain Incentive for RNR 15048 & BPT 5204"
+                  : "Fair Average Quality (FAQ) certified procurement at APMCs"}
               </p>
             </Card>
 
             <Card className="p-4 bg-gradient-to-br from-amber-500/10 to-transparent border-amber-200 dark:border-amber-900/50">
               <div className="flex items-center justify-between">
                 <p className="text-[11px] font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300">
-                  Nizamabad Turmeric e-NAM
+                  {lang === "te" ? "నేటి మొత్తం మార్కెట్ రాకలు" : "Today's Mandi Arrivals"}
                 </p>
-                <Building2 className="h-4 w-4 text-amber-600" />
+                <Truck className="h-4 w-4 text-amber-600" />
               </div>
               <div className="mt-1 flex items-baseline gap-1">
-                <span className="text-2xl font-black text-stone-900 dark:text-stone-50">₹13,400</span>
-                <span className="text-xs text-stone-500">/ quintal</span>
+                <span className="text-2xl font-black text-stone-900 dark:text-stone-50">
+                  {metrics.totalArrivals.toLocaleString("en-IN")}
+                </span>
+                <span className="text-xs text-stone-500">Quintals</span>
               </div>
               <p className="mt-1 text-xs text-stone-600 dark:text-stone-400">
-                Daily arrivals: 5,600 Qtls (Active e-Auction)
+                {lang === "te"
+                  ? `${metrics.uniqueYardsCount} వ్యవసాయ మార్కెట్ యార్డులలో క్రియాశీల రాకలు`
+                  : `Active arrivals across ${metrics.uniqueYardsCount} Telangana APMC yards`}
               </p>
             </Card>
           </div>
 
-          {/* Grid of Real APMC Mandi Cards */}
+          {/* 5. Grid of Real APMC Mandi Cards */}
           <div>
-            <div className="mb-3 flex items-center justify-between">
+            <div className="mb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
                 <span>🌾 Live Telangana Wholesale Rates</span>
                 <span className="text-[11px] font-normal text-stone-500">
-                  (Official Agmarknet Feed: {SAMPLE_MANDI_PRICES[0].priceDate})
+                  (Official Agmarknet Feed: {SAMPLE_MANDI_PRICES[0].priceDate}) • Showing {filteredPrices.length} arrivals
                 </span>
               </h3>
               <a
                 href="https://tsmarketing.in"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[11px] font-semibold text-agri-700 hover:underline flex items-center gap-1 dark:text-agri-400"
+                className="text-[11px] font-semibold text-agri-700 hover:underline flex items-center gap-1 dark:text-agri-400 self-start sm:self-auto"
               >
                 <span>tsmarketing.in Portal</span>
                 <ExternalLink className="h-3 w-3" />
               </a>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {filteredPrices.map((item) => {
-                const isUp = item.changeAmount > 0;
-                const isDown = item.changeAmount < 0;
+            {filteredPrices.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-stone-300 bg-white p-8 text-center dark:border-stone-800 dark:bg-stone-900">
+                <Store className="h-8 w-8 text-stone-400 mx-auto mb-2" />
+                <p className="text-sm font-semibold text-stone-800 dark:text-stone-200">
+                  {t("market_no_matching")}
+                </p>
+                <p className="text-xs text-stone-500 mt-1">
+                  {lang === "te"
+                    ? "ఎంచుకున్న రకం లేదా మార్కెట్ ఫిల్టర్లలో రాకలు లేవు. ఫిల్టర్లు క్లియర్ చేసి తిరిగి ప్రయత్నించండి."
+                    : "No APMC yards found for the selected variety and market combination. Try clearing filters."}
+                </p>
+                <button
+                  onClick={handleClearAllFilters}
+                  className="mt-3.5 inline-flex items-center gap-1.5 rounded-xl bg-agri-700 px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-agri-800"
+                >
+                  <RefreshCw className="h-3.5 w-3.5" />
+                  <span>{t("market_reset_filters")}</span>
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {filteredPrices.map((item) => {
+                  const isUp = item.changeAmount > 0;
+                  const isDown = item.changeAmount < 0;
 
-                return (
-                  <div
-                    key={item.id}
-                    className="flex flex-col justify-between rounded-2xl border border-stone-200/90 bg-white p-5 shadow-xs transition hover:border-agri-400 hover:shadow-md dark:border-stone-800/80 dark:bg-stone-900/90"
-                  >
-                    <div>
-                      {/* Title & Trend Icon */}
-                      <div className="flex items-start justify-between gap-1">
-                        <div>
-                          <span className="text-sm font-bold text-stone-900 dark:text-stone-100 block">
-                            {lang === "te" ? item.commodityTe : item.commodityEn}
-                          </span>
-                          <span className="text-[11px] text-stone-500 block">{item.variety}</span>
-                        </div>
-                        {isUp ? (
-                          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
-                            <TrendingUp className="h-4 w-4" />
-                          </span>
-                        ) : isDown ? (
-                          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300">
-                            <TrendingDown className="h-4 w-4" />
-                          </span>
-                        ) : (
-                          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-300">
-                            <Minus className="h-4 w-4" />
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Modal Price Display */}
-                      <div className="my-3">
-                        <div className="flex items-baseline gap-1">
-                          <span className="text-2xl sm:text-3xl font-extrabold text-stone-900 dark:text-white">
-                            ₹{item.modalPrice.toLocaleString("en-IN")}
-                          </span>
-                          <span className="text-xs text-stone-500 dark:text-stone-400">
-                            / quintal
-                          </span>
-                        </div>
-
-                        <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs">
-                          {isUp && (
-                            <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-                              +{item.changeAmount} ({item.changePct}%)
-                            </span>
-                          )}
-                          {isDown && (
-                            <span className="font-semibold text-rose-600 dark:text-rose-400">
-                              {item.changeAmount} ({item.changePct}%)
-                            </span>
-                          )}
-                          {!isUp && !isDown && (
-                            <span className="text-stone-500 dark:text-stone-400">
-                              Steady
-                            </span>
-                          )}
-                          {item.govtBonus && (
-                            <span className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200">
-                              +₹{item.govtBonus} State Bonus
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Real Market Details (Min / Max / Arrivals / MSP) */}
-                      <div className="rounded-xl bg-stone-50 p-2.5 dark:bg-stone-850 space-y-1 text-xs">
-                        <div className="flex items-center justify-between text-stone-600 dark:text-stone-300">
-                          <span>{t("market_price_range")}:</span>
-                          <b>₹{item.minPrice.toLocaleString("en-IN")} – ₹{item.maxPrice.toLocaleString("en-IN")}</b>
-                        </div>
-                        <div className="flex items-center justify-between text-stone-600 dark:text-stone-300">
-                          <span>{t("market_arrivals")}:</span>
-                          <b>{item.arrivalsQtl.toLocaleString("en-IN")} Quintals</b>
-                        </div>
-                        {item.mspPrice > 0 && (
-                          <div className="flex items-center justify-between text-stone-600 dark:text-stone-300">
-                            <span>{t("market_msp_label")}:</span>
-                            <span className="font-semibold text-agri-700 dark:text-agri-400">
-                              ₹{item.mspPrice.toLocaleString("en-IN")}
+                  return (
+                    <div
+                      key={item.id}
+                      className="flex flex-col justify-between rounded-2xl border border-stone-200/90 bg-white p-5 shadow-xs transition hover:border-agri-400 hover:shadow-md dark:border-stone-800/80 dark:bg-stone-900/90"
+                    >
+                      <div>
+                        {/* Variety Badge & Trend Icon */}
+                        <div className="flex items-start justify-between gap-1">
+                          <div>
+                            <div className="flex flex-wrap items-center gap-1.5 mb-1">
+                              <span className="rounded-lg bg-emerald-50 px-2 py-0.5 text-xs font-extrabold text-emerald-800 border border-emerald-200 dark:bg-emerald-950/70 dark:border-emerald-900/60 dark:text-emerald-300">
+                                {lang === "te" && item.varietyTe ? item.varietyTe : item.variety}
+                              </span>
+                              {item.govtBonus && (
+                                <span className="rounded-md bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-800 border border-amber-200 dark:bg-amber-950 dark:text-amber-300">
+                                  +₹{item.govtBonus} State Bonus
+                                </span>
+                              )}
+                            </div>
+                            <span className="text-xs font-medium text-stone-600 dark:text-stone-400 block">
+                              {lang === "te" ? item.commodityTe : item.commodityEn}
                             </span>
                           </div>
-                        )}
+                          {isUp ? (
+                            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 shrink-0">
+                              <TrendingUp className="h-4 w-4" />
+                            </span>
+                          ) : isDown ? (
+                            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300 shrink-0">
+                              <TrendingDown className="h-4 w-4" />
+                            </span>
+                          ) : (
+                            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-300 shrink-0">
+                              <Minus className="h-4 w-4" />
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Modal Price Display */}
+                        <div className="my-3">
+                          <div className="flex items-baseline gap-1">
+                            <span className="text-2xl sm:text-3xl font-extrabold text-stone-900 dark:text-white">
+                              ₹{item.modalPrice.toLocaleString("en-IN")}
+                            </span>
+                            <span className="text-xs text-stone-500 dark:text-stone-400">
+                              / quintal
+                            </span>
+                          </div>
+
+                          <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs">
+                            {isUp && (
+                              <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                                +₹{item.changeAmount} ({item.changePct}%)
+                              </span>
+                            )}
+                            {isDown && (
+                              <span className="font-semibold text-rose-600 dark:text-rose-400">
+                                ₹{item.changeAmount} ({item.changePct}%)
+                              </span>
+                            )}
+                            {!isUp && !isDown && (
+                              <span className="text-stone-500 dark:text-stone-400">
+                                Steady rate
+                              </span>
+                            )}
+                            <span className="text-[11px] text-stone-400">• Modal Wholesale Rate</span>
+                          </div>
+                        </div>
+
+                        {/* Real Market Details (Min / Max / Arrivals / MSP) */}
+                        <div className="rounded-xl bg-stone-50 p-2.5 dark:bg-stone-850 space-y-1 text-xs">
+                          <div className="flex items-center justify-between text-stone-600 dark:text-stone-300">
+                            <span>{t("market_price_range")}:</span>
+                            <b>
+                              ₹{item.minPrice.toLocaleString("en-IN")} – ₹{item.maxPrice.toLocaleString("en-IN")}
+                            </b>
+                          </div>
+                          <div className="flex items-center justify-between text-stone-600 dark:text-stone-300">
+                            <span>{t("market_arrivals")}:</span>
+                            <b>{item.arrivalsQtl.toLocaleString("en-IN")} Quintals</b>
+                          </div>
+                          {item.mspPrice > 0 && (
+                            <div className="flex items-center justify-between text-stone-600 dark:text-stone-300">
+                              <span>{t("market_msp_label")}:</span>
+                              <span className="font-semibold text-agri-700 dark:text-agri-400">
+                                ₹{item.mspPrice.toLocaleString("en-IN")}
+                              </span>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
 
-                    {/* Market Yard Info & Action Links */}
-                    <div className="mt-3 border-t border-stone-100 pt-3 text-xs text-stone-500 dark:border-stone-800 dark:text-stone-400 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="font-semibold text-stone-800 dark:text-stone-200 truncate">
-                          {lang === "te" ? item.marketNameTe : item.marketNameEn}
-                        </span>
-                        <span className="text-[10px] text-stone-400">{item.distanceKm} km</span>
-                      </div>
+                      {/* Market Yard Info & Action Links */}
+                      <div className="mt-3 border-t border-stone-100 pt-3 text-xs text-stone-500 dark:border-stone-800 dark:text-stone-400 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold text-stone-800 dark:text-stone-200 truncate">
+                            {lang === "te" ? item.marketNameTe : item.marketNameEn}
+                          </span>
+                          <span className="text-[10px] text-stone-400 shrink-0">{item.distanceKm} km away</span>
+                        </div>
 
-                      <div className="flex items-center justify-between gap-2 pt-1">
-                        <button
-                          onClick={() => setActiveTrendItem(item)}
-                          className="inline-flex items-center gap-1 text-[11px] font-bold text-agri-700 hover:text-agri-800 dark:text-agri-400"
-                        >
-                          <LineChartIcon className="h-3.5 w-3.5" />
-                          <span>{t("market_btn_trend")}</span>
-                        </button>
-
-                        <a
-                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.mapsQuery)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-[11px] font-medium text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200"
-                        >
-                          <MapPin className="h-3.5 w-3.5 text-stone-400" />
-                          <span>Maps</span>
-                        </a>
-
-                        {item.secretaryPhone && (
-                          <a
-                            href={`tel:${item.secretaryPhone}`}
-                            className="inline-flex items-center gap-1 text-[11px] font-medium text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200"
-                            title="Call Market Yard Secretary"
+                        <div className="flex items-center justify-between gap-2 pt-1">
+                          <button
+                            onClick={() => setActiveTrendItem(item)}
+                            className="inline-flex items-center gap-1 text-[11px] font-bold text-agri-700 hover:text-agri-800 dark:text-agri-400"
                           >
-                            <PhoneCall className="h-3.5 w-3.5 text-emerald-600" />
-                            <span>Call Yard</span>
+                            <LineChartIcon className="h-3.5 w-3.5" />
+                            <span>{t("market_btn_trend")}</span>
+                          </button>
+
+                          <a
+                            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                              item.mapsQuery
+                            )}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-[11px] font-medium text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200"
+                          >
+                            <MapPin className="h-3.5 w-3.5 text-stone-400" />
+                            <span>Maps</span>
                           </a>
-                        )}
+
+                          {item.secretaryPhone && (
+                            <a
+                              href={`tel:${item.secretaryPhone}`}
+                              className="inline-flex items-center gap-1 text-[11px] font-medium text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200"
+                              title="Call Market Yard Secretary"
+                            >
+                              <PhoneCall className="h-3.5 w-3.5 text-emerald-600" />
+                              <span>Call Yard</span>
+                            </a>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* 15-Day Price Trend Interactive Modal */}
@@ -453,10 +717,13 @@ export default function MarketPage() {
                 <div className="flex items-center justify-between border-b border-stone-100 pb-3 dark:border-stone-800">
                   <div>
                     <h3 className="text-base font-bold text-stone-900 dark:text-stone-50">
-                      {lang === "te" ? activeTrendItem.commodityTe : activeTrendItem.commodityEn}
+                      {lang === "te" && activeTrendItem.varietyTe
+                        ? activeTrendItem.varietyTe
+                        : activeTrendItem.variety}
                     </h3>
                     <p className="text-xs text-stone-500">
-                      {lang === "te" ? activeTrendItem.marketNameTe : activeTrendItem.marketNameEn} • {t("market_modal_trend_title")}
+                      {lang === "te" ? activeTrendItem.marketNameTe : activeTrendItem.marketNameEn} •{" "}
+                      {t("market_modal_trend_title")}
                     </p>
                   </div>
                   <button
@@ -490,7 +757,7 @@ export default function MarketPage() {
 
                 <div className="mt-4 flex items-center justify-between border-t border-stone-100 pt-3 dark:border-stone-800 text-xs">
                   <span className="text-stone-500">
-                    Latest recorded rate: <b>₹{activeTrendItem.modalPrice.toLocaleString("en-IN")}</b>
+                    Latest recorded rate: <b>₹{activeTrendItem.modalPrice.toLocaleString("en-IN")}/qtl</b>
                   </span>
                   <button
                     onClick={() => setActiveTrendItem(null)}

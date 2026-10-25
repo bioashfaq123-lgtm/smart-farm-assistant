@@ -106,9 +106,12 @@ export interface PumpState {
 
 export interface MandiPriceItem {
   id: string;
+  cropKey?: string;
+  varietyKey?: string;
   commodityEn: string;
   commodityTe: string;
   variety: string;
+  varietyTe?: string;
   marketNameEn: string;
   marketNameTe: string;
   districtEn: string;
