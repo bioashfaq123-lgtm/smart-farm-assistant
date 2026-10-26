@@ -179,7 +179,7 @@ export default function AdvisoryPage() {
     if (engine === "google") {
       url = `https://www.google.com/search?q=${encodeURIComponent(clean + " PJTAU Telangana agriculture")}`;
     } else if (engine === "pjtau") {
-      url = `https://www.google.com/search?q=site:pjtsau.edu.in+${encodeURIComponent(clean)}`;
+      url = `https://www.google.com/search?q=site:pjtau.edu.in+${encodeURIComponent(clean)}`;
     } else if (engine === "plantvillage") {
       url = `https://www.google.com/search?q=site:plantvillage.psu.edu+${encodeURIComponent(clean)}`;
     } else if (engine === "agmarknet") {
@@ -1431,12 +1431,12 @@ export default function AdvisoryPage() {
                   </div>
                   <div className="mt-4 flex items-center gap-2">
                     <a
-                      href="https://pjtsau.edu.in/"
+                      href="https://pjtau.edu.in/"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-700 px-3 py-1.5 text-xs font-bold text-white shadow-2xs hover:bg-emerald-800 transition"
                     >
-                      <span>Visit pjtsau.edu.in</span>
+                      <span>Visit pjtau.edu.in</span>
                       <ExternalLink className="h-3 w-3" />
                     </a>
                   </div>

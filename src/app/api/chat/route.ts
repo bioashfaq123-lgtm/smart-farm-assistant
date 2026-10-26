@@ -279,7 +279,7 @@ ${
                   : `Gemini AI (${modelId} • PJTAU Grounded)`,
                 searchQuery: finalSearchQuery,
                 webSearchUrl: `https://www.google.com/search?q=${encodeURIComponent(finalSearchQuery + " PJTAU Telangana agriculture")}`,
-                pjtauSearchUrl: `https://www.google.com/search?q=site%3Apjtsau.edu.in+${encodeURIComponent(finalSearchQuery)}`,
+                pjtauSearchUrl: `https://www.google.com/search?q=site%3Apjtau.edu.in+${encodeURIComponent(finalSearchQuery)}`,
               });
             }
           }
@@ -293,7 +293,7 @@ ${
     // 2. Verified Offline Fallback (Guaranteed zero crashes, honest labeling)
     const finalSearchQuery = userQuery || `${crop} PJTAU package of practices`;
     const webSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(finalSearchQuery + " PJTAU Telangana agriculture")}`;
-    const pjtauSearchUrl = `https://www.google.com/search?q=site%3Apjtsau.edu.in+${encodeURIComponent(finalSearchQuery)}`;
+    const pjtauSearchUrl = `https://www.google.com/search?q=site%3Apjtau.edu.in+${encodeURIComponent(finalSearchQuery)}`;
 
     if (mode === "diagnosis" || hasImage) {
       const cropKey = crop.toLowerCase().includes("cotton")
@@ -334,7 +334,7 @@ ${
           : "Offline PJTAU Reference Cases (Configure GEMINI_API_KEY for live multimodal vision)",
         searchQuery: diseaseName,
         webSearchUrl: `https://www.google.com/search?q=${encodeURIComponent(diseaseName + " PJTAU Telangana spray treatment")}`,
-        pjtauSearchUrl: `https://www.google.com/search?q=site%3Apjtsau.edu.in+${encodeURIComponent(diseaseName)}`,
+        pjtauSearchUrl: `https://www.google.com/search?q=site%3Apjtau.edu.in+${encodeURIComponent(diseaseName)}`,
       });
     }
 
@@ -370,7 +370,7 @@ ${
       reply: "Based on PJTAU guidelines, ensure adequate moisture and consult your local Mandal Agricultural Officer before spraying.",
       searchQuery: fallbackQuery,
       webSearchUrl: `https://www.google.com/search?q=${encodeURIComponent(fallbackQuery + " agriculture")}`,
-      pjtauSearchUrl: `https://www.google.com/search?q=site%3Apjtsau.edu.in+${encodeURIComponent(fallbackQuery)}`,
+      pjtauSearchUrl: `https://www.google.com/search?q=site%3Apjtau.edu.in+${encodeURIComponent(fallbackQuery)}`,
       isLiveAi: false,
       source: "Offline PJTAU Advisory (Error recovery mode)",
       error: err?.message,
