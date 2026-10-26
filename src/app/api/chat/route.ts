@@ -32,6 +32,13 @@ const PJTAU_KNOWLEDGE_BASE = [
     replyTe:
       "🌱 **వరిలో ఎరువుల యాజమాన్యం (PJTAU సిఫారసు)**:\n\n• **దుక్కిలో (చివరి దమ్ము)**: మొత్తం డీఏపీ (5-6 బస్తాలు) + పావువంతు యూరియా (2 బస్తాలు) + సగం పొటాష్ (1.5 బస్తాలు).\n• **పిలకల దశ (21-25 రోజులు)**: 2వ దఫా యూరియా (3-4 బస్తాలు).\n• **చిరుపొట్ట దశ (50-55 రోజులు)**: 3వ దఫా యూరియా (3 బస్తాలు) + మిగిలిన సగం పొటాష్ (1.5 బస్తాలు). ఈ దశలో డీఏపీ అస్సలు వేయరాదు.\n• **జింక్ లోపం**: ఆకులు తుప్పు మచ్చలుగా మారితే లీటరు నీటికి 2 గ్రాముల జింక్ సల్ఫేట్ + 10 గ్రాముల యూరియా కలిపి పిచికారీ చేయాలి.\n\n⚠️ *గమనిక: నేల పరీక్ష ఫలితాల ఆధారంగా ఎరువుల మోతాదును సర్దుబాటు చేసుకోవాలి.*",
   },
+  {
+    keywords: ["vermicompost", "earthworm", "వర్మీ", "కంపోస్ట్", "వానపాముల", "compost"],
+    replyEn:
+      "🪱 **PJTAU Vermicompost Preparation Guide for Telangana Farmers**:\n\n1. **Location & Bed Setup**: Select a shaded spot (under tree canopy or thatch roof). Construct an HDPE or brick pit measuring 10 ft length × 3 ft width × 2 ft height. Provide a 2% slope for drainage.\n2. **Bottom Layering (Bedding)**: Base layer of 2 inches gravel/coarse sand + 3 inches dried crop residue (paddy straw / dried leaves).\n3. **Feeding Layer**: Add partially decomposed farmyard manure (FYM) mixed with chopped green biomass or vegetable waste in 60:40 ratio. Fill up to 1.5 ft.\n4. **Earthworm Inoculation**: Introduce African Nightcrawler (*Eisenia fetida*) or *Eudrilus eugeniae* @ 1 to 1.5 kg (approx 1,000–1,500 worms) per bed.\n5. **Moisture & Temperature**: Sprinkle water daily to maintain 60–70% moisture (sponge-damp, never waterlogged) and 25–30°C temperature.\n6. **Harvesting (45–60 Days)**: Stop watering 3–4 days before harvest. Scrape tea-powder like dark granular castings from the top layer.\n\n⚠️ *Statutory Disclaimer: AI advice is indicative agronomic guidance based on PJTAU Package of Practices.*",
+    replyTe:
+      "🪱 **వర్మీ కంపోస్ట్ (వానపాముల ఎరువు) తయారీ విధానం — PJTAU సిఫారసు**:\n\n1. **స్థల ఎంపిక**: నీడ ఉన్న ప్రదేశంలో (చెట్ల కింద లేదా తాటాకుల పందిరి కింద) 10 అడుగుల పొడవు, 3 అడుగుల వెడల్పు, 2 అడుగుల ఎత్తు గల బెడ్ లేదా తొట్టిని ఏర్పాటు చేయాలి.\n2. **మొదటి పొర**: అడుగున 2 అంగుళాల కంకర లేదా ఇసుక, దానిపై 3 అంగుళాల ఎండు గడ్డి లేదా ఎండుటాకులు పరచాలి.\n3. **ఆహార పదార్థాలు**: పాక్షికంగా కుళ్లిన పశువుల పేడ, వ్యవసాయ వ్యర్థాలను 60:40 నిష్పత్తిలో 1.5 అడుగుల ఎత్తు వరకు నింపాలి.\n4. **వానపాముల విడుదల**: బెడ్‌కు 1 నుండి 1.5 కిలోల 'ఐసీనియా ఫెటిడా' (Eisenia fetida) లేదా 'యూడ్రిలస్' వానపాములను వదలాలి.\n5. **తేమ యాజమాన్యం**: ప్రతిరోజూ నీరు చిలకరిస్తూ 60–70% తేమ ఉండేలా చూడాలి. నీరు నిలవ ఉండరాదు.\n6. **సేకరణ (45–60 రోజులు)**: నల్లటి టీపొడి లాంటి వర్మీ కంపోస్ట్ సిద్ధమయ్యాక పైపొరలను తీసి ఆరబెట్టి జల్లెడ పట్టి నిల్వ చేసుకోవాలి.\n\n⚠️ *గమనిక: ఈ AI సలహా PJTAU మార్గదర్శకాల ప్రకారం రూపొందించబడింది.*",
+  },
 ];
 
 // Reference diagnosis cases for offline fallback
@@ -164,7 +171,13 @@ ${
 }`;
       }
 
-      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+      const candidateModels = [
+        process.env.GEMINI_MODEL,
+        "gemini-3.5-flash-lite",
+        "gemini-3.8-flash",
+        "gemini-flash-latest",
+        "gemini-1.5-flash",
+      ].filter(Boolean) as string[];
 
       const contentsParts: any[] = [];
       const userQuery = message && message.trim() !== ""
@@ -185,80 +198,79 @@ ${
         });
       }
 
-      try {
-        const geminiRes = await fetch(geminiUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [
-              {
-                role: "user",
-                parts: contentsParts,
+      for (const modelId of candidateModels) {
+        try {
+          const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${apiKey}`;
+          const geminiRes = await fetch(geminiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [
+                {
+                  role: "user",
+                  parts: contentsParts,
+                },
+              ],
+              generationConfig: {
+                temperature: 0.2,
+                maxOutputTokens: 900,
               },
-            ],
-            generationConfig: {
-              temperature: 0.15,
-              maxOutputTokens: 900,
-            },
-          }),
-        });
+            }),
+            signal: AbortSignal.timeout(18000),
+          });
 
-        if (geminiRes.status === 429) {
-          return NextResponse.json(
-            {
-              error: "AI rate limit reached. Please wait a minute or consult the offline agronomic advisory.",
-              isRateLimited: true,
-            },
-            { status: 429 }
-          );
-        }
-
-        if (geminiRes.ok) {
-          const geminiData = await geminiRes.json();
-          const candidate = geminiData.candidates?.[0];
-          const text = candidate?.content?.parts?.[0]?.text;
-
-          if (text) {
-            // If diagnosis mode, parse structured sections
-            let diagnosisData: any = null;
-            if (isDiagnosisMode) {
-              const getField = (label: string): string => {
-                const match = text.match(new RegExp(`\\*\\*${label}\\*\\*:\\s*([^\\n*]+)`, "i"));
-                return match ? match[1].trim() : "";
-              };
-
-              const identified = getField("IDENTIFIED");
-              const severityRaw = getField("SEVERITY").toLowerCase();
-              const severity: "low" | "medium" | "high" = severityRaw.includes("high")
-                ? "high"
-                : severityRaw.includes("low")
-                ? "low"
-                : "medium";
-
-              diagnosisData = {
-                diseaseName: identified || "Pathology Analysis Complete",
-                severity,
-                symptoms: getField("SYMPTOMS"),
-                remedy: getField("REMEDY"),
-                dosage: getField("DOSAGE"),
-                organicAlternative: getField("ORGANIC_ALTERNATIVE"),
-                safety: getField("SAFETY"),
-                fullText: text,
-              };
-            }
-
-            return NextResponse.json({
-              reply: text,
-              diagnosis: diagnosisData,
-              isLiveAi: true,
-              source: hasImage
-                ? "Gemini 1.5 Flash (Multimodal Vision • PJTAU Grounded)"
-                : "Gemini 1.5 Flash (PJTAU Grounded)",
-            });
+          if (geminiRes.status === 429) {
+            continue;
           }
+
+          if (geminiRes.ok) {
+            const geminiData = await geminiRes.json();
+            const candidate = geminiData.candidates?.[0];
+            const text = candidate?.content?.parts?.[0]?.text;
+
+            if (text) {
+              // If diagnosis mode, parse structured sections
+              let diagnosisData: any = null;
+              if (isDiagnosisMode) {
+                const getField = (label: string): string => {
+                  const match = text.match(new RegExp(`\\*\\*${label}\\*\\*:\\s*([^\\n*]+)`, "i"));
+                  return match ? match[1].trim() : "";
+                };
+
+                const identified = getField("IDENTIFIED");
+                const severityRaw = getField("SEVERITY").toLowerCase();
+                const severity: "low" | "medium" | "high" = severityRaw.includes("high")
+                  ? "high"
+                  : severityRaw.includes("low")
+                  ? "low"
+                  : "medium";
+
+                diagnosisData = {
+                  diseaseName: identified || "Pathology Analysis Complete",
+                  severity,
+                  symptoms: getField("SYMPTOMS"),
+                  remedy: getField("REMEDY"),
+                  dosage: getField("DOSAGE"),
+                  organicAlternative: getField("ORGANIC_ALTERNATIVE"),
+                  safety: getField("SAFETY"),
+                  fullText: text,
+                };
+              }
+
+              return NextResponse.json({
+                reply: text,
+                diagnosis: diagnosisData,
+                isLiveAi: true,
+                source: hasImage
+                  ? `Gemini AI Multimodal (${modelId} • PJTAU Grounded)`
+                  : `Gemini AI (${modelId} • PJTAU Grounded)`,
+              });
+            }
+          }
+        } catch (err) {
+          // Try next candidate model
+          continue;
         }
-      } catch (err) {
-        // Fall back gracefully below
       }
     }
 
