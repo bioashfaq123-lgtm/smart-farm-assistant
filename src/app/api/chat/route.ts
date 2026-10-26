@@ -39,6 +39,20 @@ const PJTAU_KNOWLEDGE_BASE = [
     replyTe:
       "🪱 **వర్మీ కంపోస్ట్ (వానపాముల ఎరువు) తయారీ విధానం — PJTAU సిఫారసు**:\n\n1. **స్థల ఎంపిక**: నీడ ఉన్న ప్రదేశంలో (చెట్ల కింద లేదా తాటాకుల పందిరి కింద) 10 అడుగుల పొడవు, 3 అడుగుల వెడల్పు, 2 అడుగుల ఎత్తు గల బెడ్ లేదా తొట్టిని ఏర్పాటు చేయాలి.\n2. **మొదటి పొర**: అడుగున 2 అంగుళాల కంకర లేదా ఇసుక, దానిపై 3 అంగుళాల ఎండు గడ్డి లేదా ఎండుటాకులు పరచాలి.\n3. **ఆహార పదార్థాలు**: పాక్షికంగా కుళ్లిన పశువుల పేడ, వ్యవసాయ వ్యర్థాలను 60:40 నిష్పత్తిలో 1.5 అడుగుల ఎత్తు వరకు నింపాలి.\n4. **వానపాముల విడుదల**: బెడ్‌కు 1 నుండి 1.5 కిలోల 'ఐసీనియా ఫెటిడా' (Eisenia fetida) లేదా 'యూడ్రిలస్' వానపాములను వదలాలి.\n5. **తేమ యాజమాన్యం**: ప్రతిరోజూ నీరు చిలకరిస్తూ 60–70% తేమ ఉండేలా చూడాలి. నీరు నిలవ ఉండరాదు.\n6. **సేకరణ (45–60 రోజులు)**: నల్లటి టీపొడి లాంటి వర్మీ కంపోస్ట్ సిద్ధమయ్యాక పైపొరలను తీసి ఆరబెట్టి జల్లెడ పట్టి నిల్వ చేసుకోవాలి.\n\n⚠️ *గమనిక: ఈ AI సలహా PJTAU మార్గదర్శకాల ప్రకారం రూపొందించబడింది.*",
   },
+  {
+    keywords: ["spot", "brown", "మచ్చలు", "ఆకు", "bipolaris", "lesion", "blight", "fungal", "image", "photo", "leaf"],
+    replyEn:
+      "🌿 **Paddy Brown Spot & Foliar Fungal Lesions (Bipolaris oryzae) — PJTAU Advisory**:\n\n• **Symptoms**: Oval to circular dark brown spots with yellowish halos on leaf blades. Lesions coalesce causing leaf drying. Common in low-potash or moisture-stressed soils.\n• **Immediate Action**: Drain standing excess water, avoid excessive urea (nitrogen), and top-dress potash.\n• **Recommended Chemical Spray**:\n  1. Propiconazole 25% EC @ 1.0 mL/L water (200 mL/acre) OR\n  2. Mancozeb 75% WP @ 2.0 to 2.5 g/L water (400–500 g/acre) OR\n  3. Tricyclazole 75% WP @ 0.6 g/L water (120 g/acre).\n• **Organic / Biological Alternative**: Spray Pseudomonas fluorescens @ 10 g/L or 1% Neem Oil (10,000 ppm) @ 2 mL/L.\n• **Soil Health**: Ensure balanced potash application (MOP @ 25 kg/acre at tillering/panicle stage).\n\n⚠️ *Statutory Disclaimer: AI advice is indicative agronomic guidance based on PJTAU Package of Practices. Always consult your Mandal Agricultural Officer (MAO) before spraying.*",
+    replyTe:
+      "🌿 **వరిలో గోధుమ రంగు మచ్చ తెగులు (Brown Spot) — PJTAU సిఫారసు**:\n\n• **లక్షణాలు**: ఆకులపై గుండ్రని లేదా కోడిగుడ్డు ఆకారంలో గోధుమ రంగు మచ్చలు ఏర్పడి చుట్టూ పసుపు రంగు వలయం ఉంటుంది. పొటాష్ లోపం లేదా నీటి ఎద్దడి వల్ల తీవ్రమవుతుంది.\n• **తక్షణ చర్య**: మడిలో నిలిచిన నీటిని తీసివేయండి, అధిక యూరియా వాడకాన్ని ఆపివేయండి.\n• **పిచికారీ మందులు**:\n  1. ప్రొపికొనజోల్ 25% EC @ 1.0 మి.లీ లీటరు నీటికి (ఎకరానికి 200 మి.లీ) లేదా\n  2. మాంకోజెబ్ 75% WP @ 2.0 నుండి 2.5 గ్రాములు లీటరు నీటికి లేదా\n  3. ట్రైసైక్లాజోల్ 75% WP @ 0.6 గ్రా/లీటరు.\n• **సేంద్రీయ ప్రత్యామ్నాయం**: సూడోమోనాస్ ఫ్లోరోసెన్స్ @ 10 గ్రా/లీటరు లేదా వేప నూనె @ 2 మి.లీ/లీటరు.\n• **ఎరువుల సమతుల్యత**: ఎకరానికి 25 కిలోల పొటాష్ (MOP) ఎరువును వేయడం వల్ల రోగనిరోధక శక్తి పెరుగుతుంది.\n\n⚠️ *గమనిక: ఈ AI సలహా కేవలం మార్గదర్శకం మాత్రమే. రసాయనాలు పిచికారీ చేసే ముందు మీ మండల వ్యవసాయ అధికారి (MAO)ని సంప్రదించండి.*",
+  },
+  {
+    keywords: ["chilli", "మిరప", "thrips", "నల్లి", "ముడత", "curl", "black thrips"],
+    replyEn:
+      "🌶️ **Chilli Black Thrips & Leaf Curl (Thrips parvispinus) — PJTAU Advisory**:\n\n• **Symptoms**: Upward curling of leaves, silvering on underside, shedding of flowers and small fruits.\n• **Cultural Measures**: Install 30–40 blue and yellow sticky traps per acre.\n• **Recommended Chemical Spray**:\n  1. Spinetoram 11.7% SC @ 0.9 mL/L OR\n  2. Fipronil 5% SC @ 2.0 mL/L OR\n  3. Cyantraniliprole 10.26% OD @ 1.2 mL/L.\n• **Organic Alternative**: Spray Neem oil (10,000 ppm) @ 3 mL/L + Pongamia oil @ 2 mL/L.\n\n⚠️ *Statutory Disclaimer: Consult your local Agricultural Extension Officer (AEO) before spraying.*",
+    replyTe:
+      "🌶️ **మిరపలో నల్ల తామర పురుగు మరియు ఆకుముడత — PJTAU సిఫారసు**:\n\n• **లక్షణాలు**: ఆకులు పైకి ముడుచుకుపోవడం, ఆకుల వెనుక వెండి రంగు చారలు, పూత మరియు పిందె రాలడం.\n• **యాజమాన్యం**: ఎకరానికి 30-40 నీలి మరియు పసుపు రంగు జిగురు అట్టలు పెట్టాలి.\n• **పిచికారీ**:\n  1. స్పినెటోరమ్ 11.7% SC @ 0.9 మి.లీ లేదా\n  2. ఫిప్రోనిల్ 5% SC @ 2.0 మి.లీ లేదా\n  3. సయాంట్రానిలిప్రోల్ 10.26% OD @ 1.2 మి.లీ లీటరు నీటికి.\n• **సేంద్రీయ పద్ధతి**: వేప నూనె (10,000 ppm) @ 3 మి.లీ పిచికారీ చేయాలి.\n\n⚠️ *గమనిక: రసాయనాలు వాడే ముందు వ్యవసాయ అధికారిని సంప్రదించండి.*",
+  },
 ];
 
 // Reference diagnosis cases for offline fallback
@@ -127,11 +141,15 @@ export async function POST(request: Request) {
     const apiKey = process.env.GEMINI_API_KEY;
     const district = farmerProfile?.district || "Jagtial";
     const crop = farmerProfile?.primaryCrop || "Paddy";
+    const isDiagnosisMode = mode === "diagnosis" || hasImage;
+    const userQuery = message && message.trim() !== ""
+      ? message
+      : isDiagnosisMode
+      ? "Please analyze this crop leaf photo for disease, pest damage, or deficiency symptoms under PJTAU recommendations."
+      : "Hello Krishi Sahayak";
 
     // 1. If GEMINI_API_KEY is present, call Gemini 1.5 Flash Multimodal Generative API
     if (apiKey && apiKey.trim() !== "") {
-      const isDiagnosisMode = mode === "diagnosis" || hasImage;
-
       let systemPrompt = "";
       if (isDiagnosisMode) {
         systemPrompt = `You are Krishi Sahayak (కృషి సహాయక్), an expert agronomic visual pathologist for Telangana farmers, working strictly within PJTAU (Professor Jayashankar Telangana State Agricultural University) Package of Practices.
@@ -180,12 +198,6 @@ ${
       ].filter(Boolean) as string[];
 
       const contentsParts: any[] = [];
-      const userQuery = message && message.trim() !== ""
-        ? message
-        : isDiagnosisMode
-        ? "Please analyze this crop leaf photo for disease, pest damage, or deficiency symptoms under PJTAU recommendations."
-        : "Hello Krishi Sahayak";
-
       contentsParts.push({ text: `${systemPrompt}\n\nFarmer Query: ${userQuery}` });
 
       if (hasImage) {
@@ -257,6 +269,7 @@ ${
                 };
               }
 
+              const finalSearchQuery = userQuery || `${crop} PJTAU crop advisory`;
               return NextResponse.json({
                 reply: text,
                 diagnosis: diagnosisData,
@@ -264,6 +277,9 @@ ${
                 source: hasImage
                   ? `Gemini AI Multimodal (${modelId} • PJTAU Grounded)`
                   : `Gemini AI (${modelId} • PJTAU Grounded)`,
+                searchQuery: finalSearchQuery,
+                webSearchUrl: `https://www.google.com/search?q=${encodeURIComponent(finalSearchQuery + " PJTAU Telangana agriculture")}`,
+                pjtauSearchUrl: `https://www.google.com/search?q=site%3Apjtsau.edu.in+${encodeURIComponent(finalSearchQuery)}`,
               });
             }
           }
@@ -275,6 +291,10 @@ ${
     }
 
     // 2. Verified Offline Fallback (Guaranteed zero crashes, honest labeling)
+    const finalSearchQuery = userQuery || `${crop} PJTAU package of practices`;
+    const webSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(finalSearchQuery + " PJTAU Telangana agriculture")}`;
+    const pjtauSearchUrl = `https://www.google.com/search?q=site%3Apjtsau.edu.in+${encodeURIComponent(finalSearchQuery)}`;
+
     if (mode === "diagnosis" || hasImage) {
       const cropKey = crop.toLowerCase().includes("cotton")
         ? "cotton"
@@ -312,6 +332,9 @@ ${
         source: apiKey
           ? "Offline PJTAU Reference Cases (Gemini API rate-limited or unreachable)"
           : "Offline PJTAU Reference Cases (Configure GEMINI_API_KEY for live multimodal vision)",
+        searchQuery: diseaseName,
+        webSearchUrl: `https://www.google.com/search?q=${encodeURIComponent(diseaseName + " PJTAU Telangana spray treatment")}`,
+        pjtauSearchUrl: `https://www.google.com/search?q=site%3Apjtsau.edu.in+${encodeURIComponent(diseaseName)}`,
       });
     }
 
@@ -337,14 +360,20 @@ ${
       source: apiKey
         ? "Offline PJTAU Advisory (Gemini upstream rate-limited or temporarily unreachable)"
         : "Offline PJTAU Advisory (Configure GEMINI_API_KEY in environment variables for live generative chat)",
+      searchQuery: finalSearchQuery,
+      webSearchUrl,
+      pjtauSearchUrl,
     });
   } catch (err: any) {
-    return NextResponse.json(
-      {
-        error: "Failed to process advisory query. Please try again.",
-        details: err?.message,
-      },
-      { status: 500 }
-    );
+    const fallbackQuery = "Telangana PJTAU crop disease spray";
+    return NextResponse.json({
+      reply: "Based on PJTAU guidelines, ensure adequate moisture and consult your local Mandal Agricultural Officer before spraying.",
+      searchQuery: fallbackQuery,
+      webSearchUrl: `https://www.google.com/search?q=${encodeURIComponent(fallbackQuery + " agriculture")}`,
+      pjtauSearchUrl: `https://www.google.com/search?q=site%3Apjtsau.edu.in+${encodeURIComponent(fallbackQuery)}`,
+      isLiveAi: false,
+      source: "Offline PJTAU Advisory (Error recovery mode)",
+      error: err?.message,
+    });
   }
 }

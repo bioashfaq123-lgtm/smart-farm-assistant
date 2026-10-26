@@ -177,6 +177,8 @@ export interface ChatMessage {
   timestamp: string;
   audioPlaying?: boolean;
   imageUrl?: string;
+  searchQuery?: string;
+  isFallback?: boolean;
 }
 
 export interface FieldZone {

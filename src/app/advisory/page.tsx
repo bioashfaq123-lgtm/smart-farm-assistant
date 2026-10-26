@@ -26,6 +26,11 @@ import {
   Image as ImageIcon,
   Paperclip,
   X,
+  Globe,
+  Search,
+  ExternalLink,
+  Compass,
+  BookOpen,
 } from "lucide-react";
 import { useLanguage } from "@/components/common/LanguageContext";
 import { useFarmerProfile } from "@/components/common/FarmerProfileContext";
@@ -43,6 +48,55 @@ import {
   generateWhatsAppUrl,
   copyToClipboard,
 } from "@/lib/utils/kisanShare";
+
+/**
+ * Client-side Canvas Image Compression
+ * Scales high-resolution smartphone camera photos (3-12MB) down to max 1024x1024 JPEG at 0.75 quality (~150KB-250KB).
+ * This completely avoids Vercel's 4.5MB Serverless request body limit (413 Payload Too Large).
+ */
+async function compressImageFile(file: File, maxDim = 1024, quality = 0.75): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("Failed to read image file"));
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onerror = () => reject(new Error("Failed to load image element"));
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          resolve(e.target?.result as string);
+          return;
+        }
+
+        // Fill white background for transparent images
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, width, height);
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const compressedDataUrl = canvas.toDataURL("image/jpeg", quality);
+        resolve(compressedDataUrl);
+      };
+      img.src = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  });
+}
 
 export default function AdvisoryPage() {
   const { lang, t } = useLanguage();
@@ -81,7 +135,14 @@ export default function AdvisoryPage() {
   const [inputText, setInputText] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [isSending, setIsSending] = useState(false);
-  const [activeTab, setActiveTab] = useState<"chat" | "diagnostics">("chat");
+  const [isCompressing, setIsCompressing] = useState(false);
+  const [activeTab, setActiveTab] = useState<"chat" | "diagnostics" | "browser">("chat");
+
+  // Online Agri Browser states
+  const [browserSearchQuery, setBrowserSearchQuery] = useState("");
+  const [selectedBrowserEngine, setSelectedBrowserEngine] = useState<
+    "google" | "pjtau" | "plantvillage" | "agmarknet" | "telangana"
+  >("google");
 
   // Chat image attachment state
   const [attachedImage, setAttachedImage] = useState<string | null>(null);
@@ -108,6 +169,29 @@ export default function AdvisoryPage() {
         .toUpperCase()
     : "YOU";
 
+  // Helper to open online search engine or agricultural portal directly
+  const openWebSearch = (
+    query: string,
+    engine: "google" | "pjtau" | "plantvillage" | "agmarknet" | "telangana" = "google"
+  ) => {
+    let url = "";
+    const clean = query.trim() || `${profile.primaryCrop} Telangana agriculture`;
+    if (engine === "google") {
+      url = `https://www.google.com/search?q=${encodeURIComponent(clean + " PJTAU Telangana agriculture")}`;
+    } else if (engine === "pjtau") {
+      url = `https://www.google.com/search?q=site:pjtsau.edu.in+${encodeURIComponent(clean)}`;
+    } else if (engine === "plantvillage") {
+      url = `https://www.google.com/search?q=site:plantvillage.psu.edu+${encodeURIComponent(clean)}`;
+    } else if (engine === "agmarknet") {
+      url = `https://agmarknet.gov.in/`;
+    } else if (engine === "telangana") {
+      url = `https://agri.telangana.gov.in/`;
+    }
+    if (typeof window !== "undefined") {
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
+  };
+
   // Quick suggestion prompts
   const sampleSuggestions = [
     {
@@ -128,23 +212,22 @@ export default function AdvisoryPage() {
     },
   ];
 
-  // Handle chat image selection
-  const handleChatImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle chat image selection with canvas compression
+  const handleChatImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      setErrorMessage("Image too large. Please select an image under 5MB.");
-      return;
+    try {
+      setIsCompressing(true);
+      setErrorMessage("");
+      const compressedBase64 = await compressImageFile(file);
+      setAttachedImage(compressedBase64);
+    } catch (err) {
+      setErrorMessage("Could not process image. Please try another photo.");
+    } finally {
+      setIsCompressing(false);
+      e.target.value = "";
     }
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      setAttachedImage(reader.result as string);
-    };
-    reader.readAsDataURL(file);
-    // Reset file input
-    e.target.value = "";
   };
 
   const handleSend = async (textToSend?: string) => {
@@ -175,6 +258,7 @@ export default function AdvisoryPage() {
         body: JSON.stringify({
           message: text || (imgToSend ? "Analyze this crop leaf image for pests, disease or deficiency under PJTAU practices." : ""),
           image: imgToSend || undefined,
+          mode: imgToSend ? "diagnosis" : "chat",
           lang,
           farmerProfile: {
             district: profile.district,
@@ -185,7 +269,7 @@ export default function AdvisoryPage() {
       });
 
       if (res.status === 429) {
-        setErrorMessage("AI rate limit reached. Please wait a moment or ask a specific PJTAU topic.");
+        setErrorMessage("AI rate limit reached. You can search online directly using the search buttons below.");
       }
 
       const data = await res.json();
@@ -195,23 +279,29 @@ export default function AdvisoryPage() {
         setChatSource(data.source);
       }
 
+      const searchQuery = data.searchQuery || text || `${profile.primaryCrop} leaf disease treatment PJTAU`;
+
       const botMsg: ChatMessage = {
         id: `bot-${Date.now()}`,
         sender: "assistant",
         textEn: reply,
         textTe: reply,
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        searchQuery,
+        isFallback: !data.isLiveAi,
       };
 
       setMessages((prev) => [...prev, botMsg]);
     } catch (err) {
-      setErrorMessage("Network error. Using offline PJTAU advisory.");
+      setErrorMessage("Network error. Offline PJTAU advisory active. You can search online directly below.");
       const botMsg: ChatMessage = {
         id: `bot-${Date.now()}`,
         sender: "assistant",
         textEn: "Based on PJTAU Package of Practices, maintain 2-3 cm thin water layer and monitor pest ETL thresholds. Consult your Mandal Agricultural Officer before spraying.",
         textTe: "PJTAU మార్గదర్శకాల ప్రకారం పొలంలో పలుచని నీటి నిల్వ ఉంచండి మరియు పురుగు ఉధృతిని గమనించండి. మందుల పిచికారీ కోసం మండల వ్యవసాయ అధికారి (MAO)ని సంప్రదించండి.",
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        searchQuery: text || `${profile.primaryCrop} leaf disease treatment PJTAU`,
+        isFallback: true,
       };
       setMessages((prev) => [...prev, botMsg]);
     } finally {
@@ -256,66 +346,59 @@ export default function AdvisoryPage() {
     }, 400);
   };
 
-  // Handler for live leaf photo upload and multimodal Gemini diagnosis
-  const handleLeafPhotoFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handler for live leaf photo upload and multimodal Gemini diagnosis with canvas compression
+  const handleLeafPhotoFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 8 * 1024 * 1024) {
-      alert("Image is too large. Please select an image under 8MB.");
-      return;
-    }
+    setIsAnalyzingPhoto(true);
+    setCustomAiDiagnosis(null);
+    setErrorMessage("");
 
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const base64Data = reader.result as string;
-      setUploadedLeafPhoto(base64Data);
-      setIsAnalyzingPhoto(true);
-      setCustomAiDiagnosis(null);
+    try {
+      const compressedBase64 = await compressImageFile(file);
+      setUploadedLeafPhoto(compressedBase64);
 
-      try {
-        const res = await fetch("/api/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            message: "Diagnose this crop leaf photo for disease, pest, or nutrient deficiency under PJTAU package of practices.",
-            image: base64Data,
-            mode: "diagnosis",
-            lang,
-            farmerProfile: {
-              district: profile.district,
-              primaryCrop: profile.primaryCrop,
-              areaAcre: profile.areaAcre,
-            },
-          }),
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: "Diagnose this crop leaf photo for disease, pest, or nutrient deficiency under PJTAU package of practices.",
+          image: compressedBase64,
+          mode: "diagnosis",
+          lang,
+          farmerProfile: {
+            district: profile.district,
+            primaryCrop: profile.primaryCrop,
+            areaAcre: profile.areaAcre,
+          },
+        }),
+      });
+
+      const data = await res.json();
+      if (data.diagnosis) {
+        setCustomAiDiagnosis(data.diagnosis);
+        setDiagSource(data.source || "Gemini 1.5 Flash (Multimodal Vision)");
+      } else if (data.reply) {
+        setCustomAiDiagnosis({
+          diseaseName: "Visual Leaf Pathology Analysis",
+          severity: "high",
+          symptoms: "Visual leaf lesion symptoms detected by AI.",
+          remedy: data.reply,
+          dosage: "See prescription below",
+          organicAlternative: "Neem oil 10,000 ppm @ 2 mL/L",
+          safety: "Wear protective face mask and gloves.",
+          fullText: data.reply,
         });
-
-        const data = await res.json();
-        if (data.diagnosis) {
-          setCustomAiDiagnosis(data.diagnosis);
-          setDiagSource(data.source || "Gemini 1.5 Flash (Multimodal Vision)");
-        } else if (data.reply) {
-          setCustomAiDiagnosis({
-            diseaseName: "Visual Leaf Pathology Analysis",
-            severity: "high",
-            symptoms: "Visual leaf lesion symptoms detected by AI.",
-            remedy: data.reply,
-            dosage: "See prescription below",
-            organicAlternative: "Neem oil 10,000 ppm @ 2 mL/L",
-            safety: "Wear protective face mask and gloves.",
-            fullText: data.reply,
-          });
-          setDiagSource(data.source || "Gemini 1.5 Flash Vision");
-        }
-      } catch (err) {
-        // Fallback to sample case
-        setDiagSource("Offline PJTAU Reference Cases");
-      } finally {
-        setIsAnalyzingPhoto(false);
+        setDiagSource(data.source || "Gemini 1.5 Flash Vision");
       }
-    };
-    reader.readAsDataURL(file);
-    e.target.value = "";
+    } catch (err) {
+      setDiagSource("Offline PJTAU Reference Cases");
+      setErrorMessage("AI vision diagnosis could not connect. You can search directly online using the browser tool.");
+    } finally {
+      setIsAnalyzingPhoto(false);
+      e.target.value = "";
+    }
   };
 
   // Active diagnosis display object
@@ -361,7 +444,7 @@ export default function AdvisoryPage() {
         <div className="flex items-center gap-1 rounded-2xl border border-stone-200 bg-stone-100 p-1 dark:border-stone-800 dark:bg-stone-900">
           <button
             onClick={() => setActiveTab("chat")}
-            className={`flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition ${
+            className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition ${
               activeTab === "chat"
                 ? "bg-white text-stone-900 shadow-2xs dark:bg-stone-800 dark:text-stone-50"
                 : "text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100"
@@ -372,7 +455,7 @@ export default function AdvisoryPage() {
           </button>
           <button
             onClick={() => setActiveTab("diagnostics")}
-            className={`flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition ${
+            className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition ${
               activeTab === "diagnostics"
                 ? "bg-white text-stone-900 shadow-2xs dark:bg-stone-800 dark:text-stone-50"
                 : "text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100"
@@ -380,6 +463,17 @@ export default function AdvisoryPage() {
           >
             <Camera className="h-3.5 w-3.5 text-rose-500" />
             <span>{lang === "te" ? "ఆకు తెగులు స్కానర్" : "Leaf Disease Scanner"}</span>
+          </button>
+          <button
+            onClick={() => setActiveTab("browser")}
+            className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition ${
+              activeTab === "browser"
+                ? "bg-white text-stone-900 shadow-2xs dark:bg-stone-800 dark:text-stone-50"
+                : "text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100"
+            }`}
+          >
+            <Globe className="h-3.5 w-3.5 text-sky-600" />
+            <span>{lang === "te" ? "ఆన్‌లైన్ బ్రౌజర్" : "Online Agri Browser"}</span>
           </button>
         </div>
       </div>
@@ -453,23 +547,100 @@ export default function AdvisoryPage() {
                       )}
 
                       <p className="whitespace-pre-line">{lang === "te" && msg.textTe ? msg.textTe : msg.textEn}</p>
+
+                      {/* Bot message action toolbar */}
                       <div
-                        className={`mt-2 flex items-center justify-between text-[10px] ${
+                        className={`mt-2.5 flex flex-wrap items-center justify-between gap-1.5 text-[10px] ${
                           isBot ? "text-stone-400 dark:text-stone-500" : "text-white/80"
                         }`}
                       >
                         <span>{msg.timestamp}</span>
                         {isBot && (
-                          <button
-                            onClick={() => speakText(lang === "te" && msg.textTe ? msg.textTe : msg.textEn)}
-                            className="hover:text-agri-600 dark:hover:text-agri-400 transition flex items-center gap-1 font-medium"
-                            title="Listen to audio"
-                          >
-                            <Volume2 className="h-3.5 w-3.5" />
-                            <span>{lang === "te" ? "వినండి" : "Listen"}</span>
-                          </button>
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <button
+                              onClick={() => speakText(lang === "te" && msg.textTe ? msg.textTe : msg.textEn)}
+                              className="hover:text-agri-600 dark:hover:text-agri-400 transition flex items-center gap-1 font-medium px-2 py-0.5 rounded-md bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300"
+                              title="Listen to audio"
+                            >
+                              <Volume2 className="h-3 w-3" />
+                              <span>{lang === "te" ? "వినండి" : "Listen"}</span>
+                            </button>
+
+                            <button
+                              onClick={() => openWebSearch(msg.searchQuery || msg.textEn, "google")}
+                              className="hover:text-sky-600 dark:hover:text-sky-400 transition flex items-center gap-1 font-medium px-2 py-0.5 rounded-md bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-900"
+                              title="Search Google for this topic"
+                            >
+                              <Search className="h-3 w-3" />
+                              <span>Google Search</span>
+                              <ExternalLink className="h-2.5 w-2.5 opacity-60" />
+                            </button>
+
+                            <button
+                              onClick={() => openWebSearch(msg.searchQuery || msg.textEn, "pjtau")}
+                              className="hover:text-emerald-600 dark:hover:text-emerald-400 transition flex items-center gap-1 font-medium px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900"
+                              title="Search PJTAU Digital Library"
+                            >
+                              <Compass className="h-3 w-3" />
+                              <span>PJTAU Portal</span>
+                              <ExternalLink className="h-2.5 w-2.5 opacity-60" />
+                            </button>
+
+                            <button
+                              onClick={async () => {
+                                await copyToClipboard(lang === "te" && msg.textTe ? msg.textTe : msg.textEn);
+                              }}
+                              className="hover:text-stone-700 dark:hover:text-stone-200 transition flex items-center gap-1 font-medium px-2 py-0.5 rounded-md bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400"
+                              title="Copy text"
+                            >
+                              <Copy className="h-3 w-3" />
+                              <span>Copy</span>
+                            </button>
+                          </div>
                         )}
                       </div>
+
+                      {/* If response is fallback or user wants deeper search */}
+                      {isBot && msg.isFallback && (
+                        <div className="mt-3 rounded-xl bg-amber-50/90 p-3 border border-amber-200 dark:bg-amber-950/30 dark:border-amber-800/60 text-xs space-y-2">
+                          <div className="flex items-center gap-1.5 font-bold text-amber-900 dark:text-amber-200 text-[11px]">
+                            <Globe className="h-3.5 w-3.5 text-amber-600" />
+                            <span>
+                              {lang === "te"
+                                ? "మరింత వివరణ కోసం ఆన్‌లైన్ బ్రౌజర్‌లో వెతకండి:"
+                                : "Search directly online in Agricultural Web Browser:"}
+                            </span>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <button
+                              onClick={() => openWebSearch(msg.searchQuery || profile.primaryCrop + " crop disease PJTAU", "google")}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-800 dark:text-stone-200 font-semibold text-[11px] shadow-2xs hover:bg-stone-50"
+                            >
+                              <Search className="h-3 w-3 text-sky-600" />
+                              <span>Search Google</span>
+                              <ExternalLink className="h-2.5 w-2.5 opacity-60" />
+                            </button>
+                            <button
+                              onClick={() => openWebSearch(msg.searchQuery || profile.primaryCrop, "pjtau")}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-100 dark:bg-emerald-950 border border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200 font-semibold text-[11px] shadow-2xs hover:bg-emerald-200"
+                            >
+                              <Compass className="h-3 w-3 text-emerald-700" />
+                              <span>PJTAU Digital Portal</span>
+                              <ExternalLink className="h-2.5 w-2.5 opacity-60" />
+                            </button>
+                            <button
+                              onClick={() => {
+                                setBrowserSearchQuery(msg.searchQuery || profile.primaryCrop);
+                                setActiveTab("browser");
+                              }}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-100 dark:bg-sky-950 border border-sky-300 dark:border-sky-800 text-sky-900 dark:text-sky-200 font-semibold text-[11px] shadow-2xs hover:bg-sky-200"
+                            >
+                              <Globe className="h-3 w-3 text-sky-700" />
+                              <span>Open Agri Browser</span>
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     {!isBot && (
@@ -481,6 +652,13 @@ export default function AdvisoryPage() {
                 );
               })}
 
+              {isCompressing && (
+                <div className="flex items-center gap-2 text-xs text-sky-600 dark:text-sky-400">
+                  <span className="flex h-2 w-2 rounded-full bg-sky-600 animate-ping" />
+                  <span>Compressing leaf photo for fast serverless upload...</span>
+                </div>
+              )}
+
               {isSending && (
                 <div className="flex items-center gap-2 text-xs text-stone-500 dark:text-stone-400">
                   <span className="flex h-2 w-2 rounded-full bg-agri-600 animate-ping" />
@@ -489,8 +667,39 @@ export default function AdvisoryPage() {
               )}
 
               {errorMessage && (
-                <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200">
-                  {errorMessage}
+                <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200 space-y-2">
+                  <div className="flex items-center gap-2 font-bold">
+                    <AlertOctagon className="h-4 w-4 text-amber-600 shrink-0" />
+                    <span>{errorMessage}</span>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 pt-1">
+                    <button
+                      onClick={() => openWebSearch(inputText || profile.primaryCrop + " crop disease PJTAU", "google")}
+                      className="inline-flex items-center gap-1 rounded-lg bg-white dark:bg-stone-850 px-2.5 py-1 text-xs font-semibold text-stone-800 dark:text-stone-200 border border-stone-200 dark:border-stone-700 shadow-2xs hover:bg-stone-50"
+                    >
+                      <Search className="h-3 w-3 text-sky-600" />
+                      <span>Search on Google</span>
+                      <ExternalLink className="h-2.5 w-2.5 opacity-60" />
+                    </button>
+                    <button
+                      onClick={() => openWebSearch(inputText || profile.primaryCrop, "pjtau")}
+                      className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-2.5 py-1 text-xs font-semibold text-white shadow-2xs hover:bg-emerald-700"
+                    >
+                      <Compass className="h-3 w-3" />
+                      <span>PJTAU Library</span>
+                      <ExternalLink className="h-2.5 w-2.5 opacity-60" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        setBrowserSearchQuery(inputText || profile.primaryCrop);
+                        setActiveTab("browser");
+                      }}
+                      className="inline-flex items-center gap-1 rounded-lg bg-sky-600 px-2.5 py-1 text-xs font-semibold text-white shadow-2xs hover:bg-sky-700"
+                    >
+                      <Globe className="h-3 w-3" />
+                      <span>Open Agri Browser</span>
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -602,6 +811,20 @@ export default function AdvisoryPage() {
                       <Camera className="h-3.5 w-3.5 text-rose-500" />
                       <span>Scanner</span>
                     </button>
+
+                    <button
+                      onClick={() => {
+                        if (inputText.trim()) {
+                          setBrowserSearchQuery(inputText);
+                        }
+                        setActiveTab("browser");
+                      }}
+                      className="flex items-center gap-1.5 rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-xs font-semibold text-sky-700 hover:bg-sky-100 dark:border-sky-900 dark:bg-sky-950 dark:text-sky-300 transition"
+                      title="Search online directly in Agri Browser"
+                    >
+                      <Globe className="h-3.5 w-3.5 text-sky-600" />
+                      <span>{lang === "te" ? "ఆన్‌లైన్ బ్రౌజర్" : "Online Browser"}</span>
+                    </button>
                   </div>
 
                   <button
@@ -667,7 +890,7 @@ export default function AdvisoryPage() {
             </Card>
           </div>
         </div>
-      ) : (
+      ) : activeTab === "diagnostics" ? (
         /* Multimodal Leaf & Pest Pathology Diagnostic View */
         <div className="space-y-6">
           <Card>
@@ -854,6 +1077,53 @@ export default function AdvisoryPage() {
                   </div>
                 </div>
 
+                {/* Direct Online Web Search & PJTAU Library Actions */}
+                <div className="rounded-xl border border-sky-200 bg-sky-50/70 p-3.5 dark:border-sky-900/60 dark:bg-sky-950/20">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
+                    <div>
+                      <h4 className="text-xs font-bold text-sky-950 dark:text-sky-100 flex items-center gap-1.5">
+                        <Globe className="h-4 w-4 text-sky-600" />
+                        <span>
+                          {lang === "te"
+                            ? "ఈ తెగులు నివారణను ఆన్‌లైన్ బ్రౌజర్‌లో వెతకండి"
+                            : "Search Disease Treatment Online in Web Browser"}
+                        </span>
+                      </h4>
+                      <p className="text-[11px] text-sky-800 dark:text-sky-300">
+                        Direct web search across PJTAU university publications, ICAR, and Google
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <button
+                        onClick={() => openWebSearch(activeDiagnosis.pestNameEn, "google")}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 border border-stone-200 dark:border-stone-700 font-bold text-xs shadow-2xs hover:bg-stone-50"
+                      >
+                        <Search className="h-3.5 w-3.5 text-sky-600" />
+                        <span>Search Google</span>
+                        <ExternalLink className="h-3 w-3 opacity-60" />
+                      </button>
+                      <button
+                        onClick={() => openWebSearch(activeDiagnosis.pestNameEn, "pjtau")}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-bold text-xs shadow-2xs hover:bg-emerald-700"
+                      >
+                        <Compass className="h-3.5 w-3.5" />
+                        <span>PJTAU Library</span>
+                        <ExternalLink className="h-3 w-3 opacity-60" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          setBrowserSearchQuery(activeDiagnosis.pestNameEn);
+                          setActiveTab("browser");
+                        }}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-sky-600 text-white font-bold text-xs shadow-2xs hover:bg-sky-700"
+                      >
+                        <Globe className="h-3.5 w-3.5" />
+                        <span>Open Agri Browser</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Action buttons with WhatsApp and SMS Sharing */}
                 <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
                   <div className="flex flex-wrap items-center gap-2">
@@ -942,6 +1212,351 @@ export default function AdvisoryPage() {
                 </div>
               </div>
             )}
+          </Card>
+        </div>
+      ) : (
+        /* Online Agricultural Web Browser View */
+        <div className="space-y-6">
+          <Card>
+            <CardHeader
+              title={lang === "te" ? "తెలంగాణ రైతు ఆన్‌లైన్ వ్యవసాయ బ్రౌజర్" : "Telangana Rythu Online Agricultural Web Browser"}
+              subtitle={
+                lang === "te"
+                  ? "గూగుల్, ప్రొఫెసర్ జయశంకర్ వర్సిటీ (PJTAU), ప్లాంట్‌విలేజ్ మరియు అగ్మార్క్‌నెట్ పోర్టల్స్‌లో నేరుగా వెతకండి"
+                  : "Direct real-time search across Google, PJTAU Digital Library, PlantVillage, ICAR, and Agmarknet"
+              }
+              icon={<Globe className="h-5 w-5 text-sky-600" />}
+              action={
+                <Badge variant="normal" className="text-xs bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300 border-sky-300">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500 inline-block mr-1.5 animate-pulse" />
+                  Live Web Gateway
+                </Badge>
+              }
+            />
+
+            {/* Interactive Search Engine Console */}
+            <div className="space-y-4">
+              {/* Engine Selector Pills */}
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs font-bold text-stone-600 dark:text-stone-400">Search Engine:</span>
+                {[
+                  { id: "google", label: "Google Agri", icon: Search },
+                  { id: "pjtau", label: "PJTAU Digital Library", icon: Compass },
+                  { id: "plantvillage", label: "PlantVillage Diseases", icon: Leaf },
+                  { id: "agmarknet", label: "Agmarknet Mandi Hub", icon: Layers },
+                  { id: "telangana", label: "Telangana Agri Portal", icon: Globe },
+                ].map((eng) => {
+                  const Icon = eng.icon;
+                  const isSelected = selectedBrowserEngine === eng.id;
+                  return (
+                    <button
+                      key={eng.id}
+                      onClick={() => setSelectedBrowserEngine(eng.id as any)}
+                      className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition ${
+                        isSelected
+                          ? "bg-sky-600 text-white shadow-xs"
+                          : "border border-stone-200 bg-stone-50 text-stone-700 hover:bg-stone-100 dark:border-stone-800 dark:bg-stone-850 dark:text-stone-300"
+                      }`}
+                    >
+                      <Icon className="h-3.5 w-3.5" />
+                      <span>{eng.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Live Search Input Bar */}
+              <div className="flex flex-col sm:flex-row gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3.5 top-3.5 h-4 w-4 text-stone-400" />
+                  <input
+                    type="text"
+                    value={browserSearchQuery}
+                    onChange={(e) => setBrowserSearchQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        openWebSearch(browserSearchQuery, selectedBrowserEngine);
+                      }
+                    }}
+                    placeholder={
+                      lang === "te"
+                        ? "తెగులు పేరు, పురుగు మందు మోతాదు, సన్నవడ్ల బోనస్, మార్కెట్ ధరలు లేదా ప్రభుత్వ పథకాల గురించి వెతకండి..."
+                        : "Search any crop disease, pesticide molecule, ₹500 bonus, APMC market price, or STCR schedule..."
+                    }
+                    className="w-full rounded-xl border border-stone-200 bg-white pl-10 pr-10 py-3 text-xs sm:text-sm text-stone-900 placeholder-stone-400 focus:border-sky-600 focus:outline-hidden focus:ring-1 focus:ring-sky-600 dark:border-stone-800 dark:bg-stone-950 dark:text-stone-100 dark:placeholder-stone-500"
+                  />
+                  {browserSearchQuery && (
+                    <button
+                      onClick={() => setBrowserSearchQuery("")}
+                      className="absolute right-3 top-3.5 text-stone-400 hover:text-stone-600 dark:hover:text-stone-200"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => openWebSearch(browserSearchQuery, selectedBrowserEngine)}
+                    className="inline-flex items-center gap-2 rounded-xl bg-sky-600 px-5 py-3 text-xs font-bold text-white shadow-xs hover:bg-sky-700 transition active:scale-95"
+                  >
+                    <Search className="h-4 w-4" />
+                    <span>Launch Search</span>
+                    <ExternalLink className="h-3.5 w-3.5" />
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      if (browserSearchQuery.trim()) {
+                        setActiveTab("chat");
+                        handleSend(browserSearchQuery);
+                      }
+                    }}
+                    className="inline-flex items-center gap-2 rounded-xl border border-agri-600 bg-agri-50 px-4 py-3 text-xs font-bold text-agri-800 hover:bg-agri-100 dark:bg-agri-950/40 dark:text-agri-300 transition"
+                    title="Ask Krishi Sahayak AI about this query"
+                  >
+                    <Bot className="h-4 w-4 text-agri-600" />
+                    <span>Ask AI</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Curated Telangana Agricultural Searches */}
+            <div className="mt-6 space-y-3">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-stone-700 dark:text-stone-300">
+                  {lang === "te" ? "తెలంగాణ రైతు ప్రాచుర్యం పొందిన శోధనలు:" : "Popular Telangana Agricultural Search Topics:"}
+                </h4>
+                <span className="text-[11px] text-stone-400">1-Click Live Search</span>
+              </div>
+
+              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+                {[
+                  {
+                    crop: "Paddy (వరి)",
+                    query: "Paddy Blast & Brown Spot Tricyclazole dosage PJTAU",
+                    badge: "Pathology",
+                  },
+                  {
+                    crop: "Paddy (వరి)",
+                    query: "Telangana Fine Rice ₹500 Bonus procurement rules",
+                    badge: "Govt Bonus",
+                  },
+                  {
+                    crop: "Paddy (వరి)",
+                    query: "Paddy Yellow Stem Borer Cartap Hydrochloride spray",
+                    badge: "Pest Control",
+                  },
+                  {
+                    crop: "Cotton (పత్తి)",
+                    query: "Cotton Pink Bollworm ETL & Profenofos spray PJTAU",
+                    badge: "IPM Spray",
+                  },
+                  {
+                    crop: "Chilli (మిరప)",
+                    query: "Chilli Black Thrips & Gemini Virus PJTAU spray",
+                    badge: "Specialist",
+                  },
+                  {
+                    crop: "Maize (మొక్కజొన్న)",
+                    query: "Maize Fall Armyworm Chlorantraniliprole whorl application",
+                    badge: "Dosage",
+                  },
+                  {
+                    crop: "Compost (ఎరువు)",
+                    query: "PJTAU Vermicompost Preparation Bed Step-by-Step",
+                    badge: "Organic",
+                  },
+                  {
+                    crop: "Soil Health (నేల)",
+                    query: "PJTAU Soil Health Card STCR Fertilizer schedule Telangana",
+                    badge: "STCR Card",
+                  },
+                  {
+                    crop: "Irrigation (నీరు)",
+                    query: "Telangana Micro Irrigation Drip Subsidy TSMIP scheme",
+                    badge: "Subsidy",
+                  },
+                ].map((item, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => {
+                      setBrowserSearchQuery(item.query);
+                      openWebSearch(item.query, selectedBrowserEngine);
+                    }}
+                    className="flex items-start justify-between gap-2 rounded-xl border border-stone-200 bg-white p-3 text-left shadow-2xs hover:border-sky-500 hover:bg-sky-50/40 dark:border-stone-800 dark:bg-stone-900 dark:hover:bg-stone-850 transition group"
+                  >
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] font-bold text-agri-700 dark:text-agri-400">
+                          {item.crop}
+                        </span>
+                        <span className="text-[10px] rounded-md bg-stone-100 px-1.5 py-0.5 font-semibold text-stone-600 dark:bg-stone-800 dark:text-stone-300">
+                          {item.badge}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-xs font-semibold text-stone-900 dark:text-stone-100 group-hover:text-sky-700 dark:group-hover:text-sky-300">
+                        {item.query}
+                      </p>
+                    </div>
+                    <ExternalLink className="h-3.5 w-3.5 shrink-0 text-stone-400 group-hover:text-sky-600 mt-1" />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Official Agricultural Portals Directory */}
+            <div className="mt-8 space-y-3">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-stone-700 dark:text-stone-300">
+                {lang === "te" ? "ప్రభుత్వ మరియు విశ్వవిద్యాలయ పోర్టల్స్ డైరెక్టరీ:" : "Official Government & University Portals Directory:"}
+              </h4>
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {/* 1. PJTAU */}
+                <div className="rounded-2xl border border-emerald-200 bg-emerald-50/30 p-4 dark:border-emerald-900/60 dark:bg-emerald-950/20 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase font-bold text-emerald-800 dark:text-emerald-300">
+                        State Agricultural University
+                      </span>
+                      <Compass className="h-4 w-4 text-emerald-600" />
+                    </div>
+                    <h5 className="font-extrabold text-sm text-stone-900 dark:text-stone-100 mt-1">
+                      PJTAU Official Portal
+                    </h5>
+                    <p className="text-xs text-stone-600 dark:text-stone-300 mt-1 leading-relaxed">
+                      Prof. Jayashankar Telangana State Agricultural University. Package of practices, Vyavasayam journal & KVK scientist directories.
+                    </p>
+                  </div>
+                  <div className="mt-4 flex items-center gap-2">
+                    <a
+                      href="https://pjtsau.edu.in/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-700 px-3 py-1.5 text-xs font-bold text-white shadow-2xs hover:bg-emerald-800 transition"
+                    >
+                      <span>Visit pjtsau.edu.in</span>
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  </div>
+                </div>
+
+                {/* 2. Agmarknet */}
+                <div className="rounded-2xl border border-amber-200 bg-amber-50/30 p-4 dark:border-amber-900/60 dark:bg-amber-950/20 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase font-bold text-amber-800 dark:text-amber-300">
+                        Govt of India Mandi Network
+                      </span>
+                      <Layers className="h-4 w-4 text-amber-600" />
+                    </div>
+                    <h5 className="font-extrabold text-sm text-stone-900 dark:text-stone-100 mt-1">
+                      Agmarknet National Portal
+                    </h5>
+                    <p className="text-xs text-stone-600 dark:text-stone-300 mt-1 leading-relaxed">
+                      Real-time arrivals, modal and maximum wholesale prices across all regulated APMC agricultural market yards in Telangana.
+                    </p>
+                  </div>
+                  <div className="mt-4 flex items-center gap-2">
+                    <a
+                      href="https://agmarknet.gov.in/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-amber-700 px-3 py-1.5 text-xs font-bold text-white shadow-2xs hover:bg-amber-800 transition"
+                    >
+                      <span>Visit agmarknet.gov.in</span>
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  </div>
+                </div>
+
+                {/* 3. Rythu Bandhu Portal */}
+                <div className="rounded-2xl border border-sky-200 bg-sky-50/30 p-4 dark:border-sky-900/60 dark:bg-sky-950/20 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase font-bold text-sky-800 dark:text-sky-300">
+                        Telangana State Agriculture
+                      </span>
+                      <Globe className="h-4 w-4 text-sky-600" />
+                    </div>
+                    <h5 className="font-extrabold text-sm text-stone-900 dark:text-stone-100 mt-1">
+                      Rythu Bandhu & Agri Dept
+                    </h5>
+                    <p className="text-xs text-stone-600 dark:text-stone-300 mt-1 leading-relaxed">
+                      Telangana Agriculture Department portal for crop booking records, ₹500/qtl fine rice bonus DBT status, and Rythu Bima.
+                    </p>
+                  </div>
+                  <div className="mt-4 flex items-center gap-2">
+                    <a
+                      href="https://agri.telangana.gov.in/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-sky-700 px-3 py-1.5 text-xs font-bold text-white shadow-2xs hover:bg-sky-800 transition"
+                    >
+                      <span>Visit agri.telangana.gov.in</span>
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  </div>
+                </div>
+
+                {/* 4. PlantVillage */}
+                <div className="rounded-2xl border border-rose-200 bg-rose-50/30 p-4 dark:border-rose-900/60 dark:bg-rose-950/20 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase font-bold text-rose-800 dark:text-rose-300">
+                        Leaf Pathology Encyclopedia
+                      </span>
+                      <Leaf className="h-4 w-4 text-rose-600" />
+                    </div>
+                    <h5 className="font-extrabold text-sm text-stone-900 dark:text-stone-100 mt-1">
+                      PlantVillage Disease Archive
+                    </h5>
+                    <p className="text-xs text-stone-600 dark:text-stone-300 mt-1 leading-relaxed">
+                      Penn State open-access visual diagnostic database covering hundreds of crop diseases, bacterial blights, and pests.
+                    </p>
+                  </div>
+                  <div className="mt-4 flex items-center gap-2">
+                    <a
+                      href="https://plantvillage.psu.edu/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-rose-700 px-3 py-1.5 text-xs font-bold text-white shadow-2xs hover:bg-rose-800 transition"
+                    >
+                      <span>Visit plantvillage.psu.edu</span>
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  </div>
+                </div>
+
+                {/* 5. Kisan Call Centre */}
+                <div className="rounded-2xl border border-teal-200 bg-teal-50/30 p-4 dark:border-teal-900/60 dark:bg-teal-950/20 flex flex-col justify-between sm:col-span-2 lg:col-span-2">
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase font-bold text-teal-800 dark:text-teal-300">
+                        National Toll-Free Helpline
+                      </span>
+                      <PhoneCall className="h-4 w-4 text-teal-600" />
+                    </div>
+                    <h5 className="font-extrabold text-sm text-stone-900 dark:text-stone-100 mt-1">
+                      Kisan Call Centre (1800-180-1551)
+                    </h5>
+                    <p className="text-xs text-stone-600 dark:text-stone-300 mt-1 leading-relaxed">
+                      Connect directly with qualified agricultural officers and scientists in Telugu or English. Free consultation on crop pests, fertilizer scheduling, weather forecasts, and market advisory daily from 6:00 AM to 10:00 PM.
+                    </p>
+                  </div>
+                  <div className="mt-4 flex items-center gap-2">
+                    <a
+                      href="tel:18001801551"
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-teal-700 px-4 py-2 text-xs font-bold text-white shadow-2xs hover:bg-teal-800 transition"
+                    >
+                      <PhoneCall className="h-3.5 w-3.5" />
+                      <span>Call 1800-180-1551 Free</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
           </Card>
         </div>
       )}
