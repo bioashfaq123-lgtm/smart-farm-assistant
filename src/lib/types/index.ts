@@ -176,6 +176,7 @@ export interface ChatMessage {
   textTe?: string;
   timestamp: string;
   audioPlaying?: boolean;
+  imageUrl?: string;
 }
 
 export interface FieldZone {

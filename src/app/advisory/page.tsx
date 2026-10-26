@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   MessageSquare,
   Mic,
@@ -22,6 +22,10 @@ import {
   Share2,
   Copy,
   Check,
+  Upload,
+  Image as ImageIcon,
+  Paperclip,
+  X,
 } from "lucide-react";
 import { useLanguage } from "@/components/common/LanguageContext";
 import { useFarmerProfile } from "@/components/common/FarmerProfileContext";
@@ -48,8 +52,19 @@ export default function AdvisoryPage() {
   const [isRecording, setIsRecording] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [activeTab, setActiveTab] = useState<"chat" | "diagnostics">("chat");
+
+  // Chat image attachment state
+  const [attachedImage, setAttachedImage] = useState<string | null>(null);
+  const chatFileInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Diagnostic tab states
   const [selectedCase, setSelectedCase] = useState<PestDiagnosticCase>(SAMPLE_PEST_DIAGNOSTICS[0]);
+  const [uploadedLeafPhoto, setUploadedLeafPhoto] = useState<string | null>(null);
+  const [customAiDiagnosis, setCustomAiDiagnosis] = useState<any | null>(null);
   const [isAnalyzingPhoto, setIsAnalyzingPhoto] = useState(false);
+  const [diagSource, setDiagSource] = useState<string>("PJTAU Reference Cases");
+  const diagFileInputRef = useRef<HTMLInputElement | null>(null);
+
   const [copiedPest, setCopiedPest] = useState(false);
   const [chatSource, setChatSource] = useState<string>("PJTAU Knowledge Base");
   const [errorMessage, setErrorMessage] = useState<string>("");
@@ -63,10 +78,11 @@ export default function AdvisoryPage() {
         .toUpperCase()
     : "YOU";
 
+  // Quick suggestion prompts
   const sampleSuggestions = [
     {
-      en: "How to identify and treat Paddy Blast?",
-      te: "వరిలో అగ్గితెగులు నివారణకు మందు ఏమిటి?",
+      en: "What is the recommended spray for Leaf Blast in paddy?",
+      te: "వరిలో అగ్గితెగులు నివారణకు సిఫారసు చేసిన మందు ఏమిటి?",
     },
     {
       en: "How to claim the ₹500/quintal Telangana Fine Rice bonus?",
@@ -82,21 +98,44 @@ export default function AdvisoryPage() {
     },
   ];
 
+  // Handle chat image selection
+  const handleChatImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      setErrorMessage("Image too large. Please select an image under 5MB.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setAttachedImage(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+    // Reset file input
+    e.target.value = "";
+  };
+
   const handleSend = async (textToSend?: string) => {
     const text = textToSend || inputText;
-    if (!text.trim()) return;
+    const imgToSend = attachedImage;
+
+    if (!text.trim() && !imgToSend) return;
 
     setErrorMessage("");
     const userMsg: ChatMessage = {
       id: `user-${Date.now()}`,
       sender: "user",
-      textEn: text,
-      textTe: text,
+      textEn: text || (imgToSend ? "Analyze this uploaded plant/leaf image" : ""),
+      textTe: text || (imgToSend ? "ఈ అప్‌లోడ్ చేసిన మొక్క/ఆకు చిత్రాన్ని విశ్లేషించండి" : ""),
+      imageUrl: imgToSend || undefined,
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };
 
     setMessages((prev) => [...prev, userMsg]);
     setInputText("");
+    setAttachedImage(null);
     setIsSending(true);
 
     try {
@@ -104,8 +143,14 @@ export default function AdvisoryPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          message: text,
+          message: text || (imgToSend ? "Analyze this crop leaf image for pests, disease or deficiency under PJTAU practices." : ""),
+          image: imgToSend || undefined,
           lang,
+          farmerProfile: {
+            district: profile.district,
+            primaryCrop: profile.primaryCrop,
+            areaAcre: profile.areaAcre,
+          },
         }),
       });
 
@@ -169,84 +214,172 @@ export default function AdvisoryPage() {
     }
   };
 
-  const handleSimulatePhotoUpload = (pestCase: PestDiagnosticCase) => {
+  // Handler for selecting sample reference case
+  const handleSelectSampleCase = (pestCase: PestDiagnosticCase) => {
     setIsAnalyzingPhoto(true);
     setSelectedCase(pestCase);
+    setUploadedLeafPhoto(null);
+    setCustomAiDiagnosis(null);
+    setDiagSource("PJTAU Reference Cases");
     setTimeout(() => {
       setIsAnalyzingPhoto(false);
-    }, 700);
+    }, 400);
   };
+
+  // Handler for live leaf photo upload and multimodal Gemini diagnosis
+  const handleLeafPhotoFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 8 * 1024 * 1024) {
+      alert("Image is too large. Please select an image under 8MB.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const base64Data = reader.result as string;
+      setUploadedLeafPhoto(base64Data);
+      setIsAnalyzingPhoto(true);
+      setCustomAiDiagnosis(null);
+
+      try {
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: "Diagnose this crop leaf photo for disease, pest, or nutrient deficiency under PJTAU package of practices.",
+            image: base64Data,
+            mode: "diagnosis",
+            lang,
+            farmerProfile: {
+              district: profile.district,
+              primaryCrop: profile.primaryCrop,
+              areaAcre: profile.areaAcre,
+            },
+          }),
+        });
+
+        const data = await res.json();
+        if (data.diagnosis) {
+          setCustomAiDiagnosis(data.diagnosis);
+          setDiagSource(data.source || "Gemini 1.5 Flash (Multimodal Vision)");
+        } else if (data.reply) {
+          setCustomAiDiagnosis({
+            diseaseName: "Visual Leaf Pathology Analysis",
+            severity: "high",
+            symptoms: "Visual leaf lesion symptoms detected by AI.",
+            remedy: data.reply,
+            dosage: "See prescription below",
+            organicAlternative: "Neem oil 10,000 ppm @ 2 mL/L",
+            safety: "Wear protective face mask and gloves.",
+            fullText: data.reply,
+          });
+          setDiagSource(data.source || "Gemini 1.5 Flash Vision");
+        }
+      } catch (err) {
+        // Fallback to sample case
+        setDiagSource("Offline PJTAU Reference Cases");
+      } finally {
+        setIsAnalyzingPhoto(false);
+      }
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
+
+  // Active diagnosis display object
+  const activeDiagnosis = customAiDiagnosis
+    ? {
+        pestNameEn: customAiDiagnosis.diseaseName,
+        pestNameTe: customAiDiagnosis.diseaseName,
+        cropEn: profile.primaryCrop,
+        cropTe: profile.primaryCrop,
+        severity: customAiDiagnosis.severity || "high",
+        symptomsEn: customAiDiagnosis.symptoms || "Visual symptoms analyzed from photo.",
+        symptomsTe: customAiDiagnosis.symptoms || "ఫోటో నుండి విశ్లేషించిన లక్షణాలు.",
+        recommendedSprayEn: customAiDiagnosis.remedy || "Apply recommended PJTAU spray.",
+        recommendedSprayTe: customAiDiagnosis.remedy || "సిఫారసు చేసిన మందు పిచికారీ చేయండి.",
+        dosageEn: customAiDiagnosis.dosage || "As per PJTAU package of practices",
+        dosageTe: customAiDiagnosis.dosage || "PJTAU మార్గదర్శకాల ప్రకారం",
+        organicAlternativeEn: customAiDiagnosis.organicAlternative || "Neem oil 10,000 ppm @ 2 mL/L",
+        organicAlternativeTe: customAiDiagnosis.organicAlternative || "వేప నూనె @ 2 మి.లీ/లీటరు",
+        ppePrecautionsEn: customAiDiagnosis.safety || "Wear face mask and hand gloves during spraying.",
+        ppePrecautionsTe: customAiDiagnosis.safety || "రక్షణ మాస్క్ మరియు చేతి తొడుగులు ధరించండి.",
+      }
+    : selectedCase;
 
   return (
     <div className="space-y-6">
-      {/* 1. Page Header */}
-      <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+      {/* 1. Header with View Tabs */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-900 dark:text-stone-50">
               {t("advisory_title")}
             </h1>
-            <Badge variant="normal">{t("advisory_badge_ai")}</Badge>
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300">
-              {chatSource}
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300">
+              Gemini 1.5 Flash Multimodal
             </span>
           </div>
           <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 mt-0.5">
-            {t("advisory_subtitle")}
+            {profile.village} Field &bull; {profile.district} District &bull; {profile.primaryCrop} ({profile.areaAcre} Acres)
           </p>
         </div>
 
-        {/* Tab switch between Chat and Photo Diagnostics */}
-        <div className="mt-3 sm:mt-0 flex items-center rounded-xl border border-stone-200 bg-stone-100/80 p-1 dark:border-stone-800 dark:bg-stone-900">
+        {/* View Toggle Tabs */}
+        <div className="flex items-center gap-1 rounded-2xl border border-stone-200 bg-stone-100 p-1 dark:border-stone-800 dark:bg-stone-900">
           <button
             onClick={() => setActiveTab("chat")}
-            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+            className={`flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition ${
               activeTab === "chat"
-                ? "bg-white text-agri-800 shadow-2xs dark:bg-stone-800 dark:text-agri-300"
-                : "text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200"
+                ? "bg-white text-stone-900 shadow-2xs dark:bg-stone-800 dark:text-stone-50"
+                : "text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100"
             }`}
           >
-            <MessageSquare className="h-3.5 w-3.5" />
-            <span>{lang === "te" ? "చాట్ సంభాషణ" : "AI Advisor Chat"}</span>
+            <MessageSquare className="h-3.5 w-3.5 text-agri-600" />
+            <span>{lang === "te" ? "కృషి సహాయక్ చాట్" : "Krishi Sahayak Chat"}</span>
           </button>
           <button
             onClick={() => setActiveTab("diagnostics")}
-            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+            className={`flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition ${
               activeTab === "diagnostics"
-                ? "bg-white text-agri-800 shadow-2xs dark:bg-stone-800 dark:text-agri-300"
-                : "text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200"
+                ? "bg-white text-stone-900 shadow-2xs dark:bg-stone-800 dark:text-stone-50"
+                : "text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100"
             }`}
           >
             <Camera className="h-3.5 w-3.5 text-rose-500" />
-            <span>{t("diag_tab_title")}</span>
+            <span>{lang === "te" ? "ఆకు తెగులు స్కానర్" : "Leaf Disease Scanner"}</span>
           </button>
         </div>
       </div>
 
-      {/* Mandatory Chatbot Safety Notice Banner */}
+      {/* Safety Notice Banner */}
       <SafetyNotice />
 
       {activeTab === "chat" ? (
-        /* 2-Column Advisory Chat Layout (Matching Screenshot 3) */
+        /* Chat View */
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          {/* Left: Chat Conversation Window (2 Cols) */}
-          <Card className="lg:col-span-2 flex flex-col justify-between min-h-[580px] p-0 overflow-hidden">
-            {/* Chat Stream Header */}
-            <div className="flex items-center justify-between border-b border-stone-200/80 bg-stone-50/70 p-4 dark:border-stone-800 dark:bg-stone-900/60">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-agri-700 text-white shadow-xs">
-                  <Bot className="h-5 w-5" />
+          {/* Main Chat Interface */}
+          <Card className="lg:col-span-2 flex flex-col justify-between overflow-hidden">
+            <div className="flex items-center justify-between border-b border-stone-100 p-4 dark:border-stone-800">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-agri-600 to-agri-800 text-white shadow-2xs">
+                  <Sparkles className="h-5 w-5" />
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100">
-                    Krishi Sahayak Assistant
+                    {lang === "te" ? "కృషి సహాయక్ AI సంభాషణ" : "Krishi Sahayak AI Assistant"}
                   </h3>
-                  <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    PJTAU Vyavasaya Panchangam Knowledge Engine
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="text-[11px] text-stone-500 dark:text-stone-400 font-mono">
+                      {chatSource}
+                    </span>
+                  </div>
                 </div>
               </div>
+
               <button
                 onClick={() => setMessages(INITIAL_CHAT_MESSAGES)}
                 title="Reset conversation"
@@ -278,6 +411,17 @@ export default function AdvisoryPage() {
                           : "bg-agri-700 text-white"
                       }`}
                     >
+                      {/* Attached image preview in chat message */}
+                      {msg.imageUrl && (
+                        <div className="mb-2.5 overflow-hidden rounded-xl border border-white/20">
+                          <img
+                            src={msg.imageUrl}
+                            alt="Uploaded crop leaf"
+                            className="max-h-48 w-auto object-cover rounded-lg"
+                          />
+                        </div>
+                      )}
+
                       <p className="whitespace-pre-line">{lang === "te" && msg.textTe ? msg.textTe : msg.textEn}</p>
                       <div
                         className={`mt-2 flex items-center justify-between text-[10px] ${
@@ -310,7 +454,7 @@ export default function AdvisoryPage() {
               {isSending && (
                 <div className="flex items-center gap-2 text-xs text-stone-500 dark:text-stone-400">
                   <span className="flex h-2 w-2 rounded-full bg-agri-600 animate-ping" />
-                  <span>Consulting PJTAU agronomic intelligence...</span>
+                  <span>Consulting Gemini 1.5 Flash multimodal vision & PJTAU knowledge...</span>
                 </div>
               )}
 
@@ -336,6 +480,39 @@ export default function AdvisoryPage() {
 
             {/* Input Action Bar */}
             <div className="border-t border-stone-200 p-3 sm:p-4 dark:border-stone-800 bg-white dark:bg-stone-900">
+              {/* Image attachment preview chip before sending */}
+              {attachedImage && (
+                <div className="mb-2 flex items-center gap-2 rounded-xl bg-stone-100 p-2 text-xs dark:bg-stone-850 border border-stone-200 dark:border-stone-800">
+                  <img
+                    src={attachedImage}
+                    alt="Preview"
+                    className="h-10 w-10 rounded-lg object-cover border border-stone-300"
+                  />
+                  <div className="flex-1 truncate">
+                    <span className="font-semibold text-stone-800 dark:text-stone-200 text-xs">
+                      Leaf Photo Attached
+                    </span>
+                    <p className="text-[10px] text-stone-400">Gemini 1.5 Flash Vision will inspect this image</p>
+                  </div>
+                  <button
+                    onClick={() => setAttachedImage(null)}
+                    className="p-1 text-stone-400 hover:text-stone-700 dark:hover:text-stone-200"
+                    title="Remove attachment"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
+
+              {/* Hidden file input for chat image attachment */}
+              <input
+                type="file"
+                ref={chatFileInputRef}
+                accept="image/*"
+                onChange={handleChatImageSelect}
+                className="hidden"
+              />
+
               {isRecording && (
                 <div className="mb-2 flex items-center justify-between rounded-xl bg-rose-50 p-3 text-xs font-semibold text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 border border-rose-200">
                   <div className="flex items-center gap-2">
@@ -357,7 +534,11 @@ export default function AdvisoryPage() {
                     }
                   }}
                   rows={2}
-                  placeholder={t("advisory_input_placeholder")}
+                  placeholder={
+                    attachedImage
+                      ? "Ask a question about this attached photo..."
+                      : t("advisory_input_placeholder")
+                  }
                   className="w-full resize-none rounded-xl border border-stone-200 p-3 text-xs sm:text-sm text-stone-900 placeholder-stone-400 focus:border-agri-600 focus:outline-hidden focus:ring-1 focus:ring-agri-600 dark:border-stone-800 dark:bg-stone-950 dark:text-stone-100 dark:placeholder-stone-500"
                 />
 
@@ -376,17 +557,26 @@ export default function AdvisoryPage() {
                     </button>
 
                     <button
-                      onClick={() => setActiveTab("diagnostics")}
+                      onClick={() => chatFileInputRef.current?.click()}
                       className="flex items-center gap-1.5 rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 text-xs font-semibold text-stone-700 hover:bg-stone-100 dark:border-stone-800 dark:bg-stone-850 dark:text-stone-300 transition"
+                      title="Attach leaf photo"
                     >
-                      <Camera className="h-3.5 w-3.5 text-agri-600" />
-                      <span>{t("advisory_btn_image")}</span>
+                      <Paperclip className="h-3.5 w-3.5 text-agri-600" />
+                      <span>{attachedImage ? "Change Photo" : "Attach Photo"}</span>
+                    </button>
+
+                    <button
+                      onClick={() => setActiveTab("diagnostics")}
+                      className="hidden sm:flex items-center gap-1.5 rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 text-xs font-semibold text-stone-700 hover:bg-stone-100 dark:border-stone-800 dark:bg-stone-850 dark:text-stone-300 transition"
+                    >
+                      <Camera className="h-3.5 w-3.5 text-rose-500" />
+                      <span>Scanner</span>
                     </button>
                   </div>
 
                   <button
                     onClick={() => handleSend()}
-                    disabled={!inputText.trim()}
+                    disabled={!inputText.trim() && !attachedImage}
                     className="flex items-center gap-1.5 rounded-xl bg-agri-700 px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-agri-800 disabled:opacity-50 active:scale-95"
                   >
                     <span>{t("advisory_btn_send")}</span>
@@ -410,19 +600,17 @@ export default function AdvisoryPage() {
                 {SAMPLE_ADVISORY_TIPS.map((tip) => (
                   <div
                     key={tip.id}
-                    className="rounded-xl border border-stone-100 bg-stone-50/70 p-3 dark:border-stone-800 dark:bg-stone-850"
+                    className="rounded-xl border border-stone-100 bg-stone-50/70 p-3 text-xs dark:border-stone-800 dark:bg-stone-850 space-y-1"
                   >
-                    <div className="flex items-center justify-between gap-1 mb-1">
-                      <h4 className="text-xs font-bold text-stone-900 dark:text-stone-100">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-stone-900 dark:text-stone-100">
                         {lang === "te" ? tip.titleTe : tip.titleEn}
-                      </h4>
-                      <span
-                        className={`rounded-md px-1.5 py-0.5 text-[9px] font-bold ${tip.badgeColor}`}
-                      >
+                      </span>
+                      <span className="text-[10px] uppercase font-bold text-agri-700 dark:text-agri-400">
                         {lang === "te" ? tip.categoryTe : tip.categoryEn}
                       </span>
                     </div>
-                    <p className="text-[11px] text-stone-600 dark:text-stone-300 leading-relaxed">
+                    <p className="text-stone-600 dark:text-stone-300 leading-relaxed text-[11px]">
                       {lang === "te" ? tip.descTe : tip.descEn}
                     </p>
                   </div>
@@ -430,40 +618,89 @@ export default function AdvisoryPage() {
               </div>
             </Card>
 
-            <Card className="bg-emerald-50/50 border-emerald-200/80 dark:bg-emerald-950/20 dark:border-emerald-900/40">
-              <h4 className="text-xs font-bold text-emerald-900 dark:text-emerald-100 flex items-center gap-1.5">
-                <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                <span>Telangana Extension Helpline</span>
-              </h4>
-              <p className="mt-1 text-[11px] text-emerald-800 dark:text-emerald-300">
-                For direct telephone consultation with PJTAU scientists, dial Toll-Free <b>1800 425 3536</b> (Working hours 10 AM – 5 PM).
-              </p>
+            {/* Helpline Assistance */}
+            <Card className="bg-gradient-to-br from-agri-800 to-stone-900 text-white">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-white">
+                  <PhoneCall className="h-6 w-6" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-agri-300">
+                    Kisan Call Centre (Toll-Free)
+                  </h4>
+                  <p className="text-xl font-black mt-0.5">1800-180-1551</p>
+                  <p className="text-[11px] text-stone-300 mt-1">
+                    Direct government agricultural officer helpline (6 AM - 10 PM)
+                  </p>
+                </div>
+              </div>
             </Card>
           </div>
         </div>
       ) : (
-        /* Phase 2: Leaf & Pest Photo Pathology Diagnostic View */
+        /* Multimodal Leaf & Pest Pathology Diagnostic View */
         <div className="space-y-6">
           <Card>
             <CardHeader
               title={t("diag_tab_title")}
               subtitle={t("diag_subtitle")}
               icon={<Camera className="h-5 w-5 text-rose-500" />}
-              action={<Badge variant="outline" className="text-xs">PJTAU Reference Cases</Badge>}
+              action={<Badge variant="outline" className="text-xs">{diagSource}</Badge>}
             />
 
-            {/* Step 1: Select Sample Crop Leaf or Upload */}
-            <div className="space-y-3">
-              <h4 className="text-xs font-bold text-stone-700 dark:text-stone-300 uppercase tracking-wider">
-                1. {t("diag_sample_btn")}
-              </h4>
+            {/* Live Upload Leaf Photo Card (Gemini 1.5 Flash Multimodal Vision) */}
+            <div className="rounded-2xl border-2 border-dashed border-agri-300 bg-agri-50/40 p-6 text-center dark:border-agri-800 dark:bg-agri-950/20">
+              <input
+                type="file"
+                ref={diagFileInputRef}
+                accept="image/*"
+                capture="environment"
+                onChange={handleLeafPhotoFile}
+                className="hidden"
+              />
+
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-agri-600 text-white shadow-md shadow-agri-600/30">
+                <Upload className="h-7 w-7" />
+              </div>
+
+              <h3 className="mt-3 text-base font-bold text-stone-900 dark:text-white">
+                {lang === "te"
+                  ? "తెగులు సోకిన ఆకు ఫోటో తీయండి లేదా అప్‌లోడ్ చేయండి"
+                  : "Capture or Upload Infected Crop Leaf Photo"}
+              </h3>
+              <p className="mt-1 text-xs text-stone-600 dark:text-stone-300 max-w-lg mx-auto leading-relaxed">
+                {lang === "te"
+                  ? "Google Gemini 1.5 Flash విజన్ AI సాంకేతికత ద్వారా ఆకు లక్షణాలను విశ్లేషించి, PJTAU నిర్ధారిత మందుల మోతాదును తక్షణమే పొందండి."
+                  : "Powered by Google Gemini 1.5 Flash Vision AI. Instantly identifies plant pathogens, leaf spot diseases, and chewing pests under PJTAU package of practices."}
+              </p>
+
+              <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+                <button
+                  onClick={() => diagFileInputRef.current?.click()}
+                  className="inline-flex items-center gap-2 rounded-xl bg-agri-700 px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-agri-800 transition active:scale-95"
+                >
+                  <Camera className="h-4 w-4" />
+                  <span>{lang === "te" ? "కెమెరా / ఫోటో ఎంచుకోండి" : "Take Photo / Choose Image"}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Quick Reference Sample Cases */}
+            <div className="mt-6 space-y-3">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-bold text-stone-700 dark:text-stone-300 uppercase tracking-wider">
+                  {lang === "te" ? "లేదా PJTAU ప్రామాణిక కేసును ఎంచుకోండి:" : "Or select a PJTAU Reference Sample Case:"}
+                </h4>
+                <span className="text-[11px] text-stone-400">Offline Verified Samples</span>
+              </div>
+
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 {SAMPLE_PEST_DIAGNOSTICS.map((item) => (
                   <button
                     key={item.id}
-                    onClick={() => handleSimulatePhotoUpload(item)}
+                    onClick={() => handleSelectSampleCase(item)}
                     className={`flex items-start gap-3 rounded-2xl border p-3 text-left transition ${
-                      selectedCase.id === item.id
+                      !uploadedLeafPhoto && selectedCase.id === item.id
                         ? "border-agri-600 bg-agri-50/60 ring-2 ring-agri-600/30 dark:bg-agri-950/30"
                         : "border-stone-200 bg-white hover:bg-stone-50 dark:border-stone-800 dark:bg-stone-900"
                     }`}
@@ -487,28 +724,54 @@ export default function AdvisoryPage() {
               </div>
             </div>
 
-            {/* Step 2: Diagnostic Pathology Result Card */}
+            {/* Diagnostic Pathology Result Card */}
             {isAnalyzingPhoto ? (
               <div className="my-8 flex flex-col items-center justify-center py-10 text-stone-500">
-                <span className="h-8 w-8 animate-spin rounded-full border-3 border-agri-600 border-t-transparent" />
-                <p className="mt-3 text-xs font-medium">{t("diag_analyzing")}</p>
+                <span className="h-10 w-10 animate-spin rounded-full border-3 border-agri-600 border-t-transparent" />
+                <p className="mt-3 text-xs font-bold text-stone-700 dark:text-stone-200">
+                  Gemini 1.5 Flash Vision analyzing leaf lesions...
+                </p>
+                <p className="text-[11px] text-stone-400 mt-1">
+                  Cross-referencing PJTAU pathology package of practices
+                </p>
               </div>
             ) : (
               <div className="mt-6 rounded-2xl border border-stone-200 bg-white p-5 shadow-xs dark:border-stone-800 dark:bg-stone-900 space-y-5">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-100 pb-4 dark:border-stone-800">
-                  <div>
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-agri-700 dark:text-agri-400">
-                      {t("diag_identified")}
-                    </span>
-                    <h3 className="text-lg font-black text-stone-900 dark:text-stone-50">
-                      {lang === "te" ? selectedCase.pestNameTe : selectedCase.pestNameEn}
-                    </h3>
-                    <p className="text-xs text-stone-500">
-                      Crop: <b className="text-stone-800 dark:text-stone-200">{lang === "te" ? selectedCase.cropTe : selectedCase.cropEn}</b>
-                    </p>
+                  <div className="flex items-start gap-4">
+                    {/* Uploaded photo thumbnail if user uploaded an image */}
+                    {uploadedLeafPhoto && (
+                      <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl border-2 border-agri-600 shadow-xs">
+                        <img
+                          src={uploadedLeafPhoto}
+                          alt="Analyzed crop leaf"
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                    )}
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-agri-700 dark:text-agri-400">
+                          {t("diag_identified")}
+                        </span>
+                        <Badge variant="normal" className="text-[10px]">
+                          {diagSource}
+                        </Badge>
+                      </div>
+                      <h3 className="text-lg font-black text-stone-900 dark:text-stone-50 mt-0.5">
+                        {lang === "te" ? activeDiagnosis.pestNameTe : activeDiagnosis.pestNameEn}
+                      </h3>
+                      <p className="text-xs text-stone-500">
+                        Crop: <b className="text-stone-800 dark:text-stone-200">{lang === "te" ? activeDiagnosis.cropTe : activeDiagnosis.cropEn}</b>
+                      </p>
+                    </div>
                   </div>
-                  <Badge variant={selectedCase.severity === "high" ? "critical" : "warning"} className="self-start sm:self-auto py-1 px-3">
-                    {selectedCase.severity.toUpperCase()} RISK LEVEL
+
+                  <Badge
+                    variant={activeDiagnosis.severity === "high" ? "critical" : "warning"}
+                    className="self-start sm:self-auto py-1 px-3"
+                  >
+                    {String(activeDiagnosis.severity).toUpperCase()} RISK LEVEL
                   </Badge>
                 </div>
 
@@ -520,7 +783,7 @@ export default function AdvisoryPage() {
                       <span>{t("diag_symptoms")}</span>
                     </h4>
                     <p className="text-xs text-stone-600 dark:text-stone-300 leading-relaxed">
-                      {lang === "te" ? selectedCase.symptomsTe : selectedCase.symptomsEn}
+                      {lang === "te" ? activeDiagnosis.symptomsTe : activeDiagnosis.symptomsEn}
                     </p>
                   </div>
 
@@ -530,10 +793,10 @@ export default function AdvisoryPage() {
                       <span>{t("diag_remedy")}</span>
                     </h4>
                     <p className="text-xs font-bold text-stone-900 dark:text-stone-100">
-                      {lang === "te" ? selectedCase.recommendedSprayTe : selectedCase.recommendedSprayEn}
+                      {lang === "te" ? activeDiagnosis.recommendedSprayTe : activeDiagnosis.recommendedSprayEn}
                     </p>
                     <p className="text-[11px] text-stone-600 dark:text-stone-300 pt-1">
-                      <b>{t("diag_dosage")}:</b> {lang === "te" ? selectedCase.dosageTe : selectedCase.dosageEn}
+                      <b>{t("diag_dosage")}:</b> {lang === "te" ? activeDiagnosis.dosageTe : activeDiagnosis.dosageEn}
                     </p>
                   </div>
                 </div>
@@ -546,7 +809,7 @@ export default function AdvisoryPage() {
                       <span>{t("diag_organic")}</span>
                     </h4>
                     <p className="text-xs text-emerald-800 dark:text-emerald-300 leading-relaxed">
-                      {lang === "te" ? selectedCase.organicAlternativeTe : selectedCase.organicAlternativeEn}
+                      {lang === "te" ? activeDiagnosis.organicAlternativeTe : activeDiagnosis.organicAlternativeEn}
                     </p>
                   </div>
 
@@ -556,7 +819,7 @@ export default function AdvisoryPage() {
                       <span>{t("diag_safety")}</span>
                     </h4>
                     <p className="text-xs text-rose-800 dark:text-rose-300 leading-relaxed">
-                      {lang === "te" ? selectedCase.ppePrecautionsTe : selectedCase.ppePrecautionsEn}
+                      {lang === "te" ? activeDiagnosis.ppePrecautionsTe : activeDiagnosis.ppePrecautionsEn}
                     </p>
                   </div>
                 </div>
@@ -569,8 +832,8 @@ export default function AdvisoryPage() {
                         setActiveTab("chat");
                         handleSend(
                           lang === "te"
-                            ? `నా పొలంలో ${selectedCase.pestNameTe} గుర్తించబడింది. మరింత సలహా ఇవ్వండి.`
-                            : `Detected ${selectedCase.pestNameEn} in field. Please give step-by-step guidance.`
+                            ? `నా పొలంలో ${activeDiagnosis.pestNameTe} గుర్తించబడింది. మరింత సలహా ఇవ్వండి.`
+                            : `Detected ${activeDiagnosis.pestNameEn} in field. Please give step-by-step guidance.`
                         );
                       }}
                       className="inline-flex items-center gap-2 rounded-xl bg-agri-700 px-4 py-2.5 text-xs font-semibold text-white shadow-xs transition hover:bg-agri-800"
@@ -583,18 +846,18 @@ export default function AdvisoryPage() {
                       href={generateWhatsAppUrl(
                         formatPestMessage(
                           {
-                            crop: selectedCase.cropEn,
-                            cropTe: selectedCase.cropTe,
-                            pestName: selectedCase.pestNameEn,
-                            pestNameTe: selectedCase.pestNameTe,
-                            remedy: selectedCase.recommendedSprayEn,
-                            remedyTe: selectedCase.recommendedSprayTe,
-                            dosage: selectedCase.dosageEn,
-                            dosageTe: selectedCase.dosageTe,
-                            organic: selectedCase.organicAlternativeEn,
-                            organicTe: selectedCase.organicAlternativeTe,
-                            ppe: selectedCase.ppePrecautionsEn,
-                            ppeTe: selectedCase.ppePrecautionsTe,
+                            crop: activeDiagnosis.cropEn,
+                            cropTe: activeDiagnosis.cropTe,
+                            pestName: activeDiagnosis.pestNameEn,
+                            pestNameTe: activeDiagnosis.pestNameTe,
+                            remedy: activeDiagnosis.recommendedSprayEn,
+                            remedyTe: activeDiagnosis.recommendedSprayTe,
+                            dosage: activeDiagnosis.dosageEn,
+                            dosageTe: activeDiagnosis.dosageTe,
+                            organic: activeDiagnosis.organicAlternativeEn,
+                            organicTe: activeDiagnosis.organicAlternativeTe,
+                            ppe: activeDiagnosis.ppePrecautionsEn,
+                            ppeTe: activeDiagnosis.ppePrecautionsTe,
                           },
                           lang
                         )
@@ -611,18 +874,18 @@ export default function AdvisoryPage() {
                       onClick={async () => {
                         const txt = formatPestMessage(
                           {
-                            crop: selectedCase.cropEn,
-                            cropTe: selectedCase.cropTe,
-                            pestName: selectedCase.pestNameEn,
-                            pestNameTe: selectedCase.pestNameTe,
-                            remedy: selectedCase.recommendedSprayEn,
-                            remedyTe: selectedCase.recommendedSprayTe,
-                            dosage: selectedCase.dosageEn,
-                            dosageTe: selectedCase.dosageTe,
-                            organic: selectedCase.organicAlternativeEn,
-                            organicTe: selectedCase.organicAlternativeTe,
-                            ppe: selectedCase.ppePrecautionsEn,
-                            ppeTe: selectedCase.ppePrecautionsTe,
+                            crop: activeDiagnosis.cropEn,
+                            cropTe: activeDiagnosis.cropTe,
+                            pestName: activeDiagnosis.pestNameEn,
+                            pestNameTe: activeDiagnosis.pestNameTe,
+                            remedy: activeDiagnosis.recommendedSprayEn,
+                            remedyTe: activeDiagnosis.recommendedSprayTe,
+                            dosage: activeDiagnosis.dosageEn,
+                            dosageTe: activeDiagnosis.dosageTe,
+                            organic: activeDiagnosis.organicAlternativeEn,
+                            organicTe: activeDiagnosis.organicAlternativeTe,
+                            ppe: activeDiagnosis.ppePrecautionsEn,
+                            ppeTe: activeDiagnosis.ppePrecautionsTe,
                           },
                           lang
                         );
