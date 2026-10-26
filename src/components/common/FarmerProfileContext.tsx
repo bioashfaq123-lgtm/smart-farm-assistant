@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import {
   FarmerProfile,
   DEFAULT_SAMPLE_FARMER,
+  EMPTY_INITIAL_FARMER,
   getStoredFarmerProfile,
   saveFarmerProfile,
   resetToSampleProfile,
@@ -20,7 +21,7 @@ interface FarmerProfileContextType {
 }
 
 const FarmerProfileContext = createContext<FarmerProfileContextType>({
-  profile: DEFAULT_SAMPLE_FARMER,
+  profile: EMPTY_INITIAL_FARMER,
   updateProfile: () => {},
   resetToSample: () => {},
   isModalOpen: false,
@@ -29,12 +30,18 @@ const FarmerProfileContext = createContext<FarmerProfileContextType>({
 });
 
 export function FarmerProfileProvider({ children }: { children: React.ReactNode }) {
-  const [profile, setProfile] = useState<FarmerProfile>(DEFAULT_SAMPLE_FARMER);
+  const [profile, setProfile] = useState<FarmerProfile>(EMPTY_INITIAL_FARMER);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     // Initial load from localStorage
-    setProfile(getStoredFarmerProfile());
+    const stored = getStoredFarmerProfile();
+    setProfile(stored);
+
+    // If visiting for the first time without completed profile, automatically ask the farmer to complete setup!
+    if (!stored.hasCompletedOnboarding) {
+      setIsModalOpen(true);
+    }
 
     const handleUpdate = () => {
       setProfile(getStoredFarmerProfile());
@@ -105,14 +112,14 @@ function FarmerProfileModal({
   onClose: () => void;
 }) {
   const [name, setName] = useState(profile.name);
-  const [district, setDistrict] = useState(profile.district);
-  const [mandal, setMandal] = useState(profile.mandal);
-  const [village, setVillage] = useState(profile.village);
-  const [areaAcre, setAreaAcre] = useState(profile.areaAcre);
-  const [areaGunta, setAreaGunta] = useState(profile.areaGunta);
-  const [primaryCrop, setPrimaryCrop] = useState(profile.primaryCrop);
-  const [soilType, setSoilType] = useState(profile.soilType);
-  const [irrigationType, setIrrigationType] = useState(profile.irrigationType);
+  const [district, setDistrict] = useState(profile.district || "Jagtial");
+  const [mandal, setMandal] = useState(profile.mandal || "Dharmapuri");
+  const [village, setVillage] = useState(profile.village || "Mallapur");
+  const [areaAcre, setAreaAcre] = useState(profile.areaAcre || 4);
+  const [areaGunta, setAreaGunta] = useState(profile.areaGunta || 0);
+  const [primaryCrop, setPrimaryCrop] = useState(profile.primaryCrop || "Paddy (RNR 15048 / Telangana Sona)");
+  const [soilType, setSoilType] = useState(profile.soilType || "Red Sandy Loam (చల్కా నేలలు)");
+  const [irrigationType, setIrrigationType] = useState(profile.irrigationType || "3 HP Submersible Borewell");
 
   const districtNames = Object.keys(TELANGANA_DISTRICTS);
 
@@ -128,47 +135,67 @@ function FarmerProfileModal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave({
-      name,
+      name: name.trim(),
       district,
-      mandal,
-      village,
+      mandal: mandal.trim(),
+      village: village.trim(),
       areaAcre,
       areaGunta,
       primaryCrop,
       soilType,
       irrigationType,
       isCustom: true,
+      hasCompletedOnboarding: true,
     });
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
       <div className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl dark:bg-stone-900 border border-stone-200 dark:border-stone-800 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between pb-4 border-b border-stone-200 dark:border-stone-800">
+        <div className="flex items-center justify-between pb-3 border-b border-stone-200 dark:border-stone-800">
           <div>
             <h3 className="text-lg font-bold text-stone-900 dark:text-white">
-              Farmer Profile & Field Setup
+              {profile.hasCompletedOnboarding ? "Farmer Profile & Field Setup" : "Welcome! Complete Farmer & Field Setup"}
             </h3>
             <p className="text-xs text-stone-500">
-              Personalize your real farm parameters and district location
+              {profile.hasCompletedOnboarding
+                ? "Personalize your real farm parameters and district location"
+                : "Enter your farm parameters to get personalized PJTAU advisories, local weather, and IoT insights"}
             </p>
           </div>
-          <button
-            onClick={onClose}
-            className="rounded-xl p-1.5 text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 transition"
-          >
-            ✕
-          </button>
+          {profile.hasCompletedOnboarding && (
+            <button
+              onClick={onClose}
+              className="rounded-xl p-1.5 text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 transition"
+              title="Close"
+            >
+              ✕
+            </button>
+          )}
         </div>
+
+        {/* First-time onboarding helper banner */}
+        {!profile.hasCompletedOnboarding && (
+          <div className="mt-3 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-green-50 dark:from-emerald-950/40 dark:via-teal-950/30 dark:to-green-950/40 border border-emerald-300 dark:border-emerald-800 p-3 text-xs text-emerald-900 dark:text-emerald-200 flex items-start gap-2.5">
+            <span className="text-xl shrink-0">🌾</span>
+            <div>
+              <p className="font-bold">Rythu Digital Setup (తెలంగాణ రైతు పోర్టల్)</p>
+              <p className="text-[11px] text-emerald-800 dark:text-emerald-300 mt-0.5">
+                Set up your district and crop once. All farm advisories, fertilizer split schedules, mandi rates, and sensor telemetry will adapt directly to your field.
+              </p>
+            </div>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="mt-4 space-y-4">
           <div>
             <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
-              Farmer Name / రైతు పేరు
+              Farmer Name / రైతు పేరు <span className="text-rose-500">*</span>
             </label>
             <input
               type="text"
               value={name}
+              placeholder="e.g. Md Ashfaq / మీ పేరు"
               onChange={(e) => setName(e.target.value)}
               className="w-full rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 p-2.5 text-sm font-medium outline-none focus:ring-2 focus:ring-emerald-500"
               required
@@ -228,8 +255,8 @@ function FarmerProfileModal({
               <input
                 type="number"
                 min="0.1"
-                max="100"
-                step="0.5"
+                max="1000"
+                step="any"
                 value={areaAcre}
                 onChange={(e) => setAreaAcre(parseFloat(e.target.value) || 1)}
                 className="w-full rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 p-2.5 text-sm font-medium outline-none"
@@ -245,6 +272,7 @@ function FarmerProfileModal({
                 type="number"
                 min="0"
                 max="39"
+                step="1"
                 value={areaGunta}
                 onChange={(e) => setAreaGunta(parseInt(e.target.value) || 0)}
                 className="w-full rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 p-2.5 text-sm font-medium outline-none"
@@ -268,6 +296,8 @@ function FarmerProfileModal({
                 <option value="Maize (Hybrid Yellow)">Maize (Hybrid Yellow)</option>
                 <option value="Chilli (Teja)">Chilli (Teja)</option>
                 <option value="Redgram (PRG 176)">Redgram (PRG 176)</option>
+                <option value="Soybean (JS 335)">Soybean (JS 335)</option>
+                <option value="Turmeric (Duggirala / Nizamabad)">Turmeric (Duggirala / Nizamabad)</option>
               </select>
             </div>
 
@@ -315,18 +345,20 @@ function FarmerProfileModal({
             </button>
 
             <div className="flex items-center gap-2 w-full sm:w-auto">
-              <button
-                type="button"
-                onClick={onClose}
-                className="w-1/2 sm:w-auto px-4 py-2 text-xs font-bold text-stone-700 dark:text-stone-300 rounded-xl border border-stone-200 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-800"
-              >
-                Cancel
-              </button>
+              {profile.hasCompletedOnboarding && (
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="w-1/2 sm:w-auto px-4 py-2 text-xs font-bold text-stone-700 dark:text-stone-300 rounded-xl border border-stone-200 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-800"
+                >
+                  Cancel
+                </button>
+              )}
               <button
                 type="submit"
-                className="w-1/2 sm:w-auto px-5 py-2 text-xs font-bold text-white bg-emerald-700 hover:bg-emerald-800 rounded-xl shadow-xs transition"
+                className="w-full sm:w-auto px-5 py-2 text-xs font-bold text-white bg-emerald-700 hover:bg-emerald-800 rounded-xl shadow-xs transition"
               >
-                Save My Profile
+                {profile.hasCompletedOnboarding ? "Save My Profile" : "Complete Field Setup"}
               </button>
             </div>
           </div>

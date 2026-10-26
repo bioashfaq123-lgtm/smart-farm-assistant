@@ -23,6 +23,7 @@ export interface FarmerProfile {
   sowingDate: string;
   phone?: string;
   isCustom: boolean;
+  hasCompletedOnboarding: boolean;
 }
 
 export const TELANGANA_DISTRICTS: Record<
@@ -262,6 +263,29 @@ export const TELANGANA_DISTRICTS: Record<
   },
 };
 
+export const EMPTY_INITIAL_FARMER: FarmerProfile = {
+  name: "",
+  nameTe: "",
+  district: "Jagtial",
+  districtTe: "జగిత్యాల",
+  mandal: "Dharmapuri",
+  mandalTe: "ధర్మపురి",
+  village: "Mallapur",
+  villageTe: "మల్లాపూర్",
+  areaAcre: 4.0,
+  areaGunta: 0,
+  primaryCrop: "Paddy (RNR 15048 / Telangana Sona)",
+  primaryCropTe: "వరి (RNR 15048 / తెలంగాణ సోనా)",
+  soilType: "Red Sandy Loam (చల్కా నేలలు)",
+  soilTypeTe: "ఎర్ర చల్కా నేలలు",
+  irrigationType: "3 HP Submersible Borewell",
+  irrigationTypeTe: "3 హెచ్.పి సబ్మర్సిబుల్ బోరుబావి",
+  sowingDate: "2026-07-15",
+  phone: "",
+  isCustom: false,
+  hasCompletedOnboarding: false,
+};
+
 export const DEFAULT_SAMPLE_FARMER: FarmerProfile = {
   name: "Mallesham Goud",
   nameTe: "మల్లేశం గౌడ్",
@@ -281,25 +305,30 @@ export const DEFAULT_SAMPLE_FARMER: FarmerProfile = {
   irrigationTypeTe: "3 హెచ్.పి సబ్మర్సిబుల్ బోరుబావి",
   sowingDate: "2026-07-15",
   phone: "+91 98480 12345",
-  isCustom: false,
+  isCustom: true,
+  hasCompletedOnboarding: true,
 };
 
 const STORAGE_KEY = "smartfarm_farmer_profile";
 
 export function getStoredFarmerProfile(): FarmerProfile {
-  if (typeof window === "undefined") return DEFAULT_SAMPLE_FARMER;
+  if (typeof window === "undefined") return EMPTY_INITIAL_FARMER;
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
       if (parsed && parsed.district) {
-        return { ...DEFAULT_SAMPLE_FARMER, ...parsed };
+        return {
+          ...EMPTY_INITIAL_FARMER,
+          ...parsed,
+          hasCompletedOnboarding: parsed.hasCompletedOnboarding ?? Boolean(parsed.name && parsed.name.trim() !== ""),
+        };
       }
     }
   } catch (e) {
     // fallback
   }
-  return DEFAULT_SAMPLE_FARMER;
+  return EMPTY_INITIAL_FARMER;
 }
 
 export function saveFarmerProfile(profile: Partial<FarmerProfile>): FarmerProfile {
@@ -308,6 +337,7 @@ export function saveFarmerProfile(profile: Partial<FarmerProfile>): FarmerProfil
     ...current,
     ...profile,
     isCustom: true,
+    hasCompletedOnboarding: true,
   };
 
   if (typeof window !== "undefined") {
@@ -324,7 +354,7 @@ export function saveFarmerProfile(profile: Partial<FarmerProfile>): FarmerProfil
 export function resetToSampleProfile(): FarmerProfile {
   if (typeof window !== "undefined") {
     try {
-      localStorage.removeItem(STORAGE_KEY);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_SAMPLE_FARMER));
       window.dispatchEvent(new Event("smartfarm_profile_updated"));
     } catch (e) {
       // storage error

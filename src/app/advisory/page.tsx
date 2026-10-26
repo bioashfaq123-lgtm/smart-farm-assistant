@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   MessageSquare,
   Mic,
@@ -47,7 +47,37 @@ import {
 export default function AdvisoryPage() {
   const { lang, t } = useLanguage();
   const { profile } = useFarmerProfile();
-  const [messages, setMessages] = useState<ChatMessage[]>(INITIAL_CHAT_MESSAGES);
+  const getInitialGreeting = (farmerName: string, village: string, crop: string): ChatMessage[] => {
+    const greetingNameEn = farmerName ? `${farmerName} garu` : "Rythu Mithra";
+    const greetingNameTe = farmerName ? `${farmerName} గారు` : "రైతు మిత్ర";
+    const loc = village ? `in ${village}` : "in your field";
+    const locTe = village ? `${village} లోని` : "మీ పొలంలోని";
+    const crp = crop ? crop.split(" ")[0] : "crop";
+
+    return [
+      {
+        id: "msg-welcome",
+        sender: "assistant",
+        textEn: `Namaste ${greetingNameEn}! I am your Krishi Sahayak AI. How is your ${crp} crop ${loc} doing today? You can type your question, record voice audio, or attach a plant leaf photo for instant PJTAU diagnosis.`,
+        textTe: `నమస్తే ${greetingNameTe}! నేను మీ కృషి సహాయక్ AI. ${locTe} మీ పంట ఎలా ఉంది? మీరు మీ ప్రశ్నను టైప్ చేయవచ్చు, మైక్ నొక్కి మాట్లాడవచ్చు లేదా ఆకుల ఫోటోను పంపి రోగ నిర్ధారణ పొందవచ్చు.`,
+        timestamp: "10:30 AM",
+      },
+    ];
+  };
+
+  const [messages, setMessages] = useState<ChatMessage[]>(() =>
+    getInitialGreeting(profile.name, profile.village, profile.primaryCrop)
+  );
+
+  useEffect(() => {
+    setMessages((prev) => {
+      if (prev.length === 1 && prev[0].id.startsWith("msg-")) {
+        return getInitialGreeting(profile.name, profile.village, profile.primaryCrop);
+      }
+      return prev;
+    });
+  }, [profile.name, profile.village, profile.primaryCrop]);
+
   const [inputText, setInputText] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [isSending, setIsSending] = useState(false);

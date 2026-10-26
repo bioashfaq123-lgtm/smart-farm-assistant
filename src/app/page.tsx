@@ -65,24 +65,34 @@ export default function DashboardPage() {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-900 dark:text-stone-50">
-              {t("greeting")}, {profile.name}!
+              {profile.name ? `${t("greeting")}, ${profile.name}!` : "Welcome to Smart Farm Assistant!"}
             </h1>
             {profile.isCustom ? (
               <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300">
                 Custom Profile
               </span>
-            ) : (
+            ) : profile.hasCompletedOnboarding ? (
               <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300">
                 Sample Profile (Jagtial)
+              </span>
+            ) : (
+              <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 animate-pulse">
+                New Setup Required
               </span>
             )}
           </div>
           <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 mt-0.5">
-            {t("sub_greeting")}{" "}
-            <span className="font-semibold text-agri-700 dark:text-agri-400">
-              {profile.village}, {profile.district} District
-            </span>
-            .
+            {profile.name ? (
+              <>
+                {t("sub_greeting")}{" "}
+                <span className="font-semibold text-agri-700 dark:text-agri-400">
+                  {profile.village}, {profile.district} District
+                </span>
+                .
+              </>
+            ) : (
+              "Please complete your profile to personalize advisories for your Telangana farm."
+            )}
           </p>
         </div>
 
@@ -92,7 +102,7 @@ export default function DashboardPage() {
             className="inline-flex items-center gap-1.5 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 px-3.5 py-2 text-xs font-semibold text-stone-700 dark:text-stone-200 shadow-xs hover:bg-stone-50 transition"
           >
             <Edit3 className="h-3.5 w-3.5 text-agri-600" />
-            <span>Edit Farm Profile</span>
+            <span>{profile.name ? "Edit Farm Profile" : "Set Up Farm Profile"}</span>
           </button>
           <Link
             href="/advisory"
@@ -103,6 +113,32 @@ export default function DashboardPage() {
           </Link>
         </div>
       </div>
+
+      {/* Onboarding Alert Banner if Profile Setup Pending */}
+      {!profile.hasCompletedOnboarding && (
+        <div className="rounded-2xl border-2 border-emerald-500/50 bg-gradient-to-r from-emerald-50 via-teal-50 to-green-50 dark:from-emerald-950/40 dark:via-teal-950/30 dark:to-green-950/40 p-4 sm:p-5 shadow-xs">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">👨‍🌾</span>
+                <h2 className="text-base font-bold text-stone-900 dark:text-white">
+                  Welcome to Telangana Rythu Digital Portal!
+                </h2>
+              </div>
+              <p className="text-xs text-stone-600 dark:text-stone-300 max-w-xl">
+                Please complete your farmer profile and field setup. Selecting your district, land area, crop, and irrigation system enables live Open-Meteo district weather, local APMC mandi prices, and tailored PJTAU crop advisories.
+              </p>
+            </div>
+            <button
+              onClick={openProfileModal}
+              className="shrink-0 px-4 py-2.5 rounded-xl font-bold text-xs bg-emerald-700 hover:bg-emerald-800 text-white shadow-md transition flex items-center gap-1.5"
+            >
+              <Edit3 className="w-4 h-4" />
+              <span>Complete Field Setup</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* 2. Top Row: Farm Profile Card (2 cols) & Today's Weather Card (1 col) */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">

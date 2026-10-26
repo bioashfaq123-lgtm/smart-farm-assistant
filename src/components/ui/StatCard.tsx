@@ -25,7 +25,7 @@ export function StatCard({
   icon,
   trendText,
   trendPositive,
-  demoData = true,
+  demoData = false,
 }: StatCardProps) {
   return (
     <div className="relative flex flex-col justify-between rounded-2xl border border-stone-200/90 bg-white p-5 shadow-xs transition-all hover:border-agri-400 hover:shadow-md dark:border-stone-800/80 dark:bg-stone-900/90">

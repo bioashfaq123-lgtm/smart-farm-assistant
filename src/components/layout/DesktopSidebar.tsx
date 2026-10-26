@@ -14,13 +14,24 @@ import {
   MapPin,
   ShieldCheck,
   Presentation,
+  UserCheck,
 } from "lucide-react";
 import { useLanguage } from "../common/LanguageContext";
-import { SAMPLE_PROFILE } from "@/lib/data/sampleData";
+import { useFarmerProfile } from "../common/FarmerProfileContext";
 
 export function DesktopSidebar() {
   const pathname = usePathname();
   const { t } = useLanguage();
+  const { profile, openProfileModal } = useFarmerProfile();
+
+  const initials = profile.name
+    ? profile.name
+        .split(" ")
+        .map((w) => w[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase()
+    : "🌾";
 
   const navItems = [
     {
@@ -121,24 +132,31 @@ export function DesktopSidebar() {
         })}
       </nav>
 
-      {/* Farmer Profile Pill at Bottom (Matching Screenshot) */}
+      {/* Dynamic Farmer Profile Pill at Bottom (Opens Setup Modal on Click) */}
       <div className="border-t border-stone-100 p-4 dark:border-stone-800/80">
-        <div className="flex items-center gap-3 rounded-xl p-2 transition hover:bg-stone-50 dark:hover:bg-stone-900/50">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-agri-800 text-sm font-bold text-white shadow-xs">
-            MG
+        <button
+          onClick={openProfileModal}
+          className="w-full text-left flex items-center gap-3 rounded-xl p-2 transition hover:bg-stone-50 dark:hover:bg-stone-900/50 group"
+          title="Click to edit farmer profile & field setup"
+        >
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-agri-800 text-sm font-bold text-white shadow-xs group-hover:scale-105 transition-transform">
+            {initials}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-stone-900 truncate dark:text-stone-100">
-              {SAMPLE_PROFILE.name}
+            <p className="text-sm font-semibold text-stone-900 truncate dark:text-stone-100 group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
+              {profile.name || "Set Up Farm Profile"}
             </p>
             <p className="flex items-center gap-1 text-xs text-stone-500 truncate dark:text-stone-400">
-              <MapPin className="h-3 w-3 shrink-0" />
+              <MapPin className="h-3 w-3 shrink-0 text-emerald-600" />
               <span>
-                {SAMPLE_PROFILE.village}, {SAMPLE_PROFILE.district}
+                {profile.name
+                  ? `${profile.village}, ${profile.district}`
+                  : "Click to configure farm"}
               </span>
             </p>
           </div>
-        </div>
+        </button>
+
         <div className="mt-2 pt-2 border-t border-stone-100 dark:border-stone-800/60">
           <Link
             href="/admin"
