@@ -120,6 +120,38 @@ function FarmerProfileModal({
   const [primaryCrop, setPrimaryCrop] = useState(profile.primaryCrop || "Paddy (RNR 15048 / Telangana Sona)");
   const [soilType, setSoilType] = useState(profile.soilType || "Red Sandy Loam (చల్కా నేలలు)");
   const [irrigationType, setIrrigationType] = useState(profile.irrigationType || "3 HP Submersible Borewell");
+  const [sowingDate, setSowingDate] = useState(profile.sowingDate || "");
+  const [cropAgeDays, setCropAgeDays] = useState<number | "">(() => {
+    if (profile.sowingDate) {
+      const diff = Math.floor((Date.now() - new Date(profile.sowingDate).getTime()) / (1000 * 60 * 60 * 24));
+      return isNaN(diff) || diff < 0 ? "" : diff;
+    }
+    return "";
+  });
+
+  const handleSowingDateChange = (val: string) => {
+    setSowingDate(val);
+    if (val) {
+      const diff = Math.floor((Date.now() - new Date(val).getTime()) / (1000 * 60 * 60 * 24));
+      setCropAgeDays(isNaN(diff) || diff < 0 ? 0 : diff);
+    } else {
+      setCropAgeDays("");
+    }
+  };
+
+  const handleCropAgeChange = (daysVal: string) => {
+    if (daysVal === "") {
+      setCropAgeDays("");
+      setSowingDate("");
+      return;
+    }
+    const days = parseInt(daysVal, 10);
+    if (!isNaN(days) && days >= 0) {
+      setCropAgeDays(days);
+      const targetDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+      setSowingDate(targetDate.toISOString().split("T")[0]);
+    }
+  };
 
   const districtNames = Object.keys(TELANGANA_DISTRICTS);
 
@@ -144,6 +176,7 @@ function FarmerProfileModal({
       primaryCrop,
       soilType,
       irrigationType,
+      sowingDate,
       isCustom: true,
       hasCompletedOnboarding: true,
     });
@@ -315,6 +348,39 @@ function FarmerProfileModal({
                 <option value="Medium Black Soil (మధ్యస్థ నల్ల నేల)">Medium Black Soil (మధ్యస్థ నల్ల నేల)</option>
                 <option value="Alluvial Loam (ఒండ్రు నేల)">Alluvial Loam (ఒండ్రు నేల)</option>
               </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
+                Sowing Date / విత్తిన తేదీ
+              </label>
+              <input
+                type="date"
+                value={sowingDate}
+                onChange={(e) => handleSowingDateChange(e.target.value)}
+                className="w-full rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 p-2.5 text-sm font-medium outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
+                Crop Age (Days) / పంట వయస్సు (రోజులు)
+              </label>
+              <div className="relative">
+                <input
+                  type="number"
+                  min="0"
+                  max="365"
+                  step="1"
+                  placeholder="e.g. 45"
+                  value={cropAgeDays}
+                  onChange={(e) => handleCropAgeChange(e.target.value)}
+                  className="w-full rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 p-2.5 text-sm font-medium outline-none focus:ring-2 focus:ring-emerald-500 pr-12"
+                />
+                <span className="absolute right-3 top-2.5 text-xs text-stone-400 font-medium">days</span>
+              </div>
             </div>
           </div>
 

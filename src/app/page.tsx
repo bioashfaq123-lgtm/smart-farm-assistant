@@ -40,6 +40,11 @@ export default function DashboardPage() {
   const { profile, openProfileModal, resetToSample } = useFarmerProfile();
   const { telemetry } = useIoTTelemetry(8000);
 
+  // Calculate dynamic crop age from farmer's actual sowing date
+  const cropAgeDays = profile.sowingDate
+    ? Math.max(0, Math.floor((Date.now() - new Date(profile.sowingDate).getTime()) / (1000 * 60 * 60 * 24)))
+    : null;
+
   const [weather, setWeather] = useState<LiveWeatherData | null>(null);
   const [loadingWeather, setLoadingWeather] = useState(true);
 
@@ -190,12 +195,28 @@ export default function DashboardPage() {
               <span className="text-xs text-stone-500 dark:text-stone-400">
                 {t("profile_crop_age")}
               </span>
-              <p className="mt-1 font-semibold text-stone-900 dark:text-stone-100">
-                101 {t("profile_days")}
-              </p>
-              <span className="text-[11px] text-stone-500 dark:text-stone-400">
-                {t("profile_sowing_date")}: {profile.sowingDate}
-              </span>
+              {cropAgeDays !== null && !isNaN(cropAgeDays) && profile.sowingDate ? (
+                <>
+                  <p className="mt-1 font-semibold text-stone-900 dark:text-stone-100">
+                    {cropAgeDays} {t("profile_days")}
+                  </p>
+                  <span className="text-[11px] text-stone-500 dark:text-stone-400">
+                    {t("profile_sowing_date")}: {profile.sowingDate}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <p className="mt-1 font-semibold text-stone-500 dark:text-stone-400 text-sm">
+                    Not Specified
+                  </p>
+                  <button
+                    onClick={openProfileModal}
+                    className="text-[11px] text-emerald-700 dark:text-emerald-400 font-semibold hover:underline mt-0.5 inline-block"
+                  >
+                    + Set Sowing Date
+                  </button>
+                </>
+              )}
             </div>
           </div>
 

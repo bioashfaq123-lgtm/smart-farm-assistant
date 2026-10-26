@@ -280,7 +280,7 @@ export const EMPTY_INITIAL_FARMER: FarmerProfile = {
   soilTypeTe: "ఎర్ర చల్కా నేలలు",
   irrigationType: "3 HP Submersible Borewell",
   irrigationTypeTe: "3 హెచ్.పి సబ్మర్సిబుల్ బోరుబావి",
-  sowingDate: "2026-07-15",
+  sowingDate: "",
   phone: "",
   isCustom: false,
   hasCompletedOnboarding: false,
