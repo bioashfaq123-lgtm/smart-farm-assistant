@@ -205,7 +205,7 @@ export default function InsightsPage() {
 
   // Resolve active crop configuration
   const matchedCropKey = Object.keys(DEFAULT_CROP_DURATIONS).find((k) =>
-    profile.primaryCrop.toLowerCase().includes(k.toLowerCase())
+    (profile.primaryCrop || "").toLowerCase().includes(k.toLowerCase())
   ) || "Paddy";
 
   const cropConfig = DEFAULT_CROP_DURATIONS[matchedCropKey];

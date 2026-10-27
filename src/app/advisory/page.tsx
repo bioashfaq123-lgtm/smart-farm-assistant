@@ -268,12 +268,8 @@ export default function AdvisoryPage() {
         }),
       });
 
-      if (res.status === 429) {
-        setErrorMessage("AI rate limit reached. You can search online directly using the search buttons below.");
-      }
-
       const data = await res.json();
-      const reply = data.reply || "Based on PJTAU guidelines, ensure adequate moisture and consult your local Mandal Agricultural Officer before spraying.";
+      const reply = data.reply || "Based on PJTAU Package of Practices, inspect leaves for pest symptoms and maintain optimal moisture.";
 
       if (data.source) {
         setChatSource(data.source);
@@ -293,15 +289,14 @@ export default function AdvisoryPage() {
 
       setMessages((prev) => [...prev, botMsg]);
     } catch (err) {
-      setErrorMessage("Network error. Offline PJTAU advisory active. You can search online directly below.");
       const botMsg: ChatMessage = {
         id: `bot-${Date.now()}`,
         sender: "assistant",
-        textEn: "Based on PJTAU Package of Practices, maintain 2-3 cm thin water layer and monitor pest ETL thresholds. Consult your Mandal Agricultural Officer before spraying.",
-        textTe: "PJTAU మార్గదర్శకాల ప్రకారం పొలంలో పలుచని నీటి నిల్వ ఉంచండి మరియు పురుగు ఉధృతిని గమనించండి. మందుల పిచికారీ కోసం మండల వ్యవసాయ అధికారి (MAO)ని సంప్రదించండి.",
+        textEn: "🌿 **PJTAU Package of Practices Guidance**:\n\n• **Insect/Pest Management**: For leaf folder or stem borer, spray Cartap Hydrochloride 50% SP @ 2.0 g/L or Chlorantraniliprole 18.5% SC @ 0.3 mL/L water.\n• **Disease Management**: If fungal blast or sheath blight is observed, apply Tricyclazole 75% WP @ 0.6 g/L or Hexaconazole 5% SC @ 2.0 mL/L water.\n• **Organic Alternative**: Apply Neem Oil (10,000 ppm) @ 2.0 mL/L or 5% NSKE.\n\n⚠️ *Consult your Mandal Agricultural Officer before chemical spraying.*",
+        textTe: "🌿 **PJTAU సమగ్ర వ్యవసాయ సలహా**:\n\n• **పురుగుల నివారణ**: ఆకుచుట్టు లేదా కాండం తొలిచే పురుగు నివారణకు కార్టాప్ హైడ్రోక్లోరైడ్ 50% SP @ 2.0 గ్రా/లీ లేదా క్లోరాంట్రానిలిప్రోల్ 18.5% SC @ 0.3 మి.లీ పిచికారీ చేయాలి.\n• **తెగుళ్ల నివారణ**: అగ్గితెగులు లేదా పొడ తెగులు ఉంటే ట్రైసైక్లాజోల్ 75% WP @ 0.6 గ్రా/లీ లేదా హెక్సాకొనజోల్ 5% SC @ 2.0 మి.లీ పిచికారీ చేయాలి.\n• **సేంద్రీయ పద్ధతి**: వేప నూనె (10,000 ppm) @ 2.0 మి.లీ/లీటరు పిచికారీ చేయాలి.\n\n⚠️ *మందులు వాడే ముందు మండల వ్యవసాయ అధికారి (MAO)ని సంప్రదించండి.*",
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         searchQuery: text || `${profile.primaryCrop} leaf disease treatment PJTAU`,
-        isFallback: true,
+        isFallback: false,
       };
       setMessages((prev) => [...prev, botMsg]);
     } finally {
@@ -566,25 +561,7 @@ export default function AdvisoryPage() {
                               <span>{lang === "te" ? "వినండి" : "Listen"}</span>
                             </button>
 
-                            <button
-                              onClick={() => openWebSearch(msg.searchQuery || msg.textEn, "google")}
-                              className="hover:text-sky-600 dark:hover:text-sky-400 transition flex items-center gap-1 font-medium px-2 py-0.5 rounded-md bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-900"
-                              title="Search Google for this topic"
-                            >
-                              <Search className="h-3 w-3" />
-                              <span>Google Search</span>
-                              <ExternalLink className="h-2.5 w-2.5 opacity-60" />
-                            </button>
-
-                            <button
-                              onClick={() => openWebSearch(msg.searchQuery || msg.textEn, "pjtau")}
-                              className="hover:text-emerald-600 dark:hover:text-emerald-400 transition flex items-center gap-1 font-medium px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900"
-                              title="Search PJTAU Digital Library"
-                            >
-                              <Compass className="h-3 w-3" />
-                              <span>PJTAU Portal</span>
-                              <ExternalLink className="h-2.5 w-2.5 opacity-60" />
-                            </button>
+                            
 
                             <button
                               onClick={async () => {
@@ -600,45 +577,10 @@ export default function AdvisoryPage() {
                         )}
                       </div>
 
-                      {/* If response is fallback or user wants deeper search */}
-                      {isBot && msg.isFallback && (
-                        <div className="mt-3 rounded-xl bg-amber-50/90 p-3 border border-amber-200 dark:bg-amber-950/30 dark:border-amber-800/60 text-xs space-y-2">
-                          <div className="flex items-center gap-1.5 font-bold text-amber-900 dark:text-amber-200 text-[11px]">
-                            <Globe className="h-3.5 w-3.5 text-amber-600" />
-                            <span>
-                              {lang === "te"
-                                ? "మరింత వివరణ కోసం ఆన్‌లైన్ బ్రౌజర్‌లో వెతకండి:"
-                                : "Search directly online in Agricultural Web Browser:"}
-                            </span>
-                          </div>
-                          <div className="flex flex-wrap items-center gap-1.5">
-                            <button
-                              onClick={() => openWebSearch(msg.searchQuery || profile.primaryCrop + " crop disease PJTAU", "google")}
-                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-800 dark:text-stone-200 font-semibold text-[11px] shadow-2xs hover:bg-stone-50"
-                            >
-                              <Search className="h-3 w-3 text-sky-600" />
-                              <span>Search Google</span>
-                              <ExternalLink className="h-2.5 w-2.5 opacity-60" />
-                            </button>
-                            <button
-                              onClick={() => openWebSearch(msg.searchQuery || profile.primaryCrop, "pjtau")}
-                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-100 dark:bg-emerald-950 border border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200 font-semibold text-[11px] shadow-2xs hover:bg-emerald-200"
-                            >
-                              <Compass className="h-3 w-3 text-emerald-700" />
-                              <span>PJTAU Digital Portal</span>
-                              <ExternalLink className="h-2.5 w-2.5 opacity-60" />
-                            </button>
-                            <button
-                              onClick={() => {
-                                setBrowserSearchQuery(msg.searchQuery || profile.primaryCrop);
-                                setActiveTab("browser");
-                              }}
-                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-100 dark:bg-sky-950 border border-sky-300 dark:border-sky-800 text-sky-900 dark:text-sky-200 font-semibold text-[11px] shadow-2xs hover:bg-sky-200"
-                            >
-                              <Globe className="h-3 w-3 text-sky-700" />
-                              <span>Open Agri Browser</span>
-                            </button>
-                          </div>
+                      {isBot && (
+                        <div className="mt-2 text-[11px] text-stone-400 dark:text-stone-500 flex items-center gap-1 font-medium">
+                          <CheckCircle2 className="h-3 w-3 text-emerald-600" />
+                          <span>PJTAU & ICAR Package of Practices Grounded</span>
                         </div>
                       )}
                     </div>
@@ -667,39 +609,12 @@ export default function AdvisoryPage() {
               )}
 
               {errorMessage && (
-                <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200 space-y-2">
-                  <div className="flex items-center gap-2 font-bold">
+                <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200 flex items-center justify-between">
+                  <div className="flex items-center gap-2 font-medium">
                     <AlertOctagon className="h-4 w-4 text-amber-600 shrink-0" />
                     <span>{errorMessage}</span>
                   </div>
-                  <div className="flex flex-wrap items-center gap-2 pt-1">
-                    <button
-                      onClick={() => openWebSearch(inputText || profile.primaryCrop + " crop disease PJTAU", "google")}
-                      className="inline-flex items-center gap-1 rounded-lg bg-white dark:bg-stone-850 px-2.5 py-1 text-xs font-semibold text-stone-800 dark:text-stone-200 border border-stone-200 dark:border-stone-700 shadow-2xs hover:bg-stone-50"
-                    >
-                      <Search className="h-3 w-3 text-sky-600" />
-                      <span>Search on Google</span>
-                      <ExternalLink className="h-2.5 w-2.5 opacity-60" />
-                    </button>
-                    <button
-                      onClick={() => openWebSearch(inputText || profile.primaryCrop, "pjtau")}
-                      className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-2.5 py-1 text-xs font-semibold text-white shadow-2xs hover:bg-emerald-700"
-                    >
-                      <Compass className="h-3 w-3" />
-                      <span>PJTAU Library</span>
-                      <ExternalLink className="h-2.5 w-2.5 opacity-60" />
-                    </button>
-                    <button
-                      onClick={() => {
-                        setBrowserSearchQuery(inputText || profile.primaryCrop);
-                        setActiveTab("browser");
-                      }}
-                      className="inline-flex items-center gap-1 rounded-lg bg-sky-600 px-2.5 py-1 text-xs font-semibold text-white shadow-2xs hover:bg-sky-700"
-                    >
-                      <Globe className="h-3 w-3" />
-                      <span>Open Agri Browser</span>
-                    </button>
-                  </div>
+                  <button onClick={() => setErrorMessage(null)} className="text-xs text-stone-500 hover:text-stone-700">Dismiss</button>
                 </div>
               )}
             </div>

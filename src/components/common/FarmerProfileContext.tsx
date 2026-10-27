@@ -117,7 +117,7 @@ function FarmerProfileModal({
   const [village, setVillage] = useState(profile.village || "Mallapur");
   const [areaAcre, setAreaAcre] = useState(profile.areaAcre || 4);
   const [areaGunta, setAreaGunta] = useState(profile.areaGunta || 0);
-  const [primaryCrop, setPrimaryCrop] = useState(profile.primaryCrop || "Paddy (RNR 15048 / Telangana Sona)");
+  const [primaryCrop, setPrimaryCrop] = useState(profile.primaryCrop || "");
   const [soilType, setSoilType] = useState(profile.soilType || "Red Sandy Loam (చల్కా నేలలు)");
   const [irrigationType, setIrrigationType] = useState(profile.irrigationType || "3 HP Submersible Borewell");
   const [sowingDate, setSowingDate] = useState(profile.sowingDate || "");
@@ -318,20 +318,13 @@ function FarmerProfileModal({
               <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
                 Primary Crop / పంట
               </label>
-              <select
+              <input
+                type="text"
                 value={primaryCrop}
                 onChange={(e) => setPrimaryCrop(e.target.value)}
-                className="w-full rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 p-2.5 text-sm font-medium outline-none"
-              >
-                <option value="Paddy (RNR 15048 / Telangana Sona)">Paddy (RNR 15048 / Telangana Sona)</option>
-                <option value="Paddy (BPT 5204 / Samba Mahsuri)">Paddy (BPT 5204 / Samba Mahsuri)</option>
-                <option value="Cotton (Medium-Long Staple)">Cotton (Medium-Long Staple)</option>
-                <option value="Maize (Hybrid Yellow)">Maize (Hybrid Yellow)</option>
-                <option value="Chilli (Teja)">Chilli (Teja)</option>
-                <option value="Redgram (PRG 176)">Redgram (PRG 176)</option>
-                <option value="Soybean (JS 335)">Soybean (JS 335)</option>
-                <option value="Turmeric (Duggirala / Nizamabad)">Turmeric (Duggirala / Nizamabad)</option>
-              </select>
+                placeholder="e.g. Paddy (BPT 5204), Cotton, Chilli, Maize..."
+                className="w-full rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 p-2.5 text-sm font-medium outline-none focus:ring-2 focus:ring-emerald-500"
+              />
             </div>
 
             <div>
