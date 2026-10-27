@@ -5,26 +5,33 @@
   Wiring (see docs/04-hardware-and-firmware.md):
     Soil sensor board  VCC -> 3V3, GND -> GND, AO -> GPIO34 (ADC1)
     Relay module       VCC -> VIN (5V), GND -> GND, IN -> GPIO26
-    Pump               battery(+) -> relay COM, relay NO -> pump(+), pump(-) -> battery(-)
+    Pump               battery(+) -> relay COM, relay NO -> pump(+), pump(-) ->
+  battery(-)
 */
+#include <HTTPClient.h>
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
-#include <HTTPClient.h>
 #include <time.h>
 
 // ---------- EDIT THESE ----------
-const char* WIFI_SSID = "YOUR_WIFI_NAME";
-const char* WIFI_PASS = "YOUR_WIFI_PASSWORD";
-const char* DB_URL    = "https://smart-farm-assistant-32782-default-rtdb.firebaseio.com"; // no trailing slash
-const char* DB_PATH   = "field";   // must match DB_PATH in config.js
-const int   SENSOR_PIN = 34;
-const int   RELAY_PIN  = 26;
-const bool  RELAY_ACTIVE_LOW = true;   // most blue relay modules click ON when the pin goes LOW
-const int   RAW_DRY = 3200;            // reading in dry air  (calibrate!)
-const int   RAW_WET = 1400;            // reading in water    (calibrate!)
-const unsigned long PUSH_MS          = 10000UL;              // upload every 10 s
-const unsigned long MAX_PUMP_MS      = 5UL * 60UL * 1000UL;  // safety: never run more than 5 min at a time
-const unsigned long PUMP_COOLDOWN_MS = 10UL * 60UL * 1000UL; // safety: 10 min cooldown after hitting max limit
+const char *WIFI_SSID = "Vivo Y31";
+const char *WIFI_PASS = "pimi7544";
+const char *DB_URL =
+    "https://smart-farm-assistant-32782-default-rtdb.firebaseio.com"; // no
+                                                                      // trailing
+                                                                      // slash
+const char *DB_PATH = "field"; // must match DB_PATH in config.js
+const int SENSOR_PIN = 34;
+const int RELAY_PIN = 26;
+const bool RELAY_ACTIVE_LOW =
+    true; // most blue relay modules click ON when the pin goes LOW
+const int RAW_DRY = 3200;              // reading in dry air  (calibrate!)
+const int RAW_WET = 1400;              // reading in water    (calibrate!)
+const unsigned long PUSH_MS = 10000UL; // upload every 10 s
+const unsigned long MAX_PUMP_MS =
+    5UL * 60UL * 1000UL; // safety: never run more than 5 min at a time
+const unsigned long PUMP_COOLDOWN_MS =
+    10UL * 60UL * 1000UL; // safety: 10 min cooldown after hitting max limit
 // --------------------------------
 
 bool pumpOn = false;
@@ -41,7 +48,8 @@ void setRelayHardware(bool active) {
 }
 
 void setPump(bool on) {
-  if (on == pumpOn) return; // Prevent resetting timer if state hasn't changed
+  if (on == pumpOn)
+    return; // Prevent resetting timer if state hasn't changed
 
   if (on) {
     // Safety check: do not start if cooldown is active
@@ -81,19 +89,22 @@ int readMoisture() {
   return constrain(pct, 0, 100);
 }
 
-String dbGet(const String& key) {
-  if (WiFi.status() != WL_CONNECTED) return "";
+String dbGet(const String &key) {
+  if (WiFi.status() != WL_CONNECTED)
+    return "";
   WiFiClientSecure client;
-  client.setInsecure();   // demo only: skips the certificate check
+  client.setInsecure(); // demo only: skips the certificate check
   client.setTimeout(3);
 
   HTTPClient http;
   http.setTimeout(3000);
   String out = "";
 
-  if (http.begin(client, String(DB_URL) + "/" + DB_PATH + "/" + key + ".json")) {
+  if (http.begin(client,
+                 String(DB_URL) + "/" + DB_PATH + "/" + key + ".json")) {
     int code = http.GET();
-    if (code == 200) out = http.getString();
+    if (code == 200)
+      out = http.getString();
     http.end();
   }
   client.stop();
@@ -102,8 +113,9 @@ String dbGet(const String& key) {
   return out;
 }
 
-void dbPut(const String& key, const String& json) {
-  if (WiFi.status() != WL_CONNECTED) return;
+void dbPut(const String &key, const String &json) {
+  if (WiFi.status() != WL_CONNECTED)
+    return;
   WiFiClientSecure client;
   client.setInsecure();
   client.setTimeout(3);
@@ -111,7 +123,8 @@ void dbPut(const String& key, const String& json) {
   HTTPClient http;
   http.setTimeout(3000);
 
-  if (http.begin(client, String(DB_URL) + "/" + DB_PATH + "/" + key + ".json")) {
+  if (http.begin(client,
+                 String(DB_URL) + "/" + DB_PATH + "/" + key + ".json")) {
     http.PUT(json);
     http.end();
   }
@@ -119,7 +132,8 @@ void dbPut(const String& key, const String& json) {
 }
 
 void handleWiFi() {
-  if (WiFi.status() == WL_CONNECTED) return;
+  if (WiFi.status() == WL_CONNECTED)
+    return;
 
   // Safety: turn off pump immediately if WiFi is lost
   if (pumpOn) {
@@ -170,7 +184,8 @@ void loop() {
 
   // 1. HARD 5-MINUTE TIMEOUT & COOLDOWN LATCH
   if (pumpOn && (millis() - pumpStarted >= MAX_PUMP_MS)) {
-    Serial.println("[SAFETY] Max 5-min limit reached! Engaging 10-min cooldown.");
+    Serial.println(
+        "[SAFETY] Max 5-min limit reached! Engaging 10-min cooldown.");
     setPump(false);
     safetyTripped = true;
     safetyTripTime = millis();
@@ -191,26 +206,31 @@ void loop() {
     // Only update timestamp if NTP has synchronized
     if (now > 100000UL) {
       dbPut("updated", String(now));
-      dbPut("history/" + String(now), "{\"t\":" + String(now) + ",\"m\":" + String(m) + "}");
+      dbPut("history/" + String(now),
+            "{\"t\":" + String(now) + ",\"m\":" + String(m) + "}");
     }
 
     String mode = dbGet("mode");
     if (mode == "auto") {
       int th = dbGet("threshold").toInt();
-      if (th <= 0) th = 30;
+      if (th <= 0)
+        th = 30;
       bool rainSkip = (dbGet("rain_skip") == "true");
 
       // Auto control with sensor fault check & cooldown check
       if (m >= 0 && m < th && !rainSkip && !safetyTripped) {
-        if (!pumpOn) setPump(true);
+        if (!pumpOn)
+          setPump(true);
       } else if (m >= th + 10 || rainSkip || m < 0) {
-        if (pumpOn) setPump(false);
+        if (pumpOn)
+          setPump(false);
       }
       dbPut("pump", pumpOn ? "true" : "false");
     } else {
       // Manual mode
       bool want = (dbGet("pump") == "true");
-      // If safety was tripped, reset lockout when the user sets command to false
+      // If safety was tripped, reset lockout when the user sets command to
+      // false
       if (!want && safetyTripped) {
         safetyTripped = false;
       }
@@ -220,7 +240,8 @@ void loop() {
     }
 
     dbPut("pump_state", pumpOn ? "true" : "false");
-    Serial.printf("moisture=%d%% mode=%s pump=%d locked=%d\n", m, mode.c_str(), pumpOn, safetyTripped);
+    Serial.printf("moisture=%d%% mode=%s pump=%d locked=%d\n", m, mode.c_str(),
+                  pumpOn, safetyTripped);
   }
 
   delay(50); // Yield to FreeRTOS watchdog
