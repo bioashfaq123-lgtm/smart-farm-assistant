@@ -77,8 +77,12 @@ export function DesktopSidebar() {
     <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-r border-stone-200/90 bg-white/95 backdrop-blur-md md:flex dark:border-stone-800/80 dark:bg-stone-950/95">
       {/* Brand Top Header */}
       <div className="flex items-center gap-3 border-b border-stone-100 p-6 dark:border-stone-800/80">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-agri-700 text-white shadow-xs dark:bg-agri-600">
-          <Sprout className="h-6 w-6" />
+        <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-xl shadow-md border border-emerald-500/30">
+          <img
+            src="/images/smart_farm_app_icon.jpg"
+            alt="Smart Farm Assistant Logo"
+            className="h-full w-full object-cover"
+          />
         </div>
         <div className="min-w-0">
           <span className="block text-base font-bold tracking-tight text-stone-900 dark:text-white truncate">

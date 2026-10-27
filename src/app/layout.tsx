@@ -22,8 +22,8 @@ export const metadata: Metadata = {
   applicationName: "Smart Farm Assistant",
   manifest: "/manifest.json",
   icons: {
-    icon: "/icon.svg",
-    apple: "/icon.svg",
+    icon: "/images/smart_farm_app_icon.jpg",
+    apple: "/images/smart_farm_app_icon.jpg",
   },
   verification: {
     google: "6T6_uPweHA5yPTKumhdlNSNq2gEXdzQQ1TVda3CIt5M",

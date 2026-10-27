@@ -30,8 +30,12 @@ export function Header() {
     <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-stone-200/80 bg-white/80 px-4 backdrop-blur-md md:px-8 dark:border-stone-800/80 dark:bg-stone-950/80">
       {/* Left: Mobile Title or Desktop Location Indicator */}
       <div className="flex items-center gap-3">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-agri-700 text-white md:hidden dark:bg-agri-600">
-          <Sprout className="h-5 w-5" />
+        <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-xl shadow-xs border border-emerald-500/30 md:hidden">
+          <img
+            src="/images/smart_farm_app_icon.jpg"
+            alt="Smart Farm Assistant Logo"
+            className="h-full w-full object-cover"
+          />
         </div>
         <div>
           <h2 className="text-base font-bold text-stone-900 md:hidden dark:text-stone-50 truncate max-w-[150px]">

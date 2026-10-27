@@ -65,57 +65,62 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* 1. Header Welcome Greeting */}
-      <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-900 dark:text-stone-50">
-              {profile.name ? `${t("greeting")}, ${profile.name}!` : "Welcome to Smart Farm Assistant!"}
-            </h1>
-            {profile.isCustom ? (
-              <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300">
-                Custom Profile
-              </span>
-            ) : profile.hasCompletedOnboarding ? (
-              <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300">
-                Sample Profile (Jagtial)
-              </span>
-            ) : (
-              <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 animate-pulse">
-                New Setup Required
-              </span>
-            )}
-          </div>
-          <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 mt-0.5">
-            {profile.name ? (
-              <>
-                {t("sub_greeting")}{" "}
-                <span className="font-semibold text-agri-700 dark:text-agri-400">
-                  {profile.village}, {profile.district} District
-                </span>
-                .
-              </>
-            ) : (
-              "Please complete your profile to personalize advisories for your Telangana farm."
-            )}
-          </p>
+      {/* Visual Hero Banner Card */}
+      <div className="relative overflow-hidden rounded-3xl border border-stone-200/80 dark:border-stone-800 bg-stone-900 shadow-xl">
+        <div className="absolute inset-0">
+          <img
+            src="/images/smart_farm_hero.jpg"
+            alt="Smart Farm Hero Banner"
+            className="h-full w-full object-cover opacity-60 dark:opacity-40"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-stone-950/95 via-stone-950/75 to-transparent" />
         </div>
 
-        <div className="mt-2 sm:mt-0 flex items-center gap-2">
-          <button
-            onClick={openProfileModal}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 px-3.5 py-2 text-xs font-semibold text-stone-700 dark:text-stone-200 shadow-xs hover:bg-stone-50 transition"
-          >
-            <Edit3 className="h-3.5 w-3.5 text-agri-600" />
-            <span>{profile.name ? "Edit Farm Profile" : "Set Up Farm Profile"}</span>
-          </button>
-          <Link
-            href="/advisory"
-            className="inline-flex items-center gap-2 rounded-xl bg-agri-700 px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-xs transition hover:bg-agri-800 active:scale-95"
-          >
-            <span>{t("nav_advisory")}</span>
-            <ArrowRight className="h-4 w-4" />
-          </Link>
+        <div className="relative p-6 sm:p-8 flex flex-col justify-between min-h-[210px] text-white">
+          <div className="max-w-2xl space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="px-3 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/25 text-emerald-300 border border-emerald-400/40 backdrop-blur-md">
+                🌾 Telangana Rythu Portal
+              </span>
+              <span className="px-3 py-0.5 rounded-full text-[11px] font-bold bg-sky-500/25 text-sky-300 border border-sky-400/40 backdrop-blur-md flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                Live IoT & PJTAU AI
+              </span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight drop-shadow-sm text-white">
+              {profile.name ? `${t("greeting")}, ${profile.name}!` : "Smart Farm Assistant"}
+            </h1>
+            <p className="text-xs sm:text-sm text-stone-200/90 leading-relaxed">
+              {profile.name ? (
+                <>
+                  {t("sub_greeting")}{" "}
+                  <span className="font-semibold text-emerald-300">
+                    {profile.village}, {profile.district} District
+                  </span>
+                  {" "}&bull; Primary Crop: <span className="font-semibold text-amber-300">{profile.primaryCrop || "Paddy"}</span> ({profile.areaAcre} Acres).
+                </>
+              ) : (
+                "Empowering Telangana farmers with real-time IoT soil intelligence, automated irrigation, PJTAU pest advisories, and live APMC mandi prices."
+              )}
+            </p>
+          </div>
+
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <button
+              onClick={openProfileModal}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-white px-4 py-2 text-xs font-bold text-stone-900 shadow-sm transition hover:bg-stone-100 active:scale-95"
+            >
+              <Edit3 className="h-3.5 w-3.5 text-emerald-700" />
+              <span>{profile.name ? "Edit Farm Profile" : "Set Up Farm Profile"}</span>
+            </button>
+            <Link
+              href="/advisory"
+              className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-emerald-700 active:scale-95"
+            >
+              <span>{t("nav_advisory")}</span>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
         </div>
       </div>
 
