@@ -919,11 +919,20 @@ ${
               };
             }
 
+            const modelDisplayName =
+              modelId === "gemini-3.8-flash"
+                ? "Gemini 3.8 Flash (Flagship High-Speed Multimodal)"
+                : modelId === "gemini-3.5-flash-lite"
+                ? "Gemini 3.5 Flash-Lite (Ultra-Low Latency)"
+                : modelId === "gemini-2.0-flash"
+                ? "Gemini 2.0 Flash"
+                : "Gemini 1.5 Flash";
+
             return NextResponse.json({
               reply: text,
               diagnosis: diagnosisData,
               isLiveAi: true,
-              source: `Gemini AI (${modelId} • PJTAU Grounded)`,
+              source: `${modelDisplayName} • PJTAU Grounded`,
               searchQuery: userQuery,
             });
           }
@@ -950,7 +959,7 @@ ${
     return NextResponse.json({
       reply: finalReply,
       isLiveAi: false,
-      source: "Krishi Sahayak (PJTAU Package of Practices & Grounded Web Intelligence)",
+      source: "Ground-Truth PJTAU & ICAR Agronomic Database (Instant Offline Fallback)",
       searchQuery: userQuery,
     });
   } catch (err: any) {
@@ -965,7 +974,7 @@ ${
       reply: safeReply,
       searchQuery: "paddy crop advisory PJTAU",
       isLiveAi: false,
-      source: "Krishi Sahayak (Verified PJTAU Grounded Advisory)",
+      source: "Ground-Truth PJTAU & ICAR Agronomic Database (Instant Offline Fallback)",
     });
   }
 }

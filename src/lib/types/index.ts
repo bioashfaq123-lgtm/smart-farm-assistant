@@ -129,6 +129,8 @@ export interface MandiPriceItem {
   unit: string;
   distanceKm: number;
   status: "open" | "closed";
+  marketStatus?: string;
+  totalFarmerRate?: number;
   secretaryPhone?: string;
   mapsQuery: string;
 }
@@ -179,6 +181,7 @@ export interface ChatMessage {
   imageUrl?: string;
   searchQuery?: string;
   isFallback?: boolean;
+  source?: string;
 }
 
 export interface FieldZone {

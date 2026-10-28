@@ -529,7 +529,7 @@ export default function AdvisoryPage() {
       const data = await res.json();
       if (data.diagnosis) {
         setCustomAiDiagnosis(data.diagnosis);
-        setDiagSource(data.source || "Gemini 1.5 Flash (Multimodal Vision)");
+        setDiagSource(data.source || "Gemini 3.8 Flash (Flagship Multimodal Vision)");
       } else if (data.reply) {
         setCustomAiDiagnosis({
           diseaseName: "Visual Leaf Pathology Analysis",
@@ -541,7 +541,7 @@ export default function AdvisoryPage() {
           safety: "Wear protective face mask and gloves.",
           fullText: data.reply,
         });
-        setDiagSource(data.source || "Gemini 1.5 Flash Vision");
+        setDiagSource(data.source || "Gemini 3.8 Flash Vision");
       }
     } catch (err) {
       setDiagSource("Offline PJTAU Reference Cases");
@@ -583,7 +583,7 @@ export default function AdvisoryPage() {
               {t("advisory_title")}
             </h1>
             <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300">
-              Gemini 1.5 Flash Multimodal
+              Gemini 3.8 Flash Multimodal
             </span>
           </div>
           <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 mt-0.5">
@@ -736,7 +736,7 @@ export default function AdvisoryPage() {
                       {isBot && (
                         <div className="mt-2 text-[11px] text-stone-400 dark:text-stone-500 flex items-center gap-1 font-medium">
                           <CheckCircle2 className="h-3 w-3 text-emerald-600" />
-                          <span>PJTAU & ICAR Package of Practices Grounded</span>
+                          <span>{msg.source || chatSource || "Ground-Truth PJTAU & ICAR Agronomic Database (Instant Offline Fallback)"}</span>
                         </div>
                       )}
                     </div>
@@ -760,7 +760,11 @@ export default function AdvisoryPage() {
               {isSending && (
                 <div className="flex items-center gap-2 text-xs text-stone-500 dark:text-stone-400">
                   <span className="flex h-2 w-2 rounded-full bg-agri-600 animate-ping" />
-                  <span>Consulting Gemini 1.5 Flash multimodal vision & PJTAU knowledge...</span>
+                  <span>
+                    {lang === "te"
+                      ? "జెమిని 3.8 ఫ్లాష్ మరియు PJTAU నాలెడ్జ్ బేస్‌ను పరిశీలిస్తోంది..."
+                      : "Consulting Gemini 3.8 Flash & PJTAU agronomy engine..."}
+                  </span>
                 </div>
               )}
 
@@ -802,7 +806,7 @@ export default function AdvisoryPage() {
                     <span className="font-semibold text-stone-800 dark:text-stone-200 text-xs">
                       Leaf Photo Attached
                     </span>
-                    <p className="text-[10px] text-stone-400">Gemini 1.5 Flash Vision will inspect this image</p>
+                    <p className="text-[10px] text-stone-400">Gemini 3.8 Flash Vision will inspect this image</p>
                   </div>
                   <button
                     onClick={() => setAttachedImage(null)}
@@ -972,7 +976,7 @@ export default function AdvisoryPage() {
               action={<Badge variant="outline" className="text-xs">{diagSource}</Badge>}
             />
 
-            {/* Live Upload Leaf Photo Card (Gemini 1.5 Flash Multimodal Vision) */}
+            {/* Live Upload Leaf Photo Card (Gemini 3.8 Flash Multimodal Vision) */}
             <div className="rounded-2xl border-2 border-dashed border-agri-300 bg-agri-50/40 p-6 text-center dark:border-agri-800 dark:bg-agri-950/20">
               <input
                 type="file"
@@ -994,8 +998,8 @@ export default function AdvisoryPage() {
               </h3>
               <p className="mt-1 text-xs text-stone-600 dark:text-stone-300 max-w-lg mx-auto leading-relaxed">
                 {lang === "te"
-                  ? "Google Gemini 1.5 Flash విజన్ AI సాంకేతికత ద్వారా ఆకు లక్షణాలను విశ్లేషించి, PJTAU నిర్ధారిత మందుల మోతాదును తక్షణమే పొందండి."
-                  : "Powered by Google Gemini 1.5 Flash Vision AI. Instantly identifies plant pathogens, leaf spot diseases, and chewing pests under PJTAU package of practices."}
+                  ? "Google Gemini 3.8 Flash విజన్ AI సాంకేతికత ద్వారా ఆకు లక్షణాలను విశ్లేషించి, PJTAU నిర్ధారిత మందుల మోతాదును తక్షణమే పొందండి."
+                  : "Powered by Google Gemini 3.8 Flash Vision AI. Instantly identifies plant pathogens, leaf spot diseases, and chewing pests under PJTAU package of practices."}
               </p>
 
               <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
@@ -1053,7 +1057,7 @@ export default function AdvisoryPage() {
               <div className="my-8 flex flex-col items-center justify-center py-10 text-stone-500">
                 <span className="h-10 w-10 animate-spin rounded-full border-3 border-agri-600 border-t-transparent" />
                 <p className="mt-3 text-xs font-bold text-stone-700 dark:text-stone-200">
-                  Gemini 1.5 Flash Vision analyzing leaf lesions...
+                  Gemini 3.8 Flash Vision analyzing leaf lesions...
                 </p>
                 <p className="text-[11px] text-stone-400 mt-1">
                   Cross-referencing PJTAU pathology package of practices
