@@ -794,7 +794,7 @@ export async function POST(request: Request) {
       apiKey &&
       typeof apiKey === "string" &&
       apiKey.trim().length >= 30 &&
-      apiKey.trim().startsWith("AIzaSy")
+      (apiKey.trim().startsWith("AIzaSy") || apiKey.trim().startsWith("AQ."))
     );
 
     // 1. Check Gemini Generative AI only if a valid AI Studio key is provided
@@ -864,7 +864,7 @@ ${
           const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${apiKey}`;
           const geminiRes = await fetch(geminiUrl, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey.trim() },
             body: JSON.stringify({
               contents: [{ role: "user", parts: contentsParts }],
               generationConfig: {
