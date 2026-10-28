@@ -799,7 +799,16 @@ export async function POST(request: Request) {
 
     // 1. Check Gemini Generative AI only if a valid AI Studio key is provided
     if (isApiKeyValid) {
-      const candidateModels = ["gemini-1.5-flash", "gemini-1.5-flash-8b"];
+      const preferredModel = (process.env.GEMINI_MODEL || "gemini-3.8-flash").trim();
+      const candidateModels = Array.from(
+        new Set([
+          preferredModel,
+          "gemini-3.8-flash",
+          "gemini-3.5-flash-lite",
+          "gemini-2.0-flash",
+          "gemini-1.5-flash",
+        ])
+      );
 
       let systemPrompt = "";
       if (isDiagnosisMode) {
