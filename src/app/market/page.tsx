@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import {
+  Navigation,
   TrendingUp,
   TrendingDown,
   Minus,
@@ -372,748 +373,526 @@ ${activeBonus > 0 ? `🏛️ తెలంగాణ బోనస్ (DBT): +₹${
       </div>
 
       {activeMainTab === "market" ? (
-        /* ================= TAB 1: REAL MARKET DATA VIEW ================= */
-        <div className="space-y-5">
-          {/* 1. Primary Commodity Chips Bar */}
-          <div>
-            <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-              <SlidersHorizontal className="h-4 w-4 text-stone-400 shrink-0 hidden sm:block" />
-              {COMMODITY_CROPS.map((crop) => {
-                const isActive = selectedCropFilter === crop.key;
-                return (
-                  <button
-                    key={crop.key}
-                    onClick={() => handleSelectCrop(crop.key)}
-                    className={`shrink-0 inline-flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-semibold transition ${
-                      isActive
-                        ? "bg-agri-700 text-white shadow-xs"
-                        : "border border-stone-200 bg-white text-stone-600 hover:bg-stone-50 dark:border-stone-800 dark:bg-stone-900 dark:text-stone-300"
-                    }`}
-                  >
-                    <span>{crop.icon}</span>
-                    <span>{lang === "te" ? crop.labelTe : crop.labelEn}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* 2. Variety Selector Bar: Choose Specific Crop Variety */}
-          <div className="rounded-2xl border border-agri-200/90 bg-gradient-to-r from-agri-50/70 via-white to-agri-50/30 p-4 shadow-2xs dark:border-stone-800 dark:bg-stone-900/90 dark:from-stone-900 dark:to-stone-900">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-agri-100 dark:border-stone-800 pb-3">
-              <div className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-agri-600 dark:text-agri-400" />
-                <span className="text-xs font-bold uppercase tracking-wider text-agri-950 dark:text-agri-200">
-                  {lang === "te" ? "రకం ఎంచుకోండి (Choose Variety):" : "Choose Variety / Commercial Grade:"}
-                </span>
-                <span className="text-[11px] text-stone-500">
-                  ({availableVarieties.length} {lang === "te" ? "రకాలు" : "varieties in catalogue"})
-                </span>
-              </div>
-              {selectedVarietyFilter !== "all" && (
-                <button
-                  onClick={() => setSelectedVarietyFilter("all")}
-                  className="text-[11px] font-semibold text-agri-700 hover:text-agri-900 dark:text-agri-400 flex items-center gap-1 self-start sm:self-auto"
-                >
-                  <X className="h-3 w-3" />
-                  <span>{lang === "te" ? "అన్ని రకాలు చూపించు" : "Show All Varieties"}</span>
-                </button>
-              )}
-            </div>
-
-            {/* Variety Quick Pills */}
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              <button
-                onClick={() => setSelectedVarietyFilter("all")}
-                className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition ${
-                  selectedVarietyFilter === "all"
-                    ? "bg-agri-700 text-white shadow-xs"
-                    : "border border-stone-200 bg-white text-stone-700 hover:bg-stone-50 dark:border-stone-800 dark:bg-stone-850 dark:text-stone-300"
-                }`}
-              >
-                <span>{lang === "te" ? "అన్ని రకాలు (All Varieties)" : "All Varieties"}</span>
-              </button>
-              {availableVarieties.map((v) => {
-                const isSelected = selectedVarietyFilter === v.varietyKey;
-                return (
-                  <button
-                    key={v.varietyKey}
-                    onClick={() => setSelectedVarietyFilter(isSelected ? "all" : v.varietyKey)}
-                    className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold transition ${
-                      isSelected
-                        ? "bg-agri-700 text-white shadow-xs ring-2 ring-agri-500"
-                        : "border border-stone-200 bg-white text-stone-700 hover:bg-stone-50 dark:border-stone-800 dark:bg-stone-850 dark:text-stone-300"
-                    }`}
-                  >
-                    <span>{lang === "te" ? v.nameTe : v.nameEn}</span>
-                    {v.bonusEligible && (
-                      <span
-                        className={`rounded-md px-1.5 py-0.5 text-[9px] font-extrabold ${
-                          isSelected
-                            ? "bg-white/20 text-white"
-                            : "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
-                        }`}
-                      >
-                        +₹500 Govt Bonus
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Active Variety Information Banner */}
-            {selectedVarietyInfo && (
-              <div className="mt-3 rounded-xl bg-white/95 p-3 text-xs border border-agri-200/70 dark:bg-stone-850 dark:border-stone-800 shadow-2xs">
-                <div className="flex flex-wrap items-center gap-2 font-bold text-stone-900 dark:text-stone-100">
-                  <Tag className="h-3.5 w-3.5 text-agri-600" />
-                  <span>{lang === "te" ? selectedVarietyInfo.nameTe : selectedVarietyInfo.nameEn}</span>
-                  {selectedVarietyInfo.bonusEligible && (
-                    <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200 dark:bg-emerald-950 dark:border-emerald-800 dark:text-emerald-300">
-                      {lang === "te"
-                        ? "తెలంగాణ ప్రభుత్వం +₹500 సన్న వడ్ల బోనస్ అర్హత"
-                        : "Eligible for +₹500/qtl Telangana State Fine Paddy Bonus"}
-                    </span>
-                  )}
-                </div>
-                <p className="mt-1 text-stone-600 dark:text-stone-300 text-[11px] leading-relaxed">
-                  {lang === "te" ? selectedVarietyInfo.featuresTe : selectedVarietyInfo.featuresEn}
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* 3. Search and Secondary APMC Market Yard Selector */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-            {/* APMC Yard / District Dropdown */}
-            <div className="flex items-center gap-2 flex-1 max-w-sm">
-              <MapPin className="h-4 w-4 text-stone-400 shrink-0" />
-              <select
-                value={selectedMarketFilter}
-                onChange={(e) => setSelectedMarketFilter(e.target.value)}
-                className="w-full rounded-xl border border-stone-200 bg-white p-2.5 text-xs font-semibold text-stone-800 shadow-2xs focus:border-agri-500 focus:outline-hidden dark:border-stone-800 dark:bg-stone-900 dark:text-stone-200"
-              >
-                <option value="all">
+        /* ================= TAB 1: SIMPLE FARMER-FIRST MANDI HUB ================= */
+        <div className="space-y-6">
+          {/* STEP 1: SELECT CROP (BIG, SIMPLE, ONE-TOUCH BUTTONS) */}
+          <div className="rounded-3xl border border-stone-200 bg-white p-5 shadow-xs dark:border-stone-800 dark:bg-stone-900">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+              <div>
+                <h2 className="text-base sm:text-lg font-black text-stone-900 dark:text-stone-50 flex items-center gap-2">
+                  <span>🌾 1. Select Crop / పంటను ఎంచుకోండి:</span>
+                </h2>
+                <p className="text-xs text-stone-500 dark:text-stone-400">
                   {lang === "te"
-                    ? "తెలంగాణలోని అన్ని మార్కెట్ యార్డులు (All APMCs)"
-                    : "All Telangana APMC Yards"}
-                </option>
-                {allApmcMarkets.map((mkt) => (
-                  <option key={mkt} value={mkt}>
-                    {mkt}
-                  </option>
-                ))}
-              </select>
-            </div>
+                    ? "పంటను ఎంచుకుని నేటి మార్కెట్ రాకలు, ధరలు మరియు యార్డ్ లొకేషన్ వివరాలు పొందండి"
+                    : "Tap any crop to instantly see today's arrivals, procurement prices & mandi yard directions"}
+                </p>
+              </div>
 
-            {/* Instant Search Bar */}
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-stone-400" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={t("market_search_placeholder")}
-                className="w-full rounded-xl border border-stone-200 bg-white pl-9 pr-8 py-2.5 text-xs text-stone-900 placeholder-stone-400 shadow-2xs focus:border-agri-500 focus:outline-hidden dark:border-stone-800 dark:bg-stone-900 dark:text-stone-100"
-              />
-              {searchQuery && (
+              {selectedCropFilter !== "all" && (
                 <button
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 dark:hover:text-stone-200"
+                  onClick={() => handleSelectCrop("all")}
+                  className="text-xs font-bold text-emerald-700 hover:text-emerald-800 dark:text-emerald-400 flex items-center gap-1 self-start sm:self-auto"
                 >
-                  <X className="h-3.5 w-3.5" />
+                  <span>{lang === "te" ? "అన్ని పంటలు చూపించు" : "Show All Crops"}</span>
                 </button>
               )}
             </div>
 
-            {/* Clear All Filters Button */}
-            {hasActiveFilter && (
-              <button
-                onClick={handleClearAllFilters}
-                className="inline-flex items-center gap-1.5 rounded-xl border border-stone-200 bg-stone-100 px-3 py-2 text-xs font-semibold text-stone-600 hover:bg-stone-200 dark:border-stone-800 dark:bg-stone-850 dark:text-stone-300 self-start sm:self-auto"
-              >
-                <RefreshCw className="h-3 w-3" />
-                <span>{t("market_reset_filters")}</span>
-              </button>
-            )}
+            {/* Big Tactile Crop Buttons */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
+              {[
+                { key: "paddy", labelEn: "Paddy", labelTe: "వరి (ధాన్యం)", icon: "🌾", badge: "+₹500 Bonus" },
+                { key: "cotton", labelEn: "Cotton", labelTe: "పత్తి", icon: "☁️", badge: "CCI Rate" },
+                { key: "maize", labelEn: "Maize", labelTe: "మొక్కజొన్న", icon: "🌽", badge: "Feed Demand" },
+                { key: "chilli", labelEn: "Chilli", labelTe: "మిరప", icon: "🌶️", badge: "Spot Auction" },
+                { key: "redgram", labelEn: "Redgram", labelTe: "కందులు", icon: "🫘", badge: "MSP Center" },
+                { key: "turmeric", labelEn: "Turmeric", labelTe: "పసుపు", icon: "🟡", badge: "Nizamabad" },
+                { key: "groundnut", labelEn: "Groundnut", labelTe: "వేరుశెనగ", icon: "🥜", badge: "Oil Mills" },
+                { key: "all", labelEn: "All Crops", labelTe: "అన్ని పంటలు", icon: "✨", badge: "All Mandis" },
+              ].map((c) => {
+                const isSelected = selectedCropFilter === c.key;
+                return (
+                  <button
+                    key={c.key}
+                    onClick={() => handleSelectCrop(c.key)}
+                    className={`flex flex-col items-center justify-center p-3 rounded-2xl border text-center transition-all active:scale-95 ${
+                      isSelected
+                        ? "border-emerald-500 bg-emerald-50/90 dark:bg-emerald-950/60 ring-2 ring-emerald-500 shadow-md text-emerald-950 dark:text-emerald-100 font-black"
+                        : "border-stone-200 bg-stone-50/50 hover:bg-stone-100 dark:border-stone-800 dark:bg-stone-850 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300 font-bold"
+                    }`}
+                  >
+                    <span className="text-2xl sm:text-3xl mb-1">{c.icon}</span>
+                    <span className="text-xs sm:text-sm font-bold leading-tight">
+                      {lang === "te" ? c.labelTe : c.labelEn}
+                    </span>
+                    <span
+                      className={`mt-1 text-[9px] px-1.5 py-0.5 rounded-full font-bold ${
+                        isSelected
+                          ? "bg-emerald-600 text-white"
+                          : "bg-stone-200 text-stone-600 dark:bg-stone-700 dark:text-stone-300"
+                      }`}
+                    >
+                      {c.badge}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
-          {/* 4. Real Price Analytics Cards (Dynamic Based on Active Selection) */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <Card className="p-4 bg-gradient-to-br from-emerald-500/10 to-transparent border-emerald-200 dark:border-emerald-900/50">
-              <div className="flex items-center justify-between">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
-                  {selectedVarietyFilter !== "all"
-                    ? (lang === "te" ? "ఈ రకానికి గరిష్ట ధర" : "Highest for Selected Variety")
-                    : t("market_highest_modal")}
-                </p>
-                <Award className="h-4 w-4 text-emerald-600" />
+          {/* STEP 2: SUMMARY OF TODAY'S ARRIVALS & RATES FOR SELECTED CROP */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* 1. Total Arrivals */}
+            <div className="rounded-2xl border border-stone-200 bg-white p-4 shadow-xs dark:border-stone-800 dark:bg-stone-900 flex items-center gap-3.5">
+              <div className="h-12 w-12 rounded-2xl bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 flex items-center justify-center shrink-0">
+                <Truck className="h-6 w-6" />
               </div>
-              <div className="mt-1 flex items-baseline gap-1">
-                <span className="text-2xl font-black text-stone-900 dark:text-stone-50">
-                  {metrics.highest ? `₹${metrics.highest.modalPrice.toLocaleString("en-IN")}` : "---"}
+              <div className="min-w-0 flex-1">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400 block truncate">
+                  {lang === "te" ? "నేటి మొత్తం రాకలు" : "Today's Total Arrivals"}
                 </span>
-                <span className="text-xs text-stone-500">/ quintal</span>
-              </div>
-              <p className="mt-1 text-xs text-stone-600 dark:text-stone-400 truncate">
-                {metrics.highest
-                  ? `${metrics.highest.variety} at ${
-                      lang === "te" ? metrics.highest.marketNameTe : metrics.highest.marketNameEn
-                    }`
-                  : "No market arrivals"}
-              </p>
-            </Card>
-
-            <Card className="p-4 bg-gradient-to-br from-sky-500/10 to-transparent border-sky-200 dark:border-sky-900/50">
-              <div className="flex items-center justify-between">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-sky-800 dark:text-sky-300">
-                  {metrics.hasBonusPaddy
-                    ? (lang === "te" ? "తెలంగాణ సోనా / సన్న బియ్యం" : "Telangana Fine Rice Bonus")
-                    : (lang === "te" ? "కనీస మద్దతు ధర (MSP)" : "Govt MSP Benchmark")}
-                </p>
-                {metrics.hasBonusPaddy ? (
-                  <span className="rounded-md bg-sky-100 px-1.5 py-0.5 text-[9px] font-bold text-sky-800 dark:bg-sky-950 dark:text-sky-300">
-                    +₹500 Govt Bonus
-                  </span>
-                ) : (
-                  <Building2 className="h-4 w-4 text-sky-600" />
-                )}
-              </div>
-              <div className="mt-1 flex items-baseline gap-1">
-                <span className="text-2xl font-black text-stone-900 dark:text-stone-50">
-                  {metrics.hasBonusPaddy ? "₹2,300 + ₹500" : "MSP Protected"}
-                </span>
-                <span className="text-xs text-stone-500">
-                  {metrics.hasBonusPaddy ? "= ₹2,800/qtl" : "as per FAQ norms"}
-                </span>
-              </div>
-              <p className="mt-1 text-xs text-stone-600 dark:text-stone-400 truncate">
-                {metrics.hasBonusPaddy
-                  ? "Telangana Rythu Fine Grain Incentive for RNR 15048 & BPT 5204"
-                  : "Fair Average Quality (FAQ) certified procurement at APMCs"}
-              </p>
-            </Card>
-
-            <Card className="p-4 bg-gradient-to-br from-amber-500/10 to-transparent border-amber-200 dark:border-amber-900/50">
-              <div className="flex items-center justify-between">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300">
-                  {lang === "te" ? "నేటి మొత్తం మార్కెట్ రాకలు" : "Today's Mandi Arrivals"}
-                </p>
-                <Truck className="h-4 w-4 text-amber-600" />
-              </div>
-              <div className="mt-1 flex items-baseline gap-1">
-                <span className="text-2xl font-black text-stone-900 dark:text-stone-50">
+                <span className="text-xl sm:text-2xl font-black text-stone-900 dark:text-stone-50 font-mono">
                   {metrics.totalArrivals.toLocaleString("en-IN")}
                 </span>
-                <span className="text-xs text-stone-500">Quintals</span>
+                <span className="text-xs text-stone-500 block truncate">
+                  {lang === "te" ? "క్వింటాళ్ల రాకలు రికార్డయ్యాయి" : "Quintals arrived at yards"}
+                </span>
               </div>
-              <p className="mt-1 text-xs text-stone-600 dark:text-stone-400">
-                {lang === "te"
-                  ? `${metrics.uniqueYardsCount} వ్యవసాయ మార్కెట్ యార్డులలో క్రియాశీల రాకలు`
-                  : `Active arrivals across ${metrics.uniqueYardsCount} Telangana APMC yards`}
-              </p>
-            </Card>
+            </div>
+
+            {/* 2. Highest Mandi Rate */}
+            <div className="rounded-2xl border border-stone-200 bg-white p-4 shadow-xs dark:border-stone-800 dark:bg-stone-900 flex items-center gap-3.5">
+              <div className="h-12 w-12 rounded-2xl bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 flex items-center justify-center shrink-0">
+                <Award className="h-6 w-6" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400 block truncate">
+                  {lang === "te" ? "అత్యధిక ధర (టాప్ రేటు)" : "Top Mandi Rate Today"}
+                </span>
+                <span className="text-xl sm:text-2xl font-black text-emerald-700 dark:text-emerald-400 font-mono">
+                  {metrics.highest ? `₹${(metrics.highest.totalFarmerRate || metrics.highest.modalPrice).toLocaleString("en-IN")}` : "---"}
+                </span>
+                <span className="text-xs text-stone-500 block truncate">
+                  {metrics.highest ? `${metrics.highest.marketNameEn}` : "/ quintal"}
+                </span>
+              </div>
+            </div>
+
+            {/* 3. Telangana Bonus / MSP Status */}
+            <div className="rounded-2xl border border-stone-200 bg-white p-4 shadow-xs dark:border-stone-800 dark:bg-stone-900 flex items-center gap-3.5">
+              <div className="h-12 w-12 rounded-2xl bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300 flex items-center justify-center shrink-0">
+                <Building2 className="h-6 w-6" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400 block truncate">
+                  {metrics.hasBonusPaddy ? "Telangana State Bonus" : "Govt MSP Protection"}
+                </span>
+                <span className="text-xl sm:text-2xl font-black text-stone-900 dark:text-stone-50 font-mono">
+                  {metrics.hasBonusPaddy ? "+₹500 / Qtl" : "MSP Protected"}
+                </span>
+                <span className="text-xs text-stone-500 block truncate">
+                  {metrics.hasBonusPaddy ? "Direct DBT to bank account" : "Fair Average Quality (FAQ)"}
+                </span>
+              </div>
+            </div>
+
+            {/* 4. Active Mandis & Nearest Yard */}
+            <div className="rounded-2xl border border-stone-200 bg-white p-4 shadow-xs dark:border-stone-800 dark:bg-stone-900 flex items-center gap-3.5">
+              <div className="h-12 w-12 rounded-2xl bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300 flex items-center justify-center shrink-0">
+                <MapPin className="h-6 w-6" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400 block truncate">
+                  {lang === "te" ? "క్రియాశీల యార్డులు" : "Active Mandi Yards"}
+                </span>
+                <span className="text-xl sm:text-2xl font-black text-stone-900 dark:text-stone-50 font-mono">
+                  {metrics.uniqueYardsCount} {lang === "te" ? "యార్డులు" : "Yards Open"}
+                </span>
+                <span className="text-xs text-stone-500 block truncate">
+                  {filteredPrices[0] ? `Nearest: ${filteredPrices[0].distanceKm} km away` : "Telangana APMC"}
+                </span>
+              </div>
+            </div>
           </div>
 
-          {/* 5. Live Telangana APMC Mandi Rates Table & Cards */}
+          {/* STEP 3: MANDI ARRIVALS & DIRECT LOCATION NAVIGATION SECTION */}
           <div>
             <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
-                  <span>🌾 Live Telangana Wholesale Rates ({activeCropLabel})</span>
-                  <span className="text-[11px] font-normal text-stone-500">
-                    • Showing {filteredPrices.length} arrivals
-                  </span>
+                <h3 className="text-base sm:text-lg font-black text-stone-900 dark:text-stone-100 flex items-center gap-2">
+                  <span>🏛️ 2. Mandi Arrivals & Yard Directions ({activeCropLabel})</span>
+                  <Badge variant="online" className="text-[10px] py-0.5">
+                    ● Live Arrivals Feed
+                  </Badge>
                 </h3>
-                <p className="text-xs text-stone-500">
-                  {selectedCropFilter !== "all"
-                    ? `Live procurement prices across Telangana markets for ${activeCropLabel}`
-                    : "Wholesale APMC yard rates synchronized with Central MSP and Telangana ₹500 State Bonus"}
+                <p className="text-xs text-stone-500 mt-0.5">
+                  {lang === "te"
+                    ? "మీ పంటను అమ్ముకోవడానికి దగ్గరి మార్కెట్ యార్డ్‌ను ఎంచుకుని లొకేషన్ బటన్ నొక్కండి"
+                    : "Review today's arrivals and tap 'Get Directions' to navigate directly to the Mandi gate"}
                 </p>
               </div>
 
-              <div className="flex items-center gap-2 self-start sm:self-auto">
-                {/* View Switcher: Table View (Requested Layout) vs Card View */}
-                <div className="flex items-center rounded-xl border border-stone-200 bg-stone-100 p-1 dark:border-stone-800 dark:bg-stone-850">
-                  <button
-                    onClick={() => setMandiViewMode("table")}
-                    className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
-                      mandiViewMode === "table"
-                        ? "bg-white text-emerald-800 shadow-2xs dark:bg-stone-800 dark:text-emerald-300"
-                        : "text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200"
-                    }`}
-                  >
-                    <Layers className="h-3.5 w-3.5" />
-                    <span>{lang === "te" ? "టేబుల్ వీక్షణ" : "APMC Table"}</span>
-                  </button>
-                  <button
-                    onClick={() => setMandiViewMode("cards")}
-                    className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
-                      mandiViewMode === "cards"
-                        ? "bg-white text-emerald-800 shadow-2xs dark:bg-stone-800 dark:text-emerald-300"
-                        : "text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200"
-                    }`}
-                  >
-                    <Store className="h-3.5 w-3.5" />
-                    <span>{lang === "te" ? "కార్డుల వీక్షణ" : "Yard Cards"}</span>
-                  </button>
-                </div>
-
-                <a
-                  href="https://tsmarketing.in"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[11px] font-semibold text-agri-700 hover:underline flex items-center gap-1 dark:text-agri-400 hidden md:flex"
+              {/* View Switcher: Easy Cards vs Full Table */}
+              <div className="flex items-center gap-1 bg-stone-100 dark:bg-stone-850 p-1 rounded-xl border border-stone-200 dark:border-stone-800 self-start sm:self-auto">
+                <button
+                  onClick={() => setMandiViewMode("cards")}
+                  className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition ${
+                    mandiViewMode === "cards"
+                      ? "bg-white text-emerald-800 shadow-2xs dark:bg-stone-800 dark:text-emerald-300"
+                      : "text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200"
+                  }`}
                 >
-                  <span>tsmarketing.in</span>
-                  <ExternalLink className="h-3 w-3" />
-                </a>
+                  <Store className="h-3.5 w-3.5" />
+                  <span>{lang === "te" ? "యార్డ్ కార్డులు" : "Yard Cards"}</span>
+                </button>
+                <button
+                  onClick={() => setMandiViewMode("table")}
+                  className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition ${
+                    mandiViewMode === "table"
+                      ? "bg-white text-emerald-800 shadow-2xs dark:bg-stone-800 dark:text-emerald-300"
+                      : "text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200"
+                  }`}
+                >
+                  <Layers className="h-3.5 w-3.5" />
+                  <span>{lang === "te" ? "టేబుల్ లిస్ట్" : "APMC Table"}</span>
+                </button>
               </div>
             </div>
 
             {filteredPrices.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-stone-300 bg-white p-8 text-center dark:border-stone-800 dark:bg-stone-900">
-                <Store className="h-8 w-8 text-stone-400 mx-auto mb-2" />
-                <p className="text-sm font-semibold text-stone-800 dark:text-stone-200">
-                  {t("market_no_matching")}
+              <div className="rounded-3xl border border-dashed border-stone-300 bg-white p-10 text-center dark:border-stone-800 dark:bg-stone-900">
+                <Store className="h-10 w-10 text-stone-400 mx-auto mb-3" />
+                <p className="text-base font-bold text-stone-800 dark:text-stone-200">
+                  {lang === "te" ? "ఎంచుకున్న పంటకు రాకలు కనుగొనబడలేదు" : "No market arrivals found for this crop"}
                 </p>
-                <p className="text-xs text-stone-500 mt-1">
+                <p className="text-xs text-stone-500 mt-1 max-w-md mx-auto">
                   {lang === "te"
-                    ? "ఎంచుకున్న రకం లేదా మార్కెట్ ఫిల్టర్లలో రాకలు లేవు. ఫిల్టర్లు క్లియర్ చేసి తిరిగి ప్రయత్నించండి."
-                    : "No APMC yards found for the selected variety and market combination. Try clearing filters."}
+                    ? "ఈ పంటకు నేటి మార్కెట్ యార్డ్ రికార్డులు లేవు. ఇతర పంటలను ఎంచుకోండి."
+                    : "Try selecting All Crops or switching commodities above to see active Telangana market yards."}
                 </p>
                 <button
                   onClick={handleClearAllFilters}
-                  className="mt-3.5 inline-flex items-center gap-1.5 rounded-xl bg-agri-700 px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-agri-800"
+                  className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-emerald-700 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-emerald-800"
                 >
                   <RefreshCw className="h-3.5 w-3.5" />
                   <span>{t("market_reset_filters")}</span>
                 </button>
               </div>
-            ) : mandiViewMode === "table" ? (
-              /* ================= TABLE VIEW: EXACT APMC PROCUREMENT TABLE ================= */
-              <div className="space-y-6">
-                <div className="overflow-x-auto rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-2xs">
-                  <table className="w-full text-left text-xs md:text-sm">
-                    <thead className="bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 font-bold border-b border-stone-200 dark:border-stone-700">
-                      <tr>
-                        <th className="py-3.5 px-4 font-bold">Market Yard</th>
-                        <th className="py-3.5 px-4 font-bold">Commodity & Variety</th>
-                        <th className="py-3.5 px-4 font-bold">Central MSP</th>
-                        <th className="py-3.5 px-4 font-bold">TS State Bonus</th>
-                        <th className="py-3.5 px-4 font-bold text-emerald-700 dark:text-emerald-400">Total Farmer Rate</th>
-                        <th className="py-3.5 px-4 font-bold">Market Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-stone-200 dark:divide-stone-800 bg-white dark:bg-stone-900">
-                      {filteredPrices.map((row) => {
-                        const hasBonus = (row.govtBonus || 0) > 0;
-                        const totalRate = row.totalFarmerRate || (row.modalPrice + (row.govtBonus || 0));
-                        return (
-                          <tr
-                            key={row.id}
-                            className={hasBonus ? "bg-emerald-50/40 dark:bg-emerald-950/20 font-semibold" : "hover:bg-stone-50 dark:hover:bg-stone-850 transition"}
-                          >
-                            <td className="py-3.5 px-4 font-bold text-stone-900 dark:text-white">
-                              {lang === "te" ? row.marketNameTe : row.marketNameEn}
-                            </td>
-                            <td className="py-3.5 px-4 text-stone-800 dark:text-stone-200">
-                              {lang === "te" ? `${row.commodityTe} (${row.varietyTe || row.variety})` : `${row.commodityEn} (${row.variety})`}
-                            </td>
-                            <td className="py-3.5 px-4 font-mono text-stone-700 dark:text-stone-300">
-                              {row.mspPrice > 0 ? `₹${row.mspPrice.toLocaleString("en-IN")}` : "N/A"}
-                            </td>
-                            <td className="py-3.5 px-4 font-mono">
-                              {hasBonus ? (
-                                <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 font-bold">
-                                  +₹{row.govtBonus}
-                                </span>
-                              ) : (
-                                "—"
-                              )}
-                            </td>
-                            <td className="py-3.5 px-4 font-mono font-black text-emerald-700 dark:text-emerald-400 text-sm md:text-base">
-                              ₹{totalRate.toLocaleString("en-IN")} / Qtl
-                            </td>
-                            <td className="py-3.5 px-4 text-stone-500 text-[11px]">
-                              {row.marketStatus || (hasBonus ? "Bonus Disbursed via DBT" : "Active MSP Procurement")}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Interactive Yield Payout Deck & WhatsApp Share */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Payout Calculator */}
-                  <div className="bg-stone-50 dark:bg-stone-800/60 rounded-2xl p-6 border border-stone-200 dark:border-stone-700">
-                    <div className="flex items-center justify-between mb-4">
-                      <h4 className="text-sm font-bold text-stone-900 dark:text-white">
-                        {profile.name}'s {activeCropLabel} Payout Calculator
-                      </h4>
-                      <span className="text-xs font-mono font-bold text-emerald-700 dark:text-emerald-400">
-                        {selectedVarietyInfo ? (lang === "te" ? selectedVarietyInfo.nameTe : selectedVarietyInfo.nameEn) : (profile.primaryCrop || "RNR 15048")} ({profile.areaAcre || 4.5} Acres)
-                      </span>
-                    </div>
-
-                    <div className="mb-4">
-                      <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1">
-                        Expected Yield in Quintals / దిగుబడి (క్వింటాళ్లు):
-                      </label>
-                      <input
-                        type="number"
-                        min="1"
-                        max="1000"
-                        value={calcYieldQtl}
-                        onChange={(e) => setCalcYieldQtl(parseInt(e.target.value) || 0)}
-                        className="w-full px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-base font-bold font-mono outline-none"
-                      />
-                      <span className="text-[11px] text-stone-500 mt-1 block">
-                        Estimated ~{profile.areaAcre ? Math.round(calcYieldQtl / profile.areaAcre) : 21} Qtl/acre on {profile.areaAcre || 4.5} Acres | ఖరీఫ్ సగటు దిగుబడి అంచనా
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3 mt-4">
-                      <div className="p-3.5 rounded-xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700">
-                        <span className="text-xs text-stone-500 block">Total Realized Value:</span>
-                        <span className="text-xl font-black text-stone-900 dark:text-white font-mono mt-1 block">
-                          ₹{(calcYieldQtl * activeRate).toLocaleString("en-IN")}
-                        </span>
-                        <span className="text-[10px] text-stone-400">@ ₹{activeRate.toLocaleString("en-IN")}/quintal</span>
-                      </div>
-
-                      <div className="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800">
-                        <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300 block">
-                          {activeBonus > 0 ? "TS Bonus Component:" : "Base MSP Value:"}
-                        </span>
-                        <span className="text-xl font-black text-emerald-700 dark:text-emerald-400 font-mono mt-1 block">
-                          {activeBonus > 0
-                            ? `+₹${(calcYieldQtl * activeBonus).toLocaleString("en-IN")}`
-                            : `₹${(calcYieldQtl * activeMsp).toLocaleString("en-IN")}`}
-                        </span>
-                        <span className="text-[10px] text-emerald-600">
-                          {activeBonus > 0 ? "Direct DBT to Rythu Account" : `MSP Benchmark: ₹${activeMsp.toLocaleString("en-IN")}/Qtl`}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* WhatsApp Share Advisory Generator */}
-                  <div className="bg-stone-50 dark:bg-stone-800/60 rounded-2xl p-6 border border-stone-200 dark:border-stone-700 flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <Share2 className="w-4 h-4 text-emerald-600" />
-                          <h4 className="text-sm font-bold text-stone-900 dark:text-white">
-                            WhatsApp Rythu Advisory Formatter
-                          </h4>
-                        </div>
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300">
-                          Bilingual Text
-                        </span>
-                      </div>
-
-                      <div className="bg-white dark:bg-stone-900 rounded-xl p-3 border border-stone-200 dark:border-stone-700 font-mono text-[11px] text-stone-700 dark:text-stone-300 whitespace-pre-line max-h-40 overflow-y-auto">
-                        {whatsappText}
-                      </div>
-                    </div>
-
-                    <div className="mt-4 pt-3 border-t border-stone-200 dark:border-stone-700 flex flex-wrap items-center justify-between gap-2">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={async () => {
-                            const ok = await copyToClipboard(whatsappText);
-                            if (ok) {
-                              setCopiedShareText(true);
-                              setTimeout(() => setCopiedShareText(false), 2500);
-                            }
-                          }}
-                          className={`px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs ${
-                            copiedShareText
-                              ? "bg-emerald-600 text-white"
-                              : "bg-emerald-700 hover:bg-emerald-800 text-white"
-                          }`}
-                        >
-                          {copiedShareText ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
-                          <span>{copiedShareText ? "Copied!" : "Copy Text"}</span>
-                        </button>
-
-                        <a
-                          href={generateWhatsAppUrl(whatsappText)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="px-3.5 py-2 rounded-xl text-xs font-bold bg-green-600 hover:bg-green-700 text-white transition flex items-center gap-1.5 shadow-xs"
-                        >
-                          <Share2 className="w-4 h-4" />
-                          <span>Share on WhatsApp</span>
-                        </a>
-                      </div>
-
-                      <span className="text-[11px] text-stone-500">Rythu Direct Share</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              /* ================= CARD VIEW (ORIGINAL DETAILED GRID) ================= */
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            ) : mandiViewMode === "cards" ? (
+              /* ================= 1. SIMPLE CARD VIEW WITH PROMINENT ARRIVALS & DIRECTIONS ================= */
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredPrices.map((item) => {
-                  const isUp = item.changeAmount > 0;
-                  const isDown = item.changeAmount < 0;
+                  const hasBonus = (item.govtBonus || 0) > 0;
+                  const totalRate = item.totalFarmerRate || (item.modalPrice + (item.govtBonus || 0));
+                  const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
+                    item.mapsQuery || `${item.marketNameEn}, ${item.districtEn}, Telangana`
+                  )}`;
 
                   return (
                     <div
                       key={item.id}
-                      className="flex flex-col justify-between rounded-2xl border border-stone-200/90 bg-white p-5 shadow-xs transition hover:border-agri-400 hover:shadow-md dark:border-stone-800/80 dark:bg-stone-900/90"
+                      className="rounded-3xl border border-stone-200/90 bg-white p-5 shadow-xs transition hover:border-emerald-500 hover:shadow-md dark:border-stone-800 dark:bg-stone-900 flex flex-col justify-between"
                     >
                       <div>
-                        {/* Variety Badge & Trend Icon */}
-                        <div className="flex items-start justify-between gap-1">
+                        {/* Top Header: Yard Name & Distance */}
+                        <div className="flex items-start justify-between gap-2 border-b border-stone-100 dark:border-stone-800 pb-3 mb-3">
                           <div>
-                            <div className="flex flex-wrap items-center gap-1.5 mb-1">
-                              <span className="rounded-lg bg-emerald-50 px-2 py-0.5 text-xs font-extrabold text-emerald-800 border border-emerald-200 dark:bg-emerald-950/70 dark:border-emerald-900/60 dark:text-emerald-300">
-                                {lang === "te" && item.varietyTe ? item.varietyTe : item.variety}
-                              </span>
-                              {item.govtBonus && (
-                                <span className="rounded-md bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-800 border border-amber-200 dark:bg-amber-950 dark:text-amber-300">
-                                  +₹{item.govtBonus} State Bonus
-                                </span>
-                              )}
-                            </div>
-                            <span className="text-xs font-medium text-stone-600 dark:text-stone-400 block">
-                              {lang === "te" ? item.commodityTe : item.commodityEn}
+                            <h4 className="text-base font-black text-stone-900 dark:text-stone-50 leading-snug">
+                              {lang === "te" ? item.marketNameTe : item.marketNameEn}
+                            </h4>
+                            <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block mt-0.5">
+                              {lang === "te" ? item.districtTe : item.districtEn} District
                             </span>
                           </div>
-                          {isUp ? (
-                            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 shrink-0">
-                              <TrendingUp className="h-4 w-4" />
-                            </span>
-                          ) : isDown ? (
-                            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300 shrink-0">
-                              <TrendingDown className="h-4 w-4" />
-                            </span>
-                          ) : (
-                            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-300 shrink-0">
-                              <Minus className="h-4 w-4" />
+                          <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 text-[11px] font-bold border border-emerald-200 dark:border-emerald-800 shrink-0 flex items-center gap-1">
+                            <MapPin className="h-3 w-3" />
+                            <span>{item.distanceKm} km</span>
+                          </span>
+                        </div>
+
+                        {/* Commodity & Variety Badge */}
+                        <div className="mb-3">
+                          <span className="text-xs font-bold text-stone-800 dark:text-stone-200 block">
+                            {lang === "te" ? `${item.commodityTe} (${item.varietyTe || item.variety})` : `${item.commodityEn} (${item.variety})`}
+                          </span>
+                          {hasBonus && (
+                            <span className="inline-block mt-1 px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 text-[10px] font-black border border-emerald-300 dark:border-emerald-800">
+                              +₹500/Qtl Telangana State Bonus via DBT
                             </span>
                           )}
                         </div>
 
-                        {/* Modal Price Display */}
-                        <div className="my-3">
-                          <div className="flex items-baseline gap-1">
-                            <span className="text-2xl sm:text-3xl font-extrabold text-stone-900 dark:text-white">
-                              ₹{item.modalPrice.toLocaleString("en-IN")}
+                        {/* PROMINENT ARRIVALS BADGE & TODAY'S RATE */}
+                        <div className="grid grid-cols-2 gap-2 p-3 rounded-2xl bg-stone-50 dark:bg-stone-850 border border-stone-200/70 dark:border-stone-800 mb-4">
+                          <div>
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400 block flex items-center gap-1">
+                              <Truck className="h-3 w-3" />
+                              <span>{lang === "te" ? "నేటి రాకలు" : "Today's Arrivals"}</span>
                             </span>
-                            <span className="text-xs text-stone-500 dark:text-stone-400">
-                              / quintal
+                            <span className="text-base sm:text-lg font-black font-mono text-stone-900 dark:text-white mt-0.5 block">
+                              {item.arrivalsQtl.toLocaleString("en-IN")} Qtl
+                            </span>
+                            <span className="text-[10px] text-stone-400 block truncate">
+                              Weighment Active
                             </span>
                           </div>
 
-                          <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs">
-                            {isUp && (
-                              <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-                                +₹{item.changeAmount} ({item.changePct}%)
-                              </span>
-                            )}
-                            {isDown && (
-                              <span className="font-semibold text-rose-600 dark:text-rose-400">
-                                ₹{item.changeAmount} ({item.changePct}%)
-                              </span>
-                            )}
-                            {!isUp && !isDown && (
-                              <span className="text-stone-500 dark:text-stone-400">
-                                Steady rate
-                              </span>
-                            )}
-                            <span className="text-[11px] text-stone-400">• Modal Wholesale Rate</span>
+                          <div>
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 block flex items-center gap-1">
+                              <Award className="h-3 w-3" />
+                              <span>{lang === "te" ? "రైతు ధర" : "Farmer Rate"}</span>
+                            </span>
+                            <span className="text-base sm:text-lg font-black font-mono text-emerald-700 dark:text-emerald-400 mt-0.5 block">
+                              ₹{totalRate.toLocaleString("en-IN")}/Qtl
+                            </span>
+                            <span className="text-[10px] text-stone-400 block truncate">
+                              {item.mspPrice > 0 ? `MSP: ₹${item.mspPrice.toLocaleString("en-IN")}` : "Spot Auction"}
+                            </span>
                           </div>
                         </div>
 
-                        {/* Real Market Details (Min / Max / Arrivals / MSP) */}
-                        <div className="rounded-xl bg-stone-50 p-2.5 dark:bg-stone-850 space-y-1 text-xs">
-                          <div className="flex items-center justify-between text-stone-600 dark:text-stone-300">
-                            <span>{t("market_price_range")}:</span>
-                            <b>
-                              ₹{item.minPrice.toLocaleString("en-IN")} – ₹{item.maxPrice.toLocaleString("en-IN")}
-                            </b>
-                          </div>
-                          <div className="flex items-center justify-between text-stone-600 dark:text-stone-300">
-                            <span>{t("market_arrivals")}:</span>
-                            <b>{item.arrivalsQtl.toLocaleString("en-IN")} Quintals</b>
-                          </div>
-                          {item.mspPrice > 0 && (
-                            <div className="flex items-center justify-between text-stone-600 dark:text-stone-300">
-                              <span>{t("market_msp_label")}:</span>
-                              <span className="font-semibold text-agri-700 dark:text-agri-400">
-                                ₹{item.mspPrice.toLocaleString("en-IN")}
-                              </span>
-                            </div>
-                          )}
+                        <div className="text-[11px] text-stone-500 mb-3 flex items-center justify-between">
+                          <span>Price Range: <b>₹{item.minPrice.toLocaleString("en-IN")} – ₹{item.maxPrice.toLocaleString("en-IN")}</b></span>
+                          <span className="text-emerald-600 font-semibold">{item.marketStatus || "Active Mandi Trade"}</span>
                         </div>
                       </div>
 
-                      {/* Market Yard Info & Action Links */}
-                      <div className="mt-3 border-t border-stone-100 pt-3 text-xs text-stone-500 dark:border-stone-800 dark:text-stone-400 space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="font-semibold text-stone-800 dark:text-stone-200 truncate">
-                            {lang === "te" ? item.marketNameTe : item.marketNameEn}
-                          </span>
-                          <span className="text-[10px] text-stone-400 shrink-0">{item.distanceKm} km away</span>
-                        </div>
+                      {/* PROMINENT LOCATION / DIRECTIONS & CALL ACTION BUTTONS */}
+                      <div className="pt-2 border-t border-stone-100 dark:border-stone-800 space-y-2">
+                        {/* BIG GREEN DIRECTIONS BUTTON */}
+                        <a
+                          href={directionsUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs sm:text-sm py-2.5 px-3 shadow-sm active:scale-98 transition"
+                        >
+                          <Navigation className="h-4 w-4" />
+                          <span>{lang === "te" ? "యార్డ్ లొకేషన్ & దిశలు (Google Maps)" : "Get Mandi Directions (Google Maps)"}</span>
+                        </a>
 
-                        <div className="flex items-center justify-between gap-2 pt-1">
-                          <button
-                            onClick={() => setActiveTrendItem(item)}
-                            className="inline-flex items-center gap-1 text-[11px] font-bold text-agri-700 hover:text-agri-800 dark:text-agri-400"
-                          >
-                            <LineChartIcon className="h-3.5 w-3.5" />
-                            <span>{t("market_btn_trend")}</span>
-                          </button>
-
-                          <a
-                            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                              item.mapsQuery
-                            )}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-[11px] font-medium text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200"
-                          >
-                            <MapPin className="h-3.5 w-3.5 text-stone-400" />
-                            <span>Maps</span>
-                          </a>
-
-                          {item.secretaryPhone && (
+                        <div className="flex items-center gap-2">
+                          {item.secretaryPhone ? (
                             <a
                               href={`tel:${item.secretaryPhone}`}
-                              className="inline-flex items-center gap-1 text-[11px] font-medium text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200"
-                              title="Call Market Yard Secretary"
+                              className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 py-2 px-3 text-xs font-semibold text-stone-800 dark:text-stone-200 hover:bg-stone-50"
                             >
                               <PhoneCall className="h-3.5 w-3.5 text-emerald-600" />
-                              <span>Call Yard</span>
+                              <span>{lang === "te" ? "ఫోన్ చేయండి" : "Call Yard"}</span>
                             </a>
+                          ) : (
+                            <button
+                              onClick={() => setActiveTrendItem(item)}
+                              className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 py-2 px-3 text-xs font-semibold text-stone-800 dark:text-stone-200 hover:bg-stone-50"
+                            >
+                              <LineChartIcon className="h-3.5 w-3.5 text-emerald-600" />
+                              <span>15-Day Trend</span>
+                            </button>
                           )}
+
+                          <button
+                            onClick={() => setActiveTrendItem(item)}
+                            className="inline-flex items-center justify-center p-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-50"
+                            title="View 15-Day Price Trend"
+                          >
+                            <LineChartIcon className="h-4 w-4" />
+                          </button>
                         </div>
                       </div>
                     </div>
                   );
                 })}
               </div>
+            ) : (
+              /* ================= 2. TABLE VIEW: CLEAN APMC PROCUREMENT TABLE WITH DIRECTIONS ================= */
+              <div className="overflow-x-auto rounded-3xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-2xs">
+                <table className="w-full text-left text-xs md:text-sm">
+                  <thead className="bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 font-bold border-b border-stone-200 dark:border-stone-700">
+                    <tr>
+                      <th className="py-3.5 px-4 font-bold">Market Yard</th>
+                      <th className="py-3.5 px-4 font-bold">Commodity & Variety</th>
+                      <th className="py-3.5 px-4 font-bold text-amber-700 dark:text-amber-400">Today's Arrivals</th>
+                      <th className="py-3.5 px-4 font-bold">Central MSP</th>
+                      <th className="py-3.5 px-4 font-bold">TS Bonus</th>
+                      <th className="py-3.5 px-4 font-bold text-emerald-700 dark:text-emerald-400">Total Farmer Rate</th>
+                      <th className="py-3.5 px-4 font-bold text-center">Mandi Location (GPS)</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-stone-200 dark:divide-stone-800 bg-white dark:bg-stone-900">
+                    {filteredPrices.map((row) => {
+                      const hasBonus = (row.govtBonus || 0) > 0;
+                      const totalRate = row.totalFarmerRate || (row.modalPrice + (row.govtBonus || 0));
+                      const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
+                        row.mapsQuery || `${row.marketNameEn}, ${row.districtEn}, Telangana`
+                      )}`;
+
+                      return (
+                        <tr
+                          key={row.id}
+                          className={hasBonus ? "bg-emerald-50/40 dark:bg-emerald-950/20 font-semibold" : "hover:bg-stone-50 dark:hover:bg-stone-850 transition"}
+                        >
+                          <td className="py-3.5 px-4">
+                            <span className="font-bold text-stone-900 dark:text-white block">
+                              {lang === "te" ? row.marketNameTe : row.marketNameEn}
+                            </span>
+                            <span className="text-[11px] text-stone-400 flex items-center gap-1 mt-0.5">
+                              <MapPin className="h-3 w-3" />
+                              <span>{row.distanceKm} km • {row.districtEn}</span>
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4 text-stone-800 dark:text-stone-200">
+                            {lang === "te" ? `${row.commodityTe} (${row.varietyTe || row.variety})` : `${row.commodityEn} (${row.variety})`}
+                          </td>
+                          <td className="py-3.5 px-4 font-mono font-bold text-amber-800 dark:text-amber-300">
+                            {row.arrivalsQtl.toLocaleString("en-IN")} Qtl
+                          </td>
+                          <td className="py-3.5 px-4 font-mono text-stone-700 dark:text-stone-300">
+                            {row.mspPrice > 0 ? `₹${row.mspPrice.toLocaleString("en-IN")}` : "N/A"}
+                          </td>
+                          <td className="py-3.5 px-4 font-mono">
+                            {hasBonus ? (
+                              <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 font-bold">
+                                +₹{row.govtBonus}
+                              </span>
+                            ) : (
+                              "—"
+                            )}
+                          </td>
+                          <td className="py-3.5 px-4 font-mono font-black text-emerald-700 dark:text-emerald-400 text-sm md:text-base">
+                            ₹{totalRate.toLocaleString("en-IN")} / Qtl
+                          </td>
+                          <td className="py-3.5 px-4 text-center">
+                            <a
+                              href={directionsUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-xs transition"
+                            >
+                              <Navigation className="h-3.5 w-3.5" />
+                              <span>Directions</span>
+                            </a>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
 
-          {/* 15-Day Price Trend Interactive Modal */}
-          {activeTrendItem && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/60 p-4 backdrop-blur-xs">
-              <div className="w-full max-w-xl rounded-3xl bg-white p-6 shadow-2xl dark:bg-stone-900 border border-stone-200 dark:border-stone-800">
-                <div className="flex items-center justify-between border-b border-stone-100 pb-3 dark:border-stone-800">
-                  <div>
-                    <h3 className="text-base font-bold text-stone-900 dark:text-stone-50">
-                      {lang === "te" && activeTrendItem.varietyTe
-                        ? activeTrendItem.varietyTe
-                        : activeTrendItem.variety}
-                    </h3>
-                    <p className="text-xs text-stone-500">
-                      {lang === "te" ? activeTrendItem.marketNameTe : activeTrendItem.marketNameEn} •{" "}
-                      {t("market_modal_trend_title")}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => setActiveTrendItem(null)}
-                    className="rounded-xl p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-700 dark:hover:bg-stone-800 dark:hover:text-stone-200"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
-                </div>
+          {/* STEP 4: INTERACTIVE YIELD PAYOUT & WHATSAPP ADVISORY */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Payout Calculator */}
+            <div className="bg-stone-50 dark:bg-stone-800/60 rounded-3xl p-6 border border-stone-200 dark:border-stone-700">
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="text-sm sm:text-base font-black text-stone-900 dark:text-white">
+                  💰 {profile.name}'s {activeCropLabel} Payout Calculator
+                </h4>
+                <span className="text-xs font-mono font-bold text-emerald-700 dark:text-emerald-400">
+                  {profile.areaAcre || 4.5} Acres Farm
+                </span>
+              </div>
 
-                <div className="mt-4 h-64 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={SAMPLE_MANDI_PRICE_TRENDS[activeTrendItem.id] || []}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
-                      <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                      <YAxis domain={["auto", "auto"]} tick={{ fontSize: 11 }} />
-                      <Tooltip
-                        formatter={(val: number) => [`₹${val.toLocaleString("en-IN")}/qtl`, "Modal Rate"]}
-                        contentStyle={{ borderRadius: "12px", fontSize: "12px" }}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="price"
-                        stroke="#16a34a"
-                        strokeWidth={2.5}
-                        dot={{ r: 4, fill: "#16a34a" }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
+              <div className="mb-4">
+                <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1">
+                  {lang === "te"
+                    ? "అమ్మదలచిన దిగుబడి (క్వింటాళ్లు) నమోదు చేయండి:"
+                    : "Enter Expected Crop to Sell (Quintals):"}
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  max="1000"
+                  value={calcYieldQtl}
+                  onChange={(e) => setCalcYieldQtl(parseInt(e.target.value) || 0)}
+                  className="w-full px-3.5 py-2.5 rounded-2xl border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-lg font-black font-mono outline-none shadow-2xs focus:ring-2 focus:ring-emerald-500"
+                />
+                <span className="text-[11px] text-stone-500 mt-1.5 block">
+                  Estimated ~{profile.areaAcre ? Math.round(calcYieldQtl / profile.areaAcre) : 21} Qtl/acre on your {profile.areaAcre || 4.5} acre field in {profile.district}
+                </span>
+              </div>
 
-                <div className="mt-4 flex items-center justify-between border-t border-stone-100 pt-3 dark:border-stone-800 text-xs">
-                  <span className="text-stone-500">
-                    Latest recorded rate: <b>₹{activeTrendItem.modalPrice.toLocaleString("en-IN")}/qtl</b>
+              <div className="grid grid-cols-2 gap-3 mt-4">
+                <div className="p-4 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700">
+                  <span className="text-xs text-stone-500 block">Total Realized Value:</span>
+                  <span className="text-xl sm:text-2xl font-black text-stone-900 dark:text-white font-mono mt-1 block">
+                    ₹{(calcYieldQtl * activeRate).toLocaleString("en-IN")}
                   </span>
-                  <button
-                    onClick={() => setActiveTrendItem(null)}
-                    className="rounded-xl bg-agri-700 px-4 py-2 font-semibold text-white hover:bg-agri-800"
-                  >
-                    Close
-                  </button>
+                  <span className="text-[10px] text-stone-400">@ ₹{activeRate.toLocaleString("en-IN")}/quintal</span>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800">
+                  <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300 block">
+                    {activeBonus > 0 ? "Telangana DBT Bonus:" : "MSP Value:"}
+                  </span>
+                  <span className="text-xl sm:text-2xl font-black text-emerald-700 dark:text-emerald-400 font-mono mt-1 block">
+                    {activeBonus > 0
+                      ? `+₹${(calcYieldQtl * activeBonus).toLocaleString("en-IN")}`
+                      : `₹${(calcYieldQtl * activeMsp).toLocaleString("en-IN")}`}
+                  </span>
+                  <span className="text-[10px] text-emerald-600">
+                    {activeBonus > 0 ? "Direct DBT into Rythu Bank Account" : `Official MSP Benchmark`}
+                  </span>
                 </div>
               </div>
             </div>
-          )}
 
-          {/* Quick Preview of Rythu Community Feed at Bottom of Market */}
-          <Card className="bg-gradient-to-r from-stone-50 to-agri-50/30 border-stone-200 dark:border-stone-800 dark:bg-stone-900">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-100 pb-3 dark:border-stone-800">
-              <div className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-agri-700" />
-                <div>
-                  <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100">
-                    {t("community_tab_title")}
-                  </h3>
-                  <p className="text-xs text-stone-500">
-                    Active Telangana farmer questions with verified PJTAU & AEO answers
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => setActiveMainTab("community")}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-agri-700 px-3.5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-agri-800 transition self-start sm:self-auto"
-              >
-                <span>{lang === "te" ? "మొత్తం చర్చలు చూడండి" : "View All Discussions"}</span>
-              </button>
-            </div>
-
-            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {communityPosts.slice(0, 2).map((post) => (
-                <div
-                  key={post.id}
-                  className="rounded-xl border border-stone-200 bg-white p-3.5 shadow-2xs dark:border-stone-800 dark:bg-stone-850 space-y-2"
-                >
-                  <div className="flex items-center justify-between text-xs text-stone-500">
-                    <b>{post.authorName} ({post.authorVillage}, {post.authorDistrict})</b>
-                    <span>{lang === "te" ? post.timeAgoTe : post.timeAgoEn}</span>
+            {/* WhatsApp Share Advisory Generator */}
+            <div className="bg-stone-50 dark:bg-stone-800/60 rounded-3xl p-6 border border-stone-200 dark:border-stone-700 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <Share2 className="w-4 h-4 text-emerald-600" />
+                    <h4 className="text-sm sm:text-base font-black text-stone-900 dark:text-white">
+                      WhatsApp Rythu Mandi Advisory
+                    </h4>
                   </div>
-                  <p className="text-xs font-semibold text-stone-900 dark:text-stone-100">
-                    {lang === "te" ? post.questionTe : post.questionEn}
-                  </p>
-                  {post.officialAnswer && (
-                    <div className="rounded-lg bg-emerald-50 p-2 text-[11px] text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200 border border-emerald-200/60">
-                      <div className="flex items-center gap-1 font-bold mb-0.5">
-                        <CheckCircle2 className="h-3 w-3 text-emerald-600" />
-                        <span>{post.officialAnswer.expertName} ({post.officialAnswer.designationEn})</span>
-                      </div>
-                      <p className="line-clamp-2">
-                        {lang === "te" ? post.officialAnswer.answerTe : post.officialAnswer.answerEn}
-                      </p>
-                    </div>
-                  )}
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300">
+                    Bilingual
+                  </span>
                 </div>
-              ))}
+
+                <div className="bg-white dark:bg-stone-900 rounded-2xl p-3.5 border border-stone-200 dark:border-stone-700 font-mono text-[11px] text-stone-700 dark:text-stone-300 whitespace-pre-line max-h-40 overflow-y-auto">
+                  {whatsappText}
+                </div>
+              </div>
+
+              <div className="mt-4 pt-3 border-t border-stone-200 dark:border-stone-700 flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={async () => {
+                      const ok = await copyToClipboard(whatsappText);
+                      if (ok) {
+                        setCopiedShareText(true);
+                        setTimeout(() => setCopiedShareText(false), 2500);
+                      }
+                    }}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs ${
+                      copiedShareText
+                        ? "bg-emerald-600 text-white"
+                        : "bg-emerald-700 hover:bg-emerald-800 text-white"
+                    }`}
+                  >
+                    {copiedShareText ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
+                    <span>{copiedShareText ? "Copied!" : "Copy Text"}</span>
+                  </button>
+
+                  <a
+                    href={generateWhatsAppUrl(whatsappText)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-2 rounded-xl text-xs font-bold bg-green-600 hover:bg-green-700 text-white transition flex items-center gap-1.5 shadow-xs"
+                  >
+                    <Share2 className="w-4 h-4" />
+                    <span>Share on WhatsApp</span>
+                  </a>
+                </div>
+
+                <span className="text-[11px] text-stone-500">Rythu Direct Share</span>
+              </div>
             </div>
-          </Card>
+          </div>
         </div>
       ) : (
         /* ================= TAB 2: FULL REAL RYTHU COMMUNITY HUB ================= */
