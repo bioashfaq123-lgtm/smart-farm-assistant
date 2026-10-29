@@ -10,6 +10,8 @@ import {
   resetToSampleProfile,
   TELANGANA_DISTRICTS,
 } from "@/lib/profile/farmerProfile";
+import { AuthModal } from "./AuthModal";
+import { DemoFarmer } from "@/lib/auth/demoProfiles";
 
 interface FarmerProfileContextType {
   profile: FarmerProfile;
@@ -18,6 +20,13 @@ interface FarmerProfileContextType {
   isModalOpen: boolean;
   openProfileModal: () => void;
   closeProfileModal: () => void;
+  isAuthModalOpen: boolean;
+  openAuthModal: (tab?: "login" | "register") => void;
+  closeAuthModal: () => void;
+  authTab: "login" | "register";
+  isLoggedIn: boolean;
+  loginWithDemo: (farmer: DemoFarmer) => void;
+  logout: () => void;
 }
 
 const FarmerProfileContext = createContext<FarmerProfileContextType>({
@@ -27,20 +36,30 @@ const FarmerProfileContext = createContext<FarmerProfileContextType>({
   isModalOpen: false,
   openProfileModal: () => {},
   closeProfileModal: () => {},
+  isAuthModalOpen: false,
+  openAuthModal: () => {},
+  closeAuthModal: () => {},
+  authTab: "login",
+  isLoggedIn: false,
+  loginWithDemo: () => {},
+  logout: () => {},
 });
 
 export function FarmerProfileProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<FarmerProfile>(EMPTY_INITIAL_FARMER);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authTab, setAuthTab] = useState<"login" | "register">("login");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     // Initial load from localStorage
     const stored = getStoredFarmerProfile();
     setProfile(stored);
 
-    // If visiting for the first time without completed profile, automatically ask the farmer to complete setup!
-    if (!stored.hasCompletedOnboarding) {
-      setIsModalOpen(true);
+    const loggedInStored = localStorage.getItem("smartfarm_logged_in") === "true";
+    if (loggedInStored || stored.hasCompletedOnboarding) {
+      setIsLoggedIn(true);
     }
 
     const handleUpdate = () => {
@@ -58,11 +77,53 @@ export function FarmerProfileProvider({ children }: { children: React.ReactNode 
   const updateProfile = (updates: Partial<FarmerProfile>) => {
     const updated = saveFarmerProfile(updates);
     setProfile(updated);
+    setIsLoggedIn(true);
   };
 
   const resetToSample = () => {
     const sample = resetToSampleProfile();
     setProfile(sample);
+    setIsLoggedIn(true);
+  };
+
+  const openAuthModal = (tab: "login" | "register" = "login") => {
+    setAuthTab(tab);
+    setIsAuthModalOpen(true);
+  };
+
+  const closeAuthModal = () => {
+    setIsAuthModalOpen(false);
+  };
+
+  const loginWithDemo = (demo: DemoFarmer) => {
+    const updated = saveFarmerProfile({
+      name: demo.name,
+      email: demo.email,
+      phone: demo.phone,
+      state: demo.state,
+      district: demo.district,
+      mandal: demo.mandal,
+      village: demo.village,
+      primaryCrop: demo.primaryCrop,
+      areaAcre: demo.areaAcre,
+      soilType: demo.soilType,
+      irrigationType: demo.irrigationType,
+      sowingDate: demo.sowingDate,
+      isCustom: true,
+      hasCompletedOnboarding: true,
+    });
+    setProfile(updated);
+    setIsLoggedIn(true);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("smartfarm_logged_in", "true");
+    }
+  };
+
+  const logout = () => {
+    setIsLoggedIn(false);
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("smartfarm_logged_in");
+    }
   };
 
   return (
@@ -74,6 +135,13 @@ export function FarmerProfileProvider({ children }: { children: React.ReactNode 
         isModalOpen,
         openProfileModal: () => setIsModalOpen(true),
         closeProfileModal: () => setIsModalOpen(false),
+        isAuthModalOpen,
+        openAuthModal,
+        closeAuthModal,
+        authTab,
+        isLoggedIn,
+        loginWithDemo,
+        logout,
       }}
     >
       {children}
@@ -91,6 +159,11 @@ export function FarmerProfileProvider({ children }: { children: React.ReactNode 
           onClose={() => setIsModalOpen(false)}
         />
       )}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={closeAuthModal}
+        initialTab={authTab}
+      />
     </FarmerProfileContext.Provider>
   );
 }
@@ -99,7 +172,6 @@ export function useFarmerProfile() {
   return useContext(FarmerProfileContext);
 }
 
-// Modal Component for changing farmer profile
 function FarmerProfileModal({
   profile,
   onSave,

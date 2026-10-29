@@ -120,6 +120,18 @@ export default function DashboardPage() {
               <span>{t("nav_advisory")}</span>
               <ArrowRight className="h-3.5 w-3.5" />
             </Link>
+            <Link
+              href="/schemes"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500/20 border border-amber-400/40 px-3.5 py-2 text-xs font-bold text-amber-200 backdrop-blur-md shadow-xs transition hover:bg-amber-500/30 active:scale-95"
+            >
+              <span>🏛️ Govt Schemes</span>
+            </Link>
+            <Link
+              href="/landing"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-white/15 border border-white/20 px-3.5 py-2 text-xs font-bold text-white backdrop-blur-md shadow-xs transition hover:bg-white/25 active:scale-95"
+            >
+              <span>✨ Feature Showcase</span>
+            </Link>
           </div>
         </div>
       </div>

@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Moon, Sun, Globe, Sprout, MapPin, Wifi, WifiOff } from "lucide-react";
+import { Moon, Sun, Globe, Sprout, MapPin, Wifi, WifiOff, LogIn, Compass } from "lucide-react";
+import Link from "next/link";
 import { useLanguage } from "../common/LanguageContext";
 import { useTheme } from "../common/ThemeContext";
 import { useFarmerProfile } from "../common/FarmerProfileContext";
@@ -9,7 +10,7 @@ import { useFarmerProfile } from "../common/FarmerProfileContext";
 export function Header() {
   const { lang, setLang, t } = useLanguage();
   const { theme, toggleTheme } = useTheme();
-  const { profile, openProfileModal } = useFarmerProfile();
+  const { profile, openProfileModal, openAuthModal, isLoggedIn } = useFarmerProfile();
   const [isOnline, setIsOnline] = useState(true);
 
   useEffect(() => {
@@ -104,6 +105,29 @@ export function Header() {
           ) : (
             <Moon className="h-4 w-4 text-stone-600" />
           )}
+        </button>
+
+        {/* Explore Showcase Link */}
+        <Link
+          href="/landing"
+          className="hidden xl:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-200/90 dark:border-stone-800 text-xs font-semibold text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-900 transition"
+          title="View Platform Showcase & Features"
+        >
+          <Compass className="w-3.5 h-3.5 text-emerald-600" />
+          <span>Showcase</span>
+        </Link>
+
+        {/* Login / Register / Farmer Profile Pill */}
+        <button
+          type="button"
+          onClick={() => openAuthModal("login")}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs transition shadow-xs"
+          title="Login / Register or Switch Farmer Profile"
+        >
+          <LogIn className="w-3.5 h-3.5" />
+          <span className="max-w-[120px] truncate">
+            {profile.name ? profile.name : "Login"}
+          </span>
         </button>
       </div>
     </header>

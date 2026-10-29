@@ -22,6 +22,8 @@ export interface FarmerProfile {
   irrigationTypeTe?: string;
   sowingDate: string;
   phone?: string;
+  email?: string;
+  state?: string;
   isCustom: boolean;
   hasCompletedOnboarding: boolean;
 }

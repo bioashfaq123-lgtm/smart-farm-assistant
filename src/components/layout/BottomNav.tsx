@@ -10,12 +10,13 @@ import {
   TrendingUp,
   Wrench,
   Sparkles,
+  Landmark,
 } from "lucide-react";
 import { useLanguage } from "../common/LanguageContext";
 
 export function BottomNav() {
   const pathname = usePathname();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
 
   const navItems = [
     {
@@ -37,6 +38,11 @@ export function BottomNav() {
       href: "/market",
       label: t("nav_market"),
       icon: TrendingUp,
+    },
+    {
+      href: "/schemes",
+      label: lang === "te" ? "పథకాలు" : "Schemes",
+      icon: Landmark,
     },
     {
       href: "/tools",

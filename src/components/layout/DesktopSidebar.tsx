@@ -15,6 +15,9 @@ import {
   ShieldCheck,
   Presentation,
   UserCheck,
+  Landmark,
+  Compass,
+  LogIn,
 } from "lucide-react";
 import { useLanguage } from "../common/LanguageContext";
 import { useFarmerProfile } from "../common/FarmerProfileContext";
@@ -22,7 +25,8 @@ import { useFarmerProfile } from "../common/FarmerProfileContext";
 export function DesktopSidebar() {
   const pathname = usePathname();
   const { t } = useLanguage();
-  const { profile, openProfileModal } = useFarmerProfile();
+  const { profile, openProfileModal, openAuthModal, isLoggedIn } = useFarmerProfile();
+  const { lang } = useLanguage();
 
   const initials = profile.name
     ? profile.name
@@ -54,6 +58,17 @@ export function DesktopSidebar() {
       href: "/market",
       label: t("nav_market"),
       icon: TrendingUp,
+    },
+    {
+      href: "/schemes",
+      label: lang === "te" ? "ప్రభుత్వ పథకాలు" : "Govt Schemes",
+      icon: Landmark,
+      badge: "NEW",
+    },
+    {
+      href: "/landing",
+      label: lang === "te" ? "ఫీచర్స్ ల్యాండింగ్" : "Feature Showcase",
+      icon: Compass,
     },
     {
       href: "/tools",
@@ -160,6 +175,17 @@ export function DesktopSidebar() {
             </p>
           </div>
         </button>
+
+        <div className="flex items-center gap-1.5 mt-2">
+          <button
+            type="button"
+            onClick={() => openAuthModal("login")}
+            className="flex-1 text-center py-1.5 px-2 rounded-lg text-[11px] font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:hover:bg-emerald-900 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800 transition flex items-center justify-center gap-1 shadow-2xs"
+          >
+            <LogIn className="w-3 h-3" />
+            <span>{isLoggedIn ? (profile.name ? "Switch Account" : "Farmer Profile") : "Login / Register"}</span>
+          </button>
+        </div>
 
         <div className="mt-2 pt-2 border-t border-stone-100 dark:border-stone-800/60">
           <Link
