@@ -84,10 +84,12 @@ export async function GET() {
     }
 
     // Normalizing values (the ESP32 sends strings "true"/"false" or numbers)
+    const nowMs = Date.now();
+    const nowSec = Math.floor(nowMs / 1000);
     const rawUpdated = data.updated ? parseInt(data.updated, 10) : null;
-    const nowSec = Math.floor(Date.now() / 1000);
-    // ESP32 sends telemetry every 10s. If updated within 120s, it is actively online.
-    const isOnline = rawUpdated ? nowSec - rawUpdated <= 120 : false;
+    const updatedMs = data.updated_ms ? parseInt(data.updated_ms, 10) : (rawUpdated ? (rawUpdated > 10000000000 ? rawUpdated : rawUpdated * 1000) : null);
+    const diffSec = updatedMs ? Math.round(Math.abs(nowMs - updatedMs) / 1000) : null;
+    const isOnline = diffSec !== null ? diffSec <= 180 : (data.moisture !== undefined && data.moisture !== null);
 
     let lastSeenAgoText = "Never";
     if (rawUpdated) {

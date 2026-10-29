@@ -14,8 +14,8 @@
 #include <time.h>
 
 // ---------- EDIT THESE ----------
-const char *WIFI_SSID = "Vivo Y31";
-const char *WIFI_PASS = "pimi7544";
+const char *WIFI_SSID = "FarmHotspot";
+const char *WIFI_PASS = "12345678";
 const char *DB_URL =
     "https://smart-farm-assistant-32782-default-rtdb.firebaseio.com"; // no
                                                                       // trailing
@@ -141,16 +141,19 @@ void handleWiFi() {
     setPump(false);
   }
 
-  // Non-blocking reconnect attempt every 10 seconds
-  if (millis() - lastWifiRetry > 10000UL) {
+  // Clean reconnect attempt every 15 seconds
+  if (millis() - lastWifiRetry > 15000UL) {
     lastWifiRetry = millis();
-    Serial.println("[WIFI] Reconnecting...");
-    WiFi.reconnect();
+    Serial.printf("[WIFI] Reconnecting to [%s]...\n", WIFI_SSID);
+    WiFi.disconnect();
+    delay(100);
+    WiFi.begin(WIFI_SSID, WIFI_PASS);
   }
 }
 
 void setup() {
   Serial.begin(115200);
+  delay(500);
 
   // PREVENT BOOT GLITCH: Preset output latch BEFORE setting pin mode to OUTPUT
   setRelayHardware(false);
@@ -161,21 +164,68 @@ void setup() {
   analogSetAttenuation(ADC_11db);
 
   WiFi.mode(WIFI_STA);
-  WiFi.setAutoReconnect(true);
+  WiFi.disconnect();
+  delay(100);
+
+  Serial.println("\n==================================================");
+  Serial.println("  Smart Farm ESP32 Diagnostics & Starting");
+  Serial.println("==================================================");
+  Serial.println("[DIAGNOSTIC] Scanning all visible 2.4 GHz WiFi networks...");
+
+  int n = WiFi.scanNetworks();
+  Serial.printf("[DIAGNOSTIC] Found %d visible networks:\n", n);
+  bool foundSSID = false;
+
+  for (int i = 0; i < n; ++i) {
+    String currentSSID = WiFi.SSID(i);
+    int rssi = WiFi.RSSI(i);
+    int ch = WiFi.channel(i);
+    Serial.printf("   #%d: \"%s\" (Signal: %d dBm, Channel: %d)\n", i + 1,
+                  currentSSID.c_str(), rssi, ch);
+    if (currentSSID == WIFI_SSID) {
+      foundSSID = true;
+    }
+  }
+
+  Serial.println("--------------------------------------------------");
+  if (!foundSSID) {
+    Serial.printf("⚠️  WARNING: \"%s\" was NOT detected by the ESP32!\n",
+                  WIFI_SSID);
+    Serial.println("   Causes & Fixes:");
+    Serial.println("   1. Check if Vivo Y31 hotspot is turned ON.");
+    Serial.println("   2. In Vivo Hotspot Configuration, change AP Band to "
+                   "'2.4 GHz Band'.");
+    Serial.println("   3. In Vivo Hotspot Configuration, verify 'Hide my "
+                   "hotspot' is OFF.");
+    Serial.println("--------------------------------------------------\n");
+  } else {
+    Serial.printf("✅ Target \"%s\" DETECTED! Proceeding to connect...\n",
+                  WIFI_SSID);
+    Serial.println("--------------------------------------------------\n");
+  }
+
+  Serial.printf("Connecting to: [%s] ...\n", WIFI_SSID);
   WiFi.begin(WIFI_SSID, WIFI_PASS);
 
-  Serial.print("Connecting WiFi");
   unsigned long startWait = millis();
-  while (WiFi.status() != WL_CONNECTED && millis() - startWait < 15000) {
+  while (WiFi.status() != WL_CONNECTED && millis() - startWait < 14000) {
     delay(500);
     Serial.print(".");
   }
 
   if (WiFi.status() == WL_CONNECTED) {
-    Serial.println(" Connected!");
+    Serial.println("\n\n🎉 [WIFI] Connected Successfully!");
+    Serial.print("   [WIFI] ESP32 IP Address: ");
+    Serial.println(WiFi.localIP());
+    Serial.print("   [WIFI] Signal Strength: ");
+    Serial.print(WiFi.RSSI());
+    Serial.println(" dBm");
     configTime(0, 0, "pool.ntp.org"); // UTC clock for the 'updated' timestamp
   } else {
-    Serial.println(" Will continue trying in background.");
+    Serial.println(
+        "\n\n[WIFI] Connection timed out. Still attempting in background...");
+    Serial.println(
+        "[WIFI] Tip: If password was changed, update WIFI_PASS in the code.");
   }
 }
 
@@ -203,12 +253,11 @@ void loop() {
       dbPut("moisture", String(m));
     }
 
-    // Only update timestamp if NTP has synchronized
-    if (now > 100000UL) {
-      dbPut("updated", String(now));
-      dbPut("history/" + String(now),
-            "{\"t\":" + String(now) + ",\"m\":" + String(m) + "}");
-    }
+    // Always write updated timestamp so web app knows ESP32 is actively pinging
+    unsigned long ts = (now > 100000UL) ? now : (1793289000UL + (millis() / 1000));
+    dbPut("updated", String(ts));
+    dbPut("updated_ms", "{\".sv\":\"timestamp\"}");
+    dbPut("history/" + String(ts), "{\"t\":" + String(ts) + ",\"m\":" + String(m) + "}");
 
     String mode = dbGet("mode");
     if (mode == "auto") {
