@@ -18,8 +18,9 @@ const char *WIFI_PASS = "12345678";
 const char *DB_URL = "https://smart-farm-assistant-32782-default-rtdb.firebaseio.com";
 const char *DB_PATH = "field";
 const int SENSOR_PIN = 34;
-const int RELAY_PIN = 26;
-const bool RELAY_ACTIVE_LOW = true;    // Set to true if relay clicks ON on LOW (standard blue modules)
+const int SENSOR_VCC_PIN = 27;         // Powers Soil Sensor (3.3V) directly so no breadboard is needed!
+const int RELAY_PIN = 26;              // Relay signal IN
+const bool RELAY_ACTIVE_LOW = true;    // Standard blue relay module
 const int RAW_DRY = 3900;             // reading in dry air  (~4000 = 0% moisture)
 const int RAW_WET = 1100;             // reading in water    (~1055 = 100% moisture)
 const unsigned long PUSH_MS = 8000UL; // upload to Firebase every 8s
@@ -41,8 +42,8 @@ int currentThreshold = 30;
 bool currentRainSkip = false;
 
 void setRelayHardware(bool active) {
-  // active = true  -> relay energized (contacts closed, pump runs)
-  // active = false -> relay de-energized (contacts open, pump stopped)
+  // active = true  -> relay clicked ON (pump runs)
+  // active = false -> relay clicked OFF (pump stops)
   digitalWrite(RELAY_PIN, (active ^ RELAY_ACTIVE_LOW) ? HIGH : LOW);
 }
 
@@ -139,7 +140,10 @@ void setup() {
   Serial.begin(115200);
   delay(500);
 
-  // Preset output latch BEFORE setting pin mode to OUTPUT to prevent power-on glitch
+  // Power the soil moisture sensor directly from GPIO 27 (3.3V)
+  pinMode(SENSOR_VCC_PIN, OUTPUT);
+  digitalWrite(SENSOR_VCC_PIN, HIGH);
+
   setRelayHardware(false);
   pinMode(RELAY_PIN, OUTPUT);
   setRelayHardware(false);
@@ -191,7 +195,7 @@ void loop() {
   if (millis() - lastFastControl >= 250UL) {
     lastFastControl = millis();
 
-    // In auto mode, react immediately to water dipping and removal
+    // Auto control responds within 0.25s of touching water or air!
     if (currentMode != "manual" && !safetyTripped) {
       if (m >= 0 && m < currentThreshold && !currentRainSkip) {
         if (!pumpOn) {
