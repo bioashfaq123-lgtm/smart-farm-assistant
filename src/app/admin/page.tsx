@@ -95,7 +95,7 @@ export default function AdminPortalPage() {
       .catch(() => setApiHealth((prev) => ({ ...prev, chat: "Offline Fallback" })));
 
     // Check IoT Firebase RTDB
-    fetch("/api/iot")
+    fetch("/api/iot-telemetry")
       .then((r) => r.json())
       .then((d) =>
         setApiHealth((prev) => ({

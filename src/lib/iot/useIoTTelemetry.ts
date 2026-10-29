@@ -61,7 +61,7 @@ export function useIoTTelemetry(pollIntervalMs: number = 8000) {
 
   const fetchTelemetry = useCallback(async () => {
     try {
-      const res = await fetch("/api/iot", { cache: "no-store" });
+      const res = await fetch("/api/iot-telemetry", { cache: "no-store" });
       if (res.ok) {
         const json = await res.json();
         if (isMounted.current) {
@@ -125,7 +125,7 @@ export function useIoTTelemetry(pollIntervalMs: number = 8000) {
         headers["Authorization"] = "Bearer owner_authorized";
       }
 
-      const res = await fetch("/api/iot", {
+      const res = await fetch("/api/iot-telemetry", {
         method: "POST",
         headers,
         body: JSON.stringify({ action, value, ownerPin: pin }),
