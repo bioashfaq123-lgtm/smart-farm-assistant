@@ -23,10 +23,9 @@ const char *DB_URL =
 const char *DB_PATH = "field"; // must match DB_PATH in config.js
 const int SENSOR_PIN = 34;
 const int RELAY_PIN = 26;
-const bool RELAY_ACTIVE_LOW =
-    true; // most blue relay modules click ON when the pin goes LOW
-const int RAW_DRY = 3200;              // reading in dry air  (calibrate!)
-const int RAW_WET = 1400;              // reading in water    (calibrate!)
+const bool RELAY_ACTIVE_LOW = true; // most blue relay modules click ON when the pin goes LOW
+const int RAW_DRY = 3900;              // reading in dry air  (calibrate!)
+const int RAW_WET = 1100;              // reading in water    (calibrate!)
 const unsigned long PUSH_MS = 10000UL; // upload every 10 s
 const unsigned long MAX_PUMP_MS =
     5UL * 60UL * 1000UL; // safety: never run more than 5 min at a time
@@ -34,6 +33,7 @@ const unsigned long PUMP_COOLDOWN_MS =
     10UL * 60UL * 1000UL; // safety: 10 min cooldown after hitting max limit
 // --------------------------------
 
+int lastRawADC = 0;
 bool pumpOn = false;
 bool safetyTripped = false;
 unsigned long pumpStarted = 0;
@@ -78,12 +78,10 @@ int readMoisture() {
     delay(2);
   }
   int raw = sum / 16;
+  lastRawADC = raw;
 
   // Sensor safety: detect disconnected or floating probe
-  if (raw > 4050) {
-    Serial.println("[SENSOR] Warning: Open circuit or disconnected probe!");
-    return -1; // Fault condition
-  }
+  // 4095 is dry air (0% moisture)
 
   int pct = map(raw, RAW_DRY, RAW_WET, 0, 100);
   return constrain(pct, 0, 100);
@@ -254,10 +252,12 @@ void loop() {
     }
 
     // Always write updated timestamp so web app knows ESP32 is actively pinging
-    unsigned long ts = (now > 100000UL) ? now : (1793289000UL + (millis() / 1000));
+    unsigned long ts =
+        (now > 100000UL) ? now : (1793289000UL + (millis() / 1000));
     dbPut("updated", String(ts));
     dbPut("updated_ms", "{\".sv\":\"timestamp\"}");
-    dbPut("history/" + String(ts), "{\"t\":" + String(ts) + ",\"m\":" + String(m) + "}");
+    dbPut("history/" + String(ts),
+          "{\"t\":" + String(ts) + ",\"m\":" + String(m) + "}");
 
     String mode = dbGet("mode");
     if (mode == "auto") {
@@ -289,8 +289,8 @@ void loop() {
     }
 
     dbPut("pump_state", pumpOn ? "true" : "false");
-    Serial.printf("moisture=%d%% mode=%s pump=%d locked=%d\n", m, mode.c_str(),
-                  pumpOn, safetyTripped);
+    Serial.printf("moisture=%d%% (raw=%d) mode=%s pump=%d locked=%d\n", m,
+                  lastRawADC, mode.c_str(), pumpOn, safetyTripped);
   }
 
   delay(50); // Yield to FreeRTOS watchdog
