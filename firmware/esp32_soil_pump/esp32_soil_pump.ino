@@ -42,10 +42,9 @@ unsigned long lastPush = 0;
 unsigned long lastWifiRetry = 0;
 
 void setRelayHardware(bool active) {
-  // OUTPUT_OPEN_DRAIN mode:
-  // active = true  -> pin pulls to GND (LOW) -> relay clicks ON
-  // active = false -> pin floats (HIGH)      -> zero current -> relay completely OFF
-  digitalWrite(RELAY_PIN, active ? LOW : HIGH);
+  // active = true  -> pin goes HIGH -> Relay turns ON
+  // active = false -> pin goes LOW  -> Relay turns OFF
+  digitalWrite(RELAY_PIN, active ? HIGH : LOW);
 }
 
 void setPump(bool on) {
@@ -156,7 +155,7 @@ void setup() {
 
   // PREVENT BOOT GLITCH: Preset output latch BEFORE setting pin mode to OUTPUT
   setRelayHardware(false);
-  pinMode(RELAY_PIN, OUTPUT_OPEN_DRAIN);
+  pinMode(RELAY_PIN, OUTPUT);
   setRelayHardware(false);
 
   analogReadResolution(12);
