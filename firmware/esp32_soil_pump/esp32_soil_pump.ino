@@ -42,9 +42,10 @@ unsigned long lastPush = 0;
 unsigned long lastWifiRetry = 0;
 
 void setRelayHardware(bool active) {
-  // active = true -> relay contacts energized (pump runs)
-  // active = false -> relay contacts open (pump stopped)
-  digitalWrite(RELAY_PIN, (active ^ RELAY_ACTIVE_LOW) ? HIGH : LOW);
+  // OUTPUT_OPEN_DRAIN mode:
+  // active = true  -> pin pulls to GND (LOW) -> relay clicks ON
+  // active = false -> pin floats (HIGH)      -> zero current -> relay completely OFF
+  digitalWrite(RELAY_PIN, active ? LOW : HIGH);
 }
 
 void setPump(bool on) {
@@ -155,7 +156,7 @@ void setup() {
 
   // PREVENT BOOT GLITCH: Preset output latch BEFORE setting pin mode to OUTPUT
   setRelayHardware(false);
-  pinMode(RELAY_PIN, OUTPUT);
+  pinMode(RELAY_PIN, OUTPUT_OPEN_DRAIN);
   setRelayHardware(false);
 
   analogReadResolution(12);
@@ -260,7 +261,7 @@ void loop() {
           "{\"t\":" + String(ts) + ",\"m\":" + String(m) + "}");
 
     String mode = dbGet("mode");
-    if (mode == "auto") {
+    if (mode != "manual") {
       int th = dbGet("threshold").toInt();
       if (th <= 0)
         th = 30;
