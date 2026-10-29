@@ -1,9 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, Sprout, Key, CheckCircle, ArrowRight, Phone, Mail, MapPin, User } from "lucide-react";
+import { X, Sprout, Key, CheckCircle, Mail, MapPin, User, ChevronDown } from "lucide-react";
 import { QUICK_DEMO_FARMERS, DemoFarmer } from "@/lib/auth/demoProfiles";
 import { useFarmerProfile } from "./FarmerProfileContext";
+import { useLanguage } from "./LanguageContext";
+import { TELANGANA_DISTRICTS } from "@/lib/profile/farmerProfile";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -13,48 +15,79 @@ interface AuthModalProps {
 
 export function AuthModal({ isOpen, onClose, initialTab = "login" }: AuthModalProps) {
   const { profile, updateProfile, loginWithDemo } = useFarmerProfile();
+  const { setLang } = useLanguage();
+
   const [tab, setTab] = useState<"login" | "register">(initialTab);
-  const [contactInput, setContactInput] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
-  const [otpInput, setOtpInput] = useState("");
+
+  // Login State (Email-only authentication)
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginOtpSent, setLoginOtpSent] = useState(false);
+  const [loginOtpInput, setLoginOtpInput] = useState("");
+
+  // Register Form State (Matching uploaded registration screenshot)
+  const [fullName, setFullName] = useState("");
+  const [registerEmail, setRegisterEmail] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [location, setLocation] = useState("");
+  const [farmSizeAcres, setFarmSizeAcres] = useState<string>("0");
+  const [preferredLang, setPreferredLang] = useState<"English" | "Telugu (తెలుగు)" | "Hindi (हिंदी)" | "Malayalam (മലയാളം)">("English");
+
+  const [registerOtpSent, setRegisterOtpSent] = useState(false);
+  const [registerOtpInput, setRegisterOtpInput] = useState("");
+
+  // Feedback messages
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
-  // Register Form State
-  const [regName, setRegName] = useState("");
-  const [regContact, setRegContact] = useState("");
-  const [regState, setRegState] = useState("Telangana");
-  const [regDistrict, setRegDistrict] = useState("Jagtial");
-  const [regVillage, setRegVillage] = useState("Mallapur");
-  const [regCrop, setRegCrop] = useState("Paddy (RNR 15048 / Telangana Sona)");
-  const [regAcres, setRegAcres] = useState(4.0);
-
   if (!isOpen) return null;
 
-  const handleSendOtp = (e: React.FormEvent) => {
+  // Validate Email
+  const isValidEmail = (email: string) => {
+    return /\S+@\S+\.\S+/.test(email.trim());
+  };
+
+  // Helper to parse Location into District and State
+  const parseLocation = (locStr: string) => {
+    if (!locStr.trim()) return { district: "Jagtial", state: "Telangana" };
+    const parts = locStr.split(",").map((s) => s.trim());
+    let districtCandidate = parts[0] || "Jagtial";
+    let stateCandidate = parts[1] || "Telangana";
+
+    // Check if districtCandidate matches any known Telangana district
+    const matchedTs = Object.keys(TELANGANA_DISTRICTS).find(
+      (d) => d.toLowerCase() === districtCandidate.toLowerCase()
+    );
+    if (matchedTs) {
+      districtCandidate = matchedTs;
+      stateCandidate = "Telangana";
+    }
+
+    return { district: districtCandidate, state: stateCandidate };
+  };
+
+  // LOGIN: Send OTP to Email
+  const handleSendLoginOtp = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!contactInput.trim()) {
-      setErrorMsg("Please enter a valid email address or 10-digit mobile number");
+    if (!loginEmail.trim() || !isValidEmail(loginEmail)) {
+      setErrorMsg("Please enter a valid email address (e.g. your.email@example.com)");
       return;
     }
     setErrorMsg("");
-    setOtpSent(true);
-    setSuccessMsg(`OTP sent to ${contactInput}! (For instant testing use OTP: 123456)`);
+    setLoginOtpSent(true);
+    setSuccessMsg(`Secure OTP sent to ${loginEmail}! (Demo verification code: 123456)`);
   };
 
-  const handleVerifyOtp = (e: React.FormEvent) => {
+  // LOGIN: Verify Email OTP
+  const handleVerifyLoginOtp = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!otpInput.trim() || otpInput.trim().length < 4) {
-      setErrorMsg("Please enter the 6-digit OTP (e.g. 123456)");
+    if (!loginOtpInput.trim() || loginOtpInput.trim().length < 4) {
+      setErrorMsg("Please enter the 6-digit code (e.g. 123456)");
       return;
     }
 
-    // Determine if email or phone
-    const isEmail = contactInput.includes("@");
     updateProfile({
-      name: profile.name || "Kisan Sathi",
-      email: isEmail ? contactInput : profile.email || "farmer@smartfarm.telangana",
-      phone: !isEmail ? contactInput : profile.phone || "+91 98480 12345",
+      name: profile.name && profile.name !== "Kisan Sathi" ? profile.name : loginEmail.split("@")[0],
+      email: loginEmail.trim().toLowerCase(),
       isCustom: true,
       hasCompletedOnboarding: true,
     });
@@ -63,33 +96,56 @@ export function AuthModal({ isOpen, onClose, initialTab = "login" }: AuthModalPr
       localStorage.setItem("smartfarm_logged_in", "true");
     }
 
-    setSuccessMsg("Welcome! Successfully logged in.");
+    setSuccessMsg("Welcome! Successfully logged in with Email ID.");
     setTimeout(() => {
       onClose();
     }, 700);
   };
 
-  const handleRegisterSubmit = (e: React.FormEvent) => {
+  // REGISTER: Send OTP to Email
+  const handleSendRegisterOtp = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!regName.trim()) {
-      setErrorMsg("Please enter your name");
+    if (!fullName.trim()) {
+      setErrorMsg("Please enter your Full Name *");
       return;
     }
-    if (!regContact.trim()) {
-      setErrorMsg("Please enter your phone or email");
+    if (!registerEmail.trim() || !isValidEmail(registerEmail)) {
+      setErrorMsg("Please enter a valid Email ID * (e.g. your.email@example.com)");
       return;
     }
 
-    const isEmail = regContact.includes("@");
+    setErrorMsg("");
+    setRegisterOtpSent(true);
+    setSuccessMsg(`OTP sent to ${registerEmail}! (Demo verification code: 123456)`);
+  };
+
+  // REGISTER: Verify Email OTP & Complete Registration
+  const handleVerifyRegisterOtp = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!registerOtpInput.trim() || registerOtpInput.trim().length < 4) {
+      setErrorMsg("Please enter the 6-digit code (e.g. 123456)");
+      return;
+    }
+
+    const { district, state } = parseLocation(location);
+    const parsedAcres = parseFloat(farmSizeAcres) || 4.0;
+
+    // Apply preferred language
+    if (preferredLang.includes("Telugu")) {
+      setLang("te");
+    } else {
+      setLang("en");
+    }
+
     updateProfile({
-      name: regName.trim(),
-      email: isEmail ? regContact : undefined,
-      phone: !isEmail ? regContact : undefined,
-      state: regState,
-      district: regDistrict,
-      village: regVillage,
-      primaryCrop: regCrop,
-      areaAcre: Number(regAcres) || 4.0,
+      name: fullName.trim(),
+      email: registerEmail.trim().toLowerCase(),
+      phone: phoneNumber.trim() || undefined,
+      district,
+      state,
+      location: location.trim() || `${district}, ${state}`,
+      areaAcre: parsedAcres > 0 ? parsedAcres : 4.0,
+      preferredLanguage: preferredLang,
       isCustom: true,
       hasCompletedOnboarding: true,
     });
@@ -98,15 +154,21 @@ export function AuthModal({ isOpen, onClose, initialTab = "login" }: AuthModalPr
       localStorage.setItem("smartfarm_logged_in", "true");
     }
 
-    setSuccessMsg(`Welcome, ${regName}! Your farmer account is registered.`);
+    setSuccessMsg(`Welcome, ${fullName.trim()}! Your farmer account is registered.`);
     setTimeout(() => {
       onClose();
     }, 800);
   };
 
+  // DEMO LOGIN: 1-Click Profile Selection
   const handleSelectDemo = (farmer: DemoFarmer) => {
     loginWithDemo(farmer);
-    setSuccessMsg(`Logged in as ${farmer.name} (${farmer.state})`);
+    if (farmer.languageBadge.includes("Telugu")) {
+      setLang("te");
+    } else {
+      setLang("en");
+    }
+    setSuccessMsg(`Logged in as ${farmer.name} (${farmer.email})`);
     setTimeout(() => {
       onClose();
     }, 600);
@@ -115,7 +177,7 @@ export function AuthModal({ isOpen, onClose, initialTab = "login" }: AuthModalPr
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-xs animate-in fade-in duration-150">
       <div
-        className="relative w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl bg-white dark:bg-stone-900 shadow-2xl border border-stone-200 dark:border-stone-800 p-6 text-stone-900 dark:text-stone-100"
+        className="relative w-full max-w-md max-h-[92vh] overflow-y-auto rounded-2xl bg-white dark:bg-stone-900 shadow-2xl border border-stone-200 dark:border-stone-800 p-6 text-stone-900 dark:text-stone-100"
         role="dialog"
         aria-modal="true"
       >
@@ -155,13 +217,14 @@ export function AuthModal({ isOpen, onClose, initialTab = "login" }: AuthModalPr
         )}
 
         {/* Segmented Tab Switcher (Login / Register) */}
-        <div className="grid grid-cols-2 p-1 bg-stone-100 dark:bg-stone-800 rounded-xl mb-4">
+        <div className="grid grid-cols-2 p-1 bg-stone-100 dark:bg-stone-800 rounded-xl mb-5">
           <button
             type="button"
             onClick={() => {
               setTab("login");
               setErrorMsg("");
-              setOtpSent(false);
+              setLoginOtpSent(false);
+              setRegisterOtpSent(false);
             }}
             className={`py-2 text-sm font-semibold rounded-lg transition-all ${
               tab === "login"
@@ -176,7 +239,8 @@ export function AuthModal({ isOpen, onClose, initialTab = "login" }: AuthModalPr
             onClick={() => {
               setTab("register");
               setErrorMsg("");
-              setOtpSent(false);
+              setLoginOtpSent(false);
+              setRegisterOtpSent(false);
             }}
             className={`py-2 text-sm font-semibold rounded-lg transition-all ${
               tab === "register"
@@ -188,24 +252,25 @@ export function AuthModal({ isOpen, onClose, initialTab = "login" }: AuthModalPr
           </button>
         </div>
 
-        {/* LOGIN TAB CONTENT */}
+        {/* TAB 1: LOGIN (EMAIL ONLY AUTH) */}
         {tab === "login" && (
           <div>
-            {!otpSent ? (
-              <form onSubmit={handleSendOtp} className="space-y-3">
+            {!loginOtpSent ? (
+              <form onSubmit={handleSendLoginOtp} className="space-y-3.5">
                 <div>
                   <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
-                    Email or Phone Number
+                    Email Address *
                   </label>
                   <input
-                    type="text"
-                    value={contactInput}
-                    onChange={(e) => setContactInput(e.target.value)}
-                    placeholder="your.email@example.com or 9876543210"
+                    type="email"
+                    value={loginEmail}
+                    onChange={(e) => setLoginEmail(e.target.value)}
+                    placeholder="your.email@example.com"
+                    required
                     className="w-full rounded-xl border border-stone-200 bg-stone-50/50 px-3.5 py-2.5 text-sm text-stone-900 placeholder-stone-400 focus:border-emerald-600 focus:bg-white focus:outline-none dark:border-stone-700 dark:bg-stone-800 dark:text-white dark:focus:border-emerald-400"
                   />
                   <p className="mt-1 text-[11px] text-stone-500 dark:text-stone-400">
-                    Enter your email address or phone number to receive OTP
+                    Enter your email address to receive secure OTP verification
                   </p>
                 </div>
 
@@ -214,31 +279,32 @@ export function AuthModal({ isOpen, onClose, initialTab = "login" }: AuthModalPr
                   className="w-full rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold py-2.5 text-sm shadow-md transition flex items-center justify-center gap-2"
                 >
                   <Key className="w-4 h-4" />
-                  <span>Send OTP</span>
+                  <span>Send OTP to Email</span>
                 </button>
               </form>
             ) : (
-              <form onSubmit={handleVerifyOtp} className="space-y-3">
+              <form onSubmit={handleVerifyLoginOtp} className="space-y-3.5">
                 <div>
                   <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
-                    Enter 6-Digit Verification Code
+                    Enter 6-Digit Email Verification Code
                   </label>
                   <input
                     type="text"
                     maxLength={6}
-                    value={otpInput}
-                    onChange={(e) => setOtpInput(e.target.value)}
+                    value={loginOtpInput}
+                    onChange={(e) => setLoginOtpInput(e.target.value)}
                     placeholder="123456"
+                    autoFocus
                     className="w-full text-center tracking-widest text-lg font-bold rounded-xl border border-stone-200 bg-stone-50/50 px-3.5 py-2.5 text-stone-900 focus:border-emerald-600 focus:bg-white focus:outline-none dark:border-stone-700 dark:bg-stone-800 dark:text-white"
                   />
                   <div className="flex items-center justify-between mt-1 text-[11px] text-stone-500">
-                    <span>Sent to: {contactInput}</span>
+                    <span>Sent to: {loginEmail}</span>
                     <button
                       type="button"
-                      onClick={() => setOtpSent(false)}
+                      onClick={() => setLoginOtpSent(false)}
                       className="text-emerald-700 dark:text-emerald-400 underline font-medium"
                     >
-                      Change
+                      Change Email
                     </button>
                   </div>
                 </div>
@@ -248,114 +314,162 @@ export function AuthModal({ isOpen, onClose, initialTab = "login" }: AuthModalPr
                   className="w-full rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold py-2.5 text-sm shadow-md transition flex items-center justify-center gap-2"
                 >
                   <CheckCircle className="w-4 h-4" />
-                  <span>Verify OTP & Enter</span>
+                  <span>Verify Email OTP & Enter</span>
                 </button>
               </form>
             )}
           </div>
         )}
 
-        {/* REGISTER TAB CONTENT */}
+        {/* TAB 2: REGISTER (MATCHING USER SCREENSHOT EXACTLY) */}
         {tab === "register" && (
-          <form onSubmit={handleRegisterSubmit} className="space-y-3">
-            <div>
-              <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
-                Farmer Full Name / రైతు పేరు
-              </label>
-              <input
-                type="text"
-                value={regName}
-                onChange={(e) => setRegName(e.target.value)}
-                placeholder="e.g. Ramesh Reddy"
-                className="w-full rounded-xl border border-stone-200 bg-stone-50/50 px-3 py-2 text-sm text-stone-900 focus:border-emerald-600 focus:bg-white focus:outline-none dark:border-stone-700 dark:bg-stone-800 dark:text-white"
-              />
-            </div>
+          <div>
+            {!registerOtpSent ? (
+              <form onSubmit={handleSendRegisterOtp} className="space-y-3.5">
+                {/* Full Name * */}
+                <div>
+                  <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
+                    Full Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="Your name"
+                    required
+                    className="w-full rounded-xl border border-stone-200 bg-stone-50/50 px-3.5 py-2 text-sm text-stone-900 placeholder-stone-400 focus:border-emerald-600 focus:bg-white focus:outline-none dark:border-stone-700 dark:bg-stone-800 dark:text-white"
+                  />
+                </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
-                Phone Number or Email
-              </label>
-              <input
-                type="text"
-                value={regContact}
-                onChange={(e) => setRegContact(e.target.value)}
-                placeholder="9876543210 or your.email@example.com"
-                className="w-full rounded-xl border border-stone-200 bg-stone-50/50 px-3 py-2 text-sm text-stone-900 focus:border-emerald-600 focus:bg-white focus:outline-none dark:border-stone-700 dark:bg-stone-800 dark:text-white"
-              />
-            </div>
+                {/* Email * */}
+                <div>
+                  <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
+                    Email *
+                  </label>
+                  <input
+                    type="email"
+                    value={registerEmail}
+                    onChange={(e) => setRegisterEmail(e.target.value)}
+                    placeholder="your.email@example.com"
+                    required
+                    className="w-full rounded-xl border border-stone-200 bg-stone-50/50 px-3.5 py-2 text-sm text-stone-900 placeholder-stone-400 focus:border-emerald-600 focus:bg-white focus:outline-none dark:border-stone-700 dark:bg-stone-800 dark:text-white"
+                  />
+                </div>
 
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className="block text-[11px] font-semibold text-stone-700 dark:text-stone-300 mb-1">
-                  State / రాష్ట్రం
-                </label>
-                <select
-                  value={regState}
-                  onChange={(e) => setRegState(e.target.value)}
-                  className="w-full rounded-xl border border-stone-200 bg-stone-50/50 px-2.5 py-2 text-xs text-stone-900 dark:border-stone-700 dark:bg-stone-800 dark:text-white"
+                {/* Phone Number */}
+                <div>
+                  <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
+                    Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    placeholder="9876543210"
+                    className="w-full rounded-xl border border-stone-200 bg-stone-50/50 px-3.5 py-2 text-sm text-stone-900 placeholder-stone-400 focus:border-emerald-600 focus:bg-white focus:outline-none dark:border-stone-700 dark:bg-stone-800 dark:text-white"
+                  />
+                  <p className="mt-1 text-[11px] text-stone-500 dark:text-stone-400">
+                    OTP will be sent to your email ID for secure, instant verification
+                  </p>
+                </div>
+
+                {/* Location and Farm Size (acres) in 2-Column Grid */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
+                      Location
+                    </label>
+                    <input
+                      type="text"
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                      placeholder="City, State"
+                      className="w-full rounded-xl border border-stone-200 bg-stone-50/50 px-3 py-2 text-sm text-stone-900 placeholder-stone-400 focus:border-emerald-600 focus:bg-white focus:outline-none dark:border-stone-700 dark:bg-stone-800 dark:text-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
+                      Farm Size (acres)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.5"
+                      min="0"
+                      value={farmSizeAcres}
+                      onChange={(e) => setFarmSizeAcres(e.target.value)}
+                      placeholder="0"
+                      className="w-full rounded-xl border border-stone-200 bg-stone-50/50 px-3 py-2 text-sm text-stone-900 placeholder-stone-400 focus:border-emerald-600 focus:bg-white focus:outline-none dark:border-stone-700 dark:bg-stone-800 dark:text-white"
+                    />
+                  </div>
+                </div>
+
+                {/* Preferred Language Dropdown (Styled with Green Accent) */}
+                <div>
+                  <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
+                    Preferred Language
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={preferredLang}
+                      onChange={(e) => setPreferredLang(e.target.value as any)}
+                      className="w-full appearance-none rounded-xl border-2 border-emerald-600/90 bg-stone-50/50 px-3.5 py-2.5 text-sm text-stone-900 font-medium focus:outline-none dark:border-emerald-500 dark:bg-stone-800 dark:text-white"
+                    >
+                      <option value="English">English</option>
+                      <option value="Telugu (తెలుగు)">Telugu (తెలుగు)</option>
+                      <option value="Hindi (हिंदी)">Hindi (हिंदी)</option>
+                      <option value="Malayalam (മലയാളം)">Malayalam (മലയാളം)</option>
+                    </select>
+                    <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-700 dark:text-emerald-400 pointer-events-none" />
+                  </div>
+                </div>
+
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  className="w-full rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold py-2.5 text-sm shadow-md transition flex items-center justify-center gap-2 mt-2"
                 >
-                  <option value="Telangana">Telangana (తెలంగాణ)</option>
-                  <option value="Maharashtra">Maharashtra</option>
-                  <option value="Kerala">Kerala</option>
-                  <option value="Andhra Pradesh">Andhra Pradesh</option>
-                </select>
-              </div>
+                  <Sprout className="w-4 h-4" />
+                  <span>Send OTP to Email</span>
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={handleVerifyRegisterOtp} className="space-y-3.5">
+                <div>
+                  <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
+                    Enter 6-Digit Email Verification Code
+                  </label>
+                  <input
+                    type="text"
+                    maxLength={6}
+                    value={registerOtpInput}
+                    onChange={(e) => setRegisterOtpInput(e.target.value)}
+                    placeholder="123456"
+                    autoFocus
+                    className="w-full text-center tracking-widest text-lg font-bold rounded-xl border border-stone-200 bg-stone-50/50 px-3.5 py-2.5 text-stone-900 focus:border-emerald-600 focus:bg-white focus:outline-none dark:border-stone-700 dark:bg-stone-800 dark:text-white"
+                  />
+                  <div className="flex items-center justify-between mt-1 text-[11px] text-stone-500">
+                    <span>Sent to: {registerEmail}</span>
+                    <button
+                      type="button"
+                      onClick={() => setRegisterOtpSent(false)}
+                      className="text-emerald-700 dark:text-emerald-400 underline font-medium"
+                    >
+                      Change Details
+                    </button>
+                  </div>
+                </div>
 
-              <div>
-                <label className="block text-[11px] font-semibold text-stone-700 dark:text-stone-300 mb-1">
-                  District / జిల్లా
-                </label>
-                <input
-                  type="text"
-                  value={regDistrict}
-                  onChange={(e) => setRegDistrict(e.target.value)}
-                  placeholder="e.g. Jagtial"
-                  className="w-full rounded-xl border border-stone-200 bg-stone-50/50 px-2.5 py-2 text-xs text-stone-900 dark:border-stone-700 dark:bg-stone-800 dark:text-white"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className="block text-[11px] font-semibold text-stone-700 dark:text-stone-300 mb-1">
-                  Primary Crop / ప్రధాన పంట
-                </label>
-                <select
-                  value={regCrop}
-                  onChange={(e) => setRegCrop(e.target.value)}
-                  className="w-full rounded-xl border border-stone-200 bg-stone-50/50 px-2.5 py-2 text-xs text-stone-900 dark:border-stone-700 dark:bg-stone-800 dark:text-white"
+                <button
+                  type="submit"
+                  className="w-full rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold py-2.5 text-sm shadow-md transition flex items-center justify-center gap-2"
                 >
-                  <option value="Paddy (RNR 15048 / Telangana Sona)">Paddy (వరి / RNR 15048)</option>
-                  <option value="Cotton (ప్రత్తి)">Cotton (ప్రత్తి)</option>
-                  <option value="Chilli (మిర్చి)">Chilli (మిర్చి)</option>
-                  <option value="Maize (మొక్కజొన్న)">Maize (మొక్కజొన్న)</option>
-                  <option value="Redgram (కందులు)">Redgram (కందులు)</option>
-                  <option value="Turmeric (పసుపు)">Turmeric (పసుపు)</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-semibold text-stone-700 dark:text-stone-300 mb-1">
-                  Land Size (Acres)
-                </label>
-                <input
-                  type="number"
-                  step="0.5"
-                  value={regAcres}
-                  onChange={(e) => setRegAcres(Number(e.target.value))}
-                  className="w-full rounded-xl border border-stone-200 bg-stone-50/50 px-2.5 py-2 text-xs text-stone-900 dark:border-stone-700 dark:bg-stone-800 dark:text-white"
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              className="w-full rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold py-2.5 text-sm shadow-md transition flex items-center justify-center gap-2 mt-2"
-            >
-              <Sprout className="w-4 h-4" />
-              <span>Create Farmer Account</span>
-            </button>
-          </form>
+                  <CheckCircle className="w-4 h-4" />
+                  <span>Verify Email & Complete Registration</span>
+                </button>
+              </form>
+            )}
+          </div>
         )}
 
         {/* SECTION DIVIDER: Quick Demo Login */}
@@ -370,8 +484,8 @@ export function AuthModal({ isOpen, onClose, initialTab = "login" }: AuthModalPr
           </div>
         </div>
 
-        {/* DEMO LOGIN CARDS (MATCHING REFERENCE EXACTLY) */}
-        <div className="space-y-2.5 max-h-60 overflow-y-auto pr-1">
+        {/* DEMO LOGIN CARDS (EXACT MATCH TO REFERENCE) */}
+        <div className="space-y-2.5 max-h-56 overflow-y-auto pr-1">
           {QUICK_DEMO_FARMERS.map((farmer) => (
             <button
               key={farmer.id}

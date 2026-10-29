@@ -109,3 +109,4 @@ export const QUICK_DEMO_FARMERS: DemoFarmer[] = [
     sowingDate: "2026-06-20",
   },
 ];
+

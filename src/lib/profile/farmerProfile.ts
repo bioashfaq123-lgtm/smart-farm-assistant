@@ -24,6 +24,8 @@ export interface FarmerProfile {
   phone?: string;
   email?: string;
   state?: string;
+  location?: string;
+  preferredLanguage?: string;
   isCustom: boolean;
   hasCompletedOnboarding: boolean;
 }
