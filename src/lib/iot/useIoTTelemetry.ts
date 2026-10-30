@@ -111,7 +111,7 @@ function parseRawTelemetry(data: any): IoTTelemetryState {
   };
 }
 
-export function useIoTTelemetry(pollIntervalMs: number = 4000) {
+export function useIoTTelemetry(pollIntervalMs: number = 2500) {
   const [data, setData] = useState<IoTTelemetryState>(DEFAULT_STATE);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -226,8 +226,10 @@ export function useIoTTelemetry(pollIntervalMs: number = 4000) {
 
       let updates: Record<string, any> = {};
       if (action === "toggle_pump") {
-        updates["pump"] = Boolean(value) ? "true" : "false";
-        if (Boolean(value)) updates["mode"] = "manual";
+        const stateStr = Boolean(value) ? "true" : "false";
+        updates["pump"] = stateStr;
+        updates["pump_state"] = stateStr;
+        updates["mode"] = "manual";
       } else if (action === "set_mode") {
         updates["mode"] = value === "manual" ? "manual" : "auto";
       } else if (action === "set_threshold") {
@@ -247,13 +249,13 @@ export function useIoTTelemetry(pollIntervalMs: number = 4000) {
         return { success: false, error: "Firebase update failed" };
       }
 
-      // Optimistic state update
+      // Optimistic state update (0ms instant response)
       setData((prev) => {
         const copy = { ...prev };
         if (action === "toggle_pump") {
           copy.pump = Boolean(value);
           copy.pumpState = Boolean(value);
-          if (value) copy.mode = "manual";
+          copy.mode = "manual";
         } else if (action === "set_mode") {
           copy.mode = value;
         } else if (action === "set_threshold") {
@@ -264,8 +266,10 @@ export function useIoTTelemetry(pollIntervalMs: number = 4000) {
         return copy;
       });
 
-      // Re-fetch after 1.2s to confirm ESP32 acknowledged command
-      setTimeout(() => fetchTelemetry(), 1200);
+      // Fast staggered re-fetches to sync with ESP32 confirmation in real-time
+      setTimeout(() => fetchTelemetry(), 500);
+      setTimeout(() => fetchTelemetry(), 1500);
+      setTimeout(() => fetchTelemetry(), 3000);
 
       return { success: true };
     } catch (err: any) {
