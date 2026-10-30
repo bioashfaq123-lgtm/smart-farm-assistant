@@ -434,6 +434,76 @@ export default function AdvisoryPage() {
       const compressedBase64 = await compressImageFile(file);
       setAttachedImage(compressedBase64);
     } catch (err) {
+      setErrorMessage("Could not process image. Please try another photo.");
+    } finally {
+      setIsCompressing(false);
+      e.target.value = "";
+    }
+  };
+
+  const handleSend = async (textToSend?: string) => {
+    const text = textToSend || inputText;
+    const imgToSend = attachedImage;
+
+    if (!text.trim() && !imgToSend) return;
+
+    setErrorMessage("");
+    const userMsg: ChatMessage = {
+      id: `user-${Date.now()}`,
+      sender: "user",
+      textEn: text || (imgToSend ? "Analyze this uploaded plant/leaf image" : ""),
+      textTe: text || (imgToSend ? "ఈ అప్‌లోడ్ చేసిన మొక్క/ఆకు చిత్రాన్ని విశ్లేషించండి" : ""),
+      imageUrl: imgToSend || undefined,
+      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    };
+
+    setMessages((prev) => [...prev, userMsg]);
+    setInputText("");
+    setAttachedImage(null);
+    setIsSending(true);
+
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: text || (imgToSend ? "Analyze this crop leaf image for pests, disease or deficiency under PJTAU practices." : ""),
+          image: imgToSend || undefined,
+          mode: imgToSend ? "diagnosis" : "chat",
+          lang,
+          farmerProfile: {
+            district: profile.district,
+            primaryCrop: profile.primaryCrop,
+            areaAcre: profile.areaAcre,
+          },
+        }),
+      });
+
+      const data = await res.json();
+      const rawText = data?.reply || data?.text || "";
+      const reply = (rawText && rawText.trim() !== "")
+        ? rawText
+        : getFallbackAgronomicReply(text, profile.primaryCrop, profile.district, lang);
+
+      if (data?.source) {
+        setChatSource(data.source);
+      }
+
+      const searchQuery = data?.searchQuery || text || `${profile.primaryCrop} agriculture PJTAU`;
+
+      const botMsg: ChatMessage = {
+        id: `bot-${Date.now()}`,
+        sender: "assistant",
+        textEn: reply,
+        textTe: reply,
+        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        searchQuery,
+        isFallback: !data?.isLiveAi,
+        source: data?.source || "Google & Verified Web Knowledge (Instant in-tab answer)",
+      };
+
+      setMessages((prev) => [...prev, botMsg]);
+    } catch (err) {
       const fallbackText = getFallbackAgronomicReply(text, profile.primaryCrop, profile.district, lang);
       const botMsg: ChatMessage = {
         id: `bot-${Date.now()}`,
@@ -443,7 +513,7 @@ export default function AdvisoryPage() {
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         searchQuery: text || `${profile.primaryCrop} agriculture PJTAU`,
         isFallback: true,
-        source: "Google and Verified Web Knowledge (Instant in-tab answer)",
+        source: "Google & Verified Web Knowledge (Instant in-tab answer)",
       };
       setMessages((prev) => [...prev, botMsg]);
     } finally {
