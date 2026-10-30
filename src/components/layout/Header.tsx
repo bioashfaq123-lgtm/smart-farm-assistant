@@ -109,7 +109,7 @@ export function Header() {
 
         {/* Explore Showcase Link */}
         <Link
-          href="/landing"
+          href="/"
           className="hidden xl:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-200/90 dark:border-stone-800 text-xs font-semibold text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-900 transition"
           title="View Platform Showcase & Features"
         >

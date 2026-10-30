@@ -393,7 +393,7 @@ export default function AdminPortalPage() {
         {/* Back to website link */}
         <div className="mt-4 text-center z-10">
           <Link
-            href="/"
+            href="/dashboard"
             className="text-xs text-indigo-200 hover:text-white underline underline-offset-4 flex items-center gap-1 justify-center transition"
           >
             ← Return to Public Farm Portal
@@ -493,7 +493,7 @@ export default function AdminPortalPage() {
             </button>
 
             <Link
-              href="/"
+              href="/dashboard"
               target="_blank"
               className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-xl border border-stone-200 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-800 transition"
               title="Open Public Site"

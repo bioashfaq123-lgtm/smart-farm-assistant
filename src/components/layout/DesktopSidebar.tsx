@@ -39,7 +39,7 @@ export function DesktopSidebar() {
 
   const navItems = [
     {
-      href: "/",
+      href: "/dashboard",
       label: t("nav_dashboard"),
       icon: LayoutDashboard,
     },
@@ -66,7 +66,7 @@ export function DesktopSidebar() {
       badge: "NEW",
     },
     {
-      href: "/landing",
+      href: "/",
       label: lang === "te" ? "ఫీచర్స్ ల్యాండింగ్" : "Feature Showcase",
       icon: Compass,
     },
@@ -113,7 +113,7 @@ export function DesktopSidebar() {
       <nav className="flex-1 space-y-1.5 p-4 overflow-y-auto">
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = pathname === item.href;
+          const isActive = pathname === item.href || (item.href === "/" && (pathname === "/" || pathname === "/landing")) || (item.href === "/dashboard" && pathname === "/dashboard");
 
           return (
             <Link

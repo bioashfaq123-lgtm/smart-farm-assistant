@@ -752,7 +752,7 @@ export default function ConferenceDemoPage() {
             <span>Download offline copy</span>
           </a>
           <Link
-            href="/"
+            href="/dashboard"
             className="px-3 py-1 bg-amber-700 hover:bg-amber-800 text-white rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-xs"
             title="Return to live connected website"
           >

@@ -20,7 +20,7 @@ export function BottomNav() {
 
   const navItems = [
     {
-      href: "/",
+      href: "/dashboard",
       label: t("nav_dashboard"),
       icon: LayoutDashboard,
     },
