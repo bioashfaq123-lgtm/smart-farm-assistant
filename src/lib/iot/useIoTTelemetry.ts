@@ -200,15 +200,7 @@ export function useIoTTelemetry(pollIntervalMs: number = 2500) {
     pin?: string
   ): Promise<{ success: boolean; error?: string }> => {
     try {
-      // Cooldown safety check (matching firmware safety)
-      if (action === "toggle_pump" && value === true && safetyCooldown > 0) {
-        return {
-          success: false,
-          error: `Pump safety cooldown active. Please wait ${Math.ceil(
-            safetyCooldown / 60
-          )} minutes before restarting.`,
-        };
-      }
+
 
       // Owner verification for actuator control
       const hasAuth =

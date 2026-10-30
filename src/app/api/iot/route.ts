@@ -5,10 +5,6 @@ export const dynamic = "force-dynamic";
 const DEFAULT_DB_URL = "https://smart-farm-assistant-32782-default-rtdb.firebaseio.com";
 const DEFAULT_DB_PATH = "field";
 
-// Maximum continuous pump duration (5 minutes, matching firmware MAX_PUMP_MS)
-const MAX_PUMP_DURATION_MS = 5 * 60 * 1000;
-// Safety cooldown duration (10 minutes, matching firmware PUMP_COOLDOWN_MS)
-const PUMP_COOLDOWN_MS = 10 * 60 * 1000;
 
 function getDbUrl(): string {
   const url = process.env.FIREBASE_DATABASE_URL || process.env.DB_URL || DEFAULT_DB_URL;

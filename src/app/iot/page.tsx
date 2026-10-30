@@ -91,10 +91,7 @@ export default function IoTPage() {
       return;
     }
 
-    if (safetyCooldown > 0) {
-      setActionNotice(`Safety cooldown active: wait ${safetyCooldown}s before starting pump.`);
-      return;
-    }
+
 
     setIsSubmitting(true);
     const targetState = !telemetry.pumpState;
@@ -104,7 +101,7 @@ export default function IoTPage() {
     if (res.success) {
       setActionNotice(
         targetState
-          ? "Pump START command dispatched to ESP32 relay (Max 5-min safety cutoff active)."
+          ? "Pump START command dispatched to ESP32 relay."
           : "Pump STOP command sent to ESP32 relay."
       );
     } else {
@@ -624,8 +621,7 @@ export default function IoTPage() {
                 </div>
                 <p className="text-xs text-stone-500 dark:text-stone-400">
                   Mode: <b className="uppercase text-stone-800 dark:text-stone-200">{telemetry.mode}</b> &bull;{" "}
-                  Threshold: {telemetry.threshold}% &bull;{" "}
-                  Safety: 5-min max limit
+                  Threshold: {telemetry.threshold}%
                 </p>
               </div>
 
@@ -643,15 +639,14 @@ export default function IoTPage() {
               </button>
             </div>
 
-            {/* Firmware Safety Guarantee Card */}
-            <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-3 text-xs text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-200">
+            {/* Direct Relay Control Info Card */}
+            <div className="rounded-xl border border-agri-200 bg-agri-50/70 p-3 text-xs text-agri-950 dark:border-agri-900/50 dark:bg-agri-950/30 dark:text-agri-200">
               <div className="flex items-center gap-2 font-semibold">
-                <ShieldAlert className="h-4 w-4 text-amber-700" />
-                <span>Firmware Safety Protection (5-Min Max Cutoff)</span>
+                <Power className="h-4 w-4 text-agri-700 dark:text-agri-400" />
+                <span>Continuous Irrigation Control Active</span>
               </div>
               <p className="mt-1 text-[11px] leading-relaxed">
-                The ESP32 firmware enforces a strict 5-minute hardware auto-off timeout and 10-minute cooldown
-                latch to protect against dry-run motor burnout or pipe burst.
+                Direct pump switching enabled. In Manual mode, the pump runs continuously until you turn it off. In Auto mode, irrigation triggers dynamically based on soil moisture and threshold.
               </p>
             </div>
 

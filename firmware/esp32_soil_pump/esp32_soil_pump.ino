@@ -3,11 +3,12 @@
   Platform: ESP32 Dev Module (Arduino IDE)
   
   Optimized Architecture:
-  1. Fast 1-Second Cloud Command Polling: Manual pump ON/OFF executes in <= 1s.
-  2. Single-Call Atomic REST Sync: Replaced 10 blocking HTTP calls with 1 fast GET / PATCH.
-  3. Trimmed-Mean ADC Filtering: Eliminates Wi-Fi RF noise spikes on ADC1 GPIO 34.
-  4. Modem Sleep Disabled (WiFi.setSleep(false)): Lowers network roundtrip to <15ms.
-  5. Fail-Safe Auto Irrigation & 5-Min Hardware Safety Timeout: Runs locally even if Wi-Fi drops.
+  1. Unrestricted Continuous Control: 5-minute safety cutoff and cooldown removed per farmer request.
+  2. Fast 1-Second Cloud Command Polling: Manual pump ON/OFF executes in <= 1s.
+  3. Single-Call Atomic REST Sync: Replaced blocking HTTP calls with fast GET / PATCH.
+  4. Trimmed-Mean ADC Filtering: Eliminates Wi-Fi RF noise spikes on ADC1 GPIO 34.
+  5. Modem Sleep Disabled (WiFi.setSleep(false)): Lowers network roundtrip to <15ms.
+  6. Fail-Safe Auto Irrigation: Runs locally based on soil moisture even if Wi-Fi drops.
 
   Wiring Connections:
     - Capacitive Soil Sensor VCC -> ESP32 GPIO 27 (Powers sensor with stable 3.3V)
@@ -41,21 +42,17 @@ const int RAW_DRY = 3900;         // Reading in dry air  (~3900 = 0% moisture)
 const int RAW_WET = 1100;         // Reading in water    (~1100 = 100% moisture)
 
 // Loop Timers (Decoupled for sub-second responsiveness)
-const unsigned long POLL_COMMANDS_MS   = 1000UL;              // Check manual pump commands every 1.0s
-const unsigned long PUSH_TELEMETRY_MS  = 6000UL;              // Push telemetry every 6s
-const unsigned long PUSH_HISTORY_MS    = 60000UL;             // Record history entry every 60s
-const unsigned long FAST_CONTROL_MS    = 200UL;               // Fast local auto-irrigation check (0.2s)
-const unsigned long MAX_PUMP_MS        = 5UL * 60UL * 1000UL; // Safety: 5-minute continuous run cutoff
-const unsigned long PUMP_COOLDOWN_MS   = 10UL * 60UL * 1000UL;// Safety: 10-minute cooldown latch
+const unsigned long POLL_COMMANDS_MS   = 1000UL;  // Check manual pump commands every 1.0s
+const unsigned long PUSH_TELEMETRY_MS  = 6000UL;  // Push telemetry every 6s
+const unsigned long PUSH_HISTORY_MS    = 60000UL; // Record history entry every 60s
+const unsigned long FAST_CONTROL_MS    = 200UL;   // Fast local auto-irrigation check (0.2s)
 // =======================================================
 
 // State Tracking
 int lastRawADC = 0;
 float smoothedMoisture = -1.0;
 bool pumpOn = false;
-bool safetyTripped = false;
 unsigned long pumpStarted = 0;
-unsigned long safetyTripTime = 0;
 
 unsigned long lastCommandPoll = 0;
 unsigned long lastTelemetryPush = 0;
@@ -74,25 +71,16 @@ void setRelayHardware(bool active) {
   digitalWrite(RELAY_PIN, (active ^ RELAY_ACTIVE_LOW) ? HIGH : LOW);
 }
 
-// Logical Pump Actuator with Safety Guards
+// Logical Pump Actuator (Unrestricted continuous run)
 void setPump(bool on) {
   if (on == pumpOn) return;
 
+  pumpOn = on;
+  setRelayHardware(on);
   if (on) {
-    if (safetyTripped) {
-      if (millis() - safetyTripTime < PUMP_COOLDOWN_MS) {
-        Serial.println("[SAFETY] Blocked: 10-minute cooldown active. Wait for timeout.");
-        return;
-      }
-      safetyTripped = false;
-    }
     pumpStarted = millis();
-    pumpOn = true;
-    setRelayHardware(true);
     Serial.println("[PUMP] >>> ACTIVATED (Relay Closed) <<<");
   } else {
-    pumpOn = false;
-    setRelayHardware(false);
     Serial.println("[PUMP] --- STOPPED (Relay Opened) ---");
   }
 }
@@ -243,18 +231,12 @@ void fetchCloudControls() {
         currentRainSkip = (rainVal == "true" || rainVal == "1");
       }
 
-      // Manual Mode Actuator Synchronization (Instant execution in <= 1s)
+      // Manual Mode Actuator Synchronization (Instant execution in <= 1s, continuous run)
       if (currentMode == "manual") {
         String pumpVal = getJsonField(payload, "pump");
         bool wantPump = (pumpVal == "true" || pumpVal == "1");
 
-        // Clear cooldown latch if user explicitly commands pump OFF
-        if (!wantPump && safetyTripped) {
-          safetyTripped = false;
-          Serial.println("[SAFETY] Cooldown latch reset by manual OFF command.");
-        }
-
-        if (wantPump != pumpOn && (!wantPump || !safetyTripped)) {
+        if (wantPump != pumpOn) {
           setPump(wantPump);
           // Confirm state back to Firebase immediately so web dashboard updates with zero delay
           dbPatch("{\"pump_state\":" + String(wantPump ? "\"true\"" : "\"false\"") + "}");
@@ -267,7 +249,7 @@ void fetchCloudControls() {
   client.stop();
 }
 
-// Push Live Telemetry to Firebase (1 atomic PATCH instead of 4 separate calls)
+// Push Live Telemetry to Firebase (1 atomic PATCH instead of separate calls)
 void pushTelemetry(int moisture) {
   if (WiFi.status() != WL_CONNECTED) return;
 
@@ -290,22 +272,14 @@ void pushTelemetry(int moisture) {
     dbPut("history/" + String(ts), histPayload);
   }
 
-  Serial.printf("[TELEMETRY] Moisture: %d%% (ADC: %d) | Pump: %s | Mode: %s | RainSkip: %d | Cooldown: %d\n",
+  Serial.printf("[TELEMETRY] Moisture: %d%% (ADC: %d) | Pump: %s | Mode: %s | RainSkip: %d\n",
                 moisture, lastRawADC, pumpOn ? "ON" : "OFF", currentMode.c_str(), 
-                currentRainSkip ? 1 : 0, safetyTripped ? 1 : 0);
+                currentRainSkip ? 1 : 0);
 }
 
 // Non-blocking Wi-Fi Health Manager
 void handleWiFi() {
   if (WiFi.status() == WL_CONNECTED) return;
-
-  // If pump is running in manual mode and Wi-Fi disconnects beyond safety window, shut off
-  if (pumpOn && (millis() - pumpStarted >= MAX_PUMP_MS)) {
-    Serial.println("[SAFETY] WiFi unavailable & max run limit reached! Shutting pump off.");
-    setPump(false);
-    safetyTripped = true;
-    safetyTripTime = millis();
-  }
 
   // Non-blocking auto-reconnect trigger every 10 seconds
   if (millis() - lastWifiRetry > 10000UL) {
@@ -366,22 +340,13 @@ void setup() {
 void loop() {
   handleWiFi();
 
-  // 1. HARD 5-MINUTE MOTOR SAFETY TIMEOUT
-  if (pumpOn && (millis() - pumpStarted >= MAX_PUMP_MS)) {
-    Serial.println("[SAFETY] Max 5-min limit reached! Engaging 10-min cooldown.");
-    setPump(false);
-    safetyTripped = true;
-    safetyTripTime = millis();
-    dbPatch("{\"pump\":\"false\",\"pump_state\":\"false\"}");
-  }
-
-  // 2. FAST LOCAL CONTROL LOOP (Every 200ms)
+  // 1. FAST LOCAL CONTROL LOOP (Every 200ms)
   int m = readMoisture();
   if (millis() - lastFastControl >= FAST_CONTROL_MS) {
     lastFastControl = millis();
 
     // In Auto mode: Reacts to soil moisture changes in 0.2s without waiting for cloud
-    if (currentMode == "auto" && !safetyTripped) {
+    if (currentMode == "auto") {
       if (m >= 0 && m < currentThreshold && !currentRainSkip) {
         if (!pumpOn) {
           setPump(true);
@@ -396,13 +361,13 @@ void loop() {
     }
   }
 
-  // 3. FAST CLOUD COMMAND CHECK (Every 1.0s for instantaneous manual response)
+  // 2. FAST CLOUD COMMAND CHECK (Every 1.0s for instantaneous manual response)
   if (WiFi.status() == WL_CONNECTED && (millis() - lastCommandPoll >= POLL_COMMANDS_MS)) {
     lastCommandPoll = millis();
     fetchCloudControls();
   }
 
-  // 4. CLOUD TELEMETRY PUSH (Every 6.0s in 1 atomic PATCH)
+  // 3. CLOUD TELEMETRY PUSH (Every 6.0s in 1 atomic PATCH)
   if (WiFi.status() == WL_CONNECTED && (millis() - lastTelemetryPush >= PUSH_TELEMETRY_MS)) {
     lastTelemetryPush = millis();
     pushTelemetry(m);
