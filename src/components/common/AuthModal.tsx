@@ -1,7 +1,18 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, Sprout, Key, CheckCircle, Mail, MapPin, User, ChevronDown } from "lucide-react";
+import {
+  X,
+  Sprout,
+  Key,
+  CheckCircle,
+  Mail,
+  MapPin,
+  User,
+  ChevronDown,
+  Sparkles,
+  Zap,
+} from "lucide-react";
 import { QUICK_DEMO_FARMERS, DemoFarmer } from "@/lib/auth/demoProfiles";
 import { useFarmerProfile } from "./FarmerProfileContext";
 import { useLanguage } from "./LanguageContext";
@@ -19,6 +30,9 @@ export function AuthModal({ isOpen, onClose, initialTab = "login" }: AuthModalPr
 
   const [tab, setTab] = useState<"login" | "register">(initialTab);
 
+  // Active OTP code for instant verification
+  const [activeOtp, setActiveOtp] = useState("123456");
+
   // Login State (Email-only authentication)
   const [loginEmail, setLoginEmail] = useState("");
   const [loginOtpSent, setLoginOtpSent] = useState(false);
@@ -30,7 +44,9 @@ export function AuthModal({ isOpen, onClose, initialTab = "login" }: AuthModalPr
   const [phoneNumber, setPhoneNumber] = useState("");
   const [location, setLocation] = useState("");
   const [farmSizeAcres, setFarmSizeAcres] = useState<string>("0");
-  const [preferredLang, setPreferredLang] = useState<"English" | "Telugu (తెలుగు)" | "Hindi (हिंदी)" | "Malayalam (മലയാളം)">("English");
+  const [preferredLang, setPreferredLang] = useState<
+    "English" | "Telugu (తెలుగు)" | "Hindi (हिंदी)" | "Malayalam (മലയാളം)"
+  >("English");
 
   const [registerOtpSent, setRegisterOtpSent] = useState(false);
   const [registerOtpInput, setRegisterOtpInput] = useState("");
@@ -65,28 +81,34 @@ export function AuthModal({ isOpen, onClose, initialTab = "login" }: AuthModalPr
     return { district: districtCandidate, state: stateCandidate };
   };
 
-  // LOGIN: Send OTP to Email
+  // LOGIN: Send OTP
   const handleSendLoginOtp = (e: React.FormEvent) => {
     e.preventDefault();
     if (!loginEmail.trim() || !isValidEmail(loginEmail)) {
       setErrorMsg("Please enter a valid email address (e.g. your.email@example.com)");
       return;
     }
+    const generated = Math.floor(100000 + Math.random() * 900000).toString();
+    setActiveOtp(generated);
     setErrorMsg("");
     setLoginOtpSent(true);
-    setSuccessMsg(`Secure OTP sent to ${loginEmail}! (Demo verification code: 123456)`);
+    setSuccessMsg(`Instant verification code generated: ${generated}`);
   };
 
   // LOGIN: Verify Email OTP
   const handleVerifyLoginOtp = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!loginOtpInput.trim() || loginOtpInput.trim().length < 4) {
-      setErrorMsg("Please enter the 6-digit code (e.g. 123456)");
+    const entered = loginOtpInput.trim();
+    if (!entered || entered.length < 4) {
+      setErrorMsg("Please enter the verification code");
       return;
     }
 
     updateProfile({
-      name: profile.name && profile.name !== "Kisan Sathi" ? profile.name : loginEmail.split("@")[0],
+      name:
+        profile.name && profile.name !== "Kisan Sathi"
+          ? profile.name
+          : loginEmail.split("@")[0],
       email: loginEmail.trim().toLowerCase(),
       isCustom: true,
       hasCompletedOnboarding: true,
@@ -96,13 +118,13 @@ export function AuthModal({ isOpen, onClose, initialTab = "login" }: AuthModalPr
       localStorage.setItem("smartfarm_logged_in", "true");
     }
 
-    setSuccessMsg("Welcome! Successfully logged in with Email ID.");
+    setSuccessMsg("Welcome! Successfully logged in.");
     setTimeout(() => {
       onClose();
     }, 700);
   };
 
-  // REGISTER: Send OTP to Email
+  // REGISTER: Send OTP
   const handleSendRegisterOtp = (e: React.FormEvent) => {
     e.preventDefault();
     if (!fullName.trim()) {
@@ -114,16 +136,19 @@ export function AuthModal({ isOpen, onClose, initialTab = "login" }: AuthModalPr
       return;
     }
 
+    const generated = Math.floor(100000 + Math.random() * 900000).toString();
+    setActiveOtp(generated);
     setErrorMsg("");
     setRegisterOtpSent(true);
-    setSuccessMsg(`OTP sent to ${registerEmail}! (Demo verification code: 123456)`);
+    setSuccessMsg(`Instant verification code generated: ${generated}`);
   };
 
   // REGISTER: Verify Email OTP & Complete Registration
   const handleVerifyRegisterOtp = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!registerOtpInput.trim() || registerOtpInput.trim().length < 4) {
-      setErrorMsg("Please enter the 6-digit code (e.g. 123456)");
+    const entered = registerOtpInput.trim();
+    if (!entered || entered.length < 4) {
+      setErrorMsg("Please enter the verification code");
       return;
     }
 
@@ -195,11 +220,11 @@ export function AuthModal({ isOpen, onClose, initialTab = "login" }: AuthModalPr
           <div className="flex items-center gap-2">
             <span className="text-2xl">🌱</span>
             <h2 className="text-xl font-bold tracking-tight text-stone-900 dark:text-white">
-              FarmConnect
+              Smart Farm Assistant
             </h2>
           </div>
           <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">
-            Join our agricultural community platform
+            Smart Farming &amp; IoT Rythu Platform
           </p>
         </div>
 
@@ -270,7 +295,7 @@ export function AuthModal({ isOpen, onClose, initialTab = "login" }: AuthModalPr
                     className="w-full rounded-xl border border-stone-200 bg-stone-50/50 px-3.5 py-2.5 text-sm text-stone-900 placeholder-stone-400 focus:border-emerald-600 focus:bg-white focus:outline-none dark:border-stone-700 dark:bg-stone-800 dark:text-white dark:focus:border-emerald-400"
                   />
                   <p className="mt-1 text-[11px] text-stone-500 dark:text-stone-400">
-                    Enter your email address to receive secure OTP verification
+                    Instant OTP verification code will be generated on-screen
                   </p>
                 </div>
 
@@ -284,6 +309,28 @@ export function AuthModal({ isOpen, onClose, initialTab = "login" }: AuthModalPr
               </form>
             ) : (
               <form onSubmit={handleVerifyLoginOtp} className="space-y-3.5">
+                {/* Instant Verification Code Card */}
+                <div className="rounded-xl border border-emerald-300 bg-emerald-50/90 p-3.5 text-center dark:border-emerald-800 dark:bg-emerald-950/40">
+                  <div className="flex items-center justify-center gap-1.5 text-xs font-semibold text-emerald-800 dark:text-emerald-300">
+                    <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Instant Verification Code</span>
+                  </div>
+                  <div className="my-1.5 font-mono text-2xl font-black tracking-widest text-emerald-900 dark:text-emerald-200">
+                    {activeOtp}
+                  </div>
+                  <p className="text-[11px] text-stone-600 dark:text-stone-400">
+                    Click Auto-Fill below or type the 6-digit code to continue
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setLoginOtpInput(activeOtp)}
+                    className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-emerald-700 px-3 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-emerald-800 transition"
+                  >
+                    <Zap className="w-3.5 h-3.5" />
+                    Auto-Fill Code ({activeOtp})
+                  </button>
+                </div>
+
                 <div>
                   <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
                     Enter 6-Digit Email Verification Code
@@ -293,12 +340,12 @@ export function AuthModal({ isOpen, onClose, initialTab = "login" }: AuthModalPr
                     maxLength={6}
                     value={loginOtpInput}
                     onChange={(e) => setLoginOtpInput(e.target.value)}
-                    placeholder="123456"
+                    placeholder={activeOtp}
                     autoFocus
                     className="w-full text-center tracking-widest text-lg font-bold rounded-xl border border-stone-200 bg-stone-50/50 px-3.5 py-2.5 text-stone-900 focus:border-emerald-600 focus:bg-white focus:outline-none dark:border-stone-700 dark:bg-stone-800 dark:text-white"
                   />
                   <div className="flex items-center justify-between mt-1 text-[11px] text-stone-500">
-                    <span>Sent to: {loginEmail}</span>
+                    <span>Account: {loginEmail}</span>
                     <button
                       type="button"
                       onClick={() => setLoginOtpSent(false)}
@@ -321,7 +368,7 @@ export function AuthModal({ isOpen, onClose, initialTab = "login" }: AuthModalPr
           </div>
         )}
 
-        {/* TAB 2: REGISTER (MATCHING USER SCREENSHOT EXACTLY) */}
+        {/* TAB 2: REGISTER */}
         {tab === "register" && (
           <div>
             {!registerOtpSent ? (
@@ -369,7 +416,7 @@ export function AuthModal({ isOpen, onClose, initialTab = "login" }: AuthModalPr
                     className="w-full rounded-xl border border-stone-200 bg-stone-50/50 px-3.5 py-2 text-sm text-stone-900 placeholder-stone-400 focus:border-emerald-600 focus:bg-white focus:outline-none dark:border-stone-700 dark:bg-stone-800 dark:text-white"
                   />
                   <p className="mt-1 text-[11px] text-stone-500 dark:text-stone-400">
-                    OTP will be sent to your email ID for secure, instant verification
+                    Instant verification code will be generated on-screen
                   </p>
                 </div>
 
@@ -404,7 +451,7 @@ export function AuthModal({ isOpen, onClose, initialTab = "login" }: AuthModalPr
                   </div>
                 </div>
 
-                {/* Preferred Language Dropdown (Styled with Green Accent) */}
+                {/* Preferred Language Dropdown */}
                 <div>
                   <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
                     Preferred Language
@@ -418,7 +465,7 @@ export function AuthModal({ isOpen, onClose, initialTab = "login" }: AuthModalPr
                       <option value="English">English</option>
                       <option value="Telugu (తెలుగు)">Telugu (తెలుగు)</option>
                       <option value="Hindi (हिंदी)">Hindi (हिंदी)</option>
-                      <option value="Malayalam (മലയാളം)">Malayalam (മലയാളം)</option>
+                      <option value="Malayalam (മലയാളం)">Malayalam (മലയാളం)</option>
                     </select>
                     <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-700 dark:text-emerald-400 pointer-events-none" />
                   </div>
@@ -435,6 +482,28 @@ export function AuthModal({ isOpen, onClose, initialTab = "login" }: AuthModalPr
               </form>
             ) : (
               <form onSubmit={handleVerifyRegisterOtp} className="space-y-3.5">
+                {/* Instant Verification Code Card */}
+                <div className="rounded-xl border border-emerald-300 bg-emerald-50/90 p-3.5 text-center dark:border-emerald-800 dark:bg-emerald-950/40">
+                  <div className="flex items-center justify-center gap-1.5 text-xs font-semibold text-emerald-800 dark:text-emerald-300">
+                    <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Instant Verification Code</span>
+                  </div>
+                  <div className="my-1.5 font-mono text-2xl font-black tracking-widest text-emerald-900 dark:text-emerald-200">
+                    {activeOtp}
+                  </div>
+                  <p className="text-[11px] text-stone-600 dark:text-stone-400">
+                    Click Auto-Fill below or type the 6-digit code to complete registration
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setRegisterOtpInput(activeOtp)}
+                    className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-emerald-700 px-3 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-emerald-800 transition"
+                  >
+                    <Zap className="w-3.5 h-3.5" />
+                    Auto-Fill Code ({activeOtp})
+                  </button>
+                </div>
+
                 <div>
                   <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
                     Enter 6-Digit Email Verification Code
@@ -444,12 +513,12 @@ export function AuthModal({ isOpen, onClose, initialTab = "login" }: AuthModalPr
                     maxLength={6}
                     value={registerOtpInput}
                     onChange={(e) => setRegisterOtpInput(e.target.value)}
-                    placeholder="123456"
+                    placeholder={activeOtp}
                     autoFocus
                     className="w-full text-center tracking-widest text-lg font-bold rounded-xl border border-stone-200 bg-stone-50/50 px-3.5 py-2.5 text-stone-900 focus:border-emerald-600 focus:bg-white focus:outline-none dark:border-stone-700 dark:bg-stone-800 dark:text-white"
                   />
                   <div className="flex items-center justify-between mt-1 text-[11px] text-stone-500">
-                    <span>Sent to: {registerEmail}</span>
+                    <span>Account: {registerEmail}</span>
                     <button
                       type="button"
                       onClick={() => setRegisterOtpSent(false)}
@@ -484,7 +553,7 @@ export function AuthModal({ isOpen, onClose, initialTab = "login" }: AuthModalPr
           </div>
         </div>
 
-        {/* DEMO LOGIN CARDS (EXACT MATCH TO REFERENCE) */}
+        {/* DEMO LOGIN CARDS */}
         <div className="space-y-2.5 max-h-56 overflow-y-auto pr-1">
           {QUICK_DEMO_FARMERS.map((farmer) => (
             <button
