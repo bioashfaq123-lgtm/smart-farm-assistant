@@ -17,6 +17,7 @@ import {
   UserCheck,
   Landmark,
   Compass,
+  Stethoscope,
   LogIn,
 } from "lucide-react";
 import { useLanguage } from "../common/LanguageContext";
@@ -47,6 +48,12 @@ export function DesktopSidebar() {
       href: "/advisory",
       label: t("nav_advisory"),
       icon: MessageSquare,
+      badge: "AI",
+    },
+    {
+      href: "/diagnosis",
+      label: lang === "te" ? "పంట రోగ నిర్ధారణ" : "Disease Diagnosis",
+      icon: Stethoscope,
       badge: "AI",
     },
     {

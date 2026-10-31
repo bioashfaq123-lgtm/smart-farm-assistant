@@ -448,7 +448,7 @@ export default function HomePage() {
               Snap high-resolution plant leaf photos to diagnose Leaf Blast, Sheath Blight, Pink Bollworm, or Yellow Stem Borer with instant ICAR chemical & organic remedies.
             </p>
             <Link
-              href="/advisory"
+              href="/diagnosis"
               className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 hover:text-emerald-800 dark:text-emerald-400 group-hover:underline"
             >
               <span>Consult AI Doctor</span>
@@ -632,7 +632,7 @@ export default function HomePage() {
                   </div>
                 </div>
                 <Link
-                  href="/advisory"
+                  href="/diagnosis"
                   className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-700 text-white text-xs font-bold hover:bg-emerald-800 transition"
                 >
                   <span>Try AI Advisory Now</span>
@@ -921,7 +921,7 @@ export default function HomePage() {
               </h5>
               <ul className="space-y-1.5 text-stone-500 dark:text-stone-400">
                 <li><Link href="/dashboard" className="hover:text-emerald-600 transition">Farm Dashboard</Link></li>
-                <li><Link href="/advisory" className="hover:text-emerald-600 transition">AI Disease Diagnosis</Link></li>
+                <li><Link href="/diagnosis" className="hover:text-emerald-600 transition">AI Disease Diagnosis</Link></li>
                 <li><Link href="/iot" className="hover:text-emerald-600 transition">ESP32 IoT Sensors</Link></li>
                 <li><Link href="/market" className="hover:text-emerald-600 transition">APMC Mandi Rates</Link></li>
                 <li><Link href="/schemes" className="hover:text-emerald-600 transition">Government Schemes</Link></li>

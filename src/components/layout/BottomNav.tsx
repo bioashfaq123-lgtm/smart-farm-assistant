@@ -11,6 +11,7 @@ import {
   Wrench,
   Sparkles,
   Landmark,
+  Stethoscope,
 } from "lucide-react";
 import { useLanguage } from "../common/LanguageContext";
 
@@ -28,6 +29,11 @@ export function BottomNav() {
       href: "/advisory",
       label: t("nav_advisory"),
       icon: MessageSquare,
+    },
+    {
+      href: "/diagnosis",
+      label: lang === "te" ? "నిర్ధారణ" : "Diagnosis",
+      icon: Stethoscope,
     },
     {
       href: "/iot",
