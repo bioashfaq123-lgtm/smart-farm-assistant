@@ -8,10 +8,10 @@ import {
   getDiseasesDb,
 } from "../src/lib/diagnosisSafety.ts";
 
-// Dummy 64-char valid Base64 image payload for image upload tests
-const DUMMY_BASE64_IMAGE =
-  "data:image/jpeg;base64," +
-  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
+import { VALID_LEAF_IMAGE } from "./fixtures.mjs";
+
+// Valid Base64 image payload fixture for image upload tests
+const DUMMY_BASE64_IMAGE = VALID_LEAF_IMAGE;
 
 // Mock valid API key
 const MOCK_API_KEY = "AIzaSyFakeKeyForTestingPurposes1234567890";

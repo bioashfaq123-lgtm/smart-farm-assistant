@@ -34,18 +34,42 @@ import { Card, CardHeader } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { formatPestMessage, generateWhatsAppUrl } from "@/lib/utils/kisanShare";
 
-// Client-side Canvas Image Compression (scales to max 1024x1024 JPEG at 0.8 quality, ~150-200KB)
-async function compressImageFile(file: File, maxDim = 1024, quality = 0.8): Promise<string> {
+// Client-side Canvas Image Compression & Quality Pre-Check
+export interface ClientCompressionResult {
+  dataUrl: string;
+  width: number;
+  height: number;
+  luminance: number;
+  qualityWarning?: { en: string; te: string };
+}
+
+async function compressImageFile(file: File, maxDim = 1024, quality = 0.8): Promise<ClientCompressionResult> {
   return new Promise((resolve, reject) => {
+    // MIME validation
+    const validMimes = ["image/jpeg", "image/png", "image/webp"];
+    if (file.type && !validMimes.includes(file.type.toLowerCase())) {
+      return reject(new Error("UNSUPPORTED_FORMAT"));
+    }
+
     const reader = new FileReader();
     reader.onerror = () => reject(new Error("Failed to read image file"));
     reader.onload = (e) => {
       const img = new Image();
       img.onerror = () => reject(new Error("Failed to load image element"));
       img.onload = () => {
-        let width = img.width;
-        let height = img.height;
+        const origWidth = img.width;
+        const origHeight = img.height;
 
+        let qualityWarning: { en: string; te: string } | undefined;
+        if (origWidth < 120 || origHeight < 120) {
+          qualityWarning = {
+            en: `Low image resolution (${origWidth}x${origHeight}px). Move camera closer (15-20 cm) for clear pathology.`,
+            te: `ఫోటో పరిమాణం చాలా చిన్నది (${origWidth}x${origHeight}px). ఆకును దగ్గరగా ఉంచి స్పష్టమైన ఫోటో తీయండి.`,
+          };
+        }
+
+        let width = origWidth;
+        let height = origHeight;
         if (width > maxDim || height > maxDim) {
           if (width > height) {
             height = Math.round((height * maxDim) / width);
@@ -61,11 +85,54 @@ async function compressImageFile(file: File, maxDim = 1024, quality = 0.8): Prom
         canvas.height = height;
         const ctx = canvas.getContext("2d");
         if (!ctx) {
-          return resolve(e.target?.result as string);
+          return resolve({
+            dataUrl: e.target?.result as string,
+            width,
+            height,
+            luminance: 128,
+            qualityWarning,
+          });
         }
         ctx.drawImage(img, 0, 0, width, height);
+
+        // Sample canvas luminance across pixels
+        let totalLum = 0;
+        let count = 0;
+        try {
+          const imgData = ctx.getImageData(0, 0, width, height).data;
+          const step = Math.max(1, Math.floor(imgData.length / (4 * 500)));
+          for (let i = 0; i < imgData.length; i += 4 * step) {
+            totalLum += 0.299 * imgData[i] + 0.587 * imgData[i + 1] + 0.114 * imgData[i + 2];
+            count++;
+          }
+        } catch {
+          // Ignore if canvas tainted
+        }
+
+        const avgLum = count > 0 ? Math.round(totalLum / count) : 128;
+
+        if (!qualityWarning) {
+          if (avgLum < 22) {
+            qualityWarning = {
+              en: "Photo appears severely underexposed (too dark). Capture in natural daylight.",
+              te: "ఫోటో చాలా చీకటిగా ఉంది. మంచి ఉదయపు వెలుతురులో ఫోటో తీయండి.",
+            };
+          } else if (avgLum > 242) {
+            qualityWarning = {
+              en: "Photo has harsh glare or flash washout. Turn off flash and retake.",
+              te: "ఫోటోపై ఫ్లాష్ మెరుపు లేదా తీవ్ర కాంతి పడింది. ఫ్లాష్ లేకుండా తీయండి.",
+            };
+          }
+        }
+
         const dataUrl = canvas.toDataURL("image/jpeg", quality);
-        resolve(dataUrl);
+        resolve({
+          dataUrl,
+          width,
+          height,
+          luminance: avgLum,
+          qualityWarning,
+        });
       };
       img.src = e.target?.result as string;
     };
@@ -154,6 +221,8 @@ export default function DiagnosisPage() {
   const [symptomText, setSymptomText] = useState<string>("");
   const [leafPhotoBase64, setLeafPhotoBase64] = useState<string | null>(null);
   const [photoFileName, setPhotoFileName] = useState<string>("");
+  const [photoMeta, setPhotoMeta] = useState<{ width: number; height: number; luminance: number } | null>(null);
+  const [photoQualityWarning, setPhotoQualityWarning] = useState<{ en: string; te: string } | null>(null);
 
   // States
   const [isCompressing, setIsCompressing] = useState<boolean>(false);
@@ -178,8 +247,10 @@ export default function DiagnosisPage() {
     setPhotoFileName(file.name);
 
     try {
-      const compressed = await compressImageFile(file);
-      setLeafPhotoBase64(compressed);
+      const result = await compressImageFile(file);
+      setLeafPhotoBase64(result.dataUrl);
+      setPhotoMeta({ width: result.width, height: result.height, luminance: result.luminance });
+      setPhotoQualityWarning(result.qualityWarning || null);
     } catch (err: any) {
       setErrorMessage("Could not process image file. Please choose another JPG or PNG photo.");
     } finally {

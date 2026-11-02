@@ -10,7 +10,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test:safety": "node --experimental-strip-types --test test/phase-a-safety.test.mjs"
+    "test:safety": "node --experimental-strip-types --test test/phase-a-safety.test.mjs",
+    "test:validation": "node --experimental-strip-types --test test/phase-b-validation.test.mjs",
+    "test:all": "node --experimental-strip-types --test test/*.test.mjs"
   },
   "dependencies": {
     "@types/node": "^26.6.5",

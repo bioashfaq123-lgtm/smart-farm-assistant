@@ -1,5 +1,11 @@
 import fs from "fs";
 import path from "path";
+import {
+  validateImagePayload,
+  extractImageBuffer,
+  type ImageValidationResult,
+  type ValidationConfig,
+} from "./imageValidation.ts";
 
 export interface DiagnosisRequest {
   image?: string; // base64 data URI or raw base64
@@ -33,14 +39,18 @@ export interface StructuredDiagnosis {
   suggestedActionsTe?: string[];
   safetyDisclaimer: string;
   favourableConditions?: string;
+  metadata?: any;
 }
 
 export interface DiagnosisApiResponse {
   success: boolean;
-  status: "possible_diagnosis" | "inconclusive" | "symptom_match";
+  status: "possible_diagnosis" | "inconclusive" | "symptom_match" | "validation_failed";
   source: string;
   isAiGenerated: boolean;
   diagnosis: StructuredDiagnosis;
+  error?: string;
+  errorKey?: string;
+  guidance?: string;
 }
 
 export interface ExecuteDiagnosisResult {
@@ -62,6 +72,11 @@ export function getDiseasesDb() {
     console.warn("Could not read diseases.json from cwd:", e);
   }
   return { crops: {} };
+}
+
+export function getSupportedCrops(): string[] {
+  const db = getDiseasesDb();
+  return Object.keys(db.crops || {});
 }
 
 const AGRI_STOP_WORDS = new Set([
@@ -141,7 +156,8 @@ export function createInconclusiveDiagnosis(
   district: string = "Jagtial",
   lang: "en" | "te" = "en",
   reasonEn?: string,
-  reasonTe?: string
+  reasonTe?: string,
+  extraMetadata?: any
 ): DiagnosisApiResponse {
   return {
     success: true,
@@ -169,17 +185,72 @@ export function createInconclusiveDiagnosis(
       preventiveMeasuresEn: "Take a clear, sharp close-up photo in natural daylight showing upper and lower leaf surfaces. Check nearby plants for spread.",
       preventiveMeasuresTe: "మంచి సూర్యకాంతిలో ఆకు పైభాగం మరియు క్రింది భాగం స్పష్టంగా కనిపించేలా క్లోజప్ ఫోటో తీయండి. పక్క మొక్కలను పరిశీలించండి.",
       suggestedActionsEn: [
-        "Take a well-focused close-up photo in morning daylight.",
+        "Take a well-focused close-up photo (15-20 cm) in morning daylight.",
         "Check lower leaf surface and stem nodes for fungal webbing or insect pests.",
         "Consult your local Mandal Agricultural Extension Officer (AEO) or call Kisan Toll-Free Helpline 1800-180-1551."
       ],
       suggestedActionsTe: [
-        "మంచి వెలుతురులో ఆకు పైభాగం మరియు క్రింది భాగం స్పష్టంగా కనిపించేలా ఫోటో తీయండి.",
+        "మంచి వెలుతురులో ఆకుకు 15-20 సెం.మీ దూరంలో స్పష్టమైన క్లోజప్ ఫోటో తీయండి.",
         "ఆకుల అడుగున పురుగులు లేదా బూజు లక్షణాలు ఏమైనా ఉన్నాయో పరిశీలించండి.",
         "మీ గ్రామ వ్యవసాయ విస్తరణ అధికారి (AEO) ని లేదా కిసాన్ కాల్ సెంటర్ (1800-180-1551) ని సంప్రదించండి."
       ],
       safetyDisclaimer: "Agricultural Safety Gate: To protect crops and prevent hazardous off-label pesticide usage, unverified diagnoses are never fabricated. Always consult your Mandal Agricultural Extension Officer (AEO).",
-      favourableConditions: "Requires field confirmation under local microclimate conditions."
+      favourableConditions: "Requires field confirmation under local microclimate conditions.",
+      metadata: extraMetadata,
+    }
+  };
+}
+
+// Generate structured response for pre-inference validation failure
+export function createValidationFailureResponse(
+  crop: string,
+  district: string = "Jagtial",
+  lang: "en" | "te" = "en",
+  validation: ImageValidationResult
+): DiagnosisApiResponse {
+  const isTe = lang === "te";
+  return {
+    success: false,
+    status: "validation_failed",
+    errorKey: validation.errorKey,
+    error: isTe ? validation.messageTe : validation.messageEn,
+    guidance: isTe ? validation.guidanceTe : validation.guidanceEn,
+    source: "Smart Farm Pre-Inference Image Quality Gate",
+    isAiGenerated: false,
+    diagnosis: {
+      status: "inconclusive",
+      id: "validation_rejection",
+      diseaseNameEn: "Diagnosis Inconclusive / Image Quality Gate",
+      diseaseNameTe: "వ్యాధి నిర్ధారణ అసంపూర్ణంగా ఉంది / ఫోటో నాణ్యత సరిపోలేదు",
+      scientificName: "N/A — Pre-inference validation rejected unsuitable image",
+      crop,
+      confidenceLevel: "Unable to determine",
+      severity: "low",
+      verificationStatus: "Rejected by Pre-Inference Safety Gate",
+      symptomsEn: validation.messageEn || "Image did not pass pre-inference quality checks.",
+      symptomsTe: validation.messageTe || "ఫోటో నాణ్యతా ప్రమాణాలకు అనుగుణంగా లేదు.",
+      chemicalSprayEn: "No chemical prescription issued. Never apply chemical sprays on the basis of an unclear or unsuitable photo.",
+      chemicalSprayTe: "ఎలాంటి రసాయన మందు సిఫారసు చేయబడలేదు. అస్పష్టమైన ఫోటో ఆధారంగా రసాయన మందులు పిచికారీ చేయవద్దు.",
+      dosage: "Do not apply chemical pesticides without confirmed diagnosis",
+      isChemicalVerified: false,
+      organicControlEn: "Capture a fresh photograph in natural morning daylight.",
+      organicControlTe: "సహజమైన ఉదయపు వెలుతురులో కొత్త ఫోటో తీయండి.",
+      preventiveMeasuresEn: validation.guidanceEn || "Capture sharp close-up images showing lesion margins in natural daylight.",
+      preventiveMeasuresTe: validation.guidanceTe || "ఆకు మచ్చల అంచులు స్పష్టంగా కనిపించేలా సహజమైన వెలుతురులో ఫోటో తీయండి.",
+      suggestedActionsEn: [
+        validation.guidanceEn || "Photograph the leaf closely (15-20 cm) in natural morning lighting.",
+        "Ensure camera lens is focused directly on leaf margins rather than background soil.",
+        "Avoid harsh flash glare, deep shadows, and motion blur.",
+        "Call Kisan Toll-Free Helpline: 1800-180-1551 for on-site field consultation."
+      ],
+      suggestedActionsTe: [
+        validation.guidanceTe || "ఆకును దగ్గరగా (15-20 సెం.మీ) ఉంచి మంచి వెలుతురులో ఫోటో తీయండి.",
+        "నేల కాకుండా ఆకుపై కెమెరా ఫోకస్ అయ్యేలా చూసుకోండి.",
+        "ఫ్లాష్ లైట్ లేదా నీడ పడకుండా సహజ కాంతిలో తీయండి.",
+        "సమస్య తీవ్రంగా ఉంటే కిసాన్ కాల్ సెంటర్ 1800-180-1551 కి ఫోన్ చేయండి."
+      ],
+      safetyDisclaimer: "Agricultural Safety Gate: Unsuitable, corrupted, or non-plant images are safely filtered before inference to prevent misdiagnosis.",
+      metadata: validation.metadata,
     }
   };
 }
@@ -191,12 +262,13 @@ export async function executeDiagnosis(
     apiKey?: string;
     model?: string;
     fetchFn?: typeof fetch;
+    validationConfig?: ValidationConfig;
   }
 ): Promise<ExecuteDiagnosisResult> {
   try {
     const { image, symptoms, crop = "Paddy", district = "Jagtial", lang = "en" } = body;
 
-    const hasImage = Boolean(image && image.trim().length > 50);
+    const hasImage = Boolean(image && image.trim().length > 20);
     const hasSymptoms = Boolean(symptoms && symptoms.trim().length > 0);
 
     if (!hasImage && !hasSymptoms) {
@@ -206,17 +278,51 @@ export async function executeDiagnosis(
       };
     }
 
-    // Extract clean image payload if present
-    let mimeType = "image/jpeg";
-    let base64Data = "";
-    if (hasImage && image) {
-      if (image.startsWith("data:")) {
-        const parts = image.split(";base64,");
-        mimeType = parts[0].replace("data:", "");
-        base64Data = parts[1];
-      } else {
-        base64Data = image;
+    // Check supported crops list
+    const supportedCrops = getSupportedCrops();
+    const isSupportedCrop = supportedCrops.some(
+      (c) => c.toLowerCase() === String(crop || "").trim().toLowerCase()
+    );
+
+    // ==========================================
+    // Phase B: Pre-Inference Image Validation Gate
+    // ==========================================
+    let validMimeType = "image/jpeg";
+    let validBase64 = "";
+    let validationMeta: any = null;
+
+    if (hasImage) {
+      const validation = validateImagePayload(image, options?.validationConfig);
+      if (!validation.isValid) {
+        return {
+          status: 400,
+          body: createValidationFailureResponse(crop, district, lang, validation)
+        };
       }
+
+      validationMeta = validation.metadata;
+      validMimeType = validation.metadata?.mimeType || "image/jpeg";
+
+      // Extract sanitized base64 buffer without extra data URL prefixes
+      const extracted = extractImageBuffer(image!);
+      if (extracted) {
+        validBase64 = extracted.buffer.toString("base64");
+      }
+    }
+
+    // If crop is unsupported and no symptoms match, give safe advisory
+    if (!isSupportedCrop && !hasSymptoms) {
+      const isTe = lang === "te";
+      return {
+        status: 200,
+        body: createInconclusiveDiagnosis(
+          crop,
+          district,
+          lang,
+          `The crop "${crop}" is not currently in our validated Telangana PJTAU crop database. Supported crops are: ${supportedCrops.join(", ")}. Please consult your local Mandal Agricultural Extension Officer (AEO).`,
+          `ఈ పంట (${crop}) ప్రస్తుతం ధ్రువీకరించబడిన PJTAU డేటాబేస్‌లో లేదు. ధ్రువీకరించబడిన పంటలు: ${supportedCrops.join(", ")}. దయచేసి స్థానిక వ్యవసాయ విస్తరణ అధికారి (AEO) ని సంప్రదించండి.`
+        )
+      };
     }
 
     // SECURITY: Read credentials exclusively from server-side environment variables or explicit options
@@ -235,28 +341,37 @@ export async function executeDiagnosis(
 
       const promptParts: any[] = [];
 
-      if (hasImage && base64Data) {
+      if (hasImage && validBase64) {
         promptParts.push({
           inlineData: {
-            mimeType,
-            data: base64Data,
+            mimeType: validMimeType,
+            data: validBase64,
           },
         });
       }
 
-      const userInstruction = `You are an expert plant pathologist and agricultural extension diagnostic assistant for ${district} District, Telangana, India.
-Farmer Crop: ${crop}.
+      const userInstruction = `You are a clinical agricultural plant pathologist for ${district} District, Telangana, India.
+Declared Farmer Crop: ${crop}.
 Farmer Reported Symptoms: "${symptoms || "None provided; evaluate visually."}".
 Language Requirement: Output response in ${lang === "te" ? "Telugu (తెలుగు)" : "English"}.
 
-DIAGNOSTIC SAFETY RULES:
-1. If the photo does not clearly show a crop leaf/plant, is too blurry/dark, shows a healthy plant, or if symptoms are ambiguous/insufficient for a confident assessment, you MUST set "status": "inconclusive".
-2. DO NOT invent chemical pesticide commercial names, chemical tank mixes, or specific spray dosages.
-3. If a probable disease is visually identified, set "status": "possible_diagnosis", "confidenceLevel": "Possible diagnosis" or "Needs further verification". DO NOT assign fake percentage numbers.
-4. Chemical recommendations must state: "Consult your local Mandal Agricultural Extension Officer (AEO) for CIB&RC approved label treatment."
+MANDATORY PRE-INFERENCE & PATHOLOGY SAFETY RULES:
+1. PLANT RELEVANCE & CROP CONSISTENCY CHECK:
+   - "isPlant": Set false if image shows a person, animal, vehicle, tool, indoor room, paper/document, or non-plant object.
+   - "cropConsistency": Set "consistent" if the visible plant foliage matches "${crop}".
+     Set "inconsistent" if image shows a completely different crop/plant.
+     Set "unsupported" if the plant is an unverified crop species.
+     Set "ambiguous" if plant species cannot be reliably determined.
+2. If "isPlant" is false or "cropConsistency" is "inconsistent", you MUST set "status": "inconclusive".
+3. If the photo shows a healthy leaf, is too blurry, dark, glare-obscured, or ambiguous, you MUST set "status": "inconclusive".
+4. DO NOT invent chemical pesticide commercial names, chemical tank mixes, or specific spray dosages.
+5. If a probable disease is visually identified on the declared crop, set "status": "possible_diagnosis", "confidenceLevel": "Possible diagnosis" or "Needs further verification". DO NOT assign fake percentage numbers.
+6. Chemical recommendations must state: "Consult your local Mandal Agricultural Extension Officer (AEO) for CIB&RC approved label treatment."
 
 Output STRICT JSON only matching this schema with NO markdown fences:
 {
+  "isPlant": boolean,
+  "cropConsistency": "consistent" | "inconsistent" | "unsupported" | "ambiguous",
   "status": "possible_diagnosis" | "inconclusive",
   "diseaseNameEn": "Name of disease or 'Diagnosis Inconclusive / Further Verification Required'",
   "diseaseNameTe": "తెలుగులో వ్యాధి పేరు లేదా 'వ్యాధి నిర్ధారణ అసంపూర్ణంగా ఉంది'",
@@ -264,7 +379,7 @@ Output STRICT JSON only matching this schema with NO markdown fences:
   "crop": "${crop}",
   "confidenceLevel": "Possible diagnosis" | "Needs further verification" | "Unable to determine",
   "severity": "low" | "medium" | "high",
-  "symptomsEn": "Exact visual symptoms seen, or why image is inconclusive",
+  "symptomsEn": "Exact visual symptoms seen, or why image is inconclusive/non-plant/inconsistent",
   "symptomsTe": "గమనించిన స్పష్టమైన లక్షణాలు లేదా నిర్ధారణ ఎందుకు సాధ్యం కాలేదు",
   "chemicalSprayEn": "CIB&RC guidance note (DO NOT invent pesticide doses)",
   "chemicalSprayTe": "వ్యవసాయ అధికారి సలహా సూచన",
@@ -310,10 +425,56 @@ Output STRICT JSON only matching this schema with NO markdown fences:
             const parsed = JSON.parse(cleanJsonText);
 
             if (parsed) {
+              // 1. Plant Relevance Check
+              if (parsed.isPlant === false) {
+                return {
+                  status: 200,
+                  body: createInconclusiveDiagnosis(
+                    crop,
+                    district,
+                    lang,
+                    "The uploaded image does not appear to contain a crop leaf or agricultural plant specimen. Please upload an infected plant leaf photo.",
+                    "అందించిన ఫోటోలో పంట లేదా ఆకు స్పష్టంగా కనిపించడం లేదు. దయచేసి తెగులు సోకిన పంట ఆకు ఫోటోను అప్లోడ్ చేయండి.",
+                    validationMeta
+                  )
+                };
+              }
+
+              // 2. Crop Consistency Check
+              if (parsed.cropConsistency === "inconsistent") {
+                return {
+                  status: 200,
+                  body: createInconclusiveDiagnosis(
+                    crop,
+                    district,
+                    lang,
+                    `The foliage in the photo does not match the selected crop (${crop}). Please verify your crop selection or upload the corresponding leaf photo.`,
+                    `ఫోటోలోని ఆకులు ఎంచుకున్న పంట (${crop}) తో సరిపోలడం లేదు. దయచేసి సరైన పంటను ఎంచుకోండి లేదా ఆ పంట ఫోటోను అప్‌లోడ్ చేయండి.`,
+                    validationMeta
+                  )
+                };
+              }
+
+              // 3. Ambiguous Crop Identity Check
+              if (parsed.cropConsistency === "ambiguous" && !hasSymptoms) {
+                return {
+                  status: 200,
+                  body: createInconclusiveDiagnosis(
+                    crop,
+                    district,
+                    lang,
+                    `Crop species identity is ambiguous from the submitted image. Please capture a wider photograph showing whole plant foliage or describe visible symptoms in words.`,
+                    `ఫోటో ఆధారంగా పంట రకాన్ని స్పష్టంగా గుర్తించలేకపోయాము. దయచేసి మొక్క మొత్తం కనిపించేలా ఫోటో తీయండి లేదా లక్షణాలను వివరించండి.`,
+                    validationMeta
+                  )
+                };
+              }
+
               const isInconclusive = parsed.status === "inconclusive" || 
                 (parsed.confidenceLevel === "Unable to determine") ||
                 (parsed.diseaseNameEn && parsed.diseaseNameEn.toLowerCase().includes("inconclusive")) ||
-                (parsed.diseaseNameEn && parsed.diseaseNameEn.toLowerCase().includes("unable to determine"));
+                (parsed.diseaseNameEn && parsed.diseaseNameEn.toLowerCase().includes("unable to determine")) ||
+                (parsed.diseaseNameEn && parsed.diseaseNameEn.toLowerCase().includes("healthy"));
 
               if (isInconclusive) {
                 return {
@@ -323,7 +484,8 @@ Output STRICT JSON only matching this schema with NO markdown fences:
                     district,
                     lang,
                     parsed.symptomsEn,
-                    parsed.symptomsTe
+                    parsed.symptomsTe,
+                    validationMeta
                   )
                 };
               }
@@ -356,7 +518,7 @@ Output STRICT JSON only matching this schema with NO markdown fences:
                       diseaseNameTe: parsed.diseaseNameTe || parsed.diseaseNameEn,
                       scientificName: parsed.scientificName || localMatch?.scientificName || "Pathogen identification pending laboratory confirmation",
                       crop,
-                      confidenceLevel: parsed.confidenceLevel === "High" ? "Possible diagnosis" : "Needs further verification",
+                      confidenceLevel: (parsed.confidenceLevel === "High" || parsed.confidenceLevel === "Possible diagnosis") ? "Possible diagnosis" : "Needs further verification",
                       severity: parsed.severity || "medium",
                       verificationStatus: "Unverified (Draft Knowledge Base - Pending Field Extension Review)",
                       symptomsEn: parsed.symptomsEn || "Visual foliar symptoms observed.",
@@ -371,6 +533,7 @@ Output STRICT JSON only matching this schema with NO markdown fences:
                       preventiveMeasuresTe: (isKbMatch && localMatch.management?.cultural?.[0]) || parsed.preventiveMeasuresTe || "పొలంలో తెగులు వ్యాప్తిని గమనిస్తూ నీటి పారుదల సక్రమంగా నిర్వహించండి.",
                       safetyDisclaimer: "Always use CIB&RC approved crop protection products. Wear protective mask and gloves. Confirm critical treatment decisions with your local Agriculture Extension Officer (AEO).",
                       favourableConditions: localMatch?.favourableConditions?.weatherFactors || "Favourable under warm, humid conditions.",
+                      metadata: validationMeta,
                     },
                   }
                 };
@@ -420,6 +583,7 @@ Output STRICT JSON only matching this schema with NO markdown fences:
             preventiveMeasuresTe: culturalRec,
             safetyDisclaimer: "Indicative symptom match only. Wear protective face mask and gloves. Always verify critical diagnosis with your local Agriculture Extension Officer (AEO).",
             favourableConditions: localMatch.favourableConditions?.weatherFactors || "Favourable in humid or cloudy conditions.",
+            metadata: validationMeta,
           },
         }
       };
@@ -437,7 +601,8 @@ Output STRICT JSON only matching this schema with NO markdown fences:
           : "Visual diagnostic service could not establish a confident identification. To prevent misdiagnosis and unsafe chemical application, field inspection is required.",
         !hasImage && !hasSymptoms
           ? "ఆకు ఫోటో లేదా స్పష్టమైన లక్షణాలు అందించలేదు."
-          : "స్పష్టమైన నిర్ధారణకు తగిన సమాచారం లేదు. పంట నష్టాన్ని మరియు అనవసరపు మందుల వాడకాన్ని నివారించడానికి క్షేత్ర పరిశీలన అవసరం."
+          : "స్పష్టమైన నిర్ధారణకు తగిన సమాచారం లేదు. పంట నష్టాన్ని మరియు అనవసరపు మందుల వాడకాన్ని నివారించడానికి క్షేత్ర పరిశీలన అవసరం.",
+        validationMeta
       )
     };
   } catch (err: any) {
