@@ -380,12 +380,12 @@ export default function HomePage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto pt-8 text-left">
             <div className="rounded-2xl bg-white/80 dark:bg-stone-900/80 border border-stone-200 dark:border-stone-800 p-4 shadow-2xs">
               <span className="text-2xl font-black text-emerald-700 dark:text-emerald-400 block">
-                98.4%
+                Evidence-Based
               </span>
               <span className="text-xs font-bold text-stone-900 dark:text-white block mt-0.5">
-                AI Vision Diagnostic Accuracy
+                Decision Support & Safety Gate
               </span>
-              <span className="text-[11px] text-stone-500">ICAR & Scientific Package of Practices</span>
+              <span className="text-[11px] text-stone-500">Telangana Package of Practices Grounded</span>
             </div>
 
             <div className="rounded-2xl bg-white/80 dark:bg-stone-900/80 border border-stone-200 dark:border-stone-800 p-4 shadow-2xs">
@@ -643,7 +643,7 @@ export default function HomePage() {
               <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-100 dark:bg-stone-950 p-4 space-y-3">
                 <div className="flex items-center justify-between text-xs font-semibold text-stone-600 dark:text-stone-400">
                   <span>Sample Diagnosis Card</span>
-                  <span className="text-emerald-600 font-bold">Confidence: 98.4%</span>
+                  <span className="text-stone-600 dark:text-stone-300 font-bold">Possible Diagnosis (Indicative)</span>
                 </div>
                 <div className="rounded-xl bg-white dark:bg-stone-900 p-4 border border-stone-200/60 dark:border-stone-800 space-y-2">
                   <div className="flex items-center justify-between">

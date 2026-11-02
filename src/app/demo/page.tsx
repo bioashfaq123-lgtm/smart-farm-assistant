@@ -136,7 +136,7 @@ const SAMPLE_LEAF_DISEASES = [
     diseaseTe: "వరి అగ్గితెగులు",
     pathogen: "Pyricularia oryzae (Magnaporthe grisea)",
     severity: "High (Severe Defoliation Risk)",
-    confidence: "94.2%",
+    assessmentStatus: "Possible diagnosis (Needs field verification)",
     symptomsEn:
       "Spindle-shaped or diamond-shaped lesions with grey or whitish centers and dark reddish-brown borders. Lesions enlarge and coalesce, burning entire leaf blades.",
     symptomsTe:
@@ -161,7 +161,7 @@ const SAMPLE_LEAF_DISEASES = [
     diseaseTe: "గులాబీ రంగు పురుగు ఉధృతి",
     pathogen: "Pectinophora gossypiella",
     severity: "Critical (ETL Exceeded: >10% Damaged Bolls)",
-    confidence: "91.8%",
+    assessmentStatus: "Needs further verification",
     symptomsEn:
       "Rosetted flowers that fail to open fully ('rosette bloom'). Small entry boreholes on squares and young green bolls. Larvae feed on developing seeds inside locules, staining lint brownish.",
     symptomsTe:
@@ -186,7 +186,7 @@ const SAMPLE_LEAF_DISEASES = [
     diseaseTe: "మిరప బొబ్బర తెగులు (ఆకుముడుత)",
     pathogen: "Begomovirus (Transmitted by Whitefly Bemisia tabaci)",
     severity: "Moderate-High (Vector Control Urgently Needed)",
-    confidence: "96.5%",
+    assessmentStatus: "Possible diagnosis (Needs field verification)",
     symptomsEn:
       "Upward curling, cupping, and puckering of leaves. Vein clearing and thickening on leaf undersides. Severe plant stunting with shortened internodes and flower drop.",
     symptomsTe:
@@ -1856,7 +1856,7 @@ export default function ConferenceDemoPage() {
                       {lang === "te" ? d.diseaseTe : d.diseaseEn}
                     </h4>
                     <span className="text-[10px] text-stone-500 font-mono mt-1 block">
-                      Confidence: {d.confidence}
+                      Assessment: {d.assessmentStatus}
                     </span>
                   </button>
                 );
@@ -1938,7 +1938,7 @@ export default function ConferenceDemoPage() {
 
                 <div className="mt-4 text-center">
                   <span className="text-xs font-mono font-bold text-stone-700 dark:text-stone-300">
-                    Confidence: {activeDisease.confidence}
+                    Assessment: {activeDisease.assessmentStatus}
                   </span>
                   <p className="text-[10px] text-stone-500 font-italic mt-0.5">{activeDisease.pathogen}</p>
                 </div>

@@ -118,7 +118,6 @@ const REFERENCE_TEST_CASES = [
     nameTe: "వరి అగ్గితెగులు (ఆకు & మెడ విరుపు)",
     symptoms: "Spindle-shaped brown lesions with ash-grey centers on leaf blades. Panicle neck base turning black and rotting.",
     severity: "high",
-    imageSample: "/images/paddy_blast.jpg",
   },
   {
     id: "blb",
@@ -127,7 +126,6 @@ const REFERENCE_TEST_CASES = [
     nameTe: "బాక్టీరియా ఆకు ఎండు తెగులు",
     symptoms: "Water-soaked wavy straw-colored drying progressing downward from leaf tips and margins.",
     severity: "high",
-    imageSample: "/images/paddy_blb.jpg",
   },
   {
     id: "pbw",
@@ -136,7 +134,6 @@ const REFERENCE_TEST_CASES = [
     nameTe: "పత్తిలో గులాబీ రంగు పురుగు",
     symptoms: "Rosetted flower petals with interlocked rosette bloom. Pinkish caterpillar larvae tunneling into bolls and feeding on lint.",
     severity: "high",
-    imageSample: "/images/cotton_bollworm.jpg",
   },
   {
     id: "murda",
@@ -145,7 +142,6 @@ const REFERENCE_TEST_CASES = [
     nameTe: "మిరపలో ఆకు ముడత & తామర పురుగులు",
     symptoms: "Upward cupping of leaves like a boat, crinkling, brittle veins, and flower shedding due to thrips sucking sap.",
     severity: "medium",
-    imageSample: "/images/chilli_leaf_curl.jpg",
   },
 ];
 
@@ -257,17 +253,16 @@ export default function DiagnosisPage() {
   // Copy prescription text
   const handleCopyPrescription = () => {
     if (!diagnosisResult) return;
-    const text = `🌱 Smart Farm Assistant - Crop Diagnosis Prescription
+    const text = `🌱 Smart Farm Assistant - Crop Diagnosis Assessment
+Status: ${diagnosisResult.status === "inconclusive" ? "INCONCLUSIVE (Field Verification Required)" : "POSSIBLE DIAGNOSIS (Indicative Assessment)"}
+Assessment Level: ${diagnosisResult.confidenceLevel || "Needs further verification"}
 Disease: ${diagnosisResult.diseaseNameEn} (${diagnosisResult.diseaseNameTe})
 Crop: ${diagnosisResult.crop}
-Severity: ${diagnosisResult.severity.toUpperCase()}
 Observed Symptoms: ${diagnosisResult.symptomsEn}
-Recommended Chemical Spray: ${diagnosisResult.chemicalSprayEn}
-Dosage: ${diagnosisResult.dosage}
-Organic Alternative: ${diagnosisResult.organicControlEn}
-Preventive Agronomy: ${diagnosisResult.preventiveMeasuresEn}
-Safety: ${diagnosisResult.safetyDisclaimer}`;
-
+Chemical Notice: ${diagnosisResult.chemicalSprayEn}
+Organic / Cultural Management: ${diagnosisResult.organicControlEn}
+Preventive Field Agronomy: ${diagnosisResult.preventiveMeasuresEn}
+Safety Rule: ${diagnosisResult.safetyDisclaimer}`;
     navigator.clipboard.writeText(text);
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
@@ -581,7 +576,7 @@ Safety: ${diagnosisResult.safetyDisclaimer}`;
           <div className="flex items-center gap-2">
             <span className="text-base">🧪</span>
             <span className="text-xs font-bold text-stone-900 dark:text-white uppercase tracking-wider">
-              1-Click Instant Test Cases (Verify High-Accuracy Diagnosis)
+              1-Click Symptom Test Cases (Evaluation & Demonstration)
             </span>
           </div>
           <span className="text-[10px] text-stone-500">Click any card to test instant diagnosis</span>
@@ -613,146 +608,238 @@ Safety: ${diagnosisResult.safetyDisclaimer}`;
 
       {/* Diagnosis Results Section */}
       {diagnosisResult && (
-        <div className="rounded-3xl border-2 border-emerald-500/40 bg-white dark:bg-stone-900 p-6 shadow-xl space-y-6 animate-in fade-in duration-300">
-          {/* Top Result Banner */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-stone-200 dark:border-stone-800">
-            <div className="space-y-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 px-3 py-1 text-xs font-extrabold border border-emerald-300">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Verified Pathology Diagnosis</span>
-                </span>
-                <span className="rounded-full bg-stone-100 dark:bg-stone-800 px-2.5 py-1 text-xs font-bold text-stone-700 dark:text-stone-300">
-                  Confidence: {diagnosisResult.confidence}%
-                </span>
-                <Badge variant={diagnosisResult.severity === "high" ? "critical" : "warning"}>
-                  Severity: {diagnosisResult.severity.toUpperCase()}
-                </Badge>
+        diagnosisResult.status === "inconclusive" ? (
+          /* INCONCLUSIVE SAFETY STATE (Task 1 & Task 4) */
+          <div className="rounded-3xl border-2 border-amber-300 dark:border-amber-700/80 bg-amber-50/60 dark:bg-amber-950/30 p-6 shadow-xl space-y-5 animate-in fade-in duration-300">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-amber-200 dark:border-amber-900/60">
+              <div className="space-y-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 text-amber-900 dark:bg-amber-900/80 dark:text-amber-200 px-3 py-1 text-xs font-bold border border-amber-300 dark:border-amber-700">
+                    <AlertTriangle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                    <span>{lang === "te" ? "స్పష్టమైన నిర్ధారణ కాలేదు" : "Unable to Determine / Inconclusive"}</span>
+                  </span>
+                  <span className="rounded-full bg-white dark:bg-stone-850 px-2.5 py-1 text-xs font-semibold text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-800">
+                    {diagnosisResult.confidenceLevel || "Unable to determine"}
+                  </span>
+                  <span className="rounded-full bg-rose-50 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300 px-2.5 py-1 text-xs font-bold border border-rose-200 dark:border-rose-900">
+                    Safety Gate: Misdiagnosis Prevention
+                  </span>
+                </div>
+                <h2 className="text-xl sm:text-2xl font-black text-amber-950 dark:text-amber-100 mt-1">
+                  {lang === "te" ? diagnosisResult.diseaseNameTe : diagnosisResult.diseaseNameEn}
+                </h2>
+                <p className="text-xs text-amber-800 dark:text-amber-300">
+                  {lang === "te"
+                    ? "తప్పుడు లేదా అసంపూర్ణ నిర్ధారణ ఆధారంగా రసాయన మందులు పిచికారీ చేయడం వల్ల పంట నష్టం మరియు ధన నష్టం వాటిల్లే అవకాశం ఉంది."
+                    : "To prevent hazardous chemical sprays and unnecessary expense, a definitive diagnosis was not fabricated."}
+                </p>
               </div>
 
-              <h2 className="text-xl sm:text-2xl font-black text-stone-900 dark:text-white">
-                {lang === "te" ? diagnosisResult.diseaseNameTe : diagnosisResult.diseaseNameEn}
-              </h2>
-              <p className="text-xs text-stone-500 dark:text-stone-400 italic">
-                Scientific Pathogen Name: <span className="font-semibold text-stone-700 dark:text-stone-300">{diagnosisResult.scientificName}</span>
-              </p>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={toggleSpeech}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-amber-300 dark:border-amber-800 bg-white dark:bg-stone-850 text-xs font-bold text-stone-800 dark:text-stone-200 hover:bg-stone-50 transition shadow-2xs"
+                >
+                  {isSpeaking ? <VolumeX className="w-4 h-4 text-rose-600" /> : <Volume2 className="w-4 h-4 text-amber-600" />}
+                  <span>{isSpeaking ? "Stop Voice" : "Listen Voice"}</span>
+                </button>
+              </div>
             </div>
 
-            {/* Quick Actions Bar */}
-            <div className="flex flex-wrap items-center gap-2 shrink-0">
-              <button
-                onClick={toggleSpeech}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-xs font-bold text-stone-800 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-750 transition shadow-2xs"
-                title="Listen to prescription in voice audio"
-              >
-                {isSpeaking ? (
-                  <>
-                    <VolumeX className="w-4 h-4 text-rose-600" />
-                    <span>Stop Voice</span>
-                  </>
-                ) : (
-                  <>
-                    <Volume2 className="w-4 h-4 text-emerald-600" />
-                    <span>Listen Voice</span>
-                  </>
-                )}
-              </button>
-
-              <button
-                onClick={handleCopyPrescription}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-xs font-bold text-stone-800 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-750 transition shadow-2xs"
-                title="Copy full prescription to clipboard"
-              >
-                {isCopied ? (
-                  <>
-                    <Check className="w-4 h-4 text-emerald-600" />
-                    <span>Copied!</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-4 h-4 text-stone-600" />
-                    <span>Copy</span>
-                  </>
-                )}
-              </button>
-
-              <button
-                onClick={handleShareWhatsApp}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold shadow-md shadow-emerald-700/20 transition hover:scale-[1.02]"
-                title="Share prescription to WhatsApp"
-              >
-                <Share2 className="w-4 h-4" />
-                <span>Share WhatsApp</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Core Findings Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Box 1: Symptoms Observed */}
-            <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50/60 dark:bg-stone-850/60 p-4 space-y-1.5">
-              <span className="text-xs font-bold text-stone-700 dark:text-stone-300 uppercase tracking-wider block">
-                🔍 Visible Lesions &amp; Symptoms
+            {/* Diagnostic Reason */}
+            <div className="rounded-2xl border border-amber-200 dark:border-amber-900/60 bg-white/90 dark:bg-stone-900 p-4 space-y-1.5">
+              <span className="text-xs font-bold text-amber-900 dark:text-amber-300 uppercase tracking-wider block">
+                📋 Visual Observation &amp; Diagnostic Findings
               </span>
               <p className="text-xs text-stone-800 dark:text-stone-200 leading-relaxed font-medium">
                 {lang === "te" ? diagnosisResult.symptomsTe : diagnosisResult.symptomsEn}
               </p>
-              {diagnosisResult.favourableConditions && (
-                <div className="pt-2 text-[11px] text-stone-500">
-                  <b>Favourable Weather:</b> {diagnosisResult.favourableConditions}
-                </div>
-              )}
             </div>
 
-            {/* Box 2: Recommended Chemical Spray */}
-            <div className="rounded-2xl border border-emerald-300 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-950/30 p-4 space-y-1.5">
-              <span className="text-xs font-bold text-emerald-900 dark:text-emerald-300 uppercase tracking-wider block">
-                🧪 Recommended Scientific Chemical Treatment
-              </span>
-              <p className="text-xs font-bold text-emerald-950 dark:text-emerald-100 leading-relaxed">
-                {lang === "te" ? diagnosisResult.chemicalSprayTe : diagnosisResult.chemicalSprayEn}
-              </p>
-              <div className="pt-2 flex items-center justify-between text-[11px] text-emerald-800 dark:text-emerald-300 font-semibold border-t border-emerald-200 dark:border-emerald-800">
-                <span>Exact Dosage:</span>
-                <span className="font-bold">{diagnosisResult.dosage}</span>
+            {/* Suggested Photographic & Field Actions */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 p-4 space-y-2">
+                <span className="text-xs font-bold text-stone-900 dark:text-stone-100 uppercase tracking-wider block">
+                  📸 Photographic Best Practices for Accurate Diagnosis
+                </span>
+                <ul className="text-xs text-stone-600 dark:text-stone-300 space-y-1.5 list-disc list-inside leading-relaxed">
+                  <li>Capture clear close-up photos in natural morning sunlight.</li>
+                  <li>Ensure the camera focuses directly on the lesion or affected leaf margin.</li>
+                  <li>Photograph both the upper and lower leaf surfaces.</li>
+                  <li>Avoid blurry, out-of-focus, or extreme wide-angle field shots.</li>
+                </ul>
+              </div>
+
+              <div className="rounded-2xl border border-emerald-300 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-950/20 p-4 space-y-2">
+                <span className="text-xs font-bold text-emerald-900 dark:text-emerald-200 uppercase tracking-wider block">
+                  👨‍🌾 Recommended Field Extension Actions
+                </span>
+                <ul className="text-xs text-emerald-950 dark:text-emerald-100 space-y-1.5 list-disc list-inside leading-relaxed">
+                  <li>Inspect surrounding plants to determine if symptoms are isolated or spreading.</li>
+                  <li>Do NOT spray chemical pesticides without verified on-site diagnosis.</li>
+                  <li>Consult your local Mandal Agricultural Extension Officer (AEO) for field inspection.</li>
+                  <li>Call Kisan Toll-Free Helpline: <b>1800-180-1551</b> (6 AM – 10 PM).</li>
+                </ul>
               </div>
             </div>
-          </div>
 
-          {/* Organic & Agronomic Recommendations */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Organic Alternative */}
-            <div className="rounded-2xl border border-teal-200 dark:border-teal-900/60 bg-teal-50/40 dark:bg-teal-950/20 p-4 space-y-1.5">
-              <span className="text-xs font-bold text-teal-900 dark:text-teal-300 uppercase tracking-wider block">
-                🌿 Organic &amp; Biological Management
-              </span>
-              <p className="text-xs text-teal-950 dark:text-teal-100 leading-relaxed">
-                {lang === "te" ? diagnosisResult.organicControlTe : diagnosisResult.organicControlEn}
-              </p>
-            </div>
-
-            {/* Preventive & Cultural Agronomy */}
-            <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50/40 dark:bg-stone-850/40 p-4 space-y-1.5">
-              <span className="text-xs font-bold text-stone-700 dark:text-stone-300 uppercase tracking-wider block">
-                🌾 Cultural &amp; Preventive Field Practices
-              </span>
-              <p className="text-xs text-stone-800 dark:text-stone-200 leading-relaxed">
-                {lang === "te" ? diagnosisResult.preventiveMeasuresTe : diagnosisResult.preventiveMeasuresEn}
+            {/* Safety Footer */}
+            <div className="rounded-2xl bg-white/80 dark:bg-stone-900/80 p-3.5 text-[11px] text-stone-600 dark:text-stone-400 space-y-1 border border-amber-200 dark:border-amber-900/60">
+              <div className="flex items-center gap-1.5 font-bold text-stone-900 dark:text-white">
+                <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                <span>Safety Gate Source: {diagnosticSource}</span>
+              </div>
+              <p className="leading-relaxed">
+                {diagnosisResult.safetyDisclaimer}
               </p>
             </div>
           </div>
+        ) : (
+          /* INDICATIVE DIAGNOSIS RESULT (Unverified - Draft KB) */
+          <div className="rounded-3xl border-2 border-emerald-500/40 bg-white dark:bg-stone-900 p-6 shadow-xl space-y-6 animate-in fade-in duration-300">
+            {/* Top Result Banner */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-stone-200 dark:border-stone-800">
+              <div className="space-y-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 px-3 py-1 text-xs font-bold border border-emerald-300">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>{lang === "te" ? "సూచిక నిర్ధారణ (ధ్రువీకరించబడనిది)" : "Indicative Assessment"}</span>
+                  </span>
+                  <span className="rounded-full bg-stone-100 dark:bg-stone-800 px-2.5 py-1 text-xs font-semibold text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700">
+                    Status: {diagnosisResult.confidenceLevel || "Possible diagnosis"}
+                  </span>
+                  <span className="rounded-full bg-amber-50 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 px-2.5 py-1 text-[11px] font-semibold border border-amber-200 dark:border-amber-800">
+                    {diagnosisResult.verificationStatus || "Unverified (Draft KB - Pending Extension Review)"}
+                  </span>
+                  <Badge variant={diagnosisResult.severity === "high" ? "critical" : "warning"}>
+                    Severity: {String(diagnosisResult.severity || "medium").toUpperCase()}
+                  </Badge>
+                </div>
 
-          {/* Safety Disclaimer & Source Footnote */}
-          <div className="rounded-2xl bg-stone-100 dark:bg-stone-850 p-4 text-[11px] text-stone-600 dark:text-stone-400 space-y-1 border border-stone-200 dark:border-stone-800">
-            <div className="flex items-center gap-1.5 font-bold text-stone-900 dark:text-white">
-              <ShieldCheck className="w-4 h-4 text-emerald-600" />
-              <span>Diagnostic Engine: {diagnosticSource}</span>
+                <h2 className="text-xl sm:text-2xl font-black text-stone-900 dark:text-white mt-1">
+                  {lang === "te" ? diagnosisResult.diseaseNameTe : diagnosisResult.diseaseNameEn}
+                </h2>
+                <p className="text-xs text-stone-500 dark:text-stone-400 italic">
+                  Pathogen: <span className="font-semibold text-stone-700 dark:text-stone-300">{diagnosisResult.scientificName}</span>
+                </p>
+              </div>
+
+              {/* Quick Actions Bar */}
+              <div className="flex flex-wrap items-center gap-2 shrink-0">
+                <button
+                  onClick={toggleSpeech}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-xs font-bold text-stone-800 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-750 transition shadow-2xs"
+                  title="Listen to prescription in voice audio"
+                >
+                  {isSpeaking ? (
+                    <>
+                      <VolumeX className="w-4 h-4 text-rose-600" />
+                      <span>Stop Voice</span>
+                    </>
+                  ) : (
+                    <>
+                      <Volume2 className="w-4 h-4 text-emerald-600" />
+                      <span>Listen Voice</span>
+                    </>
+                  )}
+                </button>
+
+                <button
+                  onClick={handleCopyPrescription}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-xs font-bold text-stone-800 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-750 transition shadow-2xs"
+                  title="Copy full assessment to clipboard"
+                >
+                  {isCopied ? (
+                    <>
+                      <Check className="w-4 h-4 text-emerald-600" />
+                      <span>Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-4 h-4 text-stone-600" />
+                      <span>Copy</span>
+                    </>
+                  )}
+                </button>
+
+                <button
+                  onClick={handleShareWhatsApp}
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold shadow-md shadow-emerald-700/20 transition hover:scale-[1.02]"
+                  title="Share assessment to WhatsApp"
+                >
+                  <Share2 className="w-4 h-4" />
+                  <span>Share WhatsApp</span>
+                </button>
+              </div>
             </div>
-            <p className="leading-relaxed">
-              {diagnosisResult.safetyDisclaimer}
-            </p>
+
+            {/* Core Findings Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Box 1: Symptoms Observed */}
+              <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50/60 dark:bg-stone-850/60 p-4 space-y-1.5">
+                <span className="text-xs font-bold text-stone-700 dark:text-stone-300 uppercase tracking-wider block">
+                  🔍 Visible Lesions &amp; Symptoms
+                </span>
+                <p className="text-xs text-stone-800 dark:text-stone-200 leading-relaxed font-medium">
+                  {lang === "te" ? diagnosisResult.symptomsTe : diagnosisResult.symptomsEn}
+                </p>
+                {diagnosisResult.favourableConditions && (
+                  <div className="pt-2 text-[11px] text-stone-500">
+                    <b>Favourable Weather:</b> {diagnosisResult.favourableConditions}
+                  </div>
+                )}
+              </div>
+
+              {/* Box 2: Chemical Notice (Task 4: Strictly unverified guidance) */}
+              <div className="rounded-2xl border border-amber-300 dark:border-amber-800 bg-amber-50/40 dark:bg-amber-950/20 p-4 space-y-2">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-amber-900 dark:text-amber-300 uppercase tracking-wider">
+                  <AlertTriangle className="w-4 h-4 text-amber-600" />
+                  <span>Chemical Class Guidance (Unverified)</span>
+                </div>
+                <p className="text-xs font-semibold text-stone-900 dark:text-stone-100 leading-relaxed">
+                  {lang === "te" ? diagnosisResult.chemicalSprayTe : diagnosisResult.chemicalSprayEn}
+                </p>
+                <div className="pt-2 text-[11px] text-amber-800 dark:text-amber-300 font-medium border-t border-amber-200 dark:border-amber-900/60 leading-relaxed">
+                  ⚠️ <b>Safety Notice:</b> Chemical recommendations in draft database are unverified. Please confirm CIB&amp;RC label registration and exact dosage with your local Mandal Agricultural Extension Officer (AEO) before purchase.
+                </div>
+              </div>
+            </div>
+
+            {/* Organic & Agronomic Recommendations */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Organic Alternative */}
+              <div className="rounded-2xl border border-teal-200 dark:border-teal-900/60 bg-teal-50/40 dark:bg-teal-950/20 p-4 space-y-1.5">
+                <span className="text-xs font-bold text-teal-900 dark:text-teal-300 uppercase tracking-wider block">
+                  🌿 Organic &amp; Biological Management
+                </span>
+                <p className="text-xs text-teal-950 dark:text-teal-100 leading-relaxed">
+                  {lang === "te" ? diagnosisResult.organicControlTe : diagnosisResult.organicControlEn}
+                </p>
+              </div>
+
+              {/* Preventive & Cultural Agronomy */}
+              <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50/40 dark:bg-stone-850/40 p-4 space-y-1.5">
+                <span className="text-xs font-bold text-stone-700 dark:text-stone-300 uppercase tracking-wider block">
+                  🌾 Cultural &amp; Preventive Field Practices
+                </span>
+                <p className="text-xs text-stone-800 dark:text-stone-200 leading-relaxed">
+                  {lang === "te" ? diagnosisResult.preventiveMeasuresTe : diagnosisResult.preventiveMeasuresEn}
+                </p>
+              </div>
+            </div>
+
+            {/* Safety Disclaimer & Source Footnote */}
+            <div className="rounded-2xl bg-stone-100 dark:bg-stone-850 p-4 text-[11px] text-stone-600 dark:text-stone-400 space-y-1 border border-stone-200 dark:border-stone-800">
+              <div className="flex items-center gap-1.5 font-bold text-stone-900 dark:text-white">
+                <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                <span>Diagnostic Assessment Source: {diagnosticSource}</span>
+              </div>
+              <p className="leading-relaxed">
+                {diagnosisResult.safetyDisclaimer}
+              </p>
+            </div>
           </div>
-        </div>
+        )
       )}
     </div>
   );
