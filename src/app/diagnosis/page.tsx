@@ -228,6 +228,10 @@ export default function DiagnosisPage() {
   const [isCompressing, setIsCompressing] = useState<boolean>(false);
   const [isDiagnosing, setIsDiagnosing] = useState<boolean>(false);
   const [diagnosisResult, setDiagnosisResult] = useState<any | null>(null);
+  const [candidatesList, setCandidatesList] = useState<any[]>([]);
+  const [activeCandidateIdx, setActiveCandidateIdx] = useState<number>(0);
+  const [primaryObservation, setPrimaryObservation] = useState<string>("");
+  const [rateLimitSeconds, setRateLimitSeconds] = useState<number>(0);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [diagnosticSource, setDiagnosticSource] = useState<string>("");
   const [isCopied, setIsCopied] = useState<boolean>(false);
@@ -282,8 +286,11 @@ export default function DiagnosisPage() {
     }
 
     setErrorMessage("");
+    setRateLimitSeconds(0);
     setIsDiagnosing(true);
     setDiagnosisResult(null);
+    setCandidatesList([]);
+    setActiveCandidateIdx(0);
 
     try {
       const res = await fetch("/api/diagnose", {
@@ -300,10 +307,16 @@ export default function DiagnosisPage() {
 
       const data = await res.json();
       if (!res.ok || data.error) {
+        if (res.status === 429 && data.resetSeconds) {
+          setRateLimitSeconds(data.resetSeconds);
+        }
         throw new Error(data.error || "Failed to process diagnosis.");
       }
 
       setDiagnosisResult(data.diagnosis);
+      setCandidatesList(Array.isArray(data.candidates) ? data.candidates : []);
+      setActiveCandidateIdx(0);
+      setPrimaryObservation(data.primaryObservation || "");
       setDiagnosticSource(data.source || "Gemini Multimodal AI & Scientific Crop Pathology");
     } catch (err: any) {
       setErrorMessage(err.message || "Diagnosis service temporarily unavailable. Please verify connection and retry.");
@@ -321,41 +334,72 @@ export default function DiagnosisPage() {
     handleRunDiagnosis(testCase.crop, testCase.symptoms, undefined);
   };
 
+  // Active selected candidate item helper
+  const getActiveItem = () => {
+    if (candidatesList && candidatesList.length > 0) {
+      const cand = candidatesList[activeCandidateIdx] || candidatesList[0];
+      return {
+        ...cand,
+        diseaseNameEn: cand.commonName || cand.diseaseNameEn || diagnosisResult?.diseaseNameEn,
+        diseaseNameTe: cand.nameTe || cand.diseaseNameTe || diagnosisResult?.diseaseNameTe,
+        crop: selectedCrop,
+        symptomsEn: cand.symptomsSeen || cand.symptomsEn || diagnosisResult?.symptomsEn,
+        symptomsTe: cand.symptomsSeen || cand.symptomsTe || diagnosisResult?.symptomsTe,
+        chemicalSprayEn: cand.management?.chemicalNoticeEn || cand.chemicalSprayEn || diagnosisResult?.chemicalSprayEn,
+        chemicalSprayTe: cand.management?.chemicalNoticeTe || cand.chemicalSprayTe || diagnosisResult?.chemicalSprayTe,
+        dosage: diagnosisResult?.dosage || "Confirm with Mandal AEO before purchase",
+        organicControlEn: cand.management?.biological?.[0] || cand.organicControlEn || diagnosisResult?.organicControlEn,
+        organicControlTe: cand.management?.biological?.[0] || cand.organicControlTe || diagnosisResult?.organicControlTe,
+        preventiveMeasuresEn: cand.management?.cultural?.[0] || cand.preventiveMeasuresEn || diagnosisResult?.preventiveMeasuresEn,
+        preventiveMeasuresTe: cand.management?.cultural?.[0] || cand.preventiveMeasuresTe || diagnosisResult?.preventiveMeasuresTe,
+        safetyDisclaimer: cand.management?.safetyDisclaimer || diagnosisResult?.safetyDisclaimer,
+        favourableConditions: cand.favourableConditions || diagnosisResult?.favourableConditions,
+        unconfirmedSymptoms: cand.unconfirmedSymptoms,
+        differentialClues: cand.differentialClues,
+        fieldCheck: cand.fieldCheck,
+        type: cand.type,
+      };
+    }
+    return diagnosisResult;
+  };
+
   // Copy prescription text
   const handleCopyPrescription = () => {
-    if (!diagnosisResult) return;
+    const item = getActiveItem();
+    if (!item) return;
     const text = `🌱 Smart Farm Assistant - Crop Diagnosis Assessment
-Status: ${diagnosisResult.status === "inconclusive" ? "INCONCLUSIVE (Field Verification Required)" : "POSSIBLE DIAGNOSIS (Indicative Assessment)"}
-Assessment Level: ${diagnosisResult.confidenceLevel || "Needs further verification"}
-Disease: ${diagnosisResult.diseaseNameEn} (${diagnosisResult.diseaseNameTe})
-Crop: ${diagnosisResult.crop}
-Observed Symptoms: ${diagnosisResult.symptomsEn}
-Chemical Notice: ${diagnosisResult.chemicalSprayEn}
-Organic / Cultural Management: ${diagnosisResult.organicControlEn}
-Preventive Field Agronomy: ${diagnosisResult.preventiveMeasuresEn}
-Safety Rule: ${diagnosisResult.safetyDisclaimer}`;
+Status: ${item.status === "inconclusive" ? "INCONCLUSIVE (Field Verification Required)" : "POSSIBLE DIAGNOSIS (Indicative Assessment)"}
+Assessment Level: ${item.confidenceLevel || "Needs further verification"}
+Disease: ${item.diseaseNameEn} (${item.diseaseNameTe})
+Crop: ${item.crop || selectedCrop}
+Observed Symptoms: ${item.symptomsEn}
+${item.differentialClues ? `Differential Clues: ${item.differentialClues}\n` : ""}${item.fieldCheck ? `Field Check: ${item.fieldCheck}\n` : ""}Chemical Notice: ${item.chemicalSprayEn}
+Organic / Cultural Management: ${item.organicControlEn}
+Preventive Field Agronomy: ${item.preventiveMeasuresEn}
+Safety Rule: ${item.safetyDisclaimer}`;
     navigator.clipboard.writeText(text);
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
   };
 
   // WhatsApp Sharing
-    const handleShareWhatsApp = () => {
-    if (!diagnosisResult) return;
+  const handleShareWhatsApp = () => {
+    const item = getActiveItem();
+    if (!item) return;
     const text = formatPestMessage(
       {
-        crop: diagnosisResult.crop,
-        cropTe: diagnosisResult.crop,
-        pestName: diagnosisResult.diseaseNameEn,
-        pestNameTe: diagnosisResult.diseaseNameTe,
-        remedy: diagnosisResult.chemicalSprayEn,
-        remedyTe: diagnosisResult.chemicalSprayTe,
-        dosage: diagnosisResult.dosage,
-        dosageTe: diagnosisResult.dosage,
-        organic: diagnosisResult.organicControlEn,
-        organicTe: diagnosisResult.organicControlTe,
-        ppe: diagnosisResult.safetyDisclaimer || "Wear protective mask and gloves.",
-        ppeTe: diagnosisResult.safetyDisclaimer || "రక్షణ మాస్క్ మరియు చేతి తొడుగులు ధరించండి.",
+        crop: item.crop || selectedCrop,
+        cropTe: item.crop || selectedCrop,
+        pestName: item.diseaseNameEn,
+        pestNameTe: item.diseaseNameTe,
+        remedy: item.chemicalSprayEn,
+        remedyTe: item.chemicalSprayTe,
+        dosage: item.dosage,
+        dosageTe: item.dosage,
+        organic: item.organicControlEn,
+        organicTe: item.organicControlTe,
+        ppe: item.safetyDisclaimer || "Wear protective mask and gloves.",
+        ppeTe: item.safetyDisclaimer || "రక్షణ మాస్క్ మరియు చేతి తొడుగులు ధరించండి.",
       },
       lang
     );
@@ -371,10 +415,11 @@ Safety Rule: ${diagnosisResult.safetyDisclaimer}`;
       return;
     }
 
-    if (!diagnosisResult) return;
+    const item = getActiveItem();
+    if (!item) return;
     const textToRead = lang === "te"
-      ? `${diagnosisResult.diseaseNameTe}. ${diagnosisResult.chemicalSprayTe}. మోతాదు: ${diagnosisResult.dosage}. సేంద్రీయ విధానం: ${diagnosisResult.organicControlTe}`
-      : `${diagnosisResult.diseaseNameEn}. Recommended treatment: ${diagnosisResult.chemicalSprayEn}. Dosage: ${diagnosisResult.dosage}. Organic alternative: ${diagnosisResult.organicControlEn}`;
+      ? `${item.diseaseNameTe}. ${item.chemicalSprayTe}. మోతాదు: ${item.dosage}. సేంద్రీయ విధానం: ${item.organicControlTe}`
+      : `${item.diseaseNameEn}. Recommended treatment: ${item.chemicalSprayEn}. Dosage: ${item.dosage}. Organic alternative: ${item.organicControlEn}`;
 
     const utterance = new SpeechSynthesisUtterance(textToRead);
     utterance.lang = lang === "te" ? "te-IN" : "en-IN";
@@ -633,6 +678,18 @@ Safety Rule: ${diagnosisResult.safetyDisclaimer}`;
         </div>
       </div>
 
+      {/* Rate Limit Alert */}
+      {rateLimitSeconds > 0 && (
+        <div className="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-xs font-semibold text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200 flex items-center gap-2">
+          <AlertTriangle className="h-4 w-4 shrink-0 text-amber-600" />
+          <span>
+            {lang === "te"
+              ? `నిర్ధారణ పరిమితి ముగిసింది (10 నిమిషాలకు 10 అభ్యర్థనలు). దయచేసి మరో ${rateLimitSeconds} సెకన్ల తర్వాత ప్రయత్నించండి.`
+              : `Diagnosis rate limit reached (10 requests per 10 minutes). Please wait ${rateLimitSeconds} seconds before submitting another image.`}
+          </span>
+        </div>
+      )}
+
       {/* Error Message */}
       {errorMessage && (
         <div className="rounded-2xl border border-rose-300 bg-rose-50 p-4 text-xs font-semibold text-rose-800 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-300 flex items-center gap-2">
@@ -765,33 +822,101 @@ Safety Rule: ${diagnosisResult.safetyDisclaimer}`;
               </p>
             </div>
           </div>
-        ) : (
-          /* INDICATIVE DIAGNOSIS RESULT (Unverified - Draft KB) */
+        ) : (() => {
+          const item = getActiveItem();
+          if (!item) return null;
+          return (
+          /* INDICATIVE / DIFFERENTIAL DIAGNOSIS RESULT (Draft KB Standard) */
           <div className="rounded-3xl border-2 border-emerald-500/40 bg-white dark:bg-stone-900 p-6 shadow-xl space-y-6 animate-in fade-in duration-300">
-            {/* Top Result Banner */}
+            {/* Primary Observation Banner if available */}
+            {primaryObservation && (
+              <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50/80 dark:bg-stone-850/80 p-3.5 text-xs text-stone-700 dark:text-stone-300 flex items-start gap-2">
+                <Info className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                <div>
+                  <span className="font-bold text-stone-900 dark:text-white block mb-0.5">
+                    {lang === "te" ? "ప్రాథమిక పరిశీలన సారాంశం (AI విజన్):" : "Diagnostic Observation Summary:"}
+                  </span>
+                  <span>{primaryObservation}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Differential Candidate Tabs (Multi-Candidate Navigation) */}
+            {candidatesList && candidatesList.length > 1 && (
+              <div className="rounded-2xl border border-emerald-500/30 bg-emerald-50/40 dark:bg-emerald-950/20 p-4 space-y-2.5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                  <span className="text-xs font-bold text-emerald-950 dark:text-emerald-200 flex items-center gap-1.5">
+                    <Layers className="w-4 h-4 text-emerald-600" />
+                    <span>
+                      {lang === "te"
+                        ? "డిఫరెన్షియల్ నిర్ధారణలు (ఒకే రకమైన లక్షణాలు ఉన్న తెగుళ్ళు):"
+                        : "Differential Diagnoses (Multiple Overlapping Conditions Detected):"}
+                    </span>
+                  </span>
+                  <span className="text-[11px] text-emerald-800 dark:text-emerald-300 font-semibold">
+                    {candidatesList.length} possible conditions
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {candidatesList.map((cand: any, idx: number) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setActiveCandidateIdx(idx)}
+                      className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all border ${
+                        activeCandidateIdx === idx
+                          ? "bg-emerald-700 text-white border-emerald-700 shadow-sm scale-102"
+                          : "bg-white dark:bg-stone-850 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-750 hover:border-emerald-500"
+                      }`}
+                    >
+                      <span className="w-5 h-5 rounded-full flex items-center justify-center bg-black/10 dark:bg-white/10 text-[10px]">
+                        {idx + 1}
+                      </span>
+                      <span>{lang === "te" ? (cand.nameTe || cand.commonName) : cand.commonName}</span>
+                      <span className="text-[10px] opacity-75 uppercase tracking-wider">
+                        ({cand.type || "pathology"})
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Active Candidate Banner */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-stone-200 dark:border-stone-800">
               <div className="space-y-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 px-3 py-1 text-xs font-bold border border-emerald-300">
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>{lang === "te" ? "సూచిక నిర్ధారణ (ధ్రువీకరించబడనిది)" : "Indicative Assessment"}</span>
+                    <span>
+                      {candidatesList.length > 1
+                        ? `Candidate ${activeCandidateIdx + 1} of ${candidatesList.length}`
+                        : lang === "te"
+                        ? "సూచిక నిర్ధారణ (పరిశీలించదగినది)"
+                        : "Indicative Assessment"}
+                    </span>
                   </span>
                   <span className="rounded-full bg-stone-100 dark:bg-stone-800 px-2.5 py-1 text-xs font-semibold text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700">
-                    Status: {diagnosisResult.confidenceLevel || "Possible diagnosis"}
+                    Status: {item.confidenceLevel || "Possible diagnosis"}
                   </span>
                   <span className="rounded-full bg-amber-50 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 px-2.5 py-1 text-[11px] font-semibold border border-amber-200 dark:border-amber-800">
-                    {diagnosisResult.verificationStatus || "Unverified (Draft KB - Pending Extension Review)"}
+                    {item.verificationStatus || "Draft Knowledge Base (Pending Field Review)"}
                   </span>
-                  <Badge variant={diagnosisResult.severity === "high" ? "critical" : "warning"}>
-                    Severity: {String(diagnosisResult.severity || "medium").toUpperCase()}
+                  <Badge variant={item.severity === "high" ? "critical" : "warning"}>
+                    Severity: {String(item.severity || "medium").toUpperCase()}
                   </Badge>
+                  {item.type && (
+                    <span className="rounded-full bg-sky-50 text-sky-800 dark:bg-sky-950/60 dark:text-sky-300 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider border border-sky-200 dark:border-sky-900">
+                      {item.type}
+                    </span>
+                  )}
                 </div>
 
                 <h2 className="text-xl sm:text-2xl font-black text-stone-900 dark:text-white mt-1">
-                  {lang === "te" ? diagnosisResult.diseaseNameTe : diagnosisResult.diseaseNameEn}
+                  {lang === "te" ? item.diseaseNameTe : item.diseaseNameEn}
                 </h2>
                 <p className="text-xs text-stone-500 dark:text-stone-400 italic">
-                  Pathogen: <span className="font-semibold text-stone-700 dark:text-stone-300">{diagnosisResult.scientificName}</span>
+                  Organism / Classification: <span className="font-semibold text-stone-700 dark:text-stone-300">{item.scientificName}</span>
                 </p>
               </div>
 
@@ -847,55 +972,82 @@ Safety Rule: ${diagnosisResult.safetyDisclaimer}`;
             {/* Core Findings Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Box 1: Symptoms Observed */}
-              <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50/60 dark:bg-stone-850/60 p-4 space-y-1.5">
+              <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50/60 dark:bg-stone-850/60 p-4 space-y-2">
                 <span className="text-xs font-bold text-stone-700 dark:text-stone-300 uppercase tracking-wider block">
-                  🔍 Visible Lesions &amp; Symptoms
+                  🔍 Visible Foliage Symptoms
                 </span>
                 <p className="text-xs text-stone-800 dark:text-stone-200 leading-relaxed font-medium">
-                  {lang === "te" ? diagnosisResult.symptomsTe : diagnosisResult.symptomsEn}
+                  {lang === "te" ? item.symptomsTe : item.symptomsEn}
                 </p>
-                {diagnosisResult.favourableConditions && (
-                  <div className="pt-2 text-[11px] text-stone-500">
-                    <b>Favourable Weather:</b> {diagnosisResult.favourableConditions}
+                {item.unconfirmedSymptoms && (
+                  <div className="rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50/50 dark:bg-amber-950/20 p-2.5 text-[11px] text-amber-900 dark:text-amber-200 leading-snug">
+                    <span className="font-bold">⚠️ Unconfirmed Signs in Current Photo:</span> {item.unconfirmedSymptoms}
+                  </div>
+                )}
+                {item.favourableConditions && (
+                  <div className="pt-1 text-[11px] text-stone-500">
+                    <b>Favourable Weather:</b> {item.favourableConditions}
                   </div>
                 )}
               </div>
 
-              {/* Box 2: Chemical Notice (Task 4: Strictly unverified guidance) */}
-              <div className="rounded-2xl border border-amber-300 dark:border-amber-800 bg-amber-50/40 dark:bg-amber-950/20 p-4 space-y-2">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-amber-900 dark:text-amber-300 uppercase tracking-wider">
-                  <AlertTriangle className="w-4 h-4 text-amber-600" />
-                  <span>Chemical Class Guidance (Unverified)</span>
-                </div>
-                <p className="text-xs font-semibold text-stone-900 dark:text-stone-100 leading-relaxed">
-                  {lang === "te" ? diagnosisResult.chemicalSprayTe : diagnosisResult.chemicalSprayEn}
-                </p>
-                <div className="pt-2 text-[11px] text-amber-800 dark:text-amber-300 font-medium border-t border-amber-200 dark:border-amber-900/60 leading-relaxed">
-                  ⚠️ <b>Safety Notice:</b> Chemical recommendations in draft database are unverified. Please confirm CIB&amp;RC label registration and exact dosage with your local Mandal Agricultural Extension Officer (AEO) before purchase.
-                </div>
+              {/* Box 2: Differential Clues & Field Checks */}
+              <div className="rounded-2xl border border-blue-200 dark:border-blue-900/60 bg-blue-50/30 dark:bg-blue-950/20 p-4 space-y-2">
+                <span className="text-xs font-bold text-blue-900 dark:text-blue-300 uppercase tracking-wider block">
+                  🔬 Differential Clues &amp; Farmer Field Check
+                </span>
+                {item.differentialClues && (
+                  <div className="text-xs text-stone-800 dark:text-stone-200 leading-relaxed font-medium">
+                    <span className="font-bold text-blue-900 dark:text-blue-300 block mb-0.5">
+                      Key Distinguishing Features:
+                    </span>
+                    {item.differentialClues}
+                  </div>
+                )}
+                {item.fieldCheck && (
+                  <div className="rounded-xl border border-blue-200 dark:border-blue-900/50 bg-white dark:bg-stone-900 p-2.5 text-[11px] text-blue-950 dark:text-blue-200 leading-snug">
+                    <span className="font-bold block text-blue-700 dark:text-blue-300 mb-0.5">
+                      👨‍🌾 Recommended Field Check for Farmer:
+                    </span>
+                    {item.fieldCheck}
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Organic & Agronomic Recommendations */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Organic Alternative */}
-              <div className="rounded-2xl border border-teal-200 dark:border-teal-900/60 bg-teal-50/40 dark:bg-teal-950/20 p-4 space-y-1.5">
-                <span className="text-xs font-bold text-teal-900 dark:text-teal-300 uppercase tracking-wider block">
-                  🌿 Organic &amp; Biological Management
+            {/* Organic, Cultural & Chemical Notice */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Box 1: Cultural Management */}
+              <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50/40 dark:bg-stone-850/40 p-4 space-y-1.5">
+                <span className="text-xs font-bold text-stone-700 dark:text-stone-300 uppercase tracking-wider block">
+                  🌾 Cultural Agronomy
                 </span>
-                <p className="text-xs text-teal-950 dark:text-teal-100 leading-relaxed">
-                  {lang === "te" ? diagnosisResult.organicControlTe : diagnosisResult.organicControlEn}
+                <p className="text-xs text-stone-800 dark:text-stone-200 leading-relaxed">
+                  {lang === "te" ? item.preventiveMeasuresTe : item.preventiveMeasuresEn}
                 </p>
               </div>
 
-              {/* Preventive & Cultural Agronomy */}
-              <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50/40 dark:bg-stone-850/40 p-4 space-y-1.5">
-                <span className="text-xs font-bold text-stone-700 dark:text-stone-300 uppercase tracking-wider block">
-                  🌾 Cultural &amp; Preventive Field Practices
+              {/* Box 2: Organic & Biological */}
+              <div className="rounded-2xl border border-teal-200 dark:border-teal-900/60 bg-teal-50/40 dark:bg-teal-950/20 p-4 space-y-1.5">
+                <span className="text-xs font-bold text-teal-900 dark:text-teal-300 uppercase tracking-wider block">
+                  🌿 Organic &amp; Biological
                 </span>
-                <p className="text-xs text-stone-800 dark:text-stone-200 leading-relaxed">
-                  {lang === "te" ? diagnosisResult.preventiveMeasuresTe : diagnosisResult.preventiveMeasuresEn}
+                <p className="text-xs text-teal-950 dark:text-teal-100 leading-relaxed">
+                  {lang === "te" ? item.organicControlTe : item.organicControlEn}
                 </p>
+              </div>
+
+              {/* Box 3: Indicative Chemical Guidance */}
+              <div className="rounded-2xl border border-amber-300 dark:border-amber-800 bg-amber-50/40 dark:bg-amber-950/20 p-4 space-y-1.5">
+                <span className="text-xs font-bold text-amber-900 dark:text-amber-300 uppercase tracking-wider block">
+                  ⚠️ Chemical Guidance (Indicative Only)
+                </span>
+                <p className="text-xs font-semibold text-stone-900 dark:text-stone-100 leading-relaxed">
+                  {lang === "te" ? item.chemicalSprayTe : item.chemicalSprayEn}
+                </p>
+                <div className="text-[10px] text-amber-800 dark:text-amber-300 font-medium pt-1 border-t border-amber-200 dark:border-amber-900/50">
+                  Dosage: Confirm with Mandal AEO before purchase. Never apply without CIB&amp;RC container label verification.
+                </div>
               </div>
             </div>
 
@@ -906,11 +1058,12 @@ Safety Rule: ${diagnosisResult.safetyDisclaimer}`;
                 <span>Diagnostic Assessment Source: {diagnosticSource}</span>
               </div>
               <p className="leading-relaxed">
-                {diagnosisResult.safetyDisclaimer}
+                {item.safetyDisclaimer || diagnosisResult.safetyDisclaimer}
               </p>
             </div>
           </div>
-        )
+          );
+        })()
       )}
     </div>
   );

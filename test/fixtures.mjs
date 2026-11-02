@@ -86,3 +86,4 @@ export const SPOOFED_IMAGE = "data:image/png;base64," + Buffer.from("<html><scri
 
 // 7. Unsupported File Type (GIF89a signature)
 export const UNSUPPORTED_TYPE_IMAGE = "data:image/gif;base64," + Buffer.from("GIF89a\x01\x00\x01\x00\x80\x00\x00\x00\x00\x00\xff\xff\xff!").toString("base64");
+

@@ -324,3 +324,4 @@ test("Test 16: Valid image proceeds to diagnosis stage with safety gate preserve
   assert.equal(res.body.diagnosis.isChemicalVerified, false);
   assert.match(res.body.diagnosis.safetyDisclaimer, /Agriculture Extension Officer/i);
 });
+

@@ -12,6 +12,7 @@
     "lint": "next lint",
     "test:safety": "node --experimental-strip-types --test test/phase-a-safety.test.mjs",
     "test:validation": "node --experimental-strip-types --test test/phase-b-validation.test.mjs",
+    "test:diagnosis": "node --experimental-strip-types --test test/phase-c-diagnosis.test.mjs",
     "test:all": "node --experimental-strip-types --test test/*.test.mjs"
   },
   "dependencies": {
