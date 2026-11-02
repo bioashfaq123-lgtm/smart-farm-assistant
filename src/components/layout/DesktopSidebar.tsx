@@ -19,6 +19,7 @@ import {
   Compass,
   Stethoscope,
   LogIn,
+  LogOut,
 } from "lucide-react";
 import { useLanguage } from "../common/LanguageContext";
 import { useFarmerProfile } from "../common/FarmerProfileContext";
@@ -26,7 +27,7 @@ import { useFarmerProfile } from "../common/FarmerProfileContext";
 export function DesktopSidebar() {
   const pathname = usePathname();
   const { t } = useLanguage();
-  const { profile, openProfileModal, openAuthModal, isLoggedIn } = useFarmerProfile();
+  const { profile, openProfileModal, openAuthModal, isLoggedIn, logout } = useFarmerProfile();
   const { lang } = useLanguage();
 
   const initials = profile.name
@@ -188,10 +189,23 @@ export function DesktopSidebar() {
             type="button"
             onClick={() => openAuthModal("login")}
             className="flex-1 text-center py-1.5 px-2 rounded-lg text-[11px] font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:hover:bg-emerald-900 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800 transition flex items-center justify-center gap-1 shadow-2xs"
+            title="Switch to another farmer account or demo"
           >
             <LogIn className="w-3 h-3" />
-            <span>{isLoggedIn ? (profile.name ? "Switch Account" : "Farmer Profile") : "Login / Register"}</span>
+            <span>{isLoggedIn && profile.name ? (lang === "te" ? "ఖాతా మార్చండి" : "Switch Account") : (lang === "te" ? "లాగిన్" : "Login")}</span>
           </button>
+
+          {isLoggedIn && profile.name && (
+            <button
+              type="button"
+              onClick={logout}
+              className="py-1.5 px-2.5 rounded-lg text-[11px] font-semibold bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:hover:bg-rose-900 dark:text-rose-300 border border-rose-200/60 dark:border-rose-900 transition flex items-center justify-center gap-1 shadow-2xs"
+              title="Logout from this account"
+            >
+              <LogOut className="w-3 h-3 text-rose-600 dark:text-rose-400" />
+              <span>{lang === "te" ? "లాగ్ అవుట్" : "Logout"}</span>
+            </button>
+          )}
         </div>
 
         <div className="mt-2 pt-2 border-t border-stone-100 dark:border-stone-800/60">

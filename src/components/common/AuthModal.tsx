@@ -12,6 +12,7 @@ import {
   ChevronDown,
   Sparkles,
   Zap,
+  LogOut,
 } from "lucide-react";
 import { QUICK_DEMO_FARMERS, DemoFarmer } from "@/lib/auth/demoProfiles";
 import { useFarmerProfile } from "./FarmerProfileContext";
@@ -25,7 +26,7 @@ interface AuthModalProps {
 }
 
 export function AuthModal({ isOpen, onClose, initialTab = "login" }: AuthModalProps) {
-  const { profile, updateProfile, loginWithDemo } = useFarmerProfile();
+  const { profile, updateProfile, loginWithDemo, logout } = useFarmerProfile();
   const { setLang } = useLanguage();
 
   const [tab, setTab] = useState<"login" | "register">(initialTab);
@@ -227,6 +228,37 @@ export function AuthModal({ isOpen, onClose, initialTab = "login" }: AuthModalPr
             Smart Farming &amp; IoT Rythu Platform
           </p>
         </div>
+
+        {/* Active Session & Logout option if already logged in */}
+        {profile.name && (
+          <div className="mb-4 rounded-xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-850 p-3 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-700 text-white font-bold text-xs">
+                {profile.name.charAt(0).toUpperCase()}
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-stone-900 dark:text-white truncate">
+                  {profile.name}
+                </p>
+                <p className="text-[11px] text-stone-500 truncate">
+                  {profile.email || `${profile.village}, ${profile.district}`}
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                logout();
+                onClose();
+              }}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-rose-300 dark:border-rose-900 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 font-bold text-xs transition shadow-2xs"
+              title="Logout from this account"
+            >
+              <LogOut className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
+              <span>Log Out</span>
+            </button>
+          </div>
+        )}
 
         {/* Status Alerts */}
         {errorMsg && (

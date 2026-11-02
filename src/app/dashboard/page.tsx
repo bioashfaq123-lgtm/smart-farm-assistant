@@ -21,6 +21,7 @@ import {
   Edit3,
   RefreshCw,
   Info,
+  LogOut,
 } from "lucide-react";
 import { useLanguage } from "@/components/common/LanguageContext";
 import { useFarmerProfile } from "@/components/common/FarmerProfileContext";
@@ -37,7 +38,7 @@ import {
 
 export default function DashboardPage() {
   const { lang, t } = useLanguage();
-  const { profile, openProfileModal, resetToSample } = useFarmerProfile();
+  const { profile, openProfileModal, resetToSample, logout } = useFarmerProfile();
   const { telemetry } = useIoTTelemetry(8000);
 
   // Calculate dynamic crop age from farmer's actual sowing date
@@ -132,6 +133,16 @@ export default function DashboardPage() {
             >
               <span>✨ Feature Showcase</span>
             </Link>
+            {profile.name && (
+              <button
+                onClick={logout}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-rose-600/30 border border-rose-400/50 px-3.5 py-2 text-xs font-bold text-rose-100 backdrop-blur-md shadow-xs transition hover:bg-rose-600/50 active:scale-95 sm:ml-auto"
+                title="Logout from this farmer account"
+              >
+                <LogOut className="h-3.5 w-3.5 text-rose-300" />
+                <span>{lang === "te" ? "లాగ్ అవుట్" : "Log Out"}</span>
+              </button>
+            )}
           </div>
         </div>
       </div>

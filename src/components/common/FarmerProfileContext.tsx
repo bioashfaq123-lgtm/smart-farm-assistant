@@ -11,6 +11,7 @@ import {
   TELANGANA_DISTRICTS,
 } from "@/lib/profile/farmerProfile";
 import { AuthModal } from "./AuthModal";
+import { LogOut } from "lucide-react";
 import { DemoFarmer } from "@/lib/auth/demoProfiles";
 
 interface FarmerProfileContextType {
@@ -57,9 +58,15 @@ export function FarmerProfileProvider({ children }: { children: React.ReactNode 
     const stored = getStoredFarmerProfile();
     setProfile(stored);
 
-    const loggedInStored = localStorage.getItem("smartfarm_logged_in") === "true";
-    if (loggedInStored || stored.hasCompletedOnboarding) {
+    const loggedInStored = localStorage.getItem("smartfarm_logged_in");
+    if (loggedInStored === "true") {
       setIsLoggedIn(true);
+    } else if (loggedInStored === "false") {
+      setIsLoggedIn(false);
+    } else if (stored.hasCompletedOnboarding && stored.name && stored.name.trim() !== "") {
+      setIsLoggedIn(true);
+    } else {
+      setIsLoggedIn(false);
     }
 
     const handleUpdate = () => {
@@ -122,8 +129,19 @@ export function FarmerProfileProvider({ children }: { children: React.ReactNode 
   const logout = () => {
     setIsLoggedIn(false);
     if (typeof window !== "undefined") {
-      localStorage.removeItem("smartfarm_logged_in");
+      localStorage.setItem("smartfarm_logged_in", "false");
     }
+    const emptyProfile: FarmerProfile = {
+      ...EMPTY_INITIAL_FARMER,
+      name: "",
+      nameTe: "",
+      phone: "",
+      email: "",
+      isCustom: false,
+      hasCompletedOnboarding: false,
+    };
+    saveFarmerProfile(emptyProfile);
+    setProfile(emptyProfile);
   };
 
   return (
@@ -156,6 +174,10 @@ export function FarmerProfileProvider({ children }: { children: React.ReactNode 
             resetToSample();
             setIsModalOpen(false);
           }}
+          onLogout={() => {
+            logout();
+            setIsModalOpen(false);
+          }}
           onClose={() => setIsModalOpen(false)}
         />
       )}
@@ -176,11 +198,13 @@ function FarmerProfileModal({
   profile,
   onSave,
   onReset,
+  onLogout,
   onClose,
 }: {
   profile: FarmerProfile;
   onSave: (updates: Partial<FarmerProfile>) => void;
   onReset: () => void;
+  onLogout: () => void;
   onClose: () => void;
 }) {
   const [name, setName] = useState(profile.name);
@@ -467,13 +491,26 @@ function FarmerProfileModal({
           </div>
 
           <div className="pt-4 border-t border-stone-200 dark:border-stone-800 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <button
-              type="button"
-              onClick={onReset}
-              className="w-full sm:w-auto px-4 py-2 text-xs font-bold text-stone-600 dark:text-stone-400 hover:text-stone-900 transition border border-stone-200 dark:border-stone-700 rounded-xl"
-            >
-              Load Sample Profile (Mallesham Goud, Jagtial)
-            </button>
+            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+              <button
+                type="button"
+                onClick={onReset}
+                className="w-full sm:w-auto px-3.5 py-2 text-xs font-bold text-stone-600 dark:text-stone-400 hover:text-stone-900 transition border border-stone-200 dark:border-stone-700 rounded-xl"
+              >
+                Sample Profile
+              </button>
+              {profile.name && (
+                <button
+                  type="button"
+                  onClick={onLogout}
+                  className="w-full sm:w-auto px-3.5 py-2 text-xs font-bold text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition border border-rose-200 dark:border-rose-900/60 rounded-xl flex items-center justify-center gap-1.5 shadow-2xs"
+                  title="Logout from this account"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>Log Out</span>
+                </button>
+              )}
+            </div>
 
             <div className="flex items-center gap-2 w-full sm:w-auto">
               {profile.hasCompletedOnboarding && (

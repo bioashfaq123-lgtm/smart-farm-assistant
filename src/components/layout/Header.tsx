@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Moon, Sun, Globe, Sprout, MapPin, Wifi, WifiOff, LogIn, Compass } from "lucide-react";
+import { Moon, Sun, Globe, Sprout, MapPin, Wifi, WifiOff, LogIn, Compass, LogOut, User } from "lucide-react";
 import Link from "next/link";
 import { useLanguage } from "../common/LanguageContext";
 import { useTheme } from "../common/ThemeContext";
@@ -10,7 +10,7 @@ import { useFarmerProfile } from "../common/FarmerProfileContext";
 export function Header() {
   const { lang, setLang, t } = useLanguage();
   const { theme, toggleTheme } = useTheme();
-  const { profile, openProfileModal, openAuthModal, isLoggedIn } = useFarmerProfile();
+  const { profile, openProfileModal, openAuthModal, isLoggedIn, logout } = useFarmerProfile();
   const [isOnline, setIsOnline] = useState(true);
 
   useEffect(() => {
@@ -117,18 +117,39 @@ export function Header() {
           <span>Showcase</span>
         </Link>
 
-        {/* Login / Register / Farmer Profile Pill */}
-        <button
-          type="button"
-          onClick={() => openAuthModal("login")}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs transition shadow-xs"
-          title="Login / Register or Switch Farmer Profile"
-        >
-          <LogIn className="w-3.5 h-3.5" />
-          <span className="max-w-[120px] truncate">
-            {profile.name ? profile.name : "Login"}
-          </span>
-        </button>
+        {/* Login / Register / Farmer Profile & Logout Pill */}
+        {isLoggedIn && profile.name ? (
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={openProfileModal}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs transition shadow-xs"
+              title="Farmer Profile & Settings"
+            >
+              <User className="w-3.5 h-3.5" />
+              <span className="max-w-[110px] truncate">{profile.name}</span>
+            </button>
+            <button
+              type="button"
+              onClick={logout}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-rose-200 dark:border-rose-900/60 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 text-rose-700 dark:text-rose-300 font-semibold text-xs transition shadow-2xs"
+              title="Logout from this account"
+            >
+              <LogOut className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
+              <span className="hidden sm:inline">{lang === "te" ? "లాగ్ అవుట్" : "Logout"}</span>
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => openAuthModal("login")}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs transition shadow-xs"
+            title="Login / Register"
+          >
+            <LogIn className="w-3.5 h-3.5" />
+            <span>{lang === "te" ? "లాగిన్ / నమోదు" : "Login"}</span>
+          </button>
+        )}
       </div>
     </header>
   );
