@@ -1,0 +1,458 @@
+{
+  "evaluated_at": "2026-11-03T08:27:10.197Z",
+  "benchmark_title": "Telangana Agricultural Crop Health Benchmark (TACH-10)",
+  "benchmark_version": "1.0.0",
+  "sample_size": 16,
+  "evaluable_disease_cases": 10,
+  "abstention_opportunity_cases": 6,
+  "metrics": {
+    "top1_accuracy_percent": "100.0",
+    "top3_accuracy_percent": "100.0",
+    "macro_f1_score": "1.000",
+    "appropriate_abstention_rate_percent": "100.0",
+    "inappropriate_confident_diagnosis_rate_percent": "0.0",
+    "pre_inference_quality_gate_rejections": 1,
+    "latency_ms": {
+      "mean": 2,
+      "p50": 1,
+      "p95": 10
+    }
+  },
+  "per_class_metrics": {
+    "healthy": {
+      "true_positives": 0,
+      "false_positives": 0,
+      "false_negatives": 2,
+      "precision": 0,
+      "recall": 0,
+      "f1_score": 0
+    },
+    "paddy_blast": {
+      "true_positives": 3,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "precision": 1,
+      "recall": 1,
+      "f1_score": 1
+    },
+    "cotton_bacterial_blight": {
+      "true_positives": 1,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "precision": 1,
+      "recall": 1,
+      "f1_score": 1
+    },
+    "chilli_anthracnose_fruit_rot": {
+      "true_positives": 1,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "precision": 1,
+      "recall": 1,
+      "f1_score": 1
+    },
+    "chilli_murda_leaf_curl": {
+      "true_positives": 1,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "precision": 1,
+      "recall": 1,
+      "f1_score": 1
+    },
+    "paddy_zinc_deficiency": {
+      "true_positives": 1,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "precision": 1,
+      "recall": 1,
+      "f1_score": 1
+    },
+    "cotton_magnesium_deficiency": {
+      "true_positives": 1,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "precision": 1,
+      "recall": 1,
+      "f1_score": 1
+    },
+    "abiotic_submergence_stress": {
+      "true_positives": 0,
+      "false_positives": 0,
+      "false_negatives": 1,
+      "precision": 0,
+      "recall": 0,
+      "f1_score": 0
+    },
+    "paddy_brown_planthopper": {
+      "true_positives": 1,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "precision": 1,
+      "recall": 1,
+      "f1_score": 1
+    },
+    "cotton_pink_bollworm": {
+      "true_positives": 1,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "precision": 1,
+      "recall": 1,
+      "f1_score": 1
+    },
+    "non_plant": {
+      "true_positives": 0,
+      "false_positives": 0,
+      "false_negatives": 1,
+      "precision": 0,
+      "recall": 0,
+      "f1_score": 0
+    },
+    "unsupported_crop": {
+      "true_positives": 0,
+      "false_positives": 0,
+      "false_negatives": 1,
+      "precision": 0,
+      "recall": 0,
+      "f1_score": 0
+    },
+    "quality_rejection": {
+      "true_positives": 0,
+      "false_positives": 0,
+      "false_negatives": 1,
+      "precision": 0,
+      "recall": 0,
+      "f1_score": 0
+    }
+  },
+  "confusion_matrix": {
+    "healthy": {
+      "abstain_inconclusive": 2
+    },
+    "paddy_blast": {
+      "paddy_blast": 3
+    },
+    "cotton_bacterial_blight": {
+      "cotton_bacterial_blight": 1
+    },
+    "chilli_anthracnose_fruit_rot": {
+      "chilli_anthracnose_fruit_rot": 1
+    },
+    "chilli_murda_leaf_curl": {
+      "chilli_murda_leaf_curl": 1
+    },
+    "paddy_zinc_deficiency": {
+      "paddy_zinc_deficiency": 1
+    },
+    "cotton_magnesium_deficiency": {
+      "cotton_magnesium_deficiency": 1
+    },
+    "abiotic_submergence_stress": {
+      "abstain_inconclusive": 1
+    },
+    "paddy_brown_planthopper": {
+      "paddy_brown_planthopper": 1
+    },
+    "cotton_pink_bollworm": {
+      "cotton_pink_bollworm": 1
+    },
+    "non_plant": {
+      "abstain_inconclusive": 1
+    },
+    "unsupported_crop": {
+      "abstain_inconclusive": 1
+    },
+    "quality_rejection": {
+      "abstain_inconclusive": 1
+    }
+  },
+  "individual_results": [
+    {
+      "benchmark_id": "TACH-CAT01-PAD-HLT",
+      "crop": "Paddy",
+      "ground_truth_id": "healthy",
+      "ground_truth_name": "Healthy Paddy Foliage",
+      "category": "healthy_foliage",
+      "verification_method": "clinical_extension_inspection",
+      "returned_status": "inconclusive",
+      "top1_predicted_id": "abstain_inconclusive",
+      "top1_predicted_name": "Abstained (Inconclusive)",
+      "is_top1_match": false,
+      "is_top3_match": false,
+      "is_appropriate_abstention": true,
+      "is_inappropriate_confident": false,
+      "candidates_count": 0,
+      "latency_ms": 10,
+      "error": null
+    },
+    {
+      "benchmark_id": "TACH-CAT01-COT-HLT",
+      "crop": "Cotton",
+      "ground_truth_id": "healthy",
+      "ground_truth_name": "Healthy Cotton Foliage",
+      "category": "healthy_foliage",
+      "verification_method": "clinical_extension_inspection",
+      "returned_status": "inconclusive",
+      "top1_predicted_id": "abstain_inconclusive",
+      "top1_predicted_name": "Abstained (Inconclusive)",
+      "is_top1_match": false,
+      "is_top3_match": false,
+      "is_appropriate_abstention": true,
+      "is_inappropriate_confident": false,
+      "candidates_count": 0,
+      "latency_ms": 1,
+      "error": null
+    },
+    {
+      "benchmark_id": "TACH-CAT02-PAD-BLAST",
+      "crop": "Paddy",
+      "ground_truth_id": "paddy_blast",
+      "ground_truth_name": "Rice Blast (Leaf Blast)",
+      "category": "clearly_identifiable_disease",
+      "verification_method": "microscopic_conidia_and_aeo_confirmed",
+      "returned_status": "diagnosis_available",
+      "top1_predicted_id": "paddy_blast",
+      "top1_predicted_name": "Rice Blast (Leaf & Neck Blast)",
+      "is_top1_match": true,
+      "is_top3_match": true,
+      "is_appropriate_abstention": false,
+      "is_inappropriate_confident": false,
+      "candidates_count": 1,
+      "latency_ms": 1,
+      "error": null
+    },
+    {
+      "benchmark_id": "TACH-CAT02-COT-BLB",
+      "crop": "Cotton",
+      "ground_truth_id": "cotton_bacterial_blight",
+      "ground_truth_name": "Bacterial Blight / Angular Leaf Spot",
+      "category": "clearly_identifiable_disease",
+      "verification_method": "bacterial_streaming_test_and_aeo_confirmed",
+      "returned_status": "diagnosis_available",
+      "top1_predicted_id": "cotton_bacterial_blight",
+      "top1_predicted_name": "Bacterial Blight / Angular Leaf Spot / Blackarm",
+      "is_top1_match": true,
+      "is_top3_match": true,
+      "is_appropriate_abstention": false,
+      "is_inappropriate_confident": false,
+      "candidates_count": 1,
+      "latency_ms": 1,
+      "error": null
+    },
+    {
+      "benchmark_id": "TACH-CAT02-CHL-ANTH",
+      "crop": "Chilli",
+      "ground_truth_id": "chilli_anthracnose_fruit_rot",
+      "ground_truth_name": "Anthracnose / Dieback / Ripe Fruit Rot",
+      "category": "clearly_identifiable_disease",
+      "verification_method": "acervuli_fruiting_body_inspection",
+      "returned_status": "diagnosis_available",
+      "top1_predicted_id": "chilli_anthracnose_fruit_rot",
+      "top1_predicted_name": "Anthracnose / Dieback / Fruit Rot",
+      "is_top1_match": true,
+      "is_top3_match": true,
+      "is_appropriate_abstention": false,
+      "is_inappropriate_confident": false,
+      "candidates_count": 1,
+      "latency_ms": 1,
+      "error": null
+    },
+    {
+      "benchmark_id": "TACH-CAT03-PAD-DIFF-BLAST-BS",
+      "crop": "Paddy",
+      "ground_truth_id": "paddy_blast",
+      "ground_truth_name": "Early Rice Blast vs Brown Spot Differential",
+      "category": "visually_similar_differential_pair",
+      "verification_method": "lab_culture_confirmed",
+      "returned_status": "possible",
+      "top1_predicted_id": "paddy_blast",
+      "top1_predicted_name": "Rice Blast (Leaf & Neck Blast)",
+      "is_top1_match": true,
+      "is_top3_match": true,
+      "is_appropriate_abstention": false,
+      "is_inappropriate_confident": false,
+      "candidates_count": 2,
+      "latency_ms": 1,
+      "error": null
+    },
+    {
+      "benchmark_id": "TACH-CAT03-CHL-DIFF-MURDA",
+      "crop": "Chilli",
+      "ground_truth_id": "chilli_murda_leaf_curl",
+      "ground_truth_name": "Chilli Murda Complex (Thrips vs Mites vs Gemini Virus)",
+      "category": "visually_similar_differential_pair",
+      "verification_method": "stereomicroscope_pest_count",
+      "returned_status": "possible",
+      "top1_predicted_id": "chilli_murda_leaf_curl",
+      "top1_predicted_name": "Chilli Leaf Curl & Thrips Complex (Murda Complex)",
+      "is_top1_match": true,
+      "is_top3_match": true,
+      "is_appropriate_abstention": false,
+      "is_inappropriate_confident": false,
+      "candidates_count": 3,
+      "latency_ms": 1,
+      "error": null
+    },
+    {
+      "benchmark_id": "TACH-CAT04-PAD-ZINC",
+      "crop": "Paddy",
+      "ground_truth_id": "paddy_zinc_deficiency",
+      "ground_truth_name": "Zinc Deficiency (Khaira Disease)",
+      "category": "nutrient_deficiency",
+      "verification_method": "soil_tissue_dtpa_zinc_analysis",
+      "returned_status": "diagnosis_available",
+      "top1_predicted_id": "paddy_zinc_deficiency",
+      "top1_predicted_name": "Zinc Deficiency (Khaira / Rusting)",
+      "is_top1_match": true,
+      "is_top3_match": true,
+      "is_appropriate_abstention": false,
+      "is_inappropriate_confident": false,
+      "candidates_count": 1,
+      "latency_ms": 1,
+      "error": null
+    },
+    {
+      "benchmark_id": "TACH-CAT04-COT-MAG",
+      "crop": "Cotton",
+      "ground_truth_id": "cotton_magnesium_deficiency",
+      "ground_truth_name": "Magnesium Deficiency (Leaf Reddening)",
+      "category": "nutrient_deficiency",
+      "verification_method": "tissue_analysis_and_aeo_confirmed",
+      "returned_status": "diagnosis_available",
+      "top1_predicted_id": "cotton_magnesium_deficiency",
+      "top1_predicted_name": "Magnesium Deficiency (Leaf Reddening)",
+      "is_top1_match": true,
+      "is_top3_match": true,
+      "is_appropriate_abstention": false,
+      "is_inappropriate_confident": false,
+      "candidates_count": 1,
+      "latency_ms": 1,
+      "error": null
+    },
+    {
+      "benchmark_id": "TACH-CAT05-PAD-WATERLOG",
+      "crop": "Paddy",
+      "ground_truth_id": "abiotic_submergence_stress",
+      "ground_truth_name": "Paddy Submergence / Stagnant Water Siltation",
+      "category": "abiotic_stress",
+      "verification_method": "field_history_audit",
+      "returned_status": "inconclusive",
+      "top1_predicted_id": "abstain_inconclusive",
+      "top1_predicted_name": "Abstained (Inconclusive)",
+      "is_top1_match": false,
+      "is_top3_match": false,
+      "is_appropriate_abstention": true,
+      "is_inappropriate_confident": false,
+      "candidates_count": 0,
+      "latency_ms": 1,
+      "error": null
+    },
+    {
+      "benchmark_id": "TACH-CAT06-PAD-BPH",
+      "crop": "Paddy",
+      "ground_truth_id": "paddy_brown_planthopper",
+      "ground_truth_name": "Brown Planthopper (BPH) / Hopper Burn",
+      "category": "insect_pest_damage",
+      "verification_method": "tiller_base_insect_sweep",
+      "returned_status": "diagnosis_available",
+      "top1_predicted_id": "paddy_brown_planthopper",
+      "top1_predicted_name": "Brown Planthopper (BPH)",
+      "is_top1_match": true,
+      "is_top3_match": true,
+      "is_appropriate_abstention": false,
+      "is_inappropriate_confident": false,
+      "candidates_count": 1,
+      "latency_ms": 1,
+      "error": null
+    },
+    {
+      "benchmark_id": "TACH-CAT06-COT-PBW",
+      "crop": "Cotton",
+      "ground_truth_id": "cotton_pink_bollworm",
+      "ground_truth_name": "Pink Bollworm (PBW)",
+      "category": "insect_pest_damage",
+      "verification_method": "boll_dissection_larval_confirmation",
+      "returned_status": "diagnosis_available",
+      "top1_predicted_id": "cotton_pink_bollworm",
+      "top1_predicted_name": "Pink Bollworm",
+      "is_top1_match": true,
+      "is_top3_match": true,
+      "is_appropriate_abstention": false,
+      "is_inappropriate_confident": false,
+      "candidates_count": 1,
+      "latency_ms": 1,
+      "error": null
+    },
+    {
+      "benchmark_id": "TACH-CAT07-PAD-MIXED-BLAST-SHEATH",
+      "crop": "Paddy",
+      "ground_truth_id": "paddy_blast",
+      "ground_truth_name": "Mixed Blast and Sheath Blight Co-Infection",
+      "category": "mixed_infection",
+      "verification_method": "pathology_lab_isolation",
+      "returned_status": "possible",
+      "top1_predicted_id": "paddy_blast",
+      "top1_predicted_name": "Rice Blast (Leaf & Neck Blast)",
+      "is_top1_match": true,
+      "is_top3_match": true,
+      "is_appropriate_abstention": false,
+      "is_inappropriate_confident": false,
+      "candidates_count": 2,
+      "latency_ms": 2,
+      "error": null
+    },
+    {
+      "benchmark_id": "TACH-CAT08-NON-PLANT-TRAC",
+      "crop": "Paddy",
+      "ground_truth_id": "non_plant",
+      "ground_truth_name": "Farm Tractor / Machinery",
+      "category": "non_plant_object",
+      "verification_method": "ground_truth_object_definition",
+      "returned_status": "inconclusive",
+      "top1_predicted_id": "abstain_inconclusive",
+      "top1_predicted_name": "Abstained (Inconclusive)",
+      "is_top1_match": false,
+      "is_top3_match": false,
+      "is_appropriate_abstention": true,
+      "is_inappropriate_confident": false,
+      "candidates_count": 0,
+      "latency_ms": 1,
+      "error": null
+    },
+    {
+      "benchmark_id": "TACH-CAT09-UNSUPP-DRAGON",
+      "crop": "Dragonfruit",
+      "ground_truth_id": "unsupported_crop",
+      "ground_truth_name": "Dragonfruit Stem Canker",
+      "category": "unsupported_crop",
+      "verification_method": "botanical_classification",
+      "returned_status": "inconclusive",
+      "top1_predicted_id": "abstain_inconclusive",
+      "top1_predicted_name": "Abstained (Inconclusive)",
+      "is_top1_match": false,
+      "is_top3_match": false,
+      "is_appropriate_abstention": true,
+      "is_inappropriate_confident": false,
+      "candidates_count": 0,
+      "latency_ms": 0,
+      "error": null
+    },
+    {
+      "benchmark_id": "TACH-CAT10-DARK-FOLIAGE",
+      "crop": "Paddy",
+      "ground_truth_id": "quality_rejection",
+      "ground_truth_name": "Severely Underexposed Leaf Photograph",
+      "category": "quality_degraded_ambiguous",
+      "verification_method": "photometric_luminance_audit",
+      "returned_status": "validation_failed",
+      "top1_predicted_id": "abstain_inconclusive",
+      "top1_predicted_name": "Abstained (Inconclusive)",
+      "is_top1_match": false,
+      "is_top3_match": false,
+      "is_appropriate_abstention": true,
+      "is_inappropriate_confident": false,
+      "candidates_count": 0,
+      "latency_ms": 0,
+      "error": null
+    }
+  ]
+}

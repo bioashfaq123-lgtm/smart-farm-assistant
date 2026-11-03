@@ -1,0 +1,134 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SmartFarmAgriculturalImageBenchmarkSchema",
+  "description": "Standardized schema for ground-truth labeled agricultural crop health evaluation images reflecting real-world Indian (Telangana) farming conditions.",
+  "type": "object",
+  "required": [
+    "benchmark_version",
+    "region",
+    "items"
+  ],
+  "properties": {
+    "benchmark_version": {
+      "type": "string",
+      "example": "1.0.0"
+    },
+    "region": {
+      "type": "string",
+      "example": "Telangana, India"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "image_id",
+          "crop",
+          "condition_id",
+          "condition_name",
+          "condition_type",
+          "category",
+          "verification_status",
+          "capture_context",
+          "split"
+        ],
+        "properties": {
+          "image_id": {
+            "type": "string"
+          },
+          "file_path": {
+            "type": "string"
+          },
+          "crop": {
+            "type": "string"
+          },
+          "condition_id": {
+            "type": "string"
+          },
+          "condition_name": {
+            "type": "string"
+          },
+          "condition_type": {
+            "type": "string",
+            "enum": [
+              "fungal",
+              "bacterial",
+              "viral",
+              "insect",
+              "nutrient",
+              "abiotic",
+              "healthy",
+              "non_plant",
+              "unsupported",
+              "other"
+            ]
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "healthy_foliage",
+              "clearly_identifiable_disease",
+              "visually_similar_differential_pair",
+              "nutrient_deficiency",
+              "abiotic_stress",
+              "insect_pest_damage",
+              "mixed_infection",
+              "non_plant_object",
+              "unsupported_crop",
+              "quality_degraded_ambiguous"
+            ]
+          },
+          "verification_status": {
+            "type": "string",
+            "enum": [
+              "expert_verified_clinical",
+              "lab_confirmed_pcr",
+              "lab_confirmed_culture",
+              "extension_aeo_verified",
+              "unverified_draft"
+            ]
+          },
+          "verifier_identity": {
+            "type": "string"
+          },
+          "capture_context": {
+            "type": "string",
+            "enum": [
+              "field_in_situ",
+              "field_detached_leaf",
+              "laboratory_controlled"
+            ]
+          },
+          "field_location": {
+            "type": "object",
+            "properties": {
+              "district": { "type": "string" },
+              "state": { "type": "string" },
+              "country": { "type": "string" }
+            }
+          },
+          "plant_id": {
+            "type": "string",
+            "description": "Identifier of the individual plant to enforce group-based anti-leakage splitting."
+          },
+          "capture_session_id": {
+            "type": "string",
+            "description": "Identifier of the photo shoot session to prevent temporal leakage."
+          },
+          "split": {
+            "type": "string",
+            "enum": ["test", "val", "train"]
+          },
+          "differential_counterparts": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "List of disorder IDs with visually overlapping symptoms (e.g. ['paddy_brown_spot'] for paddy_blast)."
+          },
+          "license": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

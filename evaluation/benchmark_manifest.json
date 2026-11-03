@@ -1,0 +1,207 @@
+{
+  "benchmark_version": "1.0.0",
+  "benchmark_title": "Telangana Agricultural Crop Health Benchmark (TACH-10)",
+  "region": "Telangana, India (Jagtial, Karimnagar, Warangal, Nalgonda agro-climatic zones)",
+  "created_at": "2026-11-03",
+  "target_crops": ["Paddy", "Cotton", "Chilli", "Maize", "Redgram", "Groundnut", "Soybean", "Sesame"],
+  "design_rationale": "Comprehensive 10-category evaluation distribution reflecting real-world Indian smallholder field conditions, natural sunlight, complex soil backgrounds, variable pest stages, and clinical pathology ambiguity.",
+  "sampling_targets_per_category": {
+    "healthy_foliage": 50,
+    "clearly_identifiable_disease": 120,
+    "visually_similar_differential_pair": 100,
+    "nutrient_deficiency": 60,
+    "abiotic_stress": 40,
+    "insect_pest_damage": 80,
+    "mixed_infection": 30,
+    "non_plant_object": 40,
+    "unsupported_crop": 40,
+    "quality_degraded_ambiguous": 60,
+    "total_target_sample_size": 620
+  },
+  "anti_leakage_protocol": {
+    "rule_1_group_split": "All photos from the same plant_id and same field plot MUST reside strictly within either train, val, or test split. Never split pictures of the same plant across splits.",
+    "rule_2_temporal_split": "Consecutive burst photographs taken within the same capture_session_id must not bridge train and test.",
+    "rule_3_background_independence": "Test sets must include varied natural field soil, mulching, weeds, and varying diurnal sunlight angles to detect background spurious correlation."
+  },
+  "specification_items": [
+    {
+      "benchmark_id": "TACH-CAT01-PAD-HLT",
+      "crop": "Paddy",
+      "condition_id": "healthy",
+      "condition_name": "Healthy Paddy Foliage",
+      "condition_type": "healthy",
+      "category": "healthy_foliage",
+      "expected_status": "inconclusive",
+      "verification_method": "clinical_extension_inspection",
+      "diagnostic_note": "Foliage vigorous green without necrotic spots. Pipeline must abstain from fabricating any pathogen or issuing chemical spray."
+    },
+    {
+      "benchmark_id": "TACH-CAT01-COT-HLT",
+      "crop": "Cotton",
+      "condition_id": "healthy",
+      "condition_name": "Healthy Cotton Foliage",
+      "condition_type": "healthy",
+      "category": "healthy_foliage",
+      "expected_status": "inconclusive",
+      "verification_method": "clinical_extension_inspection",
+      "diagnostic_note": "Normal vegetative cotton leaves. System must abstain and indicate healthy foliage."
+    },
+    {
+      "benchmark_id": "TACH-CAT02-PAD-BLAST",
+      "crop": "Paddy",
+      "condition_id": "paddy_blast",
+      "condition_name": "Rice Blast (Leaf Blast)",
+      "condition_type": "fungal",
+      "category": "clearly_identifiable_disease",
+      "expected_status": "diagnosis_available",
+      "verification_method": "microscopic_conidia_and_aeo_confirmed",
+      "diagnostic_note": "Classic spindle/diamond shaped lesions with ash-grey center and dark reddish-brown margins."
+    },
+    {
+      "benchmark_id": "TACH-CAT02-COT-BLB",
+      "crop": "Cotton",
+      "condition_id": "cotton_bacterial_blight",
+      "condition_name": "Bacterial Blight / Angular Leaf Spot",
+      "condition_type": "bacterial",
+      "category": "clearly_identifiable_disease",
+      "expected_status": "diagnosis_available",
+      "verification_method": "bacterial_streaming_test_and_aeo_confirmed",
+      "diagnostic_note": "Angular water-soaked leaf spots bounded by veinlets turning dark purplish brown."
+    },
+    {
+      "benchmark_id": "TACH-CAT02-CHL-ANTH",
+      "crop": "Chilli",
+      "condition_id": "chilli_anthracnose_fruit_rot",
+      "condition_name": "Anthracnose / Dieback / Ripe Fruit Rot",
+      "condition_type": "fungal",
+      "category": "clearly_identifiable_disease",
+      "expected_status": "diagnosis_available",
+      "verification_method": "acervuli_fruiting_body_inspection",
+      "diagnostic_note": "Sunken circular spots with concentric rings of black acervuli on ripe chilli pods."
+    },
+    {
+      "benchmark_id": "TACH-CAT03-PAD-DIFF-BLAST-BS",
+      "crop": "Paddy",
+      "condition_id": "paddy_blast",
+      "condition_name": "Early Rice Blast vs Brown Spot Differential",
+      "condition_type": "fungal",
+      "category": "visually_similar_differential_pair",
+      "differential_counterparts": ["paddy_brown_spot"],
+      "expected_status": "possible",
+      "verification_method": "lab_culture_confirmed",
+      "diagnostic_note": "Early circular brown necrotic spots where spindle center has not fully elongated. Pipeline must return BOTH blast and brown spot as differential candidates."
+    },
+    {
+      "benchmark_id": "TACH-CAT03-CHL-DIFF-MURDA",
+      "crop": "Chilli",
+      "condition_id": "chilli_murda_leaf_curl",
+      "condition_name": "Chilli Murda Complex (Thrips vs Mites vs Gemini Virus)",
+      "condition_type": "other",
+      "category": "visually_similar_differential_pair",
+      "differential_counterparts": ["chilli_mite_damage", "chilli_mosaic_virus"],
+      "expected_status": "possible",
+      "verification_method": "stereomicroscope_pest_count",
+      "diagnostic_note": "Upward cupping (thrips) vs downward inverted cupping (yellow mite). System must provide differential field check instructions."
+    },
+    {
+      "benchmark_id": "TACH-CAT04-PAD-ZINC",
+      "crop": "Paddy",
+      "condition_id": "paddy_zinc_deficiency",
+      "condition_name": "Zinc Deficiency (Khaira Disease)",
+      "condition_type": "nutrient",
+      "category": "nutrient_deficiency",
+      "expected_status": "diagnosis_available",
+      "verification_method": "soil_tissue_dtpa_zinc_analysis",
+      "diagnostic_note": "Rusty-brown coalescing blotches on middle/lower leaves. Must identify micronutrient deficiency and NEVER prescribe antifungal fungicides."
+    },
+    {
+      "benchmark_id": "TACH-CAT04-COT-MAG",
+      "crop": "Cotton",
+      "condition_id": "cotton_magnesium_deficiency",
+      "condition_name": "Magnesium Deficiency (Leaf Reddening)",
+      "condition_type": "nutrient",
+      "category": "nutrient_deficiency",
+      "expected_status": "diagnosis_available",
+      "verification_method": "tissue_analysis_and_aeo_confirmed",
+      "diagnostic_note": "Interveinal purplish-red discoloration while veins remain green on mature bolls stage."
+    },
+    {
+      "benchmark_id": "TACH-CAT05-PAD-WATERLOG",
+      "crop": "Paddy",
+      "condition_id": "abiotic_submergence_stress",
+      "condition_name": "Paddy Submergence / Stagnant Water Siltation",
+      "condition_type": "abiotic",
+      "category": "abiotic_stress",
+      "expected_status": "inconclusive",
+      "verification_method": "field_history_audit",
+      "diagnostic_note": "Muddy yellow silt-covered droopy leaves after flooding. Must NOT be misdiagnosed as fungal leaf blight."
+    },
+    {
+      "benchmark_id": "TACH-CAT06-PAD-BPH",
+      "crop": "Paddy",
+      "condition_id": "paddy_brown_planthopper",
+      "condition_name": "Brown Planthopper (BPH) / Hopper Burn",
+      "condition_type": "insect",
+      "category": "insect_pest_damage",
+      "expected_status": "diagnosis_available",
+      "verification_method": "tiller_base_insect_sweep",
+      "diagnostic_note": "Circular patches of dried golden-brown tillers with hopper nymphs feeding at the plant collar."
+    },
+    {
+      "benchmark_id": "TACH-CAT06-COT-PBW",
+      "crop": "Cotton",
+      "condition_id": "cotton_pink_bollworm",
+      "condition_name": "Pink Bollworm (PBW)",
+      "condition_type": "insect",
+      "category": "insect_pest_damage",
+      "expected_status": "diagnosis_available",
+      "verification_method": "boll_dissection_larval_confirmation",
+      "diagnostic_note": "Rosetted flower buds and entry bore-holes on green cotton bolls."
+    },
+    {
+      "benchmark_id": "TACH-CAT07-PAD-MIXED-BLAST-SHEATH",
+      "crop": "Paddy",
+      "condition_id": "paddy_blast",
+      "condition_name": "Mixed Blast and Sheath Blight Co-Infection",
+      "condition_type": "fungal",
+      "category": "mixed_infection",
+      "differential_counterparts": ["paddy_sheath_blight"],
+      "expected_status": "possible",
+      "verification_method": "pathology_lab_isolation",
+      "diagnostic_note": "Leaf blade exhibits blast lesions while leaf collar displays snake-skin sheath blight lesions. Multi-candidate recognition required."
+    },
+    {
+      "benchmark_id": "TACH-CAT08-NON-PLANT-TRAC",
+      "crop": "Paddy",
+      "condition_id": "non_plant",
+      "condition_name": "Farm Tractor / Machinery",
+      "condition_type": "non_plant",
+      "category": "non_plant_object",
+      "expected_status": "inconclusive",
+      "verification_method": "ground_truth_object_definition",
+      "diagnostic_note": "Machine or tool in agricultural shed. Must trigger isPlant: false pre-filter and reject."
+    },
+    {
+      "benchmark_id": "TACH-CAT09-UNSUPP-DRAGON",
+      "crop": "Dragonfruit",
+      "condition_id": "unsupported_crop",
+      "condition_name": "Dragonfruit Stem Canker",
+      "condition_type": "unsupported",
+      "category": "unsupported_crop",
+      "expected_status": "inconclusive",
+      "verification_method": "botanical_classification",
+      "diagnostic_note": "Crop not present in validated Telangana PJTAU database. Must gracefully flag unsupported crop and list supported species."
+    },
+    {
+      "benchmark_id": "TACH-CAT10-DARK-FOLIAGE",
+      "crop": "Paddy",
+      "condition_id": "quality_rejection",
+      "condition_name": "Severely Underexposed Leaf Photograph",
+      "condition_type": "other",
+      "category": "quality_degraded_ambiguous",
+      "expected_status": "validation_failed",
+      "verification_method": "photometric_luminance_audit",
+      "diagnostic_note": "Average luminance < 20. Must be intercepted by Phase B pre-inference quality gate before vision model execution."
+    }
+  ]
+}
