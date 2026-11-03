@@ -321,7 +321,7 @@ export default function ToolsPage() {
               )}
 
               {/* Quality & Extra factors */}
-              <div className="grid grid-cols-3 gap-2 sm:col-span-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:col-span-2">
                 <div>
                   <label className="block text-[11px] font-semibold text-stone-600 dark:text-stone-400 mb-1">
                     {t("seed_germ_pct")}

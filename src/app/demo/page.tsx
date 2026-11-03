@@ -2081,7 +2081,7 @@ export default function ConferenceDemoPage() {
 
             {/* Mandi Prices Table */}
             <div className="overflow-x-auto rounded-2xl border border-stone-200 dark:border-stone-800 mb-8 bg-white dark:bg-stone-900 shadow-2xs">
-              <table className="w-full text-left text-xs md:text-sm">
+              <table className="min-w-[640px] w-full text-left text-xs md:text-sm">
                 <thead className="bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 font-bold border-b border-stone-200 dark:border-stone-700">
                   <tr>
                     <th className="py-3 px-4">Market Yard</th>

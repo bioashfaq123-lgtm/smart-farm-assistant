@@ -210,7 +210,7 @@ export function AuthModal({ isOpen, onClose, initialTab = "login" }: AuthModalPr
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 p-1 rounded-full text-stone-400 hover:text-stone-700 hover:bg-stone-100 dark:hover:text-stone-200 dark:hover:bg-stone-800 transition"
+          className="absolute top-3 right-3 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 dark:hover:text-stone-200 dark:hover:bg-stone-800 transition"
           aria-label="Close dialog"
         >
           <X className="w-5 h-5" />
@@ -453,7 +453,7 @@ export function AuthModal({ isOpen, onClose, initialTab = "login" }: AuthModalPr
                 </div>
 
                 {/* Location and Farm Size (acres) in 2-Column Grid */}
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
                       Location

@@ -68,7 +68,7 @@ export default function MarketPage() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeTrendItem, setActiveTrendItem] = useState<MandiPriceItem | null>(null);
-  const [mandiViewMode, setMandiViewMode] = useState<"table" | "cards">("table");
+  const [mandiViewMode, setMandiViewMode] = useState<"table" | "cards">("cards");
   const [calcYieldQtl, setCalcYieldQtl] = useState<number>(95);
   const [copiedShareText, setCopiedShareText] = useState<boolean>(false);
 
@@ -706,7 +706,11 @@ ${activeBonus > 0 ? `🏛️ తెలంగాణ బోనస్ (DBT): +₹${
             ) : (
               /* ================= 2. TABLE VIEW: CLEAN APMC PROCUREMENT TABLE WITH DIRECTIONS ================= */
               <div className="overflow-x-auto rounded-3xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-2xs">
-                <table className="w-full text-left text-xs md:text-sm">
+                <div className="sm:hidden px-4 py-2 bg-stone-50 dark:bg-stone-850 text-[11px] text-stone-500 border-b border-stone-200 dark:border-stone-800 flex items-center justify-between">
+                  <span>👉 {lang === "te" ? "ధరల పూర్తి పట్టిక కోసం కుడివైపుకు జరపండి" : "Scroll horizontally for full rates & GPS"}</span>
+                  <span className="font-bold text-emerald-600">⇄</span>
+                </div>
+                <table className="min-w-[720px] w-full text-left text-xs md:text-sm">
                   <thead className="bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 font-bold border-b border-stone-200 dark:border-stone-700">
                     <tr>
                       <th className="py-3.5 px-4 font-bold">Market Yard</th>

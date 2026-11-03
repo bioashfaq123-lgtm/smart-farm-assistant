@@ -1,5 +1,5 @@
 {
-  "evaluated_at": "2026-11-03T11:22:41.740Z",
+  "evaluated_at": "2026-11-03T17:05:40.725Z",
   "benchmark_title": "Telangana Agricultural Crop Health Benchmark (TACH-10)",
   "benchmark_version": "1.0.0",
   "sample_size": 16,
@@ -15,7 +15,7 @@
     "latency_ms": {
       "mean": 1,
       "p50": 1,
-      "p95": 6
+      "p95": 5
     }
   },
   "per_class_metrics": {
@@ -181,7 +181,7 @@
       "is_appropriate_abstention": true,
       "is_inappropriate_confident": false,
       "candidates_count": 0,
-      "latency_ms": 6,
+      "latency_ms": 5,
       "error": null
     },
     {
@@ -253,7 +253,7 @@
       "is_appropriate_abstention": false,
       "is_inappropriate_confident": false,
       "candidates_count": 1,
-      "latency_ms": 0,
+      "latency_ms": 1,
       "error": null
     },
     {
@@ -307,7 +307,7 @@
       "is_appropriate_abstention": false,
       "is_inappropriate_confident": false,
       "candidates_count": 1,
-      "latency_ms": 0,
+      "latency_ms": 1,
       "error": null
     },
     {
@@ -325,7 +325,7 @@
       "is_appropriate_abstention": false,
       "is_inappropriate_confident": false,
       "candidates_count": 1,
-      "latency_ms": 0,
+      "latency_ms": 1,
       "error": null
     },
     {
@@ -343,7 +343,7 @@
       "is_appropriate_abstention": true,
       "is_inappropriate_confident": false,
       "candidates_count": 0,
-      "latency_ms": 1,
+      "latency_ms": 2,
       "error": null
     },
     {
@@ -379,7 +379,7 @@
       "is_appropriate_abstention": false,
       "is_inappropriate_confident": false,
       "candidates_count": 1,
-      "latency_ms": 0,
+      "latency_ms": 1,
       "error": null
     },
     {

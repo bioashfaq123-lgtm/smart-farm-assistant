@@ -331,3 +331,4 @@ export function MobileFeaturesDrawer({ isOpen, onClose }: MobileFeaturesDrawerPr
     </div>
   );
 }
+

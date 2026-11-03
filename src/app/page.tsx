@@ -31,6 +31,7 @@ import {
   UserCheck,
   UserPlus,
   X,
+  Menu,
 } from "lucide-react";
 import { useLanguage } from "@/components/common/LanguageContext";
 import { useFarmerProfile } from "@/components/common/FarmerProfileContext";
@@ -46,6 +47,7 @@ export default function HomePage() {
 
   const [activePreviewTab, setActivePreviewTab] = useState<"ai" | "iot" | "mandi" | "schemes">("ai");
   const [selectedFeatureCat, setSelectedFeatureCat] = useState<string>("all");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
   const [showFloatingPrompt, setShowFloatingPrompt] = useState<boolean>(false);
 
@@ -163,29 +165,29 @@ export default function HomePage() {
       )}
 
       {/* LANDING TOP NAVBAR */}
-      <header className="sticky top-0 z-40 w-full border-b border-stone-200/80 bg-white/90 px-4 md:px-8 py-3.5 backdrop-blur-md dark:border-stone-800/80 dark:bg-stone-950/90">
+      <header className="sticky top-0 z-40 w-full border-b border-stone-200/80 bg-white/95 px-3 sm:px-6 md:px-8 py-3 backdrop-blur-md dark:border-stone-800/80 dark:bg-stone-950/95">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           {/* Brand Logo & Title */}
-          <div className="flex items-center gap-3">
-            <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-xl shadow-xs border border-emerald-500/30">
+          <Link href="/" className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="relative h-9 w-9 sm:h-10 sm:w-10 shrink-0 overflow-hidden rounded-xl shadow-xs border border-emerald-500/30">
               <img
                 src="/images/smart_farm_app_icon.jpg"
                 alt="Smart Farm Logo"
                 className="h-full w-full object-cover"
               />
             </div>
-            <div>
-              <span className="block text-base font-extrabold tracking-tight text-stone-900 dark:text-white leading-tight">
+            <div className="min-w-0">
+              <span className="block text-sm sm:text-base font-extrabold tracking-tight text-stone-900 dark:text-white leading-tight truncate">
                 Smart Farm Assistant
               </span>
-              <p className="text-[11px] font-medium text-emerald-700 dark:text-emerald-400">
+              <p className="text-[10px] sm:text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 truncate">
                 Telangana Rythu Digital Ecosystem
               </p>
             </div>
-          </div>
+          </Link>
 
-          {/* Center Links (Desktop) */}
-          <nav className="hidden lg:flex items-center gap-6 text-xs font-semibold text-stone-600 dark:text-stone-300">
+          {/* Center Links (Desktop only) */}
+          <nav className="hidden lg:flex items-center gap-5 xl:gap-6 text-xs font-bold text-stone-600 dark:text-stone-300">
             <a href="#register" className="hover:text-emerald-700 dark:hover:text-emerald-400 transition font-bold text-emerald-700 dark:text-emerald-400">
               {lang === "te" ? "ప్రొఫైల్ నమోదు" : "Register Profile"}
             </a>
@@ -207,50 +209,132 @@ export default function HomePage() {
           </nav>
 
           {/* Right Action Buttons */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            {/* Language switch */}
-            <div className="flex items-center rounded-xl border border-stone-200 bg-stone-100/80 p-0.5 dark:border-stone-800 dark:bg-stone-900">
+          <div className="flex items-center gap-1.5 sm:gap-2.5">
+            {/* Language switch (min 44px touch height) */}
+            <div className="flex min-h-[44px] items-center rounded-xl border border-stone-200 bg-stone-100/80 p-0.5 dark:border-stone-800 dark:bg-stone-900">
               <button
                 onClick={() => setLang("en")}
-                className={`px-2 py-1 text-xs font-bold rounded-lg transition ${
-                  lang === "en" ? "bg-white text-emerald-800 shadow-xs dark:bg-stone-800 dark:text-emerald-300" : "text-stone-500"
+                className={`min-h-[38px] px-2 sm:px-2.5 py-1 text-xs font-bold rounded-lg transition ${
+                  lang === "en" ? "bg-white text-emerald-800 shadow-2xs dark:bg-stone-800 dark:text-emerald-300" : "text-stone-500"
                 }`}
               >
                 EN
               </button>
               <button
                 onClick={() => setLang("te")}
-                className={`px-2 py-1 text-xs font-bold rounded-lg transition ${
-                  lang === "te" ? "bg-white text-emerald-800 shadow-xs dark:bg-stone-800 dark:text-emerald-300" : "text-stone-500"
+                className={`min-h-[38px] px-2 sm:px-2.5 py-1 text-xs font-bold rounded-lg transition ${
+                  lang === "te" ? "bg-white text-emerald-800 shadow-2xs dark:bg-stone-800 dark:text-emerald-300" : "text-stone-500"
                 }`}
               >
                 తెలుగు
               </button>
             </div>
 
-            {/* Login / Register Button */}
+            {/* Login / Register Button (Desktop & Tablet) */}
             <button
               onClick={() => openAuthModal(isLoggedIn ? "login" : "register")}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-300 dark:border-stone-700 text-xs font-semibold hover:bg-stone-100 dark:hover:bg-stone-800 transition"
+              className="hidden sm:flex min-h-[44px] items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-300 dark:border-stone-700 text-xs font-bold hover:bg-stone-100 dark:hover:bg-stone-800 transition"
             >
               {isLoggedIn ? (
                 <UserCheck className="w-3.5 h-3.5 text-emerald-600" />
               ) : (
                 <UserPlus className="w-3.5 h-3.5 text-emerald-600" />
               )}
-              <span>{isLoggedIn ? profile.name || "My Account" : "Register / Login"}</span>
+              <span className="truncate max-w-[100px]">{isLoggedIn ? profile.name || "My Account" : "Register / Login"}</span>
             </button>
 
             {/* Launch Dashboard CTA */}
             <Link
               href="/dashboard"
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold shadow-md transition"
+              className="hidden xs:flex min-h-[44px] items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold shadow-md transition"
             >
               <span>{lang === "te" ? "డాష్‌బోర్డ్" : "Dashboard"}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
+
+            {/* Mobile Hamburger / Collapsible Menu Toggle Button (Point 3 - min 44x44px touch) */}
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle navigation menu"
+              className="flex lg:hidden min-h-[44px] min-w-[44px] items-center justify-center rounded-xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-900 text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition"
+            >
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
           </div>
         </div>
+
+        {/* Collapsible Mobile Navigation Drawer */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden mt-3 pt-3 border-t border-stone-200 dark:border-stone-800 space-y-2 animate-in fade-in slide-in-from-top-2 duration-150">
+            <nav className="grid grid-cols-2 gap-2 text-xs font-bold">
+              <a
+                href="#register"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center min-h-[44px] p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
+              >
+                {lang === "te" ? "✍️ ప్రొఫైల్ నమోదు" : "✍️ Register Profile"}
+              </a>
+              <a
+                href="#features"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center min-h-[44px] p-2.5 rounded-xl bg-stone-50 dark:bg-stone-900 hover:bg-stone-100 text-stone-800 dark:text-stone-200 border border-stone-200 dark:border-stone-800"
+              >
+                {lang === "te" ? "✨ 10 ఫీచర్లు" : "✨ All 10 Features"}
+              </a>
+              <a
+                href="#schemes"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center min-h-[44px] p-2.5 rounded-xl bg-stone-50 dark:bg-stone-900 hover:bg-stone-100 text-stone-800 dark:text-stone-200 border border-stone-200 dark:border-stone-800"
+              >
+                {lang === "te" ? "🏛️ ప్రభుత్వ పథకాలు" : "🏛️ Govt Schemes"}
+              </a>
+              <a
+                href="#mandi"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center min-h-[44px] p-2.5 rounded-xl bg-stone-50 dark:bg-stone-900 hover:bg-stone-100 text-stone-800 dark:text-stone-200 border border-stone-200 dark:border-stone-800"
+              >
+                {lang === "te" ? "📈 మార్కెట్ యార్డులు" : "📈 Live Mandi Rates"}
+              </a>
+              <a
+                href="#iot"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center min-h-[44px] p-2.5 rounded-xl bg-stone-50 dark:bg-stone-900 hover:bg-stone-100 text-stone-800 dark:text-stone-200 border border-stone-200 dark:border-stone-800"
+              >
+                {lang === "te" ? "📡 ఐఓటీ సెన్సార్లు" : "📡 IoT Sensors"}
+              </a>
+              <a
+                href="#faq"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center min-h-[44px] p-2.5 rounded-xl bg-stone-50 dark:bg-stone-900 hover:bg-stone-100 text-stone-800 dark:text-stone-200 border border-stone-200 dark:border-stone-800"
+              >
+                ❓ FAQ
+              </a>
+            </nav>
+
+            <div className="flex flex-col gap-2 pt-2 border-t border-stone-100 dark:border-stone-800">
+              <Link
+                href="/dashboard"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full flex items-center justify-center gap-2 min-h-[44px] rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-md transition"
+              >
+                <span>{lang === "te" ? "🚀 ఫార్మ్ డాష్‌బోర్డ్ తెరవండి" : "🚀 Launch Farm Dashboard"}</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  openAuthModal(isLoggedIn ? "login" : "register");
+                }}
+                className="w-full flex items-center justify-center gap-2 min-h-[44px] rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-850 text-stone-800 dark:text-stone-200 font-bold text-xs transition"
+              >
+                <UserPlus className="w-4 h-4 text-emerald-600" />
+                <span>{isLoggedIn ? profile.name || "My Account" : "Register / Login"}</span>
+              </button>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* HERO SECTION WITH FIRST-TIME REGISTRATION CARD */}
@@ -382,7 +466,7 @@ export default function HomePage() {
           </div>
 
           {/* Platform Performance Metrics Banner */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto pt-8 text-left">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto pt-8 text-left">
             <div className="rounded-2xl bg-white/80 dark:bg-stone-900/80 border border-stone-200 dark:border-stone-800 p-4 shadow-2xs">
               <span className="text-2xl font-black text-emerald-700 dark:text-emerald-400 block">
                 Evidence-Based

@@ -519,17 +519,17 @@ Safety Rule: ${item.safetyDisclaimer}`;
                   Upload an infected crop leaf, stem, or fruit photo. Supports JPG, PNG, WebP (auto-compressed).
                 </p>
 
-                <div className="flex items-center gap-2 mt-4">
+                <div className="flex flex-col sm:flex-row items-center gap-2 mt-4 w-full">
                   <button
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       fileInputRef.current?.click();
                     }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold shadow-xs transition"
+                    className="w-full sm:w-auto min-h-[44px] flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs sm:text-sm font-bold shadow-xs transition"
                   >
-                    <Upload className="w-3.5 h-3.5" />
-                    <span>Choose Photo</span>
+                    <Upload className="w-4 h-4" />
+                    <span>Choose Photo (Gallery)</span>
                   </button>
                   <button
                     type="button"
@@ -537,10 +537,10 @@ Safety Rule: ${item.safetyDisclaimer}`;
                       e.stopPropagation();
                       cameraInputRef.current?.click();
                     }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-750 text-stone-800 dark:text-stone-200 text-xs font-bold transition shadow-xs"
+                    className="w-full sm:w-auto min-h-[44px] flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-750 text-stone-800 dark:text-stone-200 text-xs sm:text-sm font-bold transition shadow-xs"
                   >
-                    <Camera className="w-3.5 h-3.5 text-rose-500" />
-                    <span>Snap Camera</span>
+                    <Camera className="w-4 h-4 text-rose-500" />
+                    <span>Snap Phone Camera</span>
                   </button>
                 </div>
               </div>
@@ -630,13 +630,13 @@ Safety Rule: ${item.safetyDisclaimer}`;
                 <span className="text-[11px] font-bold text-stone-500 dark:text-stone-400 flex items-center gap-1">
                   <span>⚡ Common {selectedCrop} Symptoms (Click to add):</span>
                 </span>
-                <div className="flex flex-wrap gap-1.5">
+                <div className="flex flex-wrap gap-2">
                   {CROP_SYMPTOM_PRESETS[selectedCrop].map((chip, idx) => (
                     <button
                       key={idx}
                       type="button"
                       onClick={() => addSymptomChip(lang === "te" ? chip.te : chip.en)}
-                      className="rounded-lg border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-850 px-2.5 py-1 text-[11px] font-medium text-stone-700 dark:text-stone-300 hover:border-emerald-500 hover:bg-emerald-50/40 dark:hover:bg-emerald-950/20 transition shadow-2xs text-left"
+                      className="min-h-[38px] flex items-center rounded-xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-850 px-3 py-1.5 text-xs font-medium text-stone-700 dark:text-stone-300 hover:border-emerald-500 hover:bg-emerald-50/40 dark:hover:bg-emerald-950/20 transition shadow-2xs text-left"
                     >
                       + {lang === "te" ? chip.te : chip.en}
                     </button>
@@ -647,7 +647,7 @@ Safety Rule: ${item.safetyDisclaimer}`;
 
             {/* Action Bar */}
             <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-stone-100 dark:border-stone-800">
-              <span className="text-[11px] text-stone-500">
+              <span className="text-xs text-stone-500 text-center sm:text-left">
                 {leafPhotoBase64
                   ? "✓ Photo attached + Symptoms provided"
                   : symptomText
@@ -659,7 +659,7 @@ Safety Rule: ${item.safetyDisclaimer}`;
                 type="button"
                 onClick={() => handleRunDiagnosis()}
                 disabled={isDiagnosing || (!leafPhotoBase64 && !symptomText.trim())}
-                className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs px-6 py-2.5 shadow-md shadow-emerald-700/20 transition-all hover:scale-[1.02] active:scale-95"
+                className="w-full sm:w-auto min-h-[48px] flex items-center justify-center gap-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-sm px-6 py-3 shadow-md shadow-emerald-700/20 transition-all hover:scale-[1.02] active:scale-95"
               >
                 {isDiagnosing ? (
                   <>

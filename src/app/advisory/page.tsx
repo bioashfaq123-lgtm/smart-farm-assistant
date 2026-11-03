@@ -557,10 +557,10 @@ export default function AdvisoryPage() {
         </div>
 
         {/* View Toggle Tabs */}
-        <div className="flex items-center gap-1 rounded-2xl border border-stone-200 bg-stone-100 p-1 dark:border-stone-800 dark:bg-stone-900">
+        <div className="flex items-center gap-1 rounded-2xl border border-stone-200 bg-stone-100 p-1 dark:border-stone-800 dark:bg-stone-900 overflow-x-auto no-scrollbar">
           <button
             onClick={() => setActiveTab("chat")}
-            className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition ${
+            className={`shrink-0 flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition min-h-[40px] ${
               activeTab === "chat"
                 ? "bg-white text-stone-900 shadow-2xs dark:bg-stone-800 dark:text-stone-50"
                 : "text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100"
@@ -571,15 +571,15 @@ export default function AdvisoryPage() {
           </button>
           <Link
             href="/diagnosis"
-            className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200 dark:border-rose-900 transition shadow-2xs"
+            className="shrink-0 flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200 dark:border-rose-900 transition shadow-2xs min-h-[40px]"
             title="Go to standalone Crop Disease & Pest Diagnosis Studio"
           >
             <Stethoscope className="h-3.5 w-3.5 text-rose-600" />
-            <span>{lang === "te" ? "రోగ నిర్ధారణ కేంద్రం" : "Disease Diagnosis"} &rarr;</span>
+            <span>{lang === "te" ? "రోగ నిర్ధారణ" : "Disease Diagnosis"} &rarr;</span>
           </Link>
           <button
             onClick={() => setActiveTab("browser")}
-            className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition ${
+            className={`shrink-0 flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition min-h-[40px] ${
               activeTab === "browser"
                 ? "bg-white text-stone-900 shadow-2xs dark:bg-stone-800 dark:text-stone-50"
                 : "text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100"
@@ -869,35 +869,35 @@ export default function AdvisoryPage() {
                   className="w-full resize-none rounded-xl border border-stone-200 p-3 text-xs sm:text-sm text-stone-900 placeholder-stone-400 focus:border-agri-600 focus:outline-hidden focus:ring-1 focus:ring-agri-600 dark:border-stone-800 dark:bg-stone-950 dark:text-stone-100 dark:placeholder-stone-500"
                 />
 
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+                  <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                     <button
                       onClick={toggleVoiceRecording}
-                      className={`flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-semibold transition ${
+                      className={`min-h-[44px] flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold transition ${
                         isRecording
                           ? "border-rose-400 bg-rose-100 text-rose-800"
                           : "border-stone-200 bg-stone-50 text-stone-700 hover:bg-stone-100 dark:border-stone-800 dark:bg-stone-850 dark:text-stone-300"
                       }`}
                     >
-                      <Mic className="h-3.5 w-3.5 text-rose-500" />
+                      <Mic className="h-4 w-4 text-rose-500" />
                       <span>{t("advisory_btn_voice")}</span>
                     </button>
 
                     <button
                       onClick={() => chatFileInputRef.current?.click()}
-                      className="flex items-center gap-1.5 rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 text-xs font-semibold text-stone-700 hover:bg-stone-100 dark:border-stone-800 dark:bg-stone-850 dark:text-stone-300 transition"
+                      className="min-h-[44px] flex items-center gap-1.5 rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 text-xs font-bold text-stone-700 hover:bg-stone-100 dark:border-stone-800 dark:bg-stone-850 dark:text-stone-300 transition"
                       title="Attach leaf photo"
                     >
-                      <Paperclip className="h-3.5 w-3.5 text-agri-600" />
+                      <Paperclip className="h-4 w-4 text-emerald-600" />
                       <span>{attachedImage ? "Change Photo" : "Attach Photo"}</span>
                     </button>
 
                     <Link
                       href="/diagnosis"
-                      className="hidden sm:flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-100 dark:border-rose-900 dark:bg-rose-950 dark:text-rose-300 transition"
+                      className="hidden xs:flex min-h-[44px] items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700 hover:bg-rose-100 dark:border-rose-900 dark:bg-rose-950 dark:text-rose-300 transition"
                       title="Go to standalone Crop Disease & Pest Diagnosis Studio"
                     >
-                      <Stethoscope className="h-3.5 w-3.5 text-rose-600" />
+                      <Stethoscope className="h-4 w-4 text-rose-600" />
                       <span>{lang === "te" ? "రోగ నిర్ధారణ" : "Disease Diagnosis"}</span>
                     </Link>
 
@@ -908,21 +908,21 @@ export default function AdvisoryPage() {
                         }
                         setActiveTab("browser");
                       }}
-                      className="flex items-center gap-1.5 rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-xs font-semibold text-sky-700 hover:bg-sky-100 dark:border-sky-900 dark:bg-sky-950 dark:text-sky-300 transition"
+                      className="min-h-[44px] flex items-center gap-1.5 rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-xs font-bold text-sky-700 hover:bg-sky-100 dark:border-sky-900 dark:bg-sky-950 dark:text-sky-300 transition"
                       title="Search online directly in Agri Browser"
                     >
-                      <Globe className="h-3.5 w-3.5 text-sky-600" />
-                      <span>{lang === "te" ? "ఆన్‌లైన్ బ్రౌజర్" : "Online Browser"}</span>
+                      <Globe className="h-4 w-4 text-sky-600" />
+                      <span>{lang === "te" ? "బ్రౌజర్" : "Online Browser"}</span>
                     </button>
                   </div>
 
                   <button
                     onClick={() => handleSend()}
                     disabled={!inputText.trim() && !attachedImage}
-                    className="flex items-center gap-1.5 rounded-xl bg-agri-700 px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-agri-800 disabled:opacity-50 active:scale-95"
+                    className="w-full sm:w-auto min-h-[44px] flex items-center justify-center gap-2 rounded-xl bg-emerald-700 px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs transition hover:bg-emerald-800 disabled:opacity-50 active:scale-95 shrink-0"
                   >
                     <span>{t("advisory_btn_send")}</span>
-                    <Send className="h-3.5 w-3.5" />
+                    <Send className="h-4 w-4" />
                   </button>
                 </div>
               </div>
