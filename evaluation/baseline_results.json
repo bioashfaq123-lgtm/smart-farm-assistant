@@ -1,5 +1,5 @@
 {
-  "evaluated_at": "2026-11-03T08:27:10.197Z",
+  "evaluated_at": "2026-11-03T11:22:41.740Z",
   "benchmark_title": "Telangana Agricultural Crop Health Benchmark (TACH-10)",
   "benchmark_version": "1.0.0",
   "sample_size": 16,
@@ -13,9 +13,9 @@
     "inappropriate_confident_diagnosis_rate_percent": "0.0",
     "pre_inference_quality_gate_rejections": 1,
     "latency_ms": {
-      "mean": 2,
+      "mean": 1,
       "p50": 1,
-      "p95": 10
+      "p95": 6
     }
   },
   "per_class_metrics": {
@@ -181,7 +181,7 @@
       "is_appropriate_abstention": true,
       "is_inappropriate_confident": false,
       "candidates_count": 0,
-      "latency_ms": 10,
+      "latency_ms": 6,
       "error": null
     },
     {
@@ -253,7 +253,7 @@
       "is_appropriate_abstention": false,
       "is_inappropriate_confident": false,
       "candidates_count": 1,
-      "latency_ms": 1,
+      "latency_ms": 0,
       "error": null
     },
     {
@@ -307,7 +307,7 @@
       "is_appropriate_abstention": false,
       "is_inappropriate_confident": false,
       "candidates_count": 1,
-      "latency_ms": 1,
+      "latency_ms": 0,
       "error": null
     },
     {
@@ -325,7 +325,7 @@
       "is_appropriate_abstention": false,
       "is_inappropriate_confident": false,
       "candidates_count": 1,
-      "latency_ms": 1,
+      "latency_ms": 0,
       "error": null
     },
     {
@@ -361,7 +361,7 @@
       "is_appropriate_abstention": false,
       "is_inappropriate_confident": false,
       "candidates_count": 1,
-      "latency_ms": 1,
+      "latency_ms": 0,
       "error": null
     },
     {
@@ -379,7 +379,7 @@
       "is_appropriate_abstention": false,
       "is_inappropriate_confident": false,
       "candidates_count": 1,
-      "latency_ms": 1,
+      "latency_ms": 0,
       "error": null
     },
     {
@@ -397,7 +397,7 @@
       "is_appropriate_abstention": false,
       "is_inappropriate_confident": false,
       "candidates_count": 2,
-      "latency_ms": 2,
+      "latency_ms": 1,
       "error": null
     },
     {

@@ -22,9 +22,12 @@ import {
   RefreshCw,
   Info,
   LogOut,
+  Stethoscope,
+  LayoutGrid,
 } from "lucide-react";
 import { useLanguage } from "@/components/common/LanguageContext";
 import { useFarmerProfile } from "@/components/common/FarmerProfileContext";
+import { PLATFORM_FEATURES } from "@/lib/navigation/features";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { StatCard } from "@/components/ui/StatCard";
@@ -106,32 +109,46 @@ export default function DashboardPage() {
             </p>
           </div>
 
-          <div className="mt-4 flex flex-wrap items-center gap-3">
+          <div className="mt-4 flex flex-wrap items-center gap-2.5">
             <button
               onClick={openProfileModal}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-white px-4 py-2 text-xs font-bold text-stone-900 shadow-sm transition hover:bg-stone-100 active:scale-95"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-white px-3.5 py-2 text-xs font-bold text-stone-900 shadow-sm transition hover:bg-stone-100 active:scale-95"
             >
               <Edit3 className="h-3.5 w-3.5 text-emerald-700" />
-              <span>{profile.name ? "Edit Farm Profile" : "Set Up Farm Profile"}</span>
+              <span>{profile.name ? (lang === "te" ? "ప్రొఫైల్ మార్చు" : "Edit Farm Profile") : (lang === "te" ? "ప్రొఫైల్ నమోదు" : "Set Up Farm Profile")}</span>
             </button>
             <Link
+              href="/diagnosis"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 px-3.5 py-2 text-xs font-bold text-white shadow-sm transition active:scale-95"
+            >
+              <Stethoscope className="h-3.5 w-3.5" />
+              <span>{lang === "te" ? "పంట రోగ నిర్ధారణ" : "Disease Diagnosis"}</span>
+            </Link>
+            <Link
               href="/advisory"
-              className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-emerald-700 active:scale-95"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 px-3.5 py-2 text-xs font-bold text-white shadow-sm transition active:scale-95"
             >
               <span>{t("nav_advisory")}</span>
-              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+            <Link
+              href="/iot"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-teal-500/25 border border-teal-400/40 px-3.5 py-2 text-xs font-bold text-teal-200 backdrop-blur-md shadow-xs transition hover:bg-teal-500/35 active:scale-95"
+            >
+              <Activity className="h-3.5 w-3.5" />
+              <span>{lang === "te" ? "ఐఓటీ పంపు" : "IoT Pump"}</span>
+            </Link>
+            <Link
+              href="/market"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500/25 border border-amber-400/40 px-3.5 py-2 text-xs font-bold text-amber-200 backdrop-blur-md shadow-xs transition hover:bg-amber-500/35 active:scale-95"
+            >
+              <TrendingUp className="h-3.5 w-3.5" />
+              <span>{lang === "te" ? "మార్కెట్ ధరలు" : "Mandi Rates"}</span>
             </Link>
             <Link
               href="/schemes"
-              className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500/20 border border-amber-400/40 px-3.5 py-2 text-xs font-bold text-amber-200 backdrop-blur-md shadow-xs transition hover:bg-amber-500/30 active:scale-95"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-500/25 border border-indigo-400/40 px-3.5 py-2 text-xs font-bold text-indigo-200 backdrop-blur-md shadow-xs transition hover:bg-indigo-500/35 active:scale-95"
             >
-              <span>🏛️ Govt Schemes</span>
-            </Link>
-            <Link
-              href="/landing"
-              className="inline-flex items-center gap-1.5 rounded-xl bg-white/15 border border-white/20 px-3.5 py-2 text-xs font-bold text-white backdrop-blur-md shadow-xs transition hover:bg-white/25 active:scale-95"
-            >
-              <span>✨ Feature Showcase</span>
+              <span>🏛️ {lang === "te" ? "పథకాలు" : "Govt Schemes"}</span>
             </Link>
             {profile.name && (
               <button
@@ -332,6 +349,60 @@ export default function DashboardPage() {
           </div>
         </Card>
       </div>
+
+      {/* All Platform Features Hub (10 Tools) */}
+      <Card>
+        <CardHeader
+          title={lang === "te" ? "అన్ని వ్యవసాయ సాధనాలు (10 ఫీచర్లు)" : "All Platform Features (10 Tools)"}
+          subtitle={
+            lang === "te"
+              ? "ఏఐ రోగ నిర్ధారణ, ఐఓటీ పంపు, మార్కెట్ ధరలు, పథకాలు మరియు కాలిక్యులేటర్లు"
+              : "Instant access to AI diagnostics, IoT field telemetry, mandi prices, schemes, and calculators"
+          }
+          icon={<LayoutGrid className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />}
+        />
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          {PLATFORM_FEATURES.map((feature) => {
+            const Icon = feature.icon;
+            return (
+              <Link
+                key={feature.id}
+                href={feature.href}
+                className="group flex flex-col justify-between rounded-xl border border-stone-200/90 bg-stone-50/70 p-3 hover:border-emerald-500/80 hover:bg-white hover:shadow-sm transition-all dark:border-stone-800 dark:bg-stone-850/60 dark:hover:bg-stone-800"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div
+                      className={`flex h-8 w-8 items-center justify-center rounded-lg border shadow-2xs transition-transform group-hover:scale-110 ${feature.accentBg} ${feature.accentText} ${feature.accentBorder}`}
+                    >
+                      <Icon className="h-4 w-4" />
+                    </div>
+                    {feature.badge && (
+                      <span
+                        className={`rounded-md px-1.5 py-0.5 text-[9px] font-bold ${
+                          feature.badgeColor || "bg-stone-100 text-stone-700 dark:bg-stone-800 dark:text-stone-300"
+                        }`}
+                      >
+                        {feature.badge}
+                      </span>
+                    )}
+                  </div>
+                  <h4 className="text-xs font-bold text-stone-900 dark:text-stone-100 group-hover:text-emerald-700 dark:group-hover:text-emerald-400 truncate">
+                    {lang === "te" ? feature.titleTe : feature.titleEn}
+                  </h4>
+                  <p className="text-[10px] text-stone-500 dark:text-stone-400 truncate mt-0.5">
+                    {lang === "te" ? feature.titleEn : feature.titleTe}
+                  </p>
+                </div>
+                <div className="mt-2.5 flex items-center justify-between text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 pt-1.5 border-t border-stone-200/60 dark:border-stone-800">
+                  <span>{lang === "te" ? "ఓపెన్ చేయండి" : "Open"}</span>
+                  <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </Card>
 
       {/* 3. Key Stat KPI Cards Grid (4 Columns) with Real IoT Data */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

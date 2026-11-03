@@ -35,12 +35,17 @@ import {
 import { useLanguage } from "@/components/common/LanguageContext";
 import { useFarmerProfile } from "@/components/common/FarmerProfileContext";
 import { QUICK_DEMO_FARMERS } from "@/lib/auth/demoProfiles";
+import {
+  PLATFORM_FEATURES,
+  FEATURE_CATEGORIES,
+} from "@/lib/navigation/features";
 
 export default function HomePage() {
   const { lang, setLang } = useLanguage();
   const { openAuthModal, loginWithDemo, isLoggedIn, profile } = useFarmerProfile();
 
   const [activePreviewTab, setActivePreviewTab] = useState<"ai" | "iot" | "mandi" | "schemes">("ai");
+  const [selectedFeatureCat, setSelectedFeatureCat] = useState<string>("all");
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
   const [showFloatingPrompt, setShowFloatingPrompt] = useState<boolean>(false);
 
@@ -435,126 +440,89 @@ export default function HomePage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Card 1: AI Leaf Pathology */}
-          <div className="group rounded-2xl border border-stone-200 bg-white p-6 shadow-xs hover:shadow-md hover:border-emerald-500/80 transition-all dark:border-stone-800 dark:bg-stone-900">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 mb-4 group-hover:scale-105 transition-transform">
-              <Bot className="w-6 h-6" />
-            </div>
-            <h3 className="text-lg font-bold text-stone-900 dark:text-white mb-2">
-              Gemini 3.8 AI Doctor & Voice Advisory
-            </h3>
-            <p className="text-xs text-stone-600 dark:text-stone-300 leading-relaxed mb-4">
-              Snap high-resolution plant leaf photos to diagnose Leaf Blast, Sheath Blight, Pink Bollworm, or Yellow Stem Borer with instant ICAR chemical & organic remedies.
-            </p>
-            <Link
-              href="/diagnosis"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 hover:text-emerald-800 dark:text-emerald-400 group-hover:underline"
-            >
-              <span>Consult AI Doctor</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
+        {/* Category Filter Tabs */}
+        <div className="flex flex-wrap items-center justify-center gap-2 mb-10">
+          {FEATURE_CATEGORIES.map((cat) => {
+            const isSelected = selectedFeatureCat === cat.id;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => setSelectedFeatureCat(cat.id)}
+                className={`rounded-xl px-4 py-2 text-xs font-bold transition-all ${
+                  isSelected
+                    ? "bg-emerald-700 text-white shadow-sm dark:bg-emerald-600 scale-105"
+                    : "bg-white text-stone-600 hover:bg-stone-100 hover:text-stone-900 border border-stone-200 dark:border-stone-800 dark:bg-stone-900 dark:text-stone-300 dark:hover:bg-stone-800"
+                }`}
+              >
+                {lang === "te" ? cat.labelTe : cat.labelEn}
+              </button>
+            );
+          })}
+        </div>
 
-          {/* Card 2: IoT Soil Sensors & Irrigation */}
-          <div className="group rounded-2xl border border-stone-200 bg-white p-6 shadow-xs hover:shadow-md hover:border-emerald-500/80 transition-all dark:border-stone-800 dark:bg-stone-900">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-teal-100 text-teal-800 dark:bg-teal-950 dark:text-teal-300 mb-4 group-hover:scale-105 transition-transform">
-              <Activity className="w-6 h-6" />
-            </div>
-            <h3 className="text-lg font-bold text-stone-900 dark:text-white mb-2">
-              ESP32 IoT Soil Telemetry & Pump Control
-            </h3>
-            <p className="text-xs text-stone-600 dark:text-stone-300 leading-relaxed mb-4">
-              Real-time monitoring of soil volumetric water content (VWC %), NPK soil nutrient levels, and canopy temperature with automated pump cutoff interlock to save water and power.
-            </p>
-            <Link
-              href="/iot"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-teal-700 hover:text-teal-800 dark:text-teal-400 group-hover:underline"
-            >
-              <span>View Live IoT Dashboard</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
+        {/* Responsive Grid of All 10 Features */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          {PLATFORM_FEATURES.filter((f) => {
+            if (selectedFeatureCat === "all") return true;
+            return f.category === selectedFeatureCat;
+          }).map((feature) => {
+            const Icon = feature.icon;
+            return (
+              <div
+                key={feature.id}
+                className="group flex flex-col justify-between rounded-2xl border border-stone-200 bg-white p-5 shadow-2xs hover:shadow-md hover:border-emerald-500/80 transition-all dark:border-stone-800 dark:bg-stone-900"
+              >
+                <div>
+                  {/* Card Header: Icon & Badge */}
+                  <div className="flex items-center justify-between mb-3.5">
+                    <div
+                      className={`flex h-11 w-11 items-center justify-center rounded-xl border shadow-2xs transition-transform group-hover:scale-110 ${feature.accentBg} ${feature.accentText} ${feature.accentBorder}`}
+                    >
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    {feature.badge && (
+                      <span
+                        className={`rounded-md px-2 py-0.5 text-[10px] font-bold ${
+                          feature.badgeColor || "bg-stone-100 text-stone-700 dark:bg-stone-800 dark:text-stone-300"
+                        }`}
+                      >
+                        {feature.badge}
+                      </span>
+                    )}
+                  </div>
 
-          {/* Card 3: Live APMC Mandi Hub */}
-          <div className="group rounded-2xl border border-stone-200 bg-white p-6 shadow-xs hover:shadow-md hover:border-emerald-500/80 transition-all dark:border-stone-800 dark:bg-stone-900">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 mb-4 group-hover:scale-105 transition-transform">
-              <TrendingUp className="w-6 h-6" />
-            </div>
-            <h3 className="text-lg font-bold text-stone-900 dark:text-white mb-2">
-              Live Mandi Rates & GPS Navigation
-            </h3>
-            <p className="text-xs text-stone-600 dark:text-stone-300 leading-relaxed mb-4">
-              One-touch crop rates and arrivals across Jagtial, Warangal Enmamula, Nizamabad, and Khammam with Telangana ₹500 fine rice bonus breakdown and 1-tap Google Maps directions.
-            </p>
-            <Link
-              href="/market"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-700 hover:text-amber-800 dark:text-amber-400 group-hover:underline"
-            >
-              <span>Check Live Mandi Prices</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
+                  {/* Title & Category Tag */}
+                  <div className="mb-1.5">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-stone-400 dark:text-stone-500 block">
+                      {lang === "te" ? feature.categoryLabelTe : feature.categoryLabelEn}
+                    </span>
+                    <h3 className="text-base font-bold text-stone-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
+                      {lang === "te" ? feature.titleTe : feature.titleEn}
+                    </h3>
+                    <p className="text-[11px] text-stone-400 dark:text-stone-500">
+                      {lang === "te" ? feature.titleEn : feature.titleTe}
+                    </p>
+                  </div>
 
-          {/* Card 4: Government Schemes Portal */}
-          <div className="group rounded-2xl border border-stone-200 bg-white p-6 shadow-xs hover:shadow-md hover:border-emerald-500/80 transition-all dark:border-stone-800 dark:bg-stone-900">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300 mb-4 group-hover:scale-105 transition-transform">
-              <Landmark className="w-6 h-6" />
-            </div>
-            <h3 className="text-lg font-bold text-stone-900 dark:text-white mb-2">
-              Telangana & Central Schemes Portal
-            </h3>
-            <p className="text-xs text-stone-600 dark:text-stone-300 leading-relaxed mb-4">
-              Comprehensive repository of Rythu Bharosa (₹15,000/acre), Rythu Bima (₹5L insurance), Rythu Runa Mafi loan waiver, PM-KISAN, PMFBY, and solar pump subsidies with eligibility calculator.
-            </p>
-            <Link
-              href="/schemes"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-700 hover:text-indigo-800 dark:text-indigo-400 group-hover:underline"
-            >
-              <span>Explore Government Schemes</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
+                  {/* Description */}
+                  <p className="text-xs text-stone-600 dark:text-stone-400 leading-relaxed mb-4">
+                    {lang === "te" ? feature.descriptionTe : feature.descriptionEn}
+                  </p>
+                </div>
 
-          {/* Card 5: Agronomic Calculators */}
-          <div className="group rounded-2xl border border-stone-200 bg-white p-6 shadow-xs hover:shadow-md hover:border-emerald-500/80 transition-all dark:border-stone-800 dark:bg-stone-900">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-300 mb-4 group-hover:scale-105 transition-transform">
-              <Wrench className="w-6 h-6" />
-            </div>
-            <h3 className="text-lg font-bold text-stone-900 dark:text-white mb-2">
-              Scientific Agronomic Calculators
-            </h3>
-            <p className="text-xs text-stone-600 dark:text-stone-300 leading-relaxed mb-4">
-              Precision calculators for crop seed rate, 3-split fertilizer dosing (Urea / DAP / MOP), knapsack sprayer dilution, and Mallesham Goud's Paddy Payout Calculator with DBT bonus.
-            </p>
-            <Link
-              href="/tools"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-orange-700 hover:text-orange-800 dark:text-orange-400 group-hover:underline"
-            >
-              <span>Use Agri Calculators</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-
-          {/* Card 6: Offline Resilience & Demo */}
-          <div className="group rounded-2xl border border-stone-200 bg-white p-6 shadow-xs hover:shadow-md hover:border-emerald-500/80 transition-all dark:border-stone-800 dark:bg-stone-900">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300 mb-4 group-hover:scale-105 transition-transform">
-              <ShieldCheck className="w-6 h-6" />
-            </div>
-            <h3 className="text-lg font-bold text-stone-900 dark:text-white mb-2">
-              Offline-First PWA & Conference Demo
-            </h3>
-            <p className="text-xs text-stone-600 dark:text-stone-300 leading-relaxed mb-4">
-              Engineered for poor rural connectivity with local caching of agronomic remedies, plus an automated conference simulator for live farmer demonstration and evaluation.
-            </p>
-            <Link
-              href="/demo"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-rose-700 hover:text-rose-800 dark:text-rose-400 group-hover:underline"
-            >
-              <span>Open Conference Demo</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
+                {/* Direct Action Link */}
+                <div className="pt-3 border-t border-stone-100 dark:border-stone-800/80">
+                  <Link
+                    href={feature.href}
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 hover:text-emerald-800 dark:text-emerald-400 group-hover:underline"
+                  >
+                    <span>{lang === "te" ? "ప్రారంభించండి" : "Launch Feature"}</span>
+                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </section>
 
