@@ -51,6 +51,31 @@ export default function HomePage() {
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
   const [showFloatingPrompt, setShowFloatingPrompt] = useState<boolean>(false);
 
+  // Handle URL hash changes (e.g. #schemes, #mandi, #iot, #ai)
+  useEffect(() => {
+    const handleHash = () => {
+      if (typeof window === "undefined") return;
+      const hash = window.location.hash.toLowerCase();
+      if (hash === "#schemes") {
+        setActivePreviewTab("schemes");
+        document.getElementById("schemes")?.scrollIntoView({ behavior: "smooth" });
+      } else if (hash === "#mandi") {
+        setActivePreviewTab("mandi");
+        document.getElementById("mandi")?.scrollIntoView({ behavior: "smooth" });
+      } else if (hash === "#iot") {
+        setActivePreviewTab("iot");
+        document.getElementById("iot")?.scrollIntoView({ behavior: "smooth" });
+      } else if (hash === "#ai") {
+        setActivePreviewTab("ai");
+        document.getElementById("ai")?.scrollIntoView({ behavior: "smooth" });
+      }
+    };
+
+    handleHash();
+    window.addEventListener("hashchange", handleHash);
+    return () => window.removeEventListener("hashchange", handleHash);
+  }, []);
+
   // Show a gentle floating registration prompt for first-time visitors after 2.5 seconds
   useEffect(() => {
     if (!isLoggedIn && !profile.name) {
@@ -194,15 +219,27 @@ export default function HomePage() {
             <a href="#features" className="hover:text-emerald-700 dark:hover:text-emerald-400 transition">
               {lang === "te" ? "ఫీచర్లు" : "Features"}
             </a>
-            <a href="#schemes" className="hover:text-emerald-700 dark:hover:text-emerald-400 transition">
+            <Link
+              href="/schemes"
+              className="hover:text-emerald-700 dark:hover:text-emerald-400 transition"
+              title="Open Telangana & Central Govt Schemes Portal"
+            >
               {lang === "te" ? "ప్రభుత్వ పథకాలు" : "Govt Schemes"}
-            </a>
-            <a href="#mandi" className="hover:text-emerald-700 dark:hover:text-emerald-400 transition">
+            </Link>
+            <Link
+              href="/market"
+              className="hover:text-emerald-700 dark:hover:text-emerald-400 transition"
+              title="Open Live APMC Mandi Rates & Telangana Bonus"
+            >
               {lang === "te" ? "మార్కెట్ యార్డులు" : "Live Mandi Rates"}
-            </a>
-            <a href="#iot" className="hover:text-emerald-700 dark:hover:text-emerald-400 transition">
+            </Link>
+            <Link
+              href="/iot"
+              className="hover:text-emerald-700 dark:hover:text-emerald-400 transition"
+              title="Open Real-Time IoT Soil Telemetry & Pump Controller"
+            >
               {lang === "te" ? "ఐఓటీ సెన్సార్లు" : "IoT Sensors"}
-            </a>
+            </Link>
             <a href="#faq" className="hover:text-emerald-700 dark:hover:text-emerald-400 transition">
               FAQ
             </a>
@@ -282,27 +319,27 @@ export default function HomePage() {
               >
                 {lang === "te" ? "✨ 10 ఫీచర్లు" : "✨ All 10 Features"}
               </a>
-              <a
-                href="#schemes"
+              <Link
+                href="/schemes"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center min-h-[44px] p-2.5 rounded-xl bg-stone-50 dark:bg-stone-900 hover:bg-stone-100 text-stone-800 dark:text-stone-200 border border-stone-200 dark:border-stone-800"
+                className="flex items-center min-h-[44px] p-2.5 rounded-xl bg-stone-50 dark:bg-stone-900 hover:bg-stone-100 text-stone-800 dark:text-stone-200 border border-stone-200 dark:border-stone-800 font-bold"
               >
                 {lang === "te" ? "🏛️ ప్రభుత్వ పథకాలు" : "🏛️ Govt Schemes"}
-              </a>
-              <a
-                href="#mandi"
+              </Link>
+              <Link
+                href="/market"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center min-h-[44px] p-2.5 rounded-xl bg-stone-50 dark:bg-stone-900 hover:bg-stone-100 text-stone-800 dark:text-stone-200 border border-stone-200 dark:border-stone-800"
+                className="flex items-center min-h-[44px] p-2.5 rounded-xl bg-stone-50 dark:bg-stone-900 hover:bg-stone-100 text-stone-800 dark:text-stone-200 border border-stone-200 dark:border-stone-800 font-bold"
               >
                 {lang === "te" ? "📈 మార్కెట్ యార్డులు" : "📈 Live Mandi Rates"}
-              </a>
-              <a
-                href="#iot"
+              </Link>
+              <Link
+                href="/iot"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center min-h-[44px] p-2.5 rounded-xl bg-stone-50 dark:bg-stone-900 hover:bg-stone-100 text-stone-800 dark:text-stone-200 border border-stone-200 dark:border-stone-800"
+                className="flex items-center min-h-[44px] p-2.5 rounded-xl bg-stone-50 dark:bg-stone-900 hover:bg-stone-100 text-stone-800 dark:text-stone-200 border border-stone-200 dark:border-stone-800 font-bold"
               >
                 {lang === "te" ? "📡 ఐఓటీ సెన్సార్లు" : "📡 IoT Sensors"}
-              </a>
+              </Link>
               <a
                 href="#faq"
                 onClick={() => setMobileMenuOpen(false)}
@@ -611,7 +648,11 @@ export default function HomePage() {
       </section>
 
       {/* INTERACTIVE FEATURE PREVIEW BOX */}
-      <section className="max-w-6xl mx-auto px-4 md:px-8 py-10">
+      <section id="preview" className="max-w-6xl mx-auto px-4 md:px-8 py-10 scroll-mt-20">
+        <div id="schemes" className="scroll-mt-28" />
+        <div id="mandi" className="scroll-mt-28" />
+        <div id="iot" className="scroll-mt-28" />
+        <div id="ai" className="scroll-mt-28" />
         <div className="rounded-3xl border border-stone-200 bg-white dark:border-stone-800 dark:bg-stone-900 p-6 md:p-8 shadow-sm">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-4 border-b border-stone-100 dark:border-stone-800">
             <div>
