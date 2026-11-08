@@ -17,6 +17,7 @@ import { useLanguage } from "../common/LanguageContext";
 import { useTheme } from "../common/ThemeContext";
 import { useFarmerProfile } from "../common/FarmerProfileContext";
 import { MobileFeaturesDrawer } from "./MobileFeaturesDrawer";
+import { InstallAppButton } from "../common/PWAInstallContext";
 
 export function Header() {
   const { lang, setLang, t } = useLanguage();
@@ -142,6 +143,9 @@ export function Header() {
             <Compass className="w-3.5 h-3.5 text-emerald-600" />
             <span>Showcase</span>
           </Link>
+
+          {/* Direct Install App Button (Auto-hidden if user already installed) */}
+          <InstallAppButton variant="compact" />
 
           {/* Login / Register / Farmer Profile & Logout Pill */}
           {isLoggedIn && profile.name ? (

@@ -23,6 +23,7 @@ import {
 } from "@/lib/navigation/features";
 import { useLanguage } from "../common/LanguageContext";
 import { useFarmerProfile } from "../common/FarmerProfileContext";
+import { InstallAppButton } from "../common/PWAInstallContext";
 
 interface MobileFeaturesDrawerProps {
   isOpen: boolean;

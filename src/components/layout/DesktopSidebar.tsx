@@ -22,6 +22,7 @@ import {
 import { useLanguage } from "../common/LanguageContext";
 import { useFarmerProfile } from "../common/FarmerProfileContext";
 import { getFeatureSectionGroups } from "@/lib/navigation/features";
+import { InstallAppButton } from "../common/PWAInstallContext";
 
 export function DesktopSidebar() {
   const pathname = usePathname();
@@ -142,6 +143,11 @@ export function DesktopSidebar() {
             </p>
           </div>
         </button>
+
+        {/* Direct Install App Button (Auto-hidden if user already installed) */}
+        <div className="mt-2">
+          <InstallAppButton variant="drawer" />
+        </div>
 
         <div className="flex items-center gap-1.5 mt-2">
           <button

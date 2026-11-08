@@ -35,6 +35,7 @@ import {
 } from "lucide-react";
 import { useLanguage } from "@/components/common/LanguageContext";
 import { useFarmerProfile } from "@/components/common/FarmerProfileContext";
+import { InstallAppButton } from "@/components/common/PWAInstallContext";
 import { QUICK_DEMO_FARMERS } from "@/lib/auth/demoProfiles";
 import {
   PLATFORM_FEATURES,
@@ -280,6 +281,9 @@ export default function HomePage() {
               <span className="truncate max-w-[100px]">{isLoggedIn ? profile.name || "My Account" : "Register / Login"}</span>
             </button>
 
+            {/* Direct Install App Button (Auto-hidden if user already installed) */}
+            <InstallAppButton variant="compact" />
+
             {/* Launch Dashboard CTA */}
             <Link
               href="/dashboard"
@@ -350,6 +354,8 @@ export default function HomePage() {
             </nav>
 
             <div className="flex flex-col gap-2 pt-2 border-t border-stone-100 dark:border-stone-800">
+              {/* Direct Install App Banner (Auto-hidden if user already installed) */}
+              <InstallAppButton variant="drawer" />
               <Link
                 href="/dashboard"
                 onClick={() => setMobileMenuOpen(false)}
@@ -477,6 +483,8 @@ export default function HomePage() {
 
           {/* Primary Action CTAs */}
           <div className="flex flex-wrap items-center justify-center gap-3 pt-3">
+            {/* Direct Install App Button (Auto-hidden if user already installed) */}
+            <InstallAppButton variant="pill" className="px-5 py-3.5 text-sm" />
             <Link
               href="/dashboard"
               className="flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-sm shadow-lg shadow-emerald-700/25 transition-all hover:scale-[1.02]"

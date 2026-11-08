@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/common/ThemeContext";
 import { FarmerProfileProvider } from "@/components/common/FarmerProfileContext";
 import { AppShell } from "@/components/layout/AppShell";
 import { PWARegister } from "@/components/common/PWARegister";
+import { PWAInstallProvider } from "@/components/common/PWAInstallContext";
 import { AnalyticsTracker } from "@/components/common/AnalyticsTracker";
 
 export const viewport: Viewport = {
@@ -57,9 +58,11 @@ export default function RootLayout({
         <ThemeProvider>
           <LanguageProvider>
             <FarmerProfileProvider>
-              <PWARegister />
-              <AnalyticsTracker />
-              <AppShell>{children}</AppShell>
+              <PWAInstallProvider>
+                <PWARegister />
+                <AnalyticsTracker />
+                <AppShell>{children}</AppShell>
+              </PWAInstallProvider>
             </FarmerProfileProvider>
           </LanguageProvider>
         </ThemeProvider>
