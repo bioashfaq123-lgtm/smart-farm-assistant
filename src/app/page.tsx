@@ -44,11 +44,10 @@ import {
 
 export default function HomePage() {
   const { lang, setLang } = useLanguage();
-  const { openAuthModal, loginWithDemo, isLoggedIn, profile } = useFarmerProfile();
+  const { openAuthModal, openProfileModal, loginWithDemo, isLoggedIn, profile } = useFarmerProfile();
 
   const [activePreviewTab, setActivePreviewTab] = useState<"ai" | "iot" | "mandi" | "schemes">("ai");
   const [selectedFeatureCat, setSelectedFeatureCat] = useState<string>("all");
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
   const [showFloatingPrompt, setShowFloatingPrompt] = useState<boolean>(false);
 
@@ -144,7 +143,7 @@ export default function HomePage() {
       {showFloatingPrompt && (
         <aside
           aria-label="First-time registration prompt"
-          className="fixed bottom-4 left-4 right-4 md:left-auto md:right-8 md:max-w-md z-50 rounded-2xl border-2 border-emerald-500 bg-white/95 dark:bg-stone-900/95 p-4 shadow-2xl backdrop-blur-md animate-in slide-in-from-bottom duration-300"
+          className="fixed bottom-20 left-3 right-3 sm:left-4 sm:right-4 md:bottom-8 md:left-auto md:right-8 md:max-w-md z-50 rounded-2xl border-2 border-emerald-500 bg-white/95 dark:bg-stone-900/95 p-4 shadow-2xl backdrop-blur-md animate-in slide-in-from-bottom duration-300"
         >
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-start gap-3">
@@ -190,203 +189,13 @@ export default function HomePage() {
         </aside>
       )}
 
-      {/* LANDING TOP NAVBAR */}
-      <header className="sticky top-0 z-40 w-full border-b border-stone-200/80 bg-white/95 px-3 sm:px-6 md:px-8 py-3 backdrop-blur-md dark:border-stone-800/80 dark:bg-stone-950/95">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          {/* Brand Logo & Title */}
-          <Link href="/" className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-            <div className="relative h-9 w-9 sm:h-10 sm:w-10 shrink-0 overflow-hidden rounded-xl shadow-xs border border-emerald-500/30">
-              <img
-                src="/images/smart_farm_app_icon.jpg"
-                alt="Smart Farm Logo"
-                className="h-full w-full object-cover"
-              />
-            </div>
-            <div className="min-w-0">
-              <span className="block text-sm sm:text-base font-extrabold tracking-tight text-stone-900 dark:text-white leading-tight truncate">
-                Smart Farm Assistant
-              </span>
-              <p className="text-[10px] sm:text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 truncate">
-                Telangana Rythu Digital Ecosystem
-              </p>
-            </div>
-          </Link>
-
-          {/* Center Links (Desktop only) */}
-          <nav className="hidden lg:flex items-center gap-5 xl:gap-6 text-xs font-bold text-stone-600 dark:text-stone-300">
-            <a href="#register" className="hover:text-emerald-700 dark:hover:text-emerald-400 transition font-bold text-emerald-700 dark:text-emerald-400">
-              {lang === "te" ? "ప్రొఫైల్ నమోదు" : "Register Profile"}
-            </a>
-            <a href="#features" className="hover:text-emerald-700 dark:hover:text-emerald-400 transition">
-              {lang === "te" ? "ఫీచర్లు" : "Features"}
-            </a>
-            <Link
-              href="/schemes"
-              className="hover:text-emerald-700 dark:hover:text-emerald-400 transition"
-              title="Open Telangana & Central Govt Schemes Portal"
-            >
-              {lang === "te" ? "ప్రభుత్వ పథకాలు" : "Govt Schemes"}
-            </Link>
-            <Link
-              href="/market"
-              className="hover:text-emerald-700 dark:hover:text-emerald-400 transition"
-              title="Open Live APMC Mandi Rates & Telangana Bonus"
-            >
-              {lang === "te" ? "మార్కెట్ యార్డులు" : "Live Mandi Rates"}
-            </Link>
-            <Link
-              href="/iot"
-              className="hover:text-emerald-700 dark:hover:text-emerald-400 transition"
-              title="Open Real-Time IoT Soil Telemetry & Pump Controller"
-            >
-              {lang === "te" ? "ఐఓటీ సెన్సార్లు" : "IoT Sensors"}
-            </Link>
-            <a href="#faq" className="hover:text-emerald-700 dark:hover:text-emerald-400 transition">
-              FAQ
-            </a>
-          </nav>
-
-          {/* Right Action Buttons */}
-          <div className="flex items-center gap-1.5 sm:gap-2.5">
-            {/* Language switch (min 44px touch height) */}
-            <div className="flex min-h-[44px] items-center rounded-xl border border-stone-200 bg-stone-100/80 p-0.5 dark:border-stone-800 dark:bg-stone-900">
-              <button
-                onClick={() => setLang("en")}
-                className={`min-h-[38px] px-2 sm:px-2.5 py-1 text-xs font-bold rounded-lg transition ${
-                  lang === "en" ? "bg-white text-emerald-800 shadow-2xs dark:bg-stone-800 dark:text-emerald-300" : "text-stone-500"
-                }`}
-              >
-                EN
-              </button>
-              <button
-                onClick={() => setLang("te")}
-                className={`min-h-[38px] px-2 sm:px-2.5 py-1 text-xs font-bold rounded-lg transition ${
-                  lang === "te" ? "bg-white text-emerald-800 shadow-2xs dark:bg-stone-800 dark:text-emerald-300" : "text-stone-500"
-                }`}
-              >
-                తెలుగు
-              </button>
-            </div>
-
-            {/* Login / Register Button (Desktop & Tablet) */}
-            <button
-              onClick={() => openAuthModal(isLoggedIn ? "login" : "register")}
-              className="hidden sm:flex min-h-[44px] items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-300 dark:border-stone-700 text-xs font-bold hover:bg-stone-100 dark:hover:bg-stone-800 transition"
-            >
-              {isLoggedIn ? (
-                <UserCheck className="w-3.5 h-3.5 text-emerald-600" />
-              ) : (
-                <UserPlus className="w-3.5 h-3.5 text-emerald-600" />
-              )}
-              <span className="truncate max-w-[100px]">{isLoggedIn ? profile.name || "My Account" : "Register / Login"}</span>
-            </button>
-
-            {/* Direct Install App Button (Auto-hidden if user already installed) */}
-            <InstallAppButton variant="compact" />
-
-            {/* Launch Dashboard CTA */}
-            <Link
-              href="/dashboard"
-              className="hidden xs:flex min-h-[44px] items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold shadow-md transition"
-            >
-              <span>{lang === "te" ? "డాష్‌బోర్డ్" : "Dashboard"}</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-
-            {/* Mobile Hamburger / Collapsible Menu Toggle Button (Point 3 - min 44x44px touch) */}
-            <button
-              type="button"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label="Toggle navigation menu"
-              className="flex lg:hidden min-h-[44px] min-w-[44px] items-center justify-center rounded-xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-900 text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition"
-            >
-              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </button>
-          </div>
-        </div>
-
-        {/* Collapsible Mobile Navigation Drawer */}
-        {mobileMenuOpen && (
-          <div className="lg:hidden mt-3 pt-3 border-t border-stone-200 dark:border-stone-800 space-y-2 animate-in fade-in slide-in-from-top-2 duration-150">
-            <nav className="grid grid-cols-2 gap-2 text-xs font-bold">
-              <a
-                href="#register"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center min-h-[44px] p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
-              >
-                {lang === "te" ? "✍️ ప్రొఫైల్ నమోదు" : "✍️ Register Profile"}
-              </a>
-              <a
-                href="#features"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center min-h-[44px] p-2.5 rounded-xl bg-stone-50 dark:bg-stone-900 hover:bg-stone-100 text-stone-800 dark:text-stone-200 border border-stone-200 dark:border-stone-800"
-              >
-                {lang === "te" ? "✨ 10 ఫీచర్లు" : "✨ All 10 Features"}
-              </a>
-              <Link
-                href="/schemes"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center min-h-[44px] p-2.5 rounded-xl bg-stone-50 dark:bg-stone-900 hover:bg-stone-100 text-stone-800 dark:text-stone-200 border border-stone-200 dark:border-stone-800 font-bold"
-              >
-                {lang === "te" ? "🏛️ ప్రభుత్వ పథకాలు" : "🏛️ Govt Schemes"}
-              </Link>
-              <Link
-                href="/market"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center min-h-[44px] p-2.5 rounded-xl bg-stone-50 dark:bg-stone-900 hover:bg-stone-100 text-stone-800 dark:text-stone-200 border border-stone-200 dark:border-stone-800 font-bold"
-              >
-                {lang === "te" ? "📈 మార్కెట్ యార్డులు" : "📈 Live Mandi Rates"}
-              </Link>
-              <Link
-                href="/iot"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center min-h-[44px] p-2.5 rounded-xl bg-stone-50 dark:bg-stone-900 hover:bg-stone-100 text-stone-800 dark:text-stone-200 border border-stone-200 dark:border-stone-800 font-bold"
-              >
-                {lang === "te" ? "📡 ఐఓటీ సెన్సార్లు" : "📡 IoT Sensors"}
-              </Link>
-              <a
-                href="#faq"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center min-h-[44px] p-2.5 rounded-xl bg-stone-50 dark:bg-stone-900 hover:bg-stone-100 text-stone-800 dark:text-stone-200 border border-stone-200 dark:border-stone-800"
-              >
-                ❓ FAQ
-              </a>
-            </nav>
-
-            <div className="flex flex-col gap-2 pt-2 border-t border-stone-100 dark:border-stone-800">
-              {/* Direct Install App Banner (Auto-hidden if user already installed) */}
-              <InstallAppButton variant="drawer" />
-              <Link
-                href="/dashboard"
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-full flex items-center justify-center gap-2 min-h-[44px] rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-md transition"
-              >
-                <span>{lang === "te" ? "🚀 ఫార్మ్ డాష్‌బోర్డ్ తెరవండి" : "🚀 Launch Farm Dashboard"}</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-              <button
-                type="button"
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  openAuthModal(isLoggedIn ? "login" : "register");
-                }}
-                className="w-full flex items-center justify-center gap-2 min-h-[44px] rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-850 text-stone-800 dark:text-stone-200 font-bold text-xs transition"
-              >
-                <UserPlus className="w-4 h-4 text-emerald-600" />
-                <span>{isLoggedIn ? profile.name || "My Account" : "Register / Login"}</span>
-              </button>
-            </div>
-          </div>
-        )}
-      </header>
-
-      {/* HERO SECTION WITH FIRST-TIME REGISTRATION CARD */}
-      <section className="relative overflow-hidden pt-12 pb-16 md:pt-16 md:pb-20 px-4 md:px-8 border-b border-stone-200/80 dark:border-stone-800/80 bg-gradient-to-b from-emerald-50/50 via-white to-white dark:from-emerald-950/20 dark:via-stone-950 dark:to-stone-950">
-        <div className="max-w-6xl mx-auto text-center space-y-6">
+      {/* HERO SECTION WITH CLEAN MOBILE-FRIENDLY LAYOUT */}
+      <section className="relative overflow-hidden pt-8 pb-14 sm:pt-12 sm:pb-16 md:pt-16 md:pb-20 px-3.5 sm:px-6 md:px-8 border-b border-stone-200/80 dark:border-stone-800/80 bg-gradient-to-b from-emerald-50/50 via-white to-white dark:from-emerald-950/20 dark:via-stone-950 dark:to-stone-950">
+        <div className="max-w-6xl mx-auto text-center space-y-5 sm:space-y-6">
           {/* Announcement Tag */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-100/80 dark:bg-emerald-950/80 border border-emerald-300/80 dark:border-emerald-800 text-emerald-900 dark:text-emerald-300 text-xs font-semibold shadow-2xs">
-            <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-            <span>
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-100/80 dark:bg-emerald-950/80 border border-emerald-300/80 dark:border-emerald-800 text-emerald-900 dark:text-emerald-300 text-xs font-semibold shadow-2xs">
+            <Sparkles className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+            <span className="truncate max-w-[280px] sm:max-w-none">
               {lang === "te"
                 ? "జెమినీ 3.8 మల్టీమోడల్ ఏఐ & ఈఎస్పీ32 ఐఓటీ సాంకేతికత"
                 : "Powered by Gemini 3.8 Multimodal AI & Real-Time ESP32 IoT Sensors"}
@@ -394,7 +203,7 @@ export default function HomePage() {
           </div>
 
           {/* Main Hero Headline */}
-          <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight text-stone-950 dark:text-white max-w-4xl mx-auto leading-tight">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tight text-stone-950 dark:text-white max-w-4xl mx-auto leading-tight sm:leading-tight">
             {lang === "te" ? (
               <>
                 తెలంగాణ రైతులకు <span className="text-emerald-700 dark:text-emerald-400">స్మార్ట్ వ్యవసాయ</span> విప్లవం
@@ -407,18 +216,18 @@ export default function HomePage() {
           </h1>
 
           {/* Hero Subheadline */}
-          <p className="text-sm sm:text-base md:text-lg text-stone-600 dark:text-stone-300 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xs sm:text-base md:text-lg text-stone-600 dark:text-stone-300 max-w-3xl mx-auto leading-relaxed">
             {lang === "te"
               ? "పంట ఆకు ఫోటోతో తక్షణ రోగ నిర్ధారణ, బోరుబావి ఐఓటీ సెన్సార్లు, లైవ్ మార్కెట్ యార్డ్ ధరలు (సన్న బియ్యం ₹500 బోనస్), మరియు రైతు భరోసా, పి.ఎం. కిసాన్ పథకాల సమగ్ర వేదిక."
               : "Empowering farmers with Gemini 3.8 Multimodal Leaf Pathology, continuous ESP32 soil moisture telemetry with automated pump interlock, live APMC Mandi rates with GPS navigation, and unified Telangana & Central Government schemes."}
           </p>
 
           {/* ============================================================ */}
-          {/* 🌟 PROMINENT FIRST-TIME VISITOR REGISTRATION CARD (UI/UX BEST PRACTICE) */}
+          {/* 🌟 FARMER CONTEXT CARD (DYNAMIC LOGGED-IN VS GUEST) */}
           {/* ============================================================ */}
           <div id="register" className="pt-2">
             {!isLoggedIn ? (
-              <div className="mx-auto max-w-2xl rounded-3xl border-2 border-emerald-500/50 bg-gradient-to-r from-emerald-50 via-white to-emerald-50 dark:from-emerald-950/50 dark:via-stone-900 dark:to-emerald-950/50 p-5 sm:p-6 shadow-xl shadow-emerald-700/10 backdrop-blur-md text-left transition-all">
+              <div className="mx-auto max-w-2xl rounded-3xl border-2 border-emerald-500/50 bg-gradient-to-r from-emerald-50 via-white to-emerald-50 dark:from-emerald-950/50 dark:via-stone-900 dark:to-emerald-950/50 p-4.5 sm:p-6 shadow-xl shadow-emerald-700/10 backdrop-blur-md text-left transition-all">
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                   <div className="space-y-1.5 text-center sm:text-left">
                     <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-700 text-white text-[11px] font-extrabold uppercase tracking-wider shadow-xs">
@@ -453,103 +262,144 @@ export default function HomePage() {
                 </div>
               </div>
             ) : (
-              <div className="mx-auto max-w-2xl rounded-3xl border border-emerald-500/40 bg-emerald-50/80 dark:bg-emerald-950/40 p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 text-left shadow-sm">
-                <div className="flex items-center gap-3">
-                  <div className="h-11 w-11 rounded-2xl bg-emerald-700 text-white font-extrabold flex items-center justify-center text-sm shadow-xs shrink-0">
-                    {profile.name?.slice(0, 2).toUpperCase() || "MA"}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-bold text-stone-900 dark:text-white">{profile.name}</span>
-                      <span className="rounded-full bg-emerald-600/15 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 text-[10px] font-bold border border-emerald-500/30">
-                        ✓ Profile Registered
-                      </span>
+              <div className="mx-auto max-w-2xl rounded-3xl border border-emerald-500/40 bg-gradient-to-r from-emerald-50 via-white to-emerald-50 dark:from-emerald-950/40 dark:via-stone-900 dark:to-emerald-950/40 p-4 sm:p-5 shadow-sm text-left">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3.5">
+                  <div className="flex items-center gap-3">
+                    <div className="h-11 w-11 rounded-2xl bg-emerald-700 text-white font-black flex items-center justify-center text-sm shadow-xs shrink-0">
+                      {profile.name?.slice(0, 2).toUpperCase() || "AM"}
                     </div>
-                    <p className="text-xs text-stone-600 dark:text-stone-400">
-                      {profile.village}, {profile.district} District &bull; Primary Crop: <b>{profile.primaryCrop}</b> ({profile.areaAcre} Acres)
-                    </p>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-sm sm:text-base font-extrabold text-stone-900 dark:text-white truncate">
+                          {profile.name}
+                        </span>
+                        <span className="rounded-full bg-emerald-600/15 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 text-[10px] font-bold border border-emerald-500/30 shrink-0">
+                          ✓ Profile Active
+                        </span>
+                      </div>
+                      <p className="text-xs text-stone-600 dark:text-stone-400 mt-0.5">
+                        {profile.village ? `${profile.village}, ` : ""}{profile.district} District &bull; Crop: <b className="text-stone-900 dark:text-white">{profile.primaryCrop}</b> ({profile.areaAcre} Acres)
+                      </p>
+                    </div>
                   </div>
+                  <Link
+                    href="/dashboard"
+                    className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-emerald-700 text-white text-xs font-bold hover:bg-emerald-800 transition flex items-center justify-center gap-1.5 shadow-sm shrink-0 hover:scale-[1.02] active:scale-95"
+                  >
+                    <span>{lang === "te" ? "ఫార్మ్ డాష్‌బోర్డ్ తెరవండి" : "Open Farm Dashboard"}</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
                 </div>
-                <Link
-                  href="/dashboard"
-                  className="px-4 py-2.5 rounded-xl bg-emerald-700 text-white text-xs font-bold hover:bg-emerald-800 transition flex items-center gap-1.5 shadow-xs shrink-0"
-                >
-                  <span>Open Farm Dashboard</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
+
+                {/* Quick 1-tap feature shortcuts for registered farmer */}
+                <div className="mt-3.5 pt-3 border-t border-emerald-200/50 dark:border-emerald-800/50 flex flex-wrap items-center justify-between gap-2 text-xs">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <Link
+                      href="/diagnosis"
+                      className="px-2.5 py-1 rounded-lg bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 hover:text-emerald-700 font-semibold text-[11px] transition shadow-2xs"
+                    >
+                      🩺 {lang === "te" ? "రోగ నిర్ధారణ" : "AI Diagnosis"}
+                    </Link>
+                    <Link
+                      href="/iot"
+                      className="px-2.5 py-1 rounded-lg bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 hover:text-emerald-700 font-semibold text-[11px] transition shadow-2xs"
+                    >
+                      📡 {lang === "te" ? "ఐఓటీ పంపు" : "IoT Pump"}
+                    </Link>
+                    <Link
+                      href="/market"
+                      className="px-2.5 py-1 rounded-lg bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 hover:text-emerald-700 font-semibold text-[11px] transition shadow-2xs"
+                    >
+                      📈 {lang === "te" ? "మార్కెట్ ధరలు" : "Mandi Rates"}
+                    </Link>
+                    <Link
+                      href="/schemes"
+                      className="px-2.5 py-1 rounded-lg bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 hover:text-emerald-700 font-semibold text-[11px] transition shadow-2xs"
+                    >
+                      🏛️ {lang === "te" ? "పథకాలు" : "Schemes"}
+                    </Link>
+                  </div>
+                  <button
+                    onClick={openProfileModal}
+                    className="text-[11px] text-emerald-700 dark:text-emerald-400 hover:underline font-semibold"
+                  >
+                    {lang === "te" ? "ప్రొఫైల్ మార్చండి" : "Edit Details / Switch"}
+                  </button>
+                </div>
               </div>
             )}
           </div>
 
-          {/* Primary Action CTAs */}
-          <div className="flex flex-wrap items-center justify-center gap-3 pt-3">
-            {/* Direct Install App Button (Auto-hidden if user already installed) */}
-            <InstallAppButton variant="pill" className="px-5 py-3.5 text-sm" />
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-sm shadow-lg shadow-emerald-700/25 transition-all hover:scale-[1.02]"
-            >
-              <span>{lang === "te" ? "🚀 ఫార్మ్ డాష్‌బోర్డ్ ప్రారంభించండి" : "🚀 Launch Farm Dashboard"}</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
+          {/* Non-logged-in Call to Actions */}
+          {!isLoggedIn && (
+            <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3 pt-2">
+              <InstallAppButton variant="pill" className="px-5 py-3 text-xs sm:text-sm" />
+              <Link
+                href="/dashboard"
+                className="flex items-center gap-2 px-5 sm:px-6 py-3 rounded-2xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs sm:text-sm shadow-lg shadow-emerald-700/25 transition-all hover:scale-[1.02]"
+              >
+                <span>{lang === "te" ? "🚀 ఫార్మ్ డాష్‌బోర్డ్ ప్రారంభించండి" : "🚀 Launch Farm Dashboard"}</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
 
-            <button
-              onClick={() => openAuthModal("register")}
-              className="flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-white hover:bg-stone-100 text-stone-800 font-bold text-sm border border-stone-300 shadow-xs dark:bg-stone-900 dark:text-stone-100 dark:border-stone-700 dark:hover:bg-stone-800 transition-all"
-            >
-              <UserPlus className="w-4 h-4 text-emerald-600" />
-              <span>{lang === "te" ? "రైతు ఖాతా నమోదు / లాగిన్" : "Register / 1-Click Demo Login"}</span>
-            </button>
+              <button
+                onClick={() => openAuthModal("register")}
+                className="flex items-center gap-2 px-5 sm:px-6 py-3 rounded-2xl bg-white hover:bg-stone-100 text-stone-800 font-bold text-xs sm:text-sm border border-stone-300 shadow-xs dark:bg-stone-900 dark:text-stone-100 dark:border-stone-700 dark:hover:bg-stone-800 transition-all"
+              >
+                <UserPlus className="w-4 h-4 text-emerald-600" />
+                <span>{lang === "te" ? "రైతు ఖాతా నమోదు / లాగిన్" : "Register / 1-Click Demo"}</span>
+              </button>
 
-            <Link
-              href="/schemes"
-              className="flex items-center gap-2 px-5 py-3.5 rounded-2xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-sm shadow-md dark:bg-stone-800 dark:hover:bg-stone-750 transition"
-            >
-              <Landmark className="w-4 h-4 text-amber-400" />
-              <span>{lang === "te" ? "🏛️ ప్రభుత్వ పథకాల పోర్టల్" : "🏛️ Explore Govt Schemes"}</span>
-            </Link>
-          </div>
+              <Link
+                href="/schemes"
+                className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs sm:text-sm shadow-md dark:bg-stone-800 dark:hover:bg-stone-750 transition"
+              >
+                <Landmark className="w-4 h-4 text-amber-400" />
+                <span>{lang === "te" ? "🏛️ ప్రభుత్వ పథకాలు" : "🏛️ Explore Govt Schemes"}</span>
+              </Link>
+            </div>
+          )}
 
-          {/* Platform Performance Metrics Banner */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto pt-8 text-left">
-            <div className="rounded-2xl bg-white/80 dark:bg-stone-900/80 border border-stone-200 dark:border-stone-800 p-4 shadow-2xs">
-              <span className="text-2xl font-black text-emerald-700 dark:text-emerald-400 block">
+          {/* Platform Performance Metrics Banner (Clean 2x2 Grid on Mobile) */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 max-w-4xl mx-auto pt-6 text-left">
+            <div className="rounded-2xl bg-white/80 dark:bg-stone-900/80 border border-stone-200 dark:border-stone-800 p-3.5 sm:p-4 shadow-2xs">
+              <span className="text-xl sm:text-2xl font-black text-emerald-700 dark:text-emerald-400 block">
                 Evidence-Based
               </span>
               <span className="text-xs font-bold text-stone-900 dark:text-white block mt-0.5">
                 Decision Support & Safety Gate
               </span>
-              <span className="text-[11px] text-stone-500">Telangana Package of Practices Grounded</span>
+              <span className="text-[10px] sm:text-[11px] text-stone-500 block mt-0.5">PJTAU Package of Practices Grounded</span>
             </div>
 
-            <div className="rounded-2xl bg-white/80 dark:bg-stone-900/80 border border-stone-200 dark:border-stone-800 p-4 shadow-2xs">
-              <span className="text-2xl font-black text-emerald-700 dark:text-emerald-400 block">
+            <div className="rounded-2xl bg-white/80 dark:bg-stone-900/80 border border-stone-200 dark:border-stone-800 p-3.5 sm:p-4 shadow-2xs">
+              <span className="text-xl sm:text-2xl font-black text-emerald-700 dark:text-emerald-400 block">
                 ₹500 / Qtl
               </span>
               <span className="text-xs font-bold text-stone-900 dark:text-white block mt-0.5">
                 Telangana Fine Rice Bonus
               </span>
-              <span className="text-[11px] text-stone-500">Live APMC Mandi tracker (₹2,820/Qtl)</span>
+              <span className="text-[10px] sm:text-[11px] text-stone-500 block mt-0.5">Live APMC Mandi tracker (₹2,820/Qtl)</span>
             </div>
 
-            <div className="rounded-2xl bg-white/80 dark:bg-stone-900/80 border border-stone-200 dark:border-stone-800 p-4 shadow-2xs">
-              <span className="text-2xl font-black text-emerald-700 dark:text-emerald-400 block">
+            <div className="rounded-2xl bg-white/80 dark:bg-stone-900/80 border border-stone-200 dark:border-stone-800 p-3.5 sm:p-4 shadow-2xs">
+              <span className="text-xl sm:text-2xl font-black text-emerald-700 dark:text-emerald-400 block">
                 12 Active
               </span>
               <span className="text-xs font-bold text-stone-900 dark:text-white block mt-0.5">
                 Government Schemes
               </span>
-              <span className="text-[11px] text-stone-500">Rythu Bharosa, Bima, PM-KISAN, KUSUM</span>
+              <span className="text-[10px] sm:text-[11px] text-stone-500 block mt-0.5">Rythu Bharosa, Bima, PM-KISAN, KUSUM</span>
             </div>
 
-            <div className="rounded-2xl bg-white/80 dark:bg-stone-900/80 border border-stone-200 dark:border-stone-800 p-4 shadow-2xs">
-              <span className="text-2xl font-black text-emerald-700 dark:text-emerald-400 block">
+            <div className="rounded-2xl bg-white/80 dark:bg-stone-900/80 border border-stone-200 dark:border-stone-800 p-3.5 sm:p-4 shadow-2xs">
+              <span className="text-xl sm:text-2xl font-black text-emerald-700 dark:text-emerald-400 block">
                 24x7
               </span>
               <span className="text-xs font-bold text-stone-900 dark:text-white block mt-0.5">
                 IoT Telemetry & Pump Cutoff
               </span>
-              <span className="text-[11px] text-stone-500">Prevents borewell dry run & water waste</span>
+              <span className="text-[10px] sm:text-[11px] text-stone-500 block mt-0.5">Prevents borewell dry run & water waste</span>
             </div>
           </div>
         </div>
