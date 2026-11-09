@@ -298,3 +298,4 @@ export function authenticateWithGoogle(
 
   return { success: true, user: newAccount, isNew: true };
 }
+

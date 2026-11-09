@@ -1,5 +1,5 @@
 // Smart Farm Assistant - Service Worker for Offline PWA Capabilities
-const CACHE_NAME = "smart-farm-v3";
+const CACHE_NAME = "smart-farm-v5";
 const OFFLINE_URLS = [
   "/",
   "/demo",
@@ -10,6 +10,10 @@ const OFFLINE_URLS = [
   "/market",
   "/insights",
   "/manifest.json",
+  "/icon-192x192.png",
+  "/icon-512x512.png",
+  "/apple-touch-icon.png",
+  "/images/smart_farm_app_icon.jpg",
   "/icon.svg"
 ];
 
