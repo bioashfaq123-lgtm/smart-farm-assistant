@@ -284,37 +284,20 @@ function FarmerProfileModal({
         <div className="flex items-center justify-between pb-3 border-b border-stone-200 dark:border-stone-800">
           <div>
             <h3 className="text-lg font-bold text-stone-900 dark:text-white">
-              {profile.hasCompletedOnboarding ? "Farmer Profile & Field Setup" : "Welcome! Complete Farmer & Field Setup"}
+              Farmer Profile &amp; Settings
             </h3>
             <p className="text-xs text-stone-500">
-              {profile.hasCompletedOnboarding
-                ? "Personalize your real farm parameters and district location"
-                : "Enter your farm parameters to get personalized PJTAU advisories, local weather, and IoT insights"}
+              Registered farm parameters &bull; {district}, Telangana
             </p>
           </div>
-          {profile.hasCompletedOnboarding && (
-            <button
-              onClick={onClose}
-              className="rounded-xl p-1.5 text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 transition"
-              title="Close"
-            >
-              ✕
-            </button>
-          )}
+          <button
+            onClick={onClose}
+            className="rounded-xl p-1.5 text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 transition min-h-[36px] min-w-[36px] flex items-center justify-center"
+            title="Close"
+          >
+            ✕
+          </button>
         </div>
-
-        {/* First-time onboarding helper banner */}
-        {!profile.hasCompletedOnboarding && (
-          <div className="mt-3 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-green-50 dark:from-emerald-950/40 dark:via-teal-950/30 dark:to-green-950/40 border border-emerald-300 dark:border-emerald-800 p-3 text-xs text-emerald-900 dark:text-emerald-200 flex items-start gap-2.5">
-            <span className="text-xl shrink-0">🌾</span>
-            <div>
-              <p className="font-bold">Rythu Digital Setup (తెలంగాణ రైతు పోర్టల్)</p>
-              <p className="text-[11px] text-emerald-800 dark:text-emerald-300 mt-0.5">
-                Set up your district and crop once. All farm advisories, fertilizer split schedules, mandi rates, and sensor telemetry will adapt directly to your field.
-              </p>
-            </div>
-          </div>
-        )}
 
         <form onSubmit={handleSubmit} className="mt-4 space-y-4">
           <div>

@@ -41,7 +41,7 @@ import {
 
 export default function DashboardPage() {
   const { lang, t } = useLanguage();
-  const { profile, openProfileModal, resetToSample, logout } = useFarmerProfile();
+  const { profile, openProfileModal, openAuthModal, resetToSample, logout } = useFarmerProfile();
   const { telemetry } = useIoTTelemetry(8000);
 
   // Calculate dynamic crop age from farmer's actual sowing date
@@ -180,11 +180,11 @@ export default function DashboardPage() {
               </p>
             </div>
             <button
-              onClick={openProfileModal}
+              onClick={() => openAuthModal("register")}
               className="shrink-0 px-4 py-2.5 rounded-xl font-bold text-xs bg-emerald-700 hover:bg-emerald-800 text-white shadow-md transition flex items-center gap-1.5"
             >
               <Edit3 className="w-4 h-4" />
-              <span>Complete Field Setup</span>
+              <span>Complete Farmer Registry</span>
             </button>
           </div>
         </div>
