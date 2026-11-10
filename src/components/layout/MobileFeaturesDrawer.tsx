@@ -312,7 +312,7 @@ export function MobileFeaturesDrawer({ isOpen, onClose }: MobileFeaturesDrawerPr
               className="w-full py-2 px-3 rounded-xl bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs"
             >
               <LogIn className="w-4 h-4" />
-              <span>{lang === "te" ? "రైతు లాగిన్ / ఖాతా తెరవండి" : "Farmer Login / Create Account"}</span>
+              <span>{lang === "te" ? "రైతు లాగిన్" : "Farmer Login"}</span>
             </button>
           )}
 

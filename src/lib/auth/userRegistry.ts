@@ -39,8 +39,8 @@ export const INITIAL_REGISTERED_USERS: UserAccount[] = [
       villageTe: "మల్లాపూర్",
       areaAcre: 4.5,
       areaGunta: 0,
-      primaryCrop: "Paddy (RNR 15048 / Telangana Sona)",
-      primaryCropTe: "వరి (RNR 15048 / తెలంగాణ సోనా)",
+      primaryCrop: "Paddy (వరి)",
+      primaryCropTe: "వరి",
       soilType: "Red Sandy Loam (చల్కా నేలలు)",
       irrigationType: "3 HP Submersible Borewell",
       sowingDate: "2026-07-15",
@@ -68,8 +68,8 @@ export const INITIAL_REGISTERED_USERS: UserAccount[] = [
       villageTe: "మల్లాపూర్",
       areaAcre: 4.5,
       areaGunta: 0,
-      primaryCrop: "Paddy (RNR 15048 / Telangana Sona)",
-      primaryCropTe: "వరి (RNR 15048 / తెలంగాణ సోనా)",
+      primaryCrop: "Paddy (వరి)",
+      primaryCropTe: "వరి",
       soilType: "Red Sandy Loam (చల్కా నేలలు)",
       irrigationType: "3 HP Submersible Borewell",
       sowingDate: "2026-07-15",
@@ -98,8 +98,8 @@ export const INITIAL_REGISTERED_USERS: UserAccount[] = [
       villageTe: "మల్లాపూర్",
       areaAcre: 4.5,
       areaGunta: 0,
-      primaryCrop: "Paddy (RNR 15048 / Telangana Sona)",
-      primaryCropTe: "వరి (RNR 15048 / తెలంగాణ సోనా)",
+      primaryCrop: "Paddy (వరి)",
+      primaryCropTe: "వరి",
       soilType: "Red Sandy Loam (చల్కా నేలలు)",
       irrigationType: "3 HP Submersible Borewell",
       sowingDate: "2026-07-15",
@@ -182,7 +182,7 @@ export function registerNewFarmer(data: {
     village,
     areaAcre: data.areaAcre || 4.0,
     areaGunta: data.areaGunta || 0,
-    primaryCrop: data.primaryCrop || "Paddy (RNR 15048 / Telangana Sona)",
+    primaryCrop: data.primaryCrop || "Paddy (వరి)",
     soilType: data.soilType || "Red Sandy Loam (చల్కా నేలలు)",
     irrigationType: data.irrigationType || "3 HP Submersible Borewell",
     sowingDate: data.sowingDate || new Date().toISOString().split("T")[0],
@@ -215,6 +215,7 @@ export function registerNewFarmer(data: {
     try {
       localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(updatedUsers));
       localStorage.setItem("smartfarm_logged_in", "true");
+      localStorage.setItem("smartfarm_has_registered", "true");
     } catch (e) {}
   }
 
@@ -255,6 +256,7 @@ export function authenticateWithPassword(
   saveFarmerProfile(user.profile);
   if (typeof window !== "undefined") {
     localStorage.setItem("smartfarm_logged_in", "true");
+    localStorage.setItem("smartfarm_has_registered", "true");
   }
 
   return { success: true, user };
@@ -275,6 +277,7 @@ export function authenticateWithGoogle(
     saveFarmerProfile(user.profile);
     if (typeof window !== "undefined") {
       localStorage.setItem("smartfarm_logged_in", "true");
+      localStorage.setItem("smartfarm_has_registered", "true");
     }
     return { success: true, user, isNew: false };
   }
@@ -291,7 +294,7 @@ export function authenticateWithGoogle(
     village: "Mallapur",
     areaAcre: 4.5,
     areaGunta: 0,
-    primaryCrop: "Paddy (RNR 15048 / Telangana Sona)",
+    primaryCrop: "Paddy (వరి)",
     soilType: "Red Sandy Loam (చల్కా నేలలు)",
     irrigationType: "3 HP Submersible Borewell",
   });

@@ -44,7 +44,7 @@ import {
 
 export default function HomePage() {
   const { lang, setLang } = useLanguage();
-  const { openAuthModal, openProfileModal, loginWithDemo, isLoggedIn, profile } = useFarmerProfile();
+  const { openAuthModal, openProfileModal, loginWithDemo, isLoggedIn, hasRegistered, profile } = useFarmerProfile();
 
   const [activePreviewTab, setActivePreviewTab] = useState<"ai" | "iot" | "mandi" | "schemes">("ai");
   const [selectedFeatureCat, setSelectedFeatureCat] = useState<string>("all");
@@ -77,8 +77,9 @@ export default function HomePage() {
   }, []);
 
   // Show a gentle floating registration prompt for first-time visitors after 2.5 seconds
+  // Only show registration prompt for genuine first-time visitors (never registered before)
   useEffect(() => {
-    if (!isLoggedIn && !profile.name) {
+    if (!isLoggedIn && !profile.name && !hasRegistered) {
       const timer = setTimeout(() => {
         try {
           const dismissed = sessionStorage.getItem("sf_reg_prompt_dismissed");
@@ -90,8 +91,10 @@ export default function HomePage() {
         }
       }, 2500);
       return () => clearTimeout(timer);
+    } else {
+      setShowFloatingPrompt(false);
     }
-  }, [isLoggedIn, profile.name]);
+  }, [isLoggedIn, profile.name, hasRegistered]);
 
   const dismissFloatingPrompt = () => {
     setShowFloatingPrompt(false);
@@ -227,40 +230,72 @@ export default function HomePage() {
           {/* ============================================================ */}
           <div id="register" className="pt-2">
             {!isLoggedIn ? (
-              <div className="mx-auto max-w-2xl rounded-3xl border-2 border-emerald-500/50 bg-gradient-to-r from-emerald-50 via-white to-emerald-50 dark:from-emerald-950/50 dark:via-stone-900 dark:to-emerald-950/50 p-4.5 sm:p-6 shadow-xl shadow-emerald-700/10 backdrop-blur-md text-left transition-all">
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <div className="space-y-1.5 text-center sm:text-left">
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-700 text-white text-[11px] font-extrabold uppercase tracking-wider shadow-xs">
-                      <UserPlus className="w-3.5 h-3.5" />
-                      <span>{lang === "te" ? "ముఖ్య గమనిక • మొదటి సారి వచ్చిన వారికి" : "Welcome • Step 1: Register Profile"}</span>
+              hasRegistered ? (
+                /* USER HAS REGISTERED BEFORE & IS LOGGED OUT: SHOW ONLY LOGIN */
+                <div className="mx-auto max-w-2xl rounded-3xl border border-stone-200 dark:border-stone-800 bg-white/95 dark:bg-stone-900/95 p-5 sm:p-6 shadow-xl backdrop-blur-md text-left transition-all">
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="space-y-1.5 text-center sm:text-left">
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 text-[11px] font-extrabold uppercase tracking-wider">
+                        <LogIn className="w-3.5 h-3.5" />
+                        <span>{lang === "te" ? "రైతు లాగిన్" : "Farmer Portal Login"}</span>
+                      </div>
+                      <h3 className="text-base sm:text-lg font-black text-stone-950 dark:text-white">
+                        {lang === "te" ? "మీ ఫార్మ్ డాష్‌బోర్డ్ తెరవడానికి లాగిన్ అవ్వండి" : "Welcome Back! Please Log In"}
+                      </h3>
+                      <p className="text-xs text-stone-600 dark:text-stone-300 leading-relaxed">
+                        {lang === "te"
+                          ? "మీ పంట వ్యాధి నిర్ధారణ, ఐఓటీ పంపు సమాచారం, మరియు లైవ్ మార్కెట్ ధరల కోసం మీ ఖాతాతో లాగిన్ అవ్వండి."
+                          : "Log in with your Gmail or Google Account to access your live farm telemetry, crop advisories, and APMC Mandi rates."}
+                      </p>
                     </div>
-                    <h3 className="text-base sm:text-lg font-black text-stone-950 dark:text-white">
-                      {lang === "te" ? "ముందుగా మీ రైతు ప్రొఫైల్‌ను నమోదు చేసుకోండి" : "Please Register Your Farm Profile First"}
-                    </h3>
-                    <p className="text-xs text-stone-600 dark:text-stone-300 leading-relaxed">
-                      {lang === "te"
-                        ? "మీ జిల్లా వాతావరణం, పంట సలహాలు, మరియు లైవ్ మార్కెట్ ధరలను పొందడానికి మీ వివరాలను నమోదు చేయండి (30 సెకన్లు)."
-                        : "Personalize your AI crop diagnostics, district weather forecasts, and live Mandi rates for your village in 30 seconds."}
-                    </p>
-                  </div>
-                  <div className="flex flex-col sm:flex-row gap-2 shrink-0 w-full sm:w-auto">
-                    <button
-                      onClick={() => openAuthModal("register")}
-                      className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-lg shadow-emerald-700/20 transition-all hover:scale-[1.02] active:scale-95"
-                    >
-                      <UserPlus className="w-4 h-4" />
-                      <span>{lang === "te" ? "ప్రొఫైల్ నమోదు చేయండి" : "Register Farm Profile"}</span>
-                    </button>
-                    <button
-                      onClick={() => openAuthModal("login")}
-                      className="flex items-center justify-center gap-1.5 px-4 py-3 rounded-2xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-850 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-200 font-bold text-xs transition"
-                    >
-                      <LogIn className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>{lang === "te" ? "లాగిన్" : "Existing Login"}</span>
-                    </button>
+                    <div className="shrink-0 w-full sm:w-auto">
+                      <button
+                        onClick={() => openAuthModal("login")}
+                        className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-sm shadow-lg shadow-emerald-700/25 transition-all hover:scale-[1.02] active:scale-95"
+                      >
+                        <LogIn className="w-4 h-4" />
+                        <span>{lang === "te" ? "లాగిన్ అవ్వండి" : "Login"}</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
+              ) : (
+                /* BRAND NEW VISITOR: SHOW STEP 1 REGISTRY CARD */
+                <div className="mx-auto max-w-2xl rounded-3xl border-2 border-emerald-500/50 bg-gradient-to-r from-emerald-50 via-white to-emerald-50 dark:from-emerald-950/50 dark:via-stone-900 dark:to-emerald-950/50 p-4.5 sm:p-6 shadow-xl shadow-emerald-700/10 backdrop-blur-md text-left transition-all">
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="space-y-1.5 text-center sm:text-left">
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-700 text-white text-[11px] font-extrabold uppercase tracking-wider shadow-xs">
+                        <UserPlus className="w-3.5 h-3.5" />
+                        <span>{lang === "te" ? "ముఖ్య గమనిక • మొదటి సారి వచ్చిన వారికి" : "Welcome • Step 1: Register Profile"}</span>
+                      </div>
+                      <h3 className="text-base sm:text-lg font-black text-stone-950 dark:text-white">
+                        {lang === "te" ? "ముందుగా మీ రైతు ప్రొఫైల్‌ను నమోదు చేసుకోండి" : "Please Register Your Farm Profile First"}
+                      </h3>
+                      <p className="text-xs text-stone-600 dark:text-stone-300 leading-relaxed">
+                        {lang === "te"
+                          ? "మీ జిల్లా వాతావరణం, పంట సలహాలు, మరియు లైవ్ మార్కెట్ ధరలను పొందడానికి మీ వివరాలను నమోదు చేయండి (30 సెకన్లు)."
+                          : "Personalize your AI crop diagnostics, district weather forecasts, and live Mandi rates for your village in 30 seconds."}
+                      </p>
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-2 shrink-0 w-full sm:w-auto">
+                      <button
+                        onClick={() => openAuthModal("register")}
+                        className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-lg shadow-emerald-700/20 transition-all hover:scale-[1.02] active:scale-95"
+                      >
+                        <UserPlus className="w-4 h-4" />
+                        <span>{lang === "te" ? "ప్రొఫైల్ నమోదు చేయండి" : "Register Farm Profile"}</span>
+                      </button>
+                      <button
+                        onClick={() => openAuthModal("login")}
+                        className="flex items-center justify-center gap-1.5 px-4 py-3 rounded-2xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-850 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-200 font-bold text-xs transition"
+                      >
+                        <LogIn className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>{lang === "te" ? "లాగిన్" : "Existing Login"}</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )
             ) : (
               <div className="mx-auto max-w-2xl rounded-3xl border border-emerald-500/40 bg-gradient-to-r from-emerald-50 via-white to-emerald-50 dark:from-emerald-950/40 dark:via-stone-900 dark:to-emerald-950/40 p-4 sm:p-5 shadow-sm text-left">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3.5">
@@ -334,21 +369,36 @@ export default function HomePage() {
           {!isLoggedIn && (
             <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3 pt-2">
               <InstallAppButton variant="pill" className="px-5 py-3 text-xs sm:text-sm" />
-              <Link
-                href="/dashboard"
-                className="flex items-center gap-2 px-5 sm:px-6 py-3 rounded-2xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs sm:text-sm shadow-lg shadow-emerald-700/25 transition-all hover:scale-[1.02]"
-              >
-                <span>{lang === "te" ? "🚀 ఫార్మ్ డాష్‌బోర్డ్ ప్రారంభించండి" : "🚀 Launch Farm Dashboard"}</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
 
-              <button
-                onClick={() => openAuthModal("register")}
-                className="flex items-center gap-2 px-5 sm:px-6 py-3 rounded-2xl bg-white hover:bg-stone-100 text-stone-800 font-bold text-xs sm:text-sm border border-stone-300 shadow-xs dark:bg-stone-900 dark:text-stone-100 dark:border-stone-700 dark:hover:bg-stone-800 transition-all"
-              >
-                <UserPlus className="w-4 h-4 text-emerald-600" />
-                <span>{lang === "te" ? "రైతు ఖాతా నమోదు / లాగిన్" : "Register / 1-Click Demo"}</span>
-              </button>
+              {hasRegistered ? (
+                /* Once registered, show ONLY Login button */
+                <button
+                  onClick={() => openAuthModal("login")}
+                  className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs sm:text-sm shadow-lg shadow-emerald-700/25 transition-all hover:scale-[1.02]"
+                >
+                  <LogIn className="w-4 h-4" />
+                  <span>{lang === "te" ? "రైతు లాగిన్" : "Login"}</span>
+                </button>
+              ) : (
+                /* First-time visitor: allow registration */
+                <>
+                  <Link
+                    href="/dashboard"
+                    className="flex items-center gap-2 px-5 sm:px-6 py-3 rounded-2xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs sm:text-sm shadow-lg shadow-emerald-700/25 transition-all hover:scale-[1.02]"
+                  >
+                    <span>{lang === "te" ? "🚀 ఫార్మ్ డాష్‌బోర్డ్ ప్రారంభించండి" : "🚀 Launch Farm Dashboard"}</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+
+                  <button
+                    onClick={() => openAuthModal("register")}
+                    className="flex items-center gap-2 px-5 sm:px-6 py-3 rounded-2xl bg-white hover:bg-stone-100 text-stone-800 font-bold text-xs sm:text-sm border border-stone-300 shadow-xs dark:bg-stone-900 dark:text-stone-100 dark:border-stone-700 dark:hover:bg-stone-800 transition-all"
+                  >
+                    <UserPlus className="w-4 h-4 text-emerald-600" />
+                    <span>{lang === "te" ? "రైతు నమోదు" : "Register Farm Profile"}</span>
+                  </button>
+                </>
+              )}
 
               <Link
                 href="/schemes"
@@ -908,9 +958,11 @@ export default function HomePage() {
           <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-[11px] text-stone-500 gap-3">
             <p>© 2026 Smart Farm Assistant • Smart Agriculture & Farmer Welfare System</p>
             <div className="flex items-center gap-4">
-              <button onClick={() => openAuthModal("register")} className="hover:underline font-semibold text-emerald-700 dark:text-emerald-400">
-                Register Profile
-              </button>
+              {!hasRegistered && (
+                <button onClick={() => openAuthModal("register")} className="hover:underline font-semibold text-emerald-700 dark:text-emerald-400">
+                  Register Profile
+                </button>
+              )}
               <button onClick={() => openAuthModal("login")} className="hover:underline font-semibold">
                 Farmer Login
               </button>

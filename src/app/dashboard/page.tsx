@@ -21,6 +21,7 @@ import {
   Edit3,
   RefreshCw,
   Info,
+  LogIn,
   LogOut,
   Stethoscope,
   LayoutGrid,
@@ -41,7 +42,7 @@ import {
 
 export default function DashboardPage() {
   const { lang, t } = useLanguage();
-  const { profile, openProfileModal, openAuthModal, resetToSample, logout } = useFarmerProfile();
+  const { profile, openProfileModal, openAuthModal, resetToSample, logout, hasRegistered } = useFarmerProfile();
   const { telemetry } = useIoTTelemetry(8000);
 
   // Calculate dynamic crop age from farmer's actual sowing date
@@ -179,13 +180,23 @@ export default function DashboardPage() {
                 Please complete your farmer profile and field setup. Selecting your district, land area, crop, and irrigation system enables live Open-Meteo district weather, local APMC mandi prices, and tailored PJTAU crop advisories.
               </p>
             </div>
-            <button
-              onClick={() => openAuthModal("register")}
-              className="shrink-0 px-4 py-2.5 rounded-xl font-bold text-xs bg-emerald-700 hover:bg-emerald-800 text-white shadow-md transition flex items-center gap-1.5"
-            >
-              <Edit3 className="w-4 h-4" />
-              <span>Complete Farmer Registry</span>
-            </button>
+            {hasRegistered ? (
+              <button
+                onClick={() => openAuthModal("login")}
+                className="shrink-0 px-4 py-2.5 rounded-xl font-bold text-xs bg-emerald-700 hover:bg-emerald-800 text-white shadow-md transition flex items-center gap-1.5"
+              >
+                <LogIn className="w-4 h-4" />
+                <span>Login to View Farm Profile</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => openAuthModal("register")}
+                className="shrink-0 px-4 py-2.5 rounded-xl font-bold text-xs bg-emerald-700 hover:bg-emerald-800 text-white shadow-md transition flex items-center gap-1.5"
+              >
+                <Edit3 className="w-4 h-4" />
+                <span>Complete Farmer Registry</span>
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -215,7 +226,7 @@ export default function DashboardPage() {
                 {t("profile_crop")}
               </span>
               <p className="mt-1 font-semibold text-stone-900 dark:text-stone-100 truncate">
-                {profile.primaryCrop}
+                {profile.primaryCrop || (lang === "te" ? "పంటను ఎంచుకోండి" : "Crop Not Specified")}
               </p>
               <span className="text-[11px] text-agri-700 dark:text-agri-400 font-medium">
                 {profile.soilType}

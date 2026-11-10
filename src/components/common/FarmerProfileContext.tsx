@@ -26,6 +26,7 @@ interface FarmerProfileContextType {
   closeAuthModal: () => void;
   authTab: "login" | "register";
   isLoggedIn: boolean;
+  hasRegistered: boolean;
   loginWithDemo: (farmer: DemoFarmer) => void;
   logout: () => void;
 }
@@ -42,6 +43,7 @@ const FarmerProfileContext = createContext<FarmerProfileContextType>({
   closeAuthModal: () => {},
   authTab: "login",
   isLoggedIn: false,
+  hasRegistered: false,
   loginWithDemo: () => {},
   logout: () => {},
 });
@@ -52,11 +54,33 @@ export function FarmerProfileProvider({ children }: { children: React.ReactNode 
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authTab, setAuthTab] = useState<"login" | "register">("login");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [hasRegistered, setHasRegistered] = useState(false);
 
   useEffect(() => {
     // Initial load from localStorage
     const stored = getStoredFarmerProfile();
     setProfile(stored);
+
+    const registeredStored = localStorage.getItem("smartfarm_has_registered");
+    const storedUsers = localStorage.getItem("smartfarm_registered_users");
+    let hasStoredUsers = false;
+    try {
+      if (storedUsers) {
+        const parsed = JSON.parse(storedUsers);
+        hasStoredUsers = Array.isArray(parsed) && parsed.length > 0;
+      }
+    } catch (e) {}
+
+    const isReg =
+      registeredStored === "true" ||
+      hasStoredUsers ||
+      stored.hasCompletedOnboarding ||
+      Boolean(stored.name && stored.name.trim() !== "");
+
+    setHasRegistered(isReg);
+    if (isReg) {
+      localStorage.setItem("smartfarm_has_registered", "true");
+    }
 
     const loggedInStored = localStorage.getItem("smartfarm_logged_in");
     if (loggedInStored === "true") {
@@ -70,7 +94,22 @@ export function FarmerProfileProvider({ children }: { children: React.ReactNode 
     }
 
     const handleUpdate = () => {
-      setProfile(getStoredFarmerProfile());
+      const p = getStoredFarmerProfile();
+      setProfile(p);
+      const isRegNow =
+        localStorage.getItem("smartfarm_has_registered") === "true" ||
+        p.hasCompletedOnboarding ||
+        Boolean(p.name && p.name.trim() !== "");
+      if (isRegNow) {
+        setHasRegistered(true);
+        localStorage.setItem("smartfarm_has_registered", "true");
+      }
+      const loggedIn = localStorage.getItem("smartfarm_logged_in");
+      if (loggedIn === "true") {
+        setIsLoggedIn(true);
+      } else if (loggedIn === "false") {
+        setIsLoggedIn(false);
+      }
     };
 
     window.addEventListener("smartfarm_profile_updated", handleUpdate);
@@ -85,16 +124,33 @@ export function FarmerProfileProvider({ children }: { children: React.ReactNode 
     const updated = saveFarmerProfile(updates);
     setProfile(updated);
     setIsLoggedIn(true);
+    setHasRegistered(true);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("smartfarm_logged_in", "true");
+      localStorage.setItem("smartfarm_has_registered", "true");
+    }
   };
 
   const resetToSample = () => {
     const sample = resetToSampleProfile();
     setProfile(sample);
     setIsLoggedIn(true);
+    setHasRegistered(true);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("smartfarm_logged_in", "true");
+      localStorage.setItem("smartfarm_has_registered", "true");
+    }
   };
 
   const openAuthModal = (tab: "login" | "register" = "login") => {
-    setAuthTab(tab);
+    const isReg =
+      hasRegistered ||
+      (typeof window !== "undefined" && localStorage.getItem("smartfarm_has_registered") === "true");
+    if (isReg) {
+      setAuthTab("login");
+    } else {
+      setAuthTab(tab);
+    }
     setIsAuthModalOpen(true);
   };
 
@@ -121,8 +177,10 @@ export function FarmerProfileProvider({ children }: { children: React.ReactNode 
     });
     setProfile(updated);
     setIsLoggedIn(true);
+    setHasRegistered(true);
     if (typeof window !== "undefined") {
       localStorage.setItem("smartfarm_logged_in", "true");
+      localStorage.setItem("smartfarm_has_registered", "true");
     }
   };
 
@@ -130,6 +188,8 @@ export function FarmerProfileProvider({ children }: { children: React.ReactNode 
     setIsLoggedIn(false);
     if (typeof window !== "undefined") {
       localStorage.setItem("smartfarm_logged_in", "false");
+      // Keep smartfarm_has_registered permanent
+      localStorage.setItem("smartfarm_has_registered", "true");
     }
     const emptyProfile: FarmerProfile = {
       ...EMPTY_INITIAL_FARMER,
@@ -158,6 +218,7 @@ export function FarmerProfileProvider({ children }: { children: React.ReactNode 
         closeAuthModal,
         authTab,
         isLoggedIn,
+        hasRegistered,
         loginWithDemo,
         logout,
       }}
@@ -185,6 +246,7 @@ export function FarmerProfileProvider({ children }: { children: React.ReactNode 
         isOpen={isAuthModalOpen}
         onClose={closeAuthModal}
         initialTab={authTab}
+        hasRegistered={hasRegistered}
       />
     </FarmerProfileContext.Provider>
   );
@@ -395,15 +457,37 @@ function FarmerProfileModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
-                Primary Crop / పంట
+                Primary Crop / ప్రధాన పంట <span className="text-rose-500">*</span>
               </label>
-              <input
-                type="text"
+              <select
                 value={primaryCrop}
                 onChange={(e) => setPrimaryCrop(e.target.value)}
-                placeholder="e.g. Paddy (BPT 5204), Cotton, Chilli, Maize..."
                 className="w-full rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 p-2.5 text-sm font-medium outline-none focus:ring-2 focus:ring-emerald-500"
-              />
+                required
+              >
+                <option value="">Select Crop / పంటను ఎంచుకోండి</option>
+                <option value="Paddy (వరి)">Paddy / వరి</option>
+                <option value="Cotton (ప్రత్తి)">Cotton / ప్రత్తి</option>
+                <option value="Chilli (మిరప)">Chilli / మిరప</option>
+                <option value="Maize (మొక్కజొన్న)">Maize / మొక్కజొన్న</option>
+                <option value="Red Gram (కందులు)">Red Gram / కందులు</option>
+                <option value="Bengal Gram (శనగలు)">Bengal Gram / శనగలు</option>
+                <option value="Groundnut (వేరుశనగ)">Groundnut / వేరుశనగ</option>
+                <option value="Turmeric (పసుపు)">Turmeric / పసుపు</option>
+                <option value="Soybean (సోయాబీన్)">Soybean / సోయాబీన్</option>
+                <option value="Sugarcane (చెరకు)">Sugarcane / చెరకు</option>
+                <option value="Vegetables (కూరగాయలు)">Vegetables / కూరగాయలు</option>
+                <option value="Mango (మామిడి)">Mango / మామిడి</option>
+                <option value="Other Crops (ఇతర పంటలు)">Other Crops / ఇతర పంటలు</option>
+                {primaryCrop && ![
+                  "Paddy (వరి)", "Cotton (ప్రత్తి)", "Chilli (మిరప)", "Maize (మొక్కజొన్న)",
+                  "Red Gram (కందులు)", "Bengal Gram (శనగలు)", "Groundnut (వేరుశనగ)",
+                  "Turmeric (పసుపు)", "Soybean (సోయాబీన్)", "Sugarcane (చెరకు)",
+                  "Vegetables (కూరగాయలు)", "Mango (మామిడి)", "Other Crops (ఇతర పంటలు)"
+                ].includes(primaryCrop) && (
+                  <option value={primaryCrop}>{primaryCrop}</option>
+                )}
+              </select>
             </div>
 
             <div>
@@ -431,6 +515,7 @@ function FarmerProfileModal({
               <input
                 type="date"
                 value={sowingDate}
+                max={new Date().toISOString().split("T")[0]}
                 onChange={(e) => handleSowingDateChange(e.target.value)}
                 className="w-full rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 p-2.5 text-sm font-medium outline-none focus:ring-2 focus:ring-emerald-500"
               />

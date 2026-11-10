@@ -34,22 +34,32 @@ interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialTab?: "login" | "register";
+  hasRegistered?: boolean;
 }
 
-export function AuthModal({ isOpen, onClose, initialTab = "login" }: AuthModalProps) {
+export function AuthModal({
+  isOpen,
+  onClose,
+  initialTab = "login",
+  hasRegistered = false,
+}: AuthModalProps) {
   const { profile, updateProfile, loginWithDemo, logout } = useFarmerProfile();
   const { lang, setLang } = useLanguage();
 
-  const [tab, setTab] = useState<"login" | "register">(initialTab);
+  const isAlreadyRegistered =
+    hasRegistered ||
+    (typeof window !== "undefined" && localStorage.getItem("smartfarm_has_registered") === "true");
+
+  const [tab, setTab] = useState<"login" | "register">(isAlreadyRegistered ? "login" : initialTab);
 
   // Sync tab with initialTab when opened
   useEffect(() => {
     if (isOpen) {
-      setTab(initialTab);
+      setTab(isAlreadyRegistered ? "login" : initialTab);
       setErrorMsg("");
       setSuccessMsg("");
     }
-  }, [isOpen, initialTab]);
+  }, [isOpen, initialTab, isAlreadyRegistered]);
 
   // LOGIN STATE
   const [loginEmail, setLoginEmail] = useState("bioashfaq123@gmail.com");
@@ -67,10 +77,11 @@ export function AuthModal({ isOpen, onClose, initialTab = "login" }: AuthModalPr
   const [regVillage, setRegVillage] = useState("Mallapur");
   const [regAreaAcre, setRegAreaAcre] = useState("4.5");
   const [regAreaGunta, setRegAreaGunta] = useState("0");
-  const [regPrimaryCrop, setRegPrimaryCrop] = useState("Paddy (RNR 15048 / Telangana Sona)");
+  const [regPrimaryCrop, setRegPrimaryCrop] = useState("Paddy (వరి)");
   const [regSoilType, setRegSoilType] = useState("Red Sandy Loam (చల్కా నేలలు)");
   const [regIrrigationType, setRegIrrigationType] = useState("3 HP Submersible Borewell");
   const [regSowingDate, setRegSowingDate] = useState(() => new Date().toISOString().split("T")[0]);
+  const [regCropAgeDays, setRegCropAgeDays] = useState<number | "">(0);
   const [regLanguage, setRegLanguage] = useState<"English" | "Telugu (తెలుగు)" | "Hindi (हिंदी)">("English");
 
   // Google Selector Modal state
@@ -202,6 +213,10 @@ export function AuthModal({ isOpen, onClose, initialTab = "login" }: AuthModalPr
       preferredLanguage: regLanguage,
     });
 
+    if (typeof window !== "undefined") {
+      localStorage.setItem("smartfarm_has_registered", "true");
+    }
+
     setSuccessMsg(`Registration Complete! Welcome to Smart Farm, ${newAccount.name}.`);
     setTimeout(() => {
       onClose();
@@ -211,6 +226,9 @@ export function AuthModal({ isOpen, onClose, initialTab = "login" }: AuthModalPr
   // 1-Click Demo Login selection
   const handleDemoSelect = (farmer: DemoFarmer) => {
     loginWithDemo(farmer);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("smartfarm_has_registered", "true");
+    }
     if (farmer.languageBadge.includes("Telugu")) {
       setLang("te");
     } else {
@@ -253,41 +271,50 @@ export function AuthModal({ isOpen, onClose, initialTab = "login" }: AuthModalPr
           </p>
         </div>
 
-        {/* Navigation Tabs: [ Login ] | [ Farmer Registry & Field Setup ] */}
-        <div className="flex rounded-2xl bg-stone-100 dark:bg-stone-800/80 p-1 mb-5">
-          <button
-            type="button"
-            onClick={() => {
-              setTab("login");
-              setErrorMsg("");
-              setSuccessMsg("");
-            }}
-            className={`flex-1 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 ${
-              tab === "login"
-                ? "bg-white dark:bg-stone-900 text-emerald-800 dark:text-emerald-400 shadow-xs"
-                : "text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200"
-            }`}
-          >
-            <LogIn className="w-4 h-4" />
-            <span>{lang === "te" ? "లాగిన్" : "Login"}</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setTab("register");
-              setErrorMsg("");
-              setSuccessMsg("");
-            }}
-            className={`flex-1 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 ${
-              tab === "register"
-                ? "bg-white dark:bg-stone-900 text-emerald-800 dark:text-emerald-400 shadow-xs"
-                : "text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200"
-            }`}
-          >
-            <Sprout className="w-4 h-4" />
-            <span>{lang === "te" ? "రైతు రిజిస్ట్రీ & ఫీల్డ్ సెటప్" : "Farmer Registry & Field Setup"}</span>
-          </button>
-        </div>
+        {/* Navigation Tabs: If already registered, show ONLY Login mode! */}
+        {!isAlreadyRegistered ? (
+          <div className="flex rounded-2xl bg-stone-100 dark:bg-stone-800/80 p-1 mb-5">
+            <button
+              type="button"
+              onClick={() => {
+                setTab("login");
+                setErrorMsg("");
+                setSuccessMsg("");
+              }}
+              className={`flex-1 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 ${
+                tab === "login"
+                  ? "bg-white dark:bg-stone-900 text-emerald-800 dark:text-emerald-400 shadow-xs"
+                  : "text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200"
+              }`}
+            >
+              <LogIn className="w-4 h-4" />
+              <span>{lang === "te" ? "లాగిన్" : "Login"}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setTab("register");
+                setErrorMsg("");
+                setSuccessMsg("");
+              }}
+              className={`flex-1 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 ${
+                tab === "register"
+                  ? "bg-white dark:bg-stone-900 text-emerald-800 dark:text-emerald-400 shadow-xs"
+                  : "text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200"
+              }`}
+            >
+              <Sprout className="w-4 h-4" />
+              <span>{lang === "te" ? "రైతు రిజిస్ట్రీ & ఫీల్డ్ సెటప్" : "Farmer Registry & Field Setup"}</span>
+            </button>
+          </div>
+        ) : (
+          <div className="mb-4 pb-2 border-b border-stone-200 dark:border-stone-800 text-center">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-bold">
+              <LogIn className="w-3.5 h-3.5 text-emerald-600" />
+              <span>{lang === "te" ? "రైతు లాగిన్" : "Farmer Login"}</span>
+            </div>
+          </div>
+        )}
 
         {/* Alert Feedback Messages */}
         {errorMsg && (
@@ -295,7 +322,7 @@ export function AuthModal({ isOpen, onClose, initialTab = "login" }: AuthModalPr
             <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
             <div className="flex-1">
               <span>{errorMsg}</span>
-              {errorMsg.includes("register") && (
+              {errorMsg.includes("register") && !isAlreadyRegistered && (
                 <button
                   type="button"
                   onClick={() => {
@@ -427,20 +454,22 @@ export function AuthModal({ isOpen, onClose, initialTab = "login" }: AuthModalPr
               </button>
             </form>
 
-            {/* Switch to Registry notice */}
-            <div className="pt-2 text-center text-xs text-stone-500">
-              <span>{lang === "te" ? "కొత్త రైతా?" : "New to Smart Farm?"} </span>
-              <button
-                type="button"
-                onClick={() => {
-                  setTab("register");
-                  setErrorMsg("");
-                }}
-                className="font-bold text-emerald-700 dark:text-emerald-400 hover:underline"
-              >
-                {lang === "te" ? "రైతు రిజిస్ట్రీ & ఫీల్డ్ సెటప్ చేయండి →" : "Register farm profile & field setup →"}
-              </button>
-            </div>
+            {/* Switch to Registry notice (Only shown if farmer has NOT registered yet) */}
+            {!isAlreadyRegistered && (
+              <div className="pt-2 text-center text-xs text-stone-500">
+                <span>{lang === "te" ? "కొత్త రైతా?" : "New to Smart Farm?"} </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTab("register");
+                    setErrorMsg("");
+                  }}
+                  className="font-bold text-emerald-700 dark:text-emerald-400 hover:underline"
+                >
+                  {lang === "te" ? "రైతు రిజిస్ట్రీ & ఫీల్డ్ సెటప్ చేయండి →" : "Register farm profile & field setup →"}
+                </button>
+              </div>
+            )}
 
             {/* 1-Click Demo Profiles Accordion */}
             <div className="pt-2 border-t border-stone-200 dark:border-stone-800">
@@ -696,7 +725,7 @@ export function AuthModal({ isOpen, onClose, initialTab = "login" }: AuthModalPr
                 </div>
               </div>
 
-              {/* Primary Crop */}
+              {/* Primary Crop (Clean general crops without variety subcodes) */}
               <div>
                 <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1">
                   Primary Crop / ప్రధాన పంట *
@@ -707,17 +736,77 @@ export function AuthModal({ isOpen, onClose, initialTab = "login" }: AuthModalPr
                     onChange={(e) => setRegPrimaryCrop(e.target.value)}
                     className="w-full appearance-none rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50/50 dark:bg-stone-800 px-3.5 py-2 text-xs sm:text-sm text-stone-900 dark:text-white font-medium focus:border-emerald-600 focus:outline-none pr-9"
                   >
-                    <option value="Paddy (RNR 15048 / Telangana Sona)">Paddy — RNR 15048 / Telangana Sona (వరి)</option>
-                    <option value="Paddy (BPT 5204 / Samba Mahsuri)">Paddy — BPT 5204 / Samba Mahsuri (సాంబ మసూరి)</option>
+                    <option value="Paddy (వరి)">Paddy / వరి</option>
                     <option value="Cotton (ప్రత్తి)">Cotton / ప్రత్తి</option>
-                    <option value="Red Chilli (ఎర్ర మిరప)">Red Chilli / ఎర్ర మిరప</option>
+                    <option value="Chilli (మిరప)">Chilli / మిరప</option>
                     <option value="Maize (మొక్కజొన్న)">Maize / మొక్కజొన్న</option>
-                    <option value="Red Gram / Pigeon Pea (కందులు)">Red Gram / కందులు</option>
+                    <option value="Red Gram (కందులు)">Red Gram / కందులు</option>
+                    <option value="Bengal Gram (శనగలు)">Bengal Gram / శనగలు</option>
+                    <option value="Groundnut (వేరుశనగ)">Groundnut / వేరుశనగ</option>
                     <option value="Turmeric (పసుపు)">Turmeric / పసుపు</option>
                     <option value="Soybean (సోయాబీన్)">Soybean / సోయాబీన్</option>
-                    <option value="Vegetables / Horticulture (కూరగాయలు)">Vegetables / కూరగాయలు</option>
+                    <option value="Sugarcane (చెరకు)">Sugarcane / చెరకు</option>
+                    <option value="Vegetables (కూరగాయలు)">Vegetables / కూరగాయలు</option>
+                    <option value="Mango (మామిడి)">Mango / మామిడి</option>
+                    <option value="Other Crops (ఇతర పంటలు)">Other Crops / ఇతర పంటలు</option>
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Sowing Date & Crop Age (Days) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1">
+                    Date of Sowing / విత్తిన తేదీ *
+                  </label>
+                  <input
+                    type="date"
+                    value={regSowingDate}
+                    max={new Date().toISOString().split("T")[0]}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setRegSowingDate(val);
+                      if (val) {
+                        const diff = Math.floor((Date.now() - new Date(val).getTime()) / (1000 * 60 * 60 * 24));
+                        setRegCropAgeDays(isNaN(diff) || diff < 0 ? 0 : diff);
+                      } else {
+                        setRegCropAgeDays("");
+                      }
+                    }}
+                    required
+                    className="w-full rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50/50 dark:bg-stone-800 px-3.5 py-2 text-xs sm:text-sm text-stone-900 dark:text-white font-medium focus:border-emerald-600 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1">
+                    Crop Age (Days) / పంట వయస్సు
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      min="0"
+                      max="365"
+                      placeholder="e.g. 45"
+                      value={regCropAgeDays}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === "") {
+                          setRegCropAgeDays("");
+                          return;
+                        }
+                        const days = parseInt(val, 10);
+                        if (!isNaN(days) && days >= 0) {
+                          setRegCropAgeDays(days);
+                          const target = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+                          setRegSowingDate(target.toISOString().split("T")[0]);
+                        }
+                      }}
+                      className="w-full rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50/50 dark:bg-stone-800 px-3.5 py-2 text-xs sm:text-sm text-stone-900 dark:text-white font-medium focus:border-emerald-600 focus:outline-none pr-12"
+                    />
+                    <span className="absolute right-3 top-2.5 text-xs text-stone-400 font-medium">days</span>
+                  </div>
                 </div>
               </div>
 
