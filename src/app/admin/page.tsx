@@ -48,18 +48,18 @@ import {
 } from "@/lib/analytics/analyticsStore";
 import CropDiseaseDatasetManager from "@/components/admin/CropDiseaseDatasetManager";
 import { useFarmerProfile } from "@/components/common/FarmerProfileContext";
+import { ADMIN_EMAIL, isAuthorizedAdmin } from "@/lib/auth/adminAuth";
 
 export default function AdminPortalPage() {
-  const { profile, resetToSample } = useFarmerProfile();
+  const { profile, isLoggedIn, resetToSample } = useFarmerProfile();
   // Authentication states
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [email, setEmail] = useState<string>("admin@smartfarmer.com");
+  const [email, setEmail] = useState<string>("bioashfaq123@gmail.com");
   const [password, setPassword] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [rememberMe, setRememberMe] = useState<boolean>(true);
   const [authError, setAuthError] = useState<string>("");
   const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false);
-  const [showForgotModal, setShowForgotModal] = useState<boolean>(false);
 
   // Active section tab
   const [adminTab, setAdminTab] = useState<"diagnostics" | "analytics" | "dataset">("diagnostics");
@@ -113,18 +113,30 @@ export default function AdminPortalPage() {
     }
   }, []);
 
-  // Check saved session on mount
+  // Check saved session on mount or auto-authenticate if logged in as bioashfaq123@gmail.com
   useEffect(() => {
     if (typeof document !== "undefined") {
       document.title = "Smart Farm Assistant Admin";
+    }
+
+    // Auto-authenticate if already logged into site as bioashfaq123@gmail.com
+    if (isAuthorizedAdmin(profile?.email, isLoggedIn)) {
+      setIsAuthenticated(true);
+      return;
     }
 
     try {
       const savedAuth = localStorage.getItem("sf_admin_session_v1");
       if (savedAuth) {
         const parsed = JSON.parse(savedAuth);
-        if (parsed?.authenticated) {
+        if (
+          parsed?.authenticated === true &&
+          parsed?.email?.trim().toLowerCase() === ADMIN_EMAIL
+        ) {
           setIsAuthenticated(true);
+        } else {
+          // Invalidate legacy or non-admin sessions
+          localStorage.removeItem("sf_admin_session_v1");
         }
       }
     } catch {
@@ -140,7 +152,7 @@ export default function AdminPortalPage() {
     }, 30000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [isLoggedIn, profile?.email]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -151,18 +163,22 @@ export default function AdminPortalPage() {
       const cleanEmail = email.trim().toLowerCase();
       const cleanPass = password.trim();
 
-      // Accepted Admin credentials
-      const validEmails = [
-        "admin@smartfarmer.com",
-        "bioashfaq123@gmail.com",
-        "admin@smartfarming-web.vercel.app",
-        "admin@smartfarm-pjtau.vercel.app",
-      ];
+      // Only bioashfaq123@gmail.com is authorized as administrator
+      if (cleanEmail !== ADMIN_EMAIL) {
+        setAuthError(
+          "Access denied. Admin portal is restricted exclusively to bioashfaq123@gmail.com."
+        );
+        setIsLoggingIn(false);
+        return;
+      }
 
-      // Accepts SmartFarmer@2026 or admin123 for convenience
-      const isValidPass = cleanPass === "SmartFarmer@2026" || cleanPass === "admin123";
+      // Valid passwords for Ashfaq: his account password ("password123") or admin passwords
+      const isValidPass =
+        cleanPass === "password123" ||
+        cleanPass === "SmartFarmer@2026" ||
+        cleanPass === "admin123";
 
-      if (validEmails.includes(cleanEmail) && isValidPass) {
+      if (isValidPass) {
         setIsAuthenticated(true);
         if (rememberMe) {
           localStorage.setItem(
@@ -173,17 +189,11 @@ export default function AdminPortalPage() {
         setStats(getAnalyticsSummary());
       } else {
         setAuthError(
-          "Invalid email or password. Use demo email 'admin@smartfarmer.com' and password 'SmartFarmer@2026'."
+          "Invalid password for bioashfaq123@gmail.com. Please enter your valid credentials."
         );
       }
       setIsLoggingIn(false);
     }, 500);
-  };
-
-  const handleQuickFill = () => {
-    setEmail("admin@smartfarmer.com");
-    setPassword("SmartFarmer@2026");
-    setAuthError("");
   };
 
   const handleLogout = () => {
@@ -199,7 +209,43 @@ export default function AdminPortalPage() {
   };
 
   // -------------------------------------------------------------
-  // VIEW 1: SECURE ADMIN LOGIN SCREEN (Matching user's photo)
+  // VIEW 1: ACCESS RESTRICTED SCREEN (If logged in as another user)
+  // -------------------------------------------------------------
+  const isAnotherUserLoggedIn =
+    isLoggedIn &&
+    Boolean(profile?.email) &&
+    profile.email.trim().toLowerCase() !== ADMIN_EMAIL;
+
+  if (isAnotherUserLoggedIn && !isAuthenticated) {
+    return (
+      <div className="relative min-h-screen w-full flex flex-col items-center justify-center p-4 bg-gradient-to-br from-[#1e1b4b] via-[#2e1065] to-[#1e3a8a] text-stone-100 overflow-hidden font-sans">
+        <div className="relative z-10 w-full max-w-[440px] bg-white rounded-3xl p-7 md:p-8 shadow-2xl text-stone-900 border border-stone-200 text-center">
+          <div className="mx-auto w-14 h-14 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mb-4">
+            <Lock className="w-7 h-7" />
+          </div>
+          <h1 className="text-xl font-bold text-stone-900">Admin Access Restricted</h1>
+          <p className="text-xs text-stone-600 mt-2 leading-relaxed">
+            The Platform Administrator Console is restricted exclusively to <b>{ADMIN_EMAIL}</b>.
+          </p>
+          <div className="mt-4 p-3 bg-stone-50 rounded-xl border border-stone-200 text-xs text-stone-500">
+            Currently signed in as: <span className="font-semibold text-stone-800">{profile.email}</span>
+            {profile.name ? ` (${profile.name})` : ""}
+          </div>
+          <div className="mt-6 flex flex-col gap-2">
+            <Link
+              href="/dashboard"
+              className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-emerald-700 hover:bg-emerald-800 transition text-center shadow-xs"
+            >
+              Return to Farm Dashboard
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // -------------------------------------------------------------
+  // VIEW 2: SECURE ADMIN LOGIN SCREEN (Exclusively for bioashfaq123@gmail.com)
   // -------------------------------------------------------------
   if (!isAuthenticated) {
     return (
@@ -228,9 +274,9 @@ export default function AdminPortalPage() {
             <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-3 shadow-inner">
               <ShieldCheck className="w-7 h-7" />
             </div>
-            <h2 className="text-xl font-bold text-stone-900">Secure Admin Login</h2>
+            <h2 className="text-xl font-bold text-stone-900">Administrator Login</h2>
             <p className="text-stone-500 text-xs mt-1">
-              Enter your credentials to access the dashboard
+              Authorized Administrator: <b className="text-indigo-600 font-semibold">{ADMIN_EMAIL}</b>
             </p>
           </div>
 
@@ -248,7 +294,7 @@ export default function AdminPortalPage() {
             <div>
               <label className="block text-xs font-semibold text-stone-700 mb-1.5 flex items-center gap-1.5">
                 <Mail className="w-3.5 h-3.5 text-stone-500" />
-                Email Address
+                Administrator Email Address
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-stone-400">
@@ -259,7 +305,7 @@ export default function AdminPortalPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@smartfarmer.com"
+                  placeholder="bioashfaq123@gmail.com"
                   className="w-full pl-9 pr-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:bg-white transition"
                 />
               </div>
@@ -294,7 +340,7 @@ export default function AdminPortalPage() {
               </div>
             </div>
 
-            {/* Remember Me & Forgot Password */}
+            {/* Remember Me */}
             <div className="flex items-center justify-between text-xs pt-1">
               <label className="flex items-center gap-2 cursor-pointer text-stone-600 select-none">
                 <input
@@ -305,13 +351,9 @@ export default function AdminPortalPage() {
                 />
                 Remember me
               </label>
-              <button
-                type="button"
-                onClick={() => setShowForgotModal(true)}
-                className="text-indigo-600 hover:text-indigo-800 font-medium transition"
-              >
-                Forgot Password?
-              </button>
+              <span className="text-[11px] text-stone-400 font-medium">
+                Restricted Console
+              </span>
             </div>
 
             {/* Submit Button */}
@@ -328,7 +370,7 @@ export default function AdminPortalPage() {
               ) : (
                 <>
                   <LogIn className="w-4 h-4" />
-                  Login to Dashboard
+                  Login to Admin Dashboard
                 </>
               )}
             </button>
@@ -368,26 +410,9 @@ export default function AdminPortalPage() {
 
             <p className="mt-3 text-[11px] text-stone-400 flex items-center justify-center gap-1">
               <Lock className="w-3 h-3 text-stone-400" />
-              Your connection is secure and encrypted.
+              Exclusive access restricted to bioashfaq123@gmail.com
             </p>
           </div>
-        </div>
-
-        {/* Demo Quick Credentials Card */}
-        <div className="mt-5 max-w-[440px] w-full bg-white/10 backdrop-blur-md rounded-2xl p-3.5 border border-white/20 text-xs text-indigo-100 flex items-center justify-between gap-3 z-10">
-          <div>
-            <span className="font-semibold text-white block">Default Demo Admin:</span>
-            <span className="text-[11px] opacity-90">
-              admin@smartfarmer.com • SmartFarmer@2026
-            </span>
-          </div>
-          <button
-            type="button"
-            onClick={handleQuickFill}
-            className="px-3 py-1.5 bg-white text-indigo-900 rounded-lg font-semibold text-xs shadow hover:bg-indigo-50 transition active:scale-95"
-          >
-            Auto Fill
-          </button>
         </div>
 
         {/* Back to website link */}
@@ -404,45 +429,12 @@ export default function AdminPortalPage() {
         <footer className="mt-8 text-center text-xs text-indigo-300/80 z-10">
           © 2026 Smart Farm Assistant. All rights reserved.
         </footer>
-
-        {/* Forgot Password Modal */}
-        {showForgotModal && (
-          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-white text-stone-900 rounded-2xl max-w-sm w-full p-6 shadow-2xl">
-              <h3 className="text-base font-bold text-stone-900 flex items-center gap-2">
-                <KeyRound className="w-5 h-5 text-indigo-600" />
-                Password Recovery
-              </h3>
-              <p className="text-xs text-stone-600 mt-2 leading-relaxed">
-                Default platform administrator credentials:
-              </p>
-              <div className="mt-3 p-3 bg-stone-50 rounded-xl border border-stone-200 text-xs font-mono space-y-1">
-                <div>
-                  <span className="text-stone-500">Email:</span> admin@smartfarmer.com
-                </div>
-                <div>
-                  <span className="text-stone-500">Password:</span> SmartFarmer@2026
-                </div>
-              </div>
-              <p className="text-[11px] text-stone-400 mt-2">
-                You can also configure custom admin emails in your Vercel project environment variables via <code className="text-indigo-600">ADMIN_EMAIL</code>.
-              </p>
-              <button
-                type="button"
-                onClick={() => setShowForgotModal(false)}
-                className="mt-4 w-full py-2 bg-indigo-600 text-white text-xs font-semibold rounded-xl hover:bg-indigo-700 transition"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        )}
       </div>
     );
   }
 
   // -------------------------------------------------------------
-  // VIEW 2: AUTHENTICATED ADMIN VISITOR ANALYTICS DASHBOARD
+  // VIEW 3: AUTHENTICATED ADMIN VISITOR ANALYTICS DASHBOARD
   // -------------------------------------------------------------
   const currentStats = stats || getAnalyticsSummary();
 
@@ -466,7 +458,7 @@ export default function AdminPortalPage() {
                 </span>
               </div>
               <p className="text-xs text-stone-500 dark:text-stone-400">
-                Visitor Intelligence & Traffic Analytics • ADSAUF-2047
+                Platform Administrator: <b className="text-indigo-600 dark:text-indigo-400">{ADMIN_EMAIL}</b> &bull; Visitor Intelligence & Traffic Analytics
               </p>
             </div>
           </div>

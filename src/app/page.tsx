@@ -41,10 +41,12 @@ import {
   PLATFORM_FEATURES,
   FEATURE_CATEGORIES,
 } from "@/lib/navigation/features";
+import { isAuthorizedAdmin } from "@/lib/auth/adminAuth";
 
 export default function HomePage() {
   const { lang, setLang } = useLanguage();
   const { openAuthModal, openProfileModal, loginWithDemo, isLoggedIn, hasRegistered, profile } = useFarmerProfile();
+  const isAdmin = isAuthorizedAdmin(profile?.email, isLoggedIn);
 
   const [activePreviewTab, setActivePreviewTab] = useState<"ai" | "iot" | "mandi" | "schemes">("ai");
   const [selectedFeatureCat, setSelectedFeatureCat] = useState<string>("all");
@@ -938,7 +940,9 @@ export default function HomePage() {
                 <li><Link href="/tools" className="hover:text-emerald-600 transition">Fertilizer NPK Split</Link></li>
                 <li><Link href="/tools" className="hover:text-emerald-600 transition">Seed Rate Estimator</Link></li>
                 <li><Link href="/demo" className="hover:text-emerald-600 transition">Conference Live Demo</Link></li>
-                <li><Link href="/admin" className="hover:text-emerald-600 transition">Admin Console</Link></li>
+                {isAdmin && (
+                  <li><Link href="/admin" className="hover:text-emerald-600 transition">Admin Console</Link></li>
+                )}
               </ul>
             </div>
 

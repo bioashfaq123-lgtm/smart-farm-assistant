@@ -24,6 +24,7 @@ import {
 import { useLanguage } from "../common/LanguageContext";
 import { useFarmerProfile } from "../common/FarmerProfileContext";
 import { InstallAppButton } from "../common/PWAInstallContext";
+import { isAuthorizedAdmin } from "@/lib/auth/adminAuth";
 
 interface MobileFeaturesDrawerProps {
   isOpen: boolean;
@@ -34,6 +35,7 @@ export function MobileFeaturesDrawer({ isOpen, onClose }: MobileFeaturesDrawerPr
   const pathname = usePathname();
   const { lang, t } = useLanguage();
   const { profile, openProfileModal, openAuthModal, isLoggedIn, logout } = useFarmerProfile();
+  const isAdmin = isAuthorizedAdmin(profile?.email, isLoggedIn);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
@@ -317,15 +319,19 @@ export function MobileFeaturesDrawer({ isOpen, onClose }: MobileFeaturesDrawerPr
           )}
 
           <div className="flex items-center justify-between text-[11px] text-stone-500 dark:text-stone-400 pt-1 border-t border-stone-200/60 dark:border-stone-800">
-            <Link
-              href="/admin"
-              onClick={onClose}
-              className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400 font-semibold"
-            >
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Admin Traffic</span>
-            </Link>
-            <span>v2.4 &bull; Telangana Rythu Portal</span>
+            {isAdmin ? (
+              <Link
+                href="/admin"
+                onClick={onClose}
+                className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400 font-semibold"
+              >
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span>Admin Traffic</span>
+              </Link>
+            ) : (
+              <span className="text-[10px] text-stone-400">Telangana Rythu Portal</span>
+            )}
+            <span>v2.4 &bull; Smart Farm</span>
           </div>
         </div>
       </div>

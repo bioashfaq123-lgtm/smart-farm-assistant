@@ -23,11 +23,13 @@ import { useLanguage } from "../common/LanguageContext";
 import { useFarmerProfile } from "../common/FarmerProfileContext";
 import { getFeatureSectionGroups } from "@/lib/navigation/features";
 import { InstallAppButton } from "../common/PWAInstallContext";
+import { isAuthorizedAdmin } from "@/lib/auth/adminAuth";
 
 export function DesktopSidebar() {
   const pathname = usePathname();
   const { lang, t } = useLanguage();
   const { profile, openProfileModal, openAuthModal, isLoggedIn, logout } = useFarmerProfile();
+  const isAdmin = isAuthorizedAdmin(profile?.email, isLoggedIn);
 
   const initials = profile.name
     ? profile.name
@@ -177,20 +179,22 @@ export function DesktopSidebar() {
           )}
         </div>
 
-        <div className="mt-2 pt-2 border-t border-stone-200/60 dark:border-stone-800/60">
-          <Link
-            href="/admin"
-            className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg text-[10px] font-medium text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-white bg-white hover:bg-stone-100 dark:bg-stone-900 dark:hover:bg-stone-850 border border-stone-200 dark:border-stone-800 transition group"
-          >
-            <span className="flex items-center gap-1.5 truncate">
-              <ShieldCheck className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform shrink-0" />
-              Farm Assistant Admin
-            </span>
-            <span className="text-[9px] uppercase tracking-wider font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950 px-1 py-0.5 rounded">
-              Traffic
-            </span>
-          </Link>
-        </div>
+        {isAdmin && (
+          <div className="mt-2 pt-2 border-t border-stone-200/60 dark:border-stone-800/60">
+            <Link
+              href="/admin"
+              className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg text-[10px] font-medium text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-white bg-white hover:bg-stone-100 dark:bg-stone-900 dark:hover:bg-stone-850 border border-stone-200 dark:border-stone-800 transition group"
+            >
+              <span className="flex items-center gap-1.5 truncate">
+                <ShieldCheck className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform shrink-0" />
+                Farm Assistant Admin
+              </span>
+              <span className="text-[9px] uppercase tracking-wider font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950 px-1 py-0.5 rounded">
+                Traffic
+              </span>
+            </Link>
+          </div>
+        )}
       </div>
     </aside>
   );
