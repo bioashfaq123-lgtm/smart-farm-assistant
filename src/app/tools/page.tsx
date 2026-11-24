@@ -103,6 +103,11 @@ export default function ToolsPage() {
   const [fertCrop, setFertCrop] = useState("Paddy");
   const [fertArea, setFertArea] = useState(1);
   const [fertUnit, setFertUnit] = useState<"acre" | "guntha" | "ha">("acre");
+  const [hasSoilTest, setHasSoilTest] = useState(false);
+  const [soilN, setSoilN] = useState<"Low" | "Medium" | "High">("Medium");
+  const [soilP, setSoilP] = useState<"Low" | "Medium" | "High">("Medium");
+  const [soilK, setSoilK] = useState<"Low" | "Medium" | "High">("Medium");
+  const [fymTonnes, setFymTonnes] = useState(0);
   const [fertResult, setFertResult] = useState<FertResult | null>(null);
 
   const runFertCalculation = () => {
@@ -110,6 +115,13 @@ export default function ToolsPage() {
       crop: fertCrop,
       area: fertArea,
       unit: fertUnit,
+      soilTestStatus: {
+        provided: hasSoilTest,
+        nitrogenRating: soilN,
+        phosphorusRating: soilP,
+        potassiumRating: soilK,
+      },
+      organicManureTonnesApplied: fymTonnes,
     });
     setFertResult(res);
   };
@@ -510,6 +522,84 @@ export default function ToolsPage() {
               </div>
             </div>
 
+            {/* Soil Health Card & Organic Manure Calibration */}
+            <div className="mt-4 pt-4 border-t border-stone-200 dark:border-stone-800 space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-stone-800 dark:text-stone-200 flex items-center gap-1.5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={hasSoilTest}
+                    onChange={(e) => setHasSoilTest(e.target.checked)}
+                    className="h-3.5 w-3.5 rounded text-agri-600 focus:ring-agri-500"
+                  />
+                  <span>{lang === "te" ? "భూసార పరీక్ష ఫలితాలు ఉన్నాయి (Soil Test)" : "I have Soil Health Card / Lab Test Results"}</span>
+                </label>
+                <span className="text-[10px] text-stone-500">{hasSoilTest ? "Calibrated (-25% to +25%)" : "General PoP"}</span>
+              </div>
+
+              {hasSoilTest && (
+                <div className="grid grid-cols-3 gap-2 p-3 bg-stone-100/70 dark:bg-stone-800/50 rounded-xl text-xs">
+                  <div>
+                    <label className="block text-[10px] font-semibold text-stone-600 dark:text-stone-400 mb-0.5">
+                      Available N (నత్రజని)
+                    </label>
+                    <select
+                      value={soilN}
+                      onChange={(e) => setSoilN(e.target.value as any)}
+                      className="w-full rounded-lg border border-stone-300 dark:border-stone-700 p-1.5 text-xs bg-white dark:bg-stone-800"
+                    >
+                      <option value="Low">Low (&lt;140 kg/ha)</option>
+                      <option value="Medium">Medium (140-280)</option>
+                      <option value="High">High (&gt;280 kg/ha)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-semibold text-stone-600 dark:text-stone-400 mb-0.5">
+                      Available P (భాస్వరం)
+                    </label>
+                    <select
+                      value={soilP}
+                      onChange={(e) => setSoilP(e.target.value as any)}
+                      className="w-full rounded-lg border border-stone-300 dark:border-stone-700 p-1.5 text-xs bg-white dark:bg-stone-800"
+                    >
+                      <option value="Low">Low (&lt;10 kg/ha)</option>
+                      <option value="Medium">Medium (10-25)</option>
+                      <option value="High">High (&gt;25 kg/ha)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-semibold text-stone-600 dark:text-stone-400 mb-0.5">
+                      Available K (పొటాష్)
+                    </label>
+                    <select
+                      value={soilK}
+                      onChange={(e) => setSoilK(e.target.value as any)}
+                      className="w-full rounded-lg border border-stone-300 dark:border-stone-700 p-1.5 text-xs bg-white dark:bg-stone-800"
+                    >
+                      <option value="Low">Low (&lt;120 kg/ha)</option>
+                      <option value="Medium">Medium (120-280)</option>
+                      <option value="High">High (&gt;280 kg/ha)</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-[11px] font-semibold text-stone-600 dark:text-stone-400 mb-1">
+                  {lang === "te" ? "పశువుల ఎరువు / వర్మీకంపోస్ట్ (టన్నుల్లో)" : "Farmyard Manure / FYM Applied (Tonnes)"}
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.5"
+                  value={fymTonnes}
+                  onChange={(e) => setFymTonnes(parseFloat(e.target.value) || 0)}
+                  placeholder="e.g. 5 tonnes"
+                  className="w-full sm:w-1/2 rounded-xl border border-stone-200 bg-stone-50 p-2 text-xs font-medium text-stone-900 dark:border-stone-800 dark:bg-stone-900 dark:text-stone-100"
+                />
+              </div>
+            </div>
+
             <button
               onClick={runFertCalculation}
               className="mt-6 w-full rounded-xl bg-agri-700 py-3 text-sm font-bold text-white shadow-xs transition hover:bg-agri-800 active:scale-95"
@@ -523,7 +613,9 @@ export default function ToolsPage() {
             <Card className="border-agri-300 dark:border-agri-800 bg-agri-50/30 dark:bg-agri-950/20">
               <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100 mb-3 flex items-center justify-between">
                 <span>🧪 Fertilizer Requirement</span>
-                <Badge variant="normal">PJTAU PoP</Badge>
+                <Badge variant={fertResult?.isSoilTestGrounded ? "normal" : "normal"}>
+                  {fertResult?.isSoilTestGrounded ? "Soil-Test Calibrated" : "PJTAU PoP Baseline"}
+                </Badge>
               </h3>
 
               {fertResult ? (
@@ -666,6 +758,22 @@ export default function ToolsPage() {
                       </div>
                     ))}
                   </div>
+
+                  {/* Stoichiometry & Anti-Double-Counting Notice */}
+                  {fertResult.stoichiometryExplanation && (
+                    <div className="rounded-xl bg-stone-100 dark:bg-stone-800/60 p-2.5 text-[11px] text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-700">
+                      <span className="font-bold block text-stone-800 dark:text-stone-100 mb-0.5">⚖️ Stoichiometry & Nutrient Balance:</span>
+                      {fertResult.stoichiometryExplanation}
+                    </div>
+                  )}
+
+                  {/* PJTAU Supporting Citation */}
+                  {fertResult.citation && (
+                    <div className="rounded-xl bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900 p-2.5 text-[11px] text-emerald-950 dark:text-emerald-200">
+                      <span className="font-bold block mb-0.5">📖 Supporting PJTAU Citation:</span>
+                      {fertResult.citation.documentTitle} ({fertResult.citation.publicationMonthYear}) — PDF Page {fertResult.citation.pdfPage}, Printed Page {fertResult.citation.printedPage}.
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="py-8 text-center text-xs text-stone-500">

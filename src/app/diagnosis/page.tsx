@@ -1,1069 +1,749 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
-  Camera,
-  Upload,
+  Stethoscope,
+  Mic,
+  MicOff,
+  Sparkles,
   AlertTriangle,
   CheckCircle2,
-  Share2,
-  Sparkles,
-  Bot,
-  ExternalLink,
   ShieldCheck,
-  RotateCcw,
+  ShieldAlert,
+  HelpCircle,
+  Share2,
   Volume2,
   VolumeX,
-  Copy,
-  Check,
-  Search,
-  Globe,
-  FileText,
-  HelpCircle,
-  X,
-  Stethoscope,
-  ChevronRight,
-  Info,
-  Layers,
+  ChevronDown,
+  ChevronUp,
+  RotateCcw,
+  BookOpen,
   ArrowRight,
+  Info,
+  Bug,
+  Leaf,
+  Sprout,
+  Droplets,
+  Calendar,
+  MapPin,
+  ExternalLink,
 } from "lucide-react";
 import { useLanguage } from "@/components/common/LanguageContext";
 import { useFarmerProfile } from "@/components/common/FarmerProfileContext";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { formatPestMessage, generateWhatsAppUrl } from "@/lib/utils/kisanShare";
+import { PlantDoctorResponse } from "@/app/api/diagnose/route";
 
-// Client-side Canvas Image Compression & Quality Pre-Check
-export interface ClientCompressionResult {
-  dataUrl: string;
-  width: number;
-  height: number;
-  luminance: number;
-  qualityWarning?: { en: string; te: string };
-}
+const CROP_OPTIONS = [
+  { value: "Paddy", labelEn: "Paddy / Rice (వరి)", labelTe: "వరి (Paddy)" },
+  { value: "Cotton", labelEn: "Cotton (పత్తి)", labelTe: "పత్తి (Cotton)" },
+  { value: "Chilli", labelEn: "Red Chilli (మిరప)", labelTe: "మిరప (Chilli)" },
+  { value: "Maize", labelEn: "Maize (మొక్కజొన్న)", labelTe: "మొక్కజొన్న (Maize)" },
+  { value: "Redgram", labelEn: "Redgram (కంది)", labelTe: "కంది (Redgram)" },
+  { value: "Groundnut", labelEn: "Groundnut (వేరుశెనగ)", labelTe: "వేరుశెనగ (Groundnut)" },
+  { value: "Turmeric", labelEn: "Turmeric (పసుపు)", labelTe: "పసుపు (Turmeric)" },
+  { value: "Tomato", labelEn: "Tomato (టమాటా)", labelTe: "టమాటా (Tomato)" },
+];
 
-async function compressImageFile(file: File, maxDim = 1024, quality = 0.8): Promise<ClientCompressionResult> {
-  return new Promise((resolve, reject) => {
-    // MIME validation
-    const validMimes = ["image/jpeg", "image/png", "image/webp"];
-    if (file.type && !validMimes.includes(file.type.toLowerCase())) {
-      return reject(new Error("UNSUPPORTED_FORMAT"));
-    }
+const GROWTH_STAGES = [
+  { value: "Nursery", labelEn: "Nursery / Seedling (నారుమడి దశ)", labelTe: "నారుమడి దశ" },
+  { value: "Active Tillering / Branching", labelEn: "Tillering / Branching (పిలకల / శాఖీయ దశ)", labelTe: "పిలకల / శాఖీయ దశ" },
+  { value: "Square / Boot Leaf", labelEn: "Square / Boot Leaf (మొగ్గ / చిరుపొట్ట దశ)", labelTe: "మొగ్గ / చిరుపొట్ట దశ" },
+  { value: "Flowering & Fruit Set", labelEn: "Flowering (పూత దశ)", labelTe: "పూత దశ" },
+  { value: "Grain / Boll Development", labelEn: "Boll / Grain Filling (గింజ / కాయ అభివృద్ధి)", labelTe: "గింజ / కాయ అభివృద్ధి" },
+  { value: "Pre-Harvest", labelEn: "Maturity / Ripening (కోతకు ముందు)", labelTe: "కోతకు ముందు" },
+];
 
-    const reader = new FileReader();
-    reader.onerror = () => reject(new Error("Failed to read image file"));
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onerror = () => reject(new Error("Failed to load image element"));
-      img.onload = () => {
-        const origWidth = img.width;
-        const origHeight = img.height;
-
-        let qualityWarning: { en: string; te: string } | undefined;
-        if (origWidth < 120 || origHeight < 120) {
-          qualityWarning = {
-            en: `Low image resolution (${origWidth}x${origHeight}px). Move camera closer (15-20 cm) for clear pathology.`,
-            te: `ఫోటో పరిమాణం చాలా చిన్నది (${origWidth}x${origHeight}px). ఆకును దగ్గరగా ఉంచి స్పష్టమైన ఫోటో తీయండి.`,
-          };
-        }
-
-        let width = origWidth;
-        let height = origHeight;
-        if (width > maxDim || height > maxDim) {
-          if (width > height) {
-            height = Math.round((height * maxDim) / width);
-            width = maxDim;
-          } else {
-            width = Math.round((width * maxDim) / height);
-            height = maxDim;
-          }
-        }
-
-        const canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) {
-          return resolve({
-            dataUrl: e.target?.result as string,
-            width,
-            height,
-            luminance: 128,
-            qualityWarning,
-          });
-        }
-        ctx.drawImage(img, 0, 0, width, height);
-
-        // Sample canvas luminance across pixels
-        let totalLum = 0;
-        let count = 0;
-        try {
-          const imgData = ctx.getImageData(0, 0, width, height).data;
-          const step = Math.max(1, Math.floor(imgData.length / (4 * 500)));
-          for (let i = 0; i < imgData.length; i += 4 * step) {
-            totalLum += 0.299 * imgData[i] + 0.587 * imgData[i + 1] + 0.114 * imgData[i + 2];
-            count++;
-          }
-        } catch {
-          // Ignore if canvas tainted
-        }
-
-        const avgLum = count > 0 ? Math.round(totalLum / count) : 128;
-
-        if (!qualityWarning) {
-          if (avgLum < 22) {
-            qualityWarning = {
-              en: "Photo appears severely underexposed (too dark). Capture in natural daylight.",
-              te: "ఫోటో చాలా చీకటిగా ఉంది. మంచి ఉదయపు వెలుతురులో ఫోటో తీయండి.",
-            };
-          } else if (avgLum > 242) {
-            qualityWarning = {
-              en: "Photo has harsh glare or flash washout. Turn off flash and retake.",
-              te: "ఫోటోపై ఫ్లాష్ మెరుపు లేదా తీవ్ర కాంతి పడింది. ఫ్లాష్ లేకుండా తీయండి.",
-            };
-          }
-        }
-
-        const dataUrl = canvas.toDataURL("image/jpeg", quality);
-        resolve({
-          dataUrl,
-          width,
-          height,
-          luminance: avgLum,
-          qualityWarning,
-        });
-      };
-      img.src = e.target?.result as string;
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
-// Quick 1-Click Symptom Chips by Crop
-const CROP_SYMPTOM_PRESETS: Record<string, Array<{ en: string; te: string }>> = {
+const PRESET_CHIPS: Record<string, Array<{ en: string; te: string }>> = {
   Paddy: [
-    { en: "Spindle-shaped brown lesions with ash center", te: "ఆకులపై బూడిద కేంద్రంతో కదురు ఆకారపు మచ్చలు" },
-    { en: "Neck of panicle blackening and breaking (Neck rot)", te: "కంకి మెడ నల్లబడి విరిగిపోవడం" },
-    { en: "Wavy straw-yellow drying from leaf margins (BLB)", te: "ఆకు అంచుల నుండి తరంగాల రూపంలో ఎండిపోవడం" },
-    { en: "Water-soaked lesions on leaf sheath near water line", te: "నీటి మట్టం వద్ద ఆకు తొడుగుపై మచ్చలు" },
-    { en: "Dead heart in central tiller with caterpillar inside", te: "మొవ్వు కుళ్ళిపోయి ఎండిపోవడం (డెడ్ హార్ట్)" },
-    { en: "Brown spots and hopper burn in rootzone", te: "మొక్కల మొదళ్ల వద్ద ఉధృతి (సుడి దోమ)" },
-    { en: "Rusty reddish-brown discoloration on young leaves (Zinc)", te: "లేత ఆకులు ఇనుము రంగులోకి మారడం (జింక్ లోపం)" },
+    { en: "Spindle lesions with ash center (Blast / అగ్గితెగులు)", te: "ఆకులపై బూడిద కేంద్రంతో కదురు ఆకారపు మచ్చలు (అగ్గితెగులు)" },
+    { en: "Dead hearts in tillers & white ears (Stem Borer)", te: "మొవ్వు కుళ్ళు మరియు తెల్ల కంకులు (కాండం తొలిచే పురుగు)" },
+    { en: "Circular hopper-burn patches at plant base (BPH)", te: "చేనులో సుడిదోమ వల్ల ఎండిపోయిన గుండ్రని మచ్చలు (సుడిదోమ)" },
+    { en: "Wavy straw-yellow leaf drying from margins (BLB)", te: "ఆకు అంచుల వెంబడి అలల వలె ఎండిపోవడం (బాక్టీరియా ఎండు తెగులు)" },
+    { en: "Snake-skin spots on leaf sheaths near water line", te: "నీటి మట్టం వద్ద తొడుగులపై పాము చర్మం లాంటి పొడ మచ్చలు" },
+    { en: "Rusty bronze spots on leaves (Zinc deficiency)", te: "ఆకులపై ఇటుక రంగు తుప్పు మచ్చలు (జింక్ లోపం / ఖైరా)" },
+    { en: "Annual grasses and sedges weed control", te: "వరి నాటులో గడ్డి మరియు తుంగ కలుపు నివారణ" },
   ],
   Cotton: [
-    { en: "Angular water-soaked leaf spots turning dark brown", te: "ఆకులపై కోణీయ ఆకారపు మచ్చలు" },
-    { en: "Rosette flowers and pink caterpillar inside bolls", te: "రోసెట్ పువ్వులు మరియు కాయల్లో గులాబీ రంగు పురుగు" },
-    { en: "Leaves curling downward with yellowing margins", te: "ఆకులు క్రిందికి ముడుచుకోవడం మరియు పసుపు రంగు" },
-    { en: "Leaves turning red/purple between green veins (Magnesium)", te: "ఈనెల మధ్య ఆకులు ఎర్రబారడం (మెగ్నీషియం లోపం)" },
-    { en: "Dropping of flower squares and young green bolls", te: "పిందెలు మరియు కాయలు రాలిపోవడం" },
+    { en: "Rosetted flowers & boll holes (Pink Bollworm)", te: "రోసెట్ పువ్వులు మరియు కాయల్లో పురుగులు (గులాబీ రంగు పురుగు)" },
+    { en: "Upward leaf curling & yellowing (Jassids / Whitefly)", te: "ఆకులు పైకి ముడుచుకోవడం మరియు పచ్చదోమ/తెల్లదోమ" },
+    { en: "Square shedding & boll dropping", te: "పత్తిలో పూత, పిందె, మొగ్గ రాలిపోవడం" },
+    { en: "Angular water-soaked leaf spots (Black arm)", te: "ఆకులపై కోణీయ మచ్చలు (నల్ల కాండం తెగులు)" },
   ],
   Chilli: [
-    { en: "Upward boat-shaped leaf curling with stunted growth (Thrips)", te: "ఆకులు పైకి దోనెలా ముడుచుకుపోవడం (తామర పురుగులు)" },
-    { en: "Circular sunken black spots on fruit turning rotten (Anthracnose)", te: "కాయలపై నల్లటి గుండ్రని మచ్చలు (కొమ్మ ఎండు/కాయ కుళ్ళు)" },
-    { en: "White powdery fungal coating on leaf surface", te: "ఆకులపై బూడిద వంటి తెల్లని పొర" },
-    { en: "Sudden wilting and root browning in moist soil", te: "మొక్కలు అకస్మాత్తుగా వాడిపోవడం" },
+    { en: "Upward boat-shaped leaf cupping (Thrips / పైముడత)", te: "ఆకులు పైకి దోనెలా ముడుచుకోవడం (తామర పురుగులు / పైముడత)" },
+    { en: "Downward inverted leaf curl (Mites / కిందిముడత)", te: "ఆకులు కిందికి బోర్లించిన పడవలా ముడుచుకోవడం (పచ్చ నల్లి / కిందిముడత)" },
+    { en: "Twig drying from tips downward (Dieback / Colletotrichum)", te: "కొమ్మల పైనుండి కిందికి ఎండుకుపోవడం (కొమ్మ ఎండు తెగులు)" },
+    { en: "Circular sunken spots on ripe chillies (Fruit Rot)", te: "పండిన కాయలపై నల్లటి గుండ్రని కుళ్ళు మచ్చలు (కాయ కుళ్ళు)" },
   ],
   Maize: [
-    { en: "Ragged leaf holes and sawdust-like frass in whorl (FAW)", te: "మొవ్వులో రంధ్రాలు మరియు లద్దె పురుగు విసర్జన" },
-    { en: "Long spindle-shaped grey-green leaf blight spots", te: "ఆకులపై పొడవాటి బూడిద రంగు మచ్చలు" },
-    { en: "V-shaped yellowing starting from leaf tips (Nitrogen)", te: "ఆకు కొన నుండి V ఆకారంలో పసుపు రంగు (నత్రజని లోపం)" },
-  ],
-  Redgram: [
-    { en: "Sudden drooping and wilting of plants with xylem browning", te: "మొక్కలు అకస్మాత్తుగా వాడి ఎండిపోవడం (ఎండు తెగులు)" },
-    { en: "Bushy pale leaves with no flowering (Sterility Mosaic)", te: "మొక్కలు గొడ్డుబోయి పూత రాకపోవడం" },
-    { en: "Bored holes in pods with caterpillar feeding on seeds", te: "కాయలకు రంధ్రాలు చేసి గింజలు తినే శనగ పచ్చ పురుగు" },
+    { en: "Ragged holes in whorls with sawdust frass (Fall Armyworm)", te: "సుడులలో రంపపు పొట్టు లాంటి మలం & ఆకులకు రంధ్రాలు (కత్తెర పురుగు)" },
+    { en: "Yellowing of knee-high plants", te: "మోకాలి లోతు మొక్కల్లో ఆకులు పసుపుబారడం" },
   ],
 };
-
-// Preloaded Reference Test Cases for 1-Click Instant Testing
-const REFERENCE_TEST_CASES = [
-  {
-    id: "blast",
-    crop: "Paddy",
-    nameEn: "Rice Blast (Pyricularia oryzae)",
-    nameTe: "వరి అగ్గితెగులు (ఆకు & మెడ విరుపు)",
-    symptoms: "Spindle-shaped brown lesions with ash-grey centers on leaf blades. Panicle neck base turning black and rotting.",
-    severity: "high",
-  },
-  {
-    id: "blb",
-    crop: "Paddy",
-    nameEn: "Bacterial Leaf Blight (BLB)",
-    nameTe: "బాక్టీరియా ఆకు ఎండు తెగులు",
-    symptoms: "Water-soaked wavy straw-colored drying progressing downward from leaf tips and margins.",
-    severity: "high",
-  },
-  {
-    id: "pbw",
-    crop: "Cotton",
-    nameEn: "Pink Bollworm (Pectinophora gossypiella)",
-    nameTe: "పత్తిలో గులాబీ రంగు పురుగు",
-    symptoms: "Rosetted flower petals with interlocked rosette bloom. Pinkish caterpillar larvae tunneling into bolls and feeding on lint.",
-    severity: "high",
-  },
-  {
-    id: "murda",
-    crop: "Chilli",
-    nameEn: "Chilli Leaf Curl & Thrips (Murda Complex)",
-    nameTe: "మిరపలో ఆకు ముడత & తామర పురుగులు",
-    symptoms: "Upward cupping of leaves like a boat, crinkling, brittle veins, and flower shedding due to thrips sucking sap.",
-    severity: "medium",
-  },
-];
 
 export default function DiagnosisPage() {
   const { lang } = useLanguage();
   const { profile } = useFarmerProfile();
 
-  // Inputs
+  // Form Inputs
   const [selectedCrop, setSelectedCrop] = useState<string>(profile.primaryCrop || "Paddy");
   const [symptomText, setSymptomText] = useState<string>("");
-  const [leafPhotoBase64, setLeafPhotoBase64] = useState<string | null>(null);
-  const [photoFileName, setPhotoFileName] = useState<string>("");
-  const [photoMeta, setPhotoMeta] = useState<{ width: number; height: number; luminance: number } | null>(null);
-  const [photoQualityWarning, setPhotoQualityWarning] = useState<{ en: string; te: string } | null>(null);
+  const [knownDisease, setKnownDisease] = useState<string>("");
+  const [knownPest, setKnownPest] = useState<string>("");
+  const [weedProblem, setWeedProblem] = useState<string>("");
+  const [cropAgeDays, setCropAgeDays] = useState<string>("");
+  const [growthStage, setGrowthStage] = useState<string>("Active Tillering / Branching");
+  const [district, setDistrict] = useState<string>(profile.district || "Jagtial");
+  const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
 
   // States
-  const [isCompressing, setIsCompressing] = useState<boolean>(false);
   const [isDiagnosing, setIsDiagnosing] = useState<boolean>(false);
-  const [diagnosisResult, setDiagnosisResult] = useState<any | null>(null);
-  const [candidatesList, setCandidatesList] = useState<any[]>([]);
-  const [activeCandidateIdx, setActiveCandidateIdx] = useState<number>(0);
-  const [primaryObservation, setPrimaryObservation] = useState<string>("");
-  const [rateLimitSeconds, setRateLimitSeconds] = useState<number>(0);
+  const [isListening, setIsListening] = useState<boolean>(false);
+  const [result, setResult] = useState<PlantDoctorResponse | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>("");
-  const [diagnosticSource, setDiagnosticSource] = useState<string>("");
-  const [isCopied, setIsCopied] = useState<boolean>(false);
   const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
+  const [showCitations, setShowCitations] = useState<boolean>(false);
 
-  // File input refs
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const cameraInputRef = useRef<HTMLInputElement | null>(null);
+  // Sync with farmer profile crop on mount
+  useEffect(() => {
+    if (profile.primaryCrop) {
+      const match = CROP_OPTIONS.find((c) => c.value.toLowerCase() === profile.primaryCrop.toLowerCase());
+      if (match) setSelectedCrop(match.value);
+    }
+  }, [profile.primaryCrop]);
 
-  // Handle Photo Selection with Canvas Compression
-  const handlePhotoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  // Voice Input (Web Speech API)
+  const toggleSpeechRecognition = () => {
+    if (typeof window === "undefined") return;
 
-    setErrorMessage("");
-    setIsCompressing(true);
-    setPhotoFileName(file.name);
+    const SpeechRec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRec) {
+      setErrorMessage(
+        lang === "te"
+          ? "మీ బ్రౌజర్ లో వాయిస్ ఇన్పుట్ అందుబాటులో లేదు. దయచేసి లక్షణాలను టైప్ చేయండి."
+          : "Speech recognition is not supported in this browser. Please type your symptoms."
+      );
+      return;
+    }
+
+    if (isListening) {
+      setIsListening(false);
+      return;
+    }
 
     try {
-      const result = await compressImageFile(file);
-      setLeafPhotoBase64(result.dataUrl);
-      setPhotoMeta({ width: result.width, height: result.height, luminance: result.luminance });
-      setPhotoQualityWarning(result.qualityWarning || null);
-    } catch (err: any) {
-      setErrorMessage("Could not process image file. Please choose another JPG or PNG photo.");
-    } finally {
-      setIsCompressing(false);
-      e.target.value = "";
+      const recognition = new SpeechRec();
+      recognition.lang = lang === "te" ? "te-IN" : "en-IN";
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.onstart = () => {
+        setIsListening(true);
+        setErrorMessage("");
+      };
+
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        if (transcript) {
+          setSymptomText((prev) => (prev ? `${prev} ${transcript}` : transcript));
+        }
+      };
+
+      recognition.onerror = () => {
+        setIsListening(false);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognition.start();
+    } catch {
+      setIsListening(false);
     }
   };
 
-  const removePhoto = () => {
-    setLeafPhotoBase64(null);
-    setPhotoFileName("");
-  };
-
-  // Add a preset symptom chip
-  const addSymptomChip = (chipText: string) => {
+  const handleChipClick = (chipText: string) => {
     if (symptomText.includes(chipText)) return;
-    setSymptomText((prev) => (prev ? `${prev.trim()}, ${chipText}` : chipText));
+    setSymptomText((prev) => (prev ? `${prev}, ${chipText}` : chipText));
   };
 
-  // Run Diagnosis
-  const handleRunDiagnosis = async (forcedCrop?: string, forcedSymptoms?: string, forcedImage?: string) => {
-    const cropToUse = forcedCrop || selectedCrop;
-    const symptomsToUse = forcedSymptoms !== undefined ? forcedSymptoms : symptomText;
-    const imageToUse = forcedImage !== undefined ? forcedImage : leafPhotoBase64;
-
-    if (!imageToUse && !symptomsToUse.trim()) {
-      setErrorMessage("Please capture/upload a leaf photo OR describe the symptoms in words to begin diagnosis.");
+  // Run Crop Protection Advisory
+  const handleDiagnose = async () => {
+    if (!symptomText.trim() && !knownDisease.trim() && !knownPest.trim() && !weedProblem.trim()) {
+      setErrorMessage(
+        lang === "te"
+          ? "దయచేసి పంట లక్షణాలు లేదా సమస్యను వివరించండి."
+          : "Please describe the symptoms or select a known problem to begin advisory."
+      );
       return;
     }
 
     setErrorMessage("");
-    setRateLimitSeconds(0);
     setIsDiagnosing(true);
-    setDiagnosisResult(null);
-    setCandidatesList([]);
-    setActiveCandidateIdx(0);
+    setResult(null);
 
     try {
       const res = await fetch("/api/diagnose", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          image: imageToUse,
-          symptoms: symptomsToUse,
-          crop: cropToUse,
-          district: profile.district || "Jagtial",
+          crop: selectedCrop,
+          symptoms: symptomText,
+          knownDisease: knownDisease.trim() || undefined,
+          knownPest: knownPest.trim() || undefined,
+          weedProblem: weedProblem.trim() || undefined,
+          cropAgeDays: cropAgeDays || undefined,
+          growthStage,
+          district,
           lang,
         }),
       });
 
       const data = await res.json();
-      if (!res.ok || data.error) {
-        if (res.status === 429 && data.resetSeconds) {
-          setRateLimitSeconds(data.resetSeconds);
-        }
-        throw new Error(data.error || "Failed to process diagnosis.");
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to process crop protection advisory.");
       }
 
-      setDiagnosisResult(data.diagnosis);
-      setCandidatesList(Array.isArray(data.candidates) ? data.candidates : []);
-      setActiveCandidateIdx(0);
-      setPrimaryObservation(data.primaryObservation || "");
-      setDiagnosticSource(data.source || "Gemini Multimodal AI & Scientific Crop Pathology");
+      setResult(data);
     } catch (err: any) {
-      setErrorMessage(err.message || "Diagnosis service temporarily unavailable. Please verify connection and retry.");
+      setErrorMessage(err.message || "Service temporarily unavailable. Please retry.");
     } finally {
       setIsDiagnosing(false);
     }
   };
 
-  // 1-Click Test Case trigger
-  const handleSelectTestCase = (testCase: typeof REFERENCE_TEST_CASES[0]) => {
-    setSelectedCrop(testCase.crop);
-    setSymptomText(testCase.symptoms);
-    setLeafPhotoBase64(null);
-    setPhotoFileName(`Sample: ${testCase.nameEn}`);
-    handleRunDiagnosis(testCase.crop, testCase.symptoms, undefined);
-  };
+  // Text-to-Speech
+  const handleToggleSpeech = () => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window) || !result) return;
 
-  // Active selected candidate item helper
-  const getActiveItem = () => {
-    if (candidatesList && candidatesList.length > 0) {
-      const cand = candidatesList[activeCandidateIdx] || candidatesList[0];
-      return {
-        ...cand,
-        diseaseNameEn: cand.commonName || cand.diseaseNameEn || diagnosisResult?.diseaseNameEn,
-        diseaseNameTe: cand.nameTe || cand.diseaseNameTe || diagnosisResult?.diseaseNameTe,
-        crop: selectedCrop,
-        symptomsEn: cand.symptomsSeen || cand.symptomsEn || diagnosisResult?.symptomsEn,
-        symptomsTe: cand.symptomsSeen || cand.symptomsTe || diagnosisResult?.symptomsTe,
-        chemicalSprayEn: cand.management?.chemicalNoticeEn || cand.chemicalSprayEn || diagnosisResult?.chemicalSprayEn,
-        chemicalSprayTe: cand.management?.chemicalNoticeTe || cand.chemicalSprayTe || diagnosisResult?.chemicalSprayTe,
-        dosage: diagnosisResult?.dosage || "Confirm with Mandal AEO before purchase",
-        organicControlEn: cand.management?.biological?.[0] || cand.organicControlEn || diagnosisResult?.organicControlEn,
-        organicControlTe: cand.management?.biological?.[0] || cand.organicControlTe || diagnosisResult?.organicControlTe,
-        preventiveMeasuresEn: cand.management?.cultural?.[0] || cand.preventiveMeasuresEn || diagnosisResult?.preventiveMeasuresEn,
-        preventiveMeasuresTe: cand.management?.cultural?.[0] || cand.preventiveMeasuresTe || diagnosisResult?.preventiveMeasuresTe,
-        safetyDisclaimer: cand.management?.safetyDisclaimer || diagnosisResult?.safetyDisclaimer,
-        favourableConditions: cand.favourableConditions || diagnosisResult?.favourableConditions,
-        unconfirmedSymptoms: cand.unconfirmedSymptoms,
-        differentialClues: cand.differentialClues,
-        fieldCheck: cand.fieldCheck,
-        type: cand.type,
-      };
-    }
-    return diagnosisResult;
-  };
-
-  // Copy prescription text
-  const handleCopyPrescription = () => {
-    const item = getActiveItem();
-    if (!item) return;
-    const text = `🌱 Smart Farm Assistant - Crop Diagnosis Assessment
-Status: ${item.status === "inconclusive" ? "INCONCLUSIVE (Field Verification Required)" : "POSSIBLE DIAGNOSIS (Indicative Assessment)"}
-Assessment Level: ${item.confidenceLevel || "Needs further verification"}
-Disease: ${item.diseaseNameEn} (${item.diseaseNameTe})
-Crop: ${item.crop || selectedCrop}
-Observed Symptoms: ${item.symptomsEn}
-${item.differentialClues ? `Differential Clues: ${item.differentialClues}\n` : ""}${item.fieldCheck ? `Field Check: ${item.fieldCheck}\n` : ""}Chemical Notice: ${item.chemicalSprayEn}
-Organic / Cultural Management: ${item.organicControlEn}
-Preventive Field Agronomy: ${item.preventiveMeasuresEn}
-Safety Rule: ${item.safetyDisclaimer}`;
-    navigator.clipboard.writeText(text);
-    setIsCopied(true);
-    setTimeout(() => setIsCopied(false), 2000);
-  };
-
-  // WhatsApp Sharing
-  const handleShareWhatsApp = () => {
-    const item = getActiveItem();
-    if (!item) return;
-    const text = formatPestMessage(
-      {
-        crop: item.crop || selectedCrop,
-        cropTe: item.crop || selectedCrop,
-        pestName: item.diseaseNameEn,
-        pestNameTe: item.diseaseNameTe,
-        remedy: item.chemicalSprayEn,
-        remedyTe: item.chemicalSprayTe,
-        dosage: item.dosage,
-        dosageTe: item.dosage,
-        organic: item.organicControlEn,
-        organicTe: item.organicControlTe,
-        ppe: item.safetyDisclaimer || "Wear protective mask and gloves.",
-        ppeTe: item.safetyDisclaimer || "రక్షణ మాస్క్ మరియు చేతి తొడుగులు ధరించండి.",
-      },
-      lang
-    );
-    window.open(generateWhatsAppUrl(text), "_blank");
-  };
-
-  // Text-to-Speech (TTS)
-  const toggleSpeech = () => {
-    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
     if (isSpeaking) {
       window.speechSynthesis.cancel();
       setIsSpeaking(false);
       return;
     }
 
-    const item = getActiveItem();
-    if (!item) return;
-    const textToRead = lang === "te"
-      ? `${item.diseaseNameTe}. ${item.chemicalSprayTe}. మోతాదు: ${item.dosage}. సేంద్రీయ విధానం: ${item.organicControlTe}`
-      : `${item.diseaseNameEn}. Recommended treatment: ${item.chemicalSprayEn}. Dosage: ${item.dosage}. Organic alternative: ${item.organicControlEn}`;
+    const textToRead =
+      lang === "te"
+        ? `${result.suspectedCondition.nameTe}. ${result.suspectedCondition.symptomsObservedTe}.`
+        : `${result.suspectedCondition.nameEn}. ${result.suspectedCondition.symptomsObservedEn}.`;
 
-    const utterance = new SpeechSynthesisUtterance(textToRead);
-    utterance.lang = lang === "te" ? "te-IN" : "en-IN";
-    utterance.rate = 0.95;
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
+    const utter = new SpeechSynthesisUtterance(textToRead);
+    utter.lang = lang === "te" ? "te-IN" : "en-IN";
+    utter.onend = () => setIsSpeaking(false);
+    utter.onerror = () => setIsSpeaking(false);
 
     setIsSpeaking(true);
-    window.speechSynthesis.speak(utterance);
+    window.speechSynthesis.speak(utter);
   };
 
-  return (
-    <div className="space-y-6">
-      {/* Hidden File Inputs */}
-      <input
-        type="file"
-        ref={fileInputRef}
-        accept="image/*"
-        className="hidden"
-        onChange={handlePhotoSelect}
-      />
-      <input
-        type="file"
-        ref={cameraInputRef}
-        accept="image/*"
-        capture="environment"
-        className="hidden"
-        onChange={handlePhotoSelect}
-      />
+  const chips = PRESET_CHIPS[selectedCrop] || PRESET_CHIPS.Paddy;
 
-      {/* Page Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+  return (
+    <div className="space-y-6 max-w-5xl mx-auto pb-12">
+      {/* 1. Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-rose-600 to-rose-700 text-white shadow-md">
-              <Stethoscope className="h-5 w-5" />
-            </div>
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-900 dark:text-stone-50">
-                {lang === "te" ? "పంట రోగ నిర్ధారణ & చికిత్స కేంద్రం" : "Crop Disease & Pest Diagnosis Studio"}
-              </h1>
-              <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400">
-                {profile.village} Field &bull; {profile.district} District &bull; {selectedCrop} ({profile.areaAcre} Acres)
-              </p>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-900 dark:text-stone-50">
+              {lang === "te" ? "AI ప్లాంట్ డాక్టర్ — పంట సస్యరక్షణ సలహాదారు" : "AI Plant Doctor — Crop Protection Advisory"}
+            </h1>
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300">
+              PJTAU & CIBRC Grounded
+            </span>
+          </div>
+          <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 mt-1">
+            {lang === "te"
+              ? "తెలంగాణ వ్యవసాయ విశ్వవిద్యాలయ (PJTAU) పరిశోధనల ఆధారంగా శాస్త్రీయ తెగులు, పురుగుల యాజమాన్యం."
+              : "Scientifically grounded symptom analysis, IPM biological control, and verified CIBRC chemical safety."}
+          </p>
+        </div>
+
+        <Link
+          href="/advisory"
+          className="self-start sm:self-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-agri-700 bg-agri-50 hover:bg-agri-100 dark:bg-agri-950 dark:text-agri-300 border border-agri-200 transition"
+        >
+          <span>{lang === "te" ? "కృషి సహాయక్ చాట్" : "Krishi Sahayak Chat"}</span>
+          <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
+      </div>
+
+      {/* 2. Advisory Consultation Form */}
+      <Card className="border-stone-200 dark:border-stone-800 shadow-sm">
+        <div className="px-5 py-4 border-b border-stone-200 dark:border-stone-800 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Stethoscope className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+            <h2 className="text-base font-bold text-stone-900 dark:text-stone-100">
+              {lang === "te" ? "లక్షణాల నమోదు & విశ్లేషణ" : "Crop Symptom & Protection Assessment"}
+            </h2>
+          </div>
+          <span className="text-xs text-stone-500">
+            {profile.village} • {district}
+          </span>
+        </div>
+
+        <div className="p-4 sm:p-6 space-y-5">
+          {/* Row 1: Crop Selection */}
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-300 mb-2">
+              {lang === "te" ? "1. పంటను ఎంచుకోండి" : "1. Select Target Crop"}
+            </label>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {CROP_OPTIONS.map((c) => (
+                <button
+                  key={c.value}
+                  type="button"
+                  onClick={() => setSelectedCrop(c.value)}
+                  className={`p-2.5 rounded-xl text-xs font-bold border text-left transition flex items-center justify-between ${
+                    selectedCrop === c.value
+                      ? "bg-emerald-50 border-emerald-500 text-emerald-900 dark:bg-emerald-950/70 dark:border-emerald-500 dark:text-emerald-200 shadow-2xs"
+                      : "bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 hover:border-emerald-300"
+                  }`}
+                >
+                  <span>{lang === "te" ? c.labelTe : c.labelEn}</span>
+                  {selectedCrop === c.value && <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />}
+                </button>
+              ))}
             </div>
           </div>
-        </div>
 
-        <div className="flex items-center gap-2">
-          <Link
-            href="/advisory"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-xs font-semibold text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 transition shadow-2xs"
-          >
-            <Bot className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Chat With Krishi Sahayak &rarr;</span>
-          </Link>
-        </div>
-      </div>
-
-      {/* Safety Notice */}
-      <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50/80 p-3.5 text-xs text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-200 shadow-2xs">
-        <AlertTriangle className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" />
-        <div className="leading-relaxed">
-          <span className="font-bold">Agricultural Pathologist Notice: </span>
-          AI diagnosis is an indicative diagnostic tool calibrated with scientific packages of practices. Always confirm critical pesticide and dosage applications with your local Agricultural Extension Officer (AEO). Always wear PPE (mask and gloves) when spraying.
-        </div>
-      </div>
-
-      {/* Dual Diagnostic Input Studio (Photo + Symptoms Description) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column: Visual Leaf Photo Upload */}
-        <div className="lg:col-span-5 space-y-4">
-          <Card className="p-5 space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Camera className="w-4 h-4 text-rose-600" />
-                <h3 className="text-sm font-bold text-stone-900 dark:text-white">
-                  1. Capture or Upload Leaf Photo
-                </h3>
-              </div>
-              <Badge variant="normal">Option A</Badge>
-            </div>
-
-            {/* Photo Dropzone or Thumbnail */}
-            {!leafPhotoBase64 ? (
-              <div
-                onClick={() => fileInputRef.current?.click()}
-                className="group relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-stone-300 dark:border-stone-700 bg-stone-50/60 dark:bg-stone-900/40 p-6 text-center cursor-pointer hover:border-emerald-500 hover:bg-emerald-50/20 dark:hover:bg-emerald-950/10 transition-all"
-              >
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-200 shadow-xs group-hover:scale-105 transition-transform">
-                  <Upload className="w-7 h-7 text-emerald-600" />
-                </div>
-                <h4 className="mt-3 text-xs font-bold text-stone-900 dark:text-white">
-                  Click to Upload or Drag Leaf Photo
-                </h4>
-                <p className="mt-1 text-[11px] text-stone-500 dark:text-stone-400 max-w-xs">
-                  Upload an infected crop leaf, stem, or fruit photo. Supports JPG, PNG, WebP (auto-compressed).
-                </p>
-
-                <div className="flex flex-col sm:flex-row items-center gap-2 mt-4 w-full">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      fileInputRef.current?.click();
-                    }}
-                    className="w-full sm:w-auto min-h-[44px] flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs sm:text-sm font-bold shadow-xs transition"
-                  >
-                    <Upload className="w-4 h-4" />
-                    <span>Choose Photo (Gallery)</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      cameraInputRef.current?.click();
-                    }}
-                    className="w-full sm:w-auto min-h-[44px] flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-750 text-stone-800 dark:text-stone-200 text-xs sm:text-sm font-bold transition shadow-xs"
-                  >
-                    <Camera className="w-4 h-4 text-rose-500" />
-                    <span>Snap Phone Camera</span>
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="relative rounded-2xl overflow-hidden border border-emerald-500/40 bg-stone-900">
-                <img
-                  src={leafPhotoBase64}
-                  alt="Uploaded infected crop leaf"
-                  className="w-full h-56 object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end justify-between p-3.5">
-                  <div className="text-white text-xs">
-                    <span className="font-bold block truncate max-w-[200px]">{photoFileName}</span>
-                    <span className="text-[10px] text-emerald-300">✓ Compressed &amp; Ready for Vision AI</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={removePhoto}
-                    className="flex items-center gap-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white px-2.5 py-1 text-[11px] font-bold shadow-sm transition"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                    <span>Remove</span>
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {isCompressing && (
-              <div className="flex items-center gap-2 text-xs text-sky-600 font-semibold animate-pulse">
-                <span className="h-2 w-2 rounded-full bg-sky-600 animate-ping" />
-                <span>Compressing photo to optimal resolution...</span>
-              </div>
-            )}
-          </Card>
-        </div>
-
-        {/* Right Column: Describe Disease Symptoms (User Request Feature!) */}
-        <div className="lg:col-span-7 space-y-4">
-          <Card className="p-5 space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <FileText className="w-4 h-4 text-emerald-600" />
-                <h3 className="text-sm font-bold text-stone-900 dark:text-white">
-                  2. Describe Symptoms in Words (Text or 1-Click Chips)
-                </h3>
-              </div>
-              <Badge variant="normal">Option B</Badge>
-            </div>
-
-            {/* Crop Selector */}
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-stone-600 dark:text-stone-400 shrink-0">
-                Selected Crop:
-              </span>
-              <select
-                value={selectedCrop}
-                onChange={(e) => setSelectedCrop(e.target.value)}
-                className="rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-850 px-3 py-1.5 text-xs font-bold text-stone-900 dark:text-white shadow-2xs focus:border-emerald-500 focus:outline-none"
-              >
-                <option value="Paddy">Paddy (Rice / వరి)</option>
-                <option value="Cotton">Cotton (పత్తి)</option>
-                <option value="Chilli">Chilli (మిరప)</option>
-                <option value="Maize">Maize (మొక్కజొన్న)</option>
-                <option value="Redgram">Red Gram (కంది)</option>
-                <option value="Groundnut">Groundnut (వేరుశనగ)</option>
-                <option value="Soybean">Soybean (సోయాబీన్)</option>
-              </select>
-            </div>
-
-            {/* Symptom Input Textarea */}
-            <div className="space-y-1.5">
-              <label className="block text-xs font-medium text-stone-700 dark:text-stone-300">
-                Describe Visible Symptoms on Crop:
+          {/* Row 2: Symptom Description Input with Voice */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-300">
+                {lang === "te" ? "2. ఆకులు / పంటపై లక్షణాలను వివరించండి" : "2. Describe Symptoms Observed"}
               </label>
-              <textarea
-                rows={3}
-                value={symptomText}
-                onChange={(e) => setSymptomText(e.target.value)}
-                placeholder="Type what you see (e.g. Spindle brown spots with ash centers on paddy leaves, yellow leaf drying along edges, caterpillar eating flower squares, or downward leaf curling...)"
-                className="w-full rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 p-3 text-xs text-stone-900 dark:text-white placeholder-stone-400 focus:border-emerald-500 focus:outline-none shadow-2xs"
-              />
+              <button
+                type="button"
+                onClick={toggleSpeechRecognition}
+                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border transition ${
+                  isListening
+                    ? "bg-rose-100 text-rose-800 border-rose-300 animate-pulse"
+                    : "bg-stone-100 text-stone-700 hover:bg-stone-200 dark:bg-stone-800 dark:text-stone-300 border-stone-300"
+                }`}
+                title="Speak your symptoms in Telugu or English"
+              >
+                {isListening ? <MicOff className="h-3.5 w-3.5 text-rose-600" /> : <Mic className="h-3.5 w-3.5 text-emerald-600" />}
+                <span>{isListening ? (lang === "te" ? "వింటోంది..." : "Listening...") : (lang === "te" ? "మైక్ మాట్లాడండి" : "Voice Input")}</span>
+              </button>
             </div>
 
-            {/* Quick 1-Click Symptom Chips */}
-            {CROP_SYMPTOM_PRESETS[selectedCrop] && (
-              <div className="space-y-1.5">
-                <span className="text-[11px] font-bold text-stone-500 dark:text-stone-400 flex items-center gap-1">
-                  <span>⚡ Common {selectedCrop} Symptoms (Click to add):</span>
-                </span>
-                <div className="flex flex-wrap gap-2">
-                  {CROP_SYMPTOM_PRESETS[selectedCrop].map((chip, idx) => (
+            <textarea
+              rows={3}
+              value={symptomText}
+              onChange={(e) => setSymptomText(e.target.value)}
+              placeholder={
+                lang === "te"
+                  ? "ఉదాహరణ: ఆకులపై బూడిద రంగు మచ్చలు ఉన్నాయి, కంకి మెడ నల్లబడి విరిగిపోతోంది..."
+                  : "e.g. Spindle shaped spots with brown margins and grey center, neck of panicle blackening..."
+              }
+              className="w-full rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 p-3 text-sm text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 placeholder:text-stone-400"
+            />
+
+            {/* Quick 1-Click Symptom Preset Chips */}
+            <div className="mt-2.5">
+              <p className="text-[11px] font-semibold text-stone-500 mb-1.5">
+                {lang === "te" ? "సాధారణ లక్షణాల ఎంపిక (క్లిక్ చేయండి):" : "Quick Symptom Presets (Click to add):"}
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {chips.map((chip, idx) => {
+                  const chipText = lang === "te" ? chip.te : chip.en;
+                  return (
                     <button
                       key={idx}
                       type="button"
-                      onClick={() => addSymptomChip(lang === "te" ? chip.te : chip.en)}
-                      className="min-h-[38px] flex items-center rounded-xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-850 px-3 py-1.5 text-xs font-medium text-stone-700 dark:text-stone-300 hover:border-emerald-500 hover:bg-emerald-50/40 dark:hover:bg-emerald-950/20 transition shadow-2xs text-left"
+                      onClick={() => handleChipClick(chipText)}
+                      className="px-2.5 py-1 rounded-lg text-xs bg-stone-100 hover:bg-emerald-50 hover:text-emerald-800 hover:border-emerald-300 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700 transition"
                     >
-                      + {lang === "te" ? chip.te : chip.en}
+                      + {chipText}
                     </button>
-                  ))}
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Row 3: Collapsible Advanced Agronomy Parameters */}
+          <div className="border border-stone-200 dark:border-stone-800 rounded-xl overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setShowAdvanced(!showAdvanced)}
+              className="w-full px-4 py-2.5 bg-stone-50 dark:bg-stone-800/60 flex items-center justify-between text-xs font-bold text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800"
+            >
+              <span className="flex items-center gap-1.5">
+                <Leaf className="h-3.5 w-3.5 text-emerald-600" />
+                {lang === "te" ? "అదనపు క్షేత్ర వివరాలు (ఐచ్ఛికం: పురుగు పేరు, కలుపు, పంట దశ)" : "Additional Field Parameters (Optional: Pest, Weed, Crop Stage)"}
+              </span>
+              {showAdvanced ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </button>
+
+            {showAdvanced && (
+              <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-3 bg-white dark:bg-stone-900 border-t border-stone-200 dark:border-stone-800">
+                <div>
+                  <label className="block text-[11px] font-semibold text-stone-600 dark:text-stone-400 mb-1">
+                    {lang === "te" ? "తెలిసిన తెగులు పేరు" : "Known Disease (if suspected)"}
+                  </label>
+                  <input
+                    type="text"
+                    value={knownDisease}
+                    onChange={(e) => setKnownDisease(e.target.value)}
+                    placeholder="e.g. Blast, Sheath Blight, Tikka"
+                    className="w-full rounded-lg border border-stone-300 dark:border-stone-700 p-2 text-xs bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-stone-600 dark:text-stone-400 mb-1">
+                    {lang === "te" ? "కీటక పురుగు పేరు" : "Insect Pest Name"}
+                  </label>
+                  <input
+                    type="text"
+                    value={knownPest}
+                    onChange={(e) => setKnownPest(e.target.value)}
+                    placeholder="e.g. Stem Borer, BPH, Pink Bollworm"
+                    className="w-full rounded-lg border border-stone-300 dark:border-stone-700 p-2 text-xs bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-stone-600 dark:text-stone-400 mb-1">
+                    {lang === "te" ? "కలుపు సమస్య" : "Weed Problem"}
+                  </label>
+                  <input
+                    type="text"
+                    value={weedProblem}
+                    onChange={(e) => setWeedProblem(e.target.value)}
+                    placeholder="e.g. Echinochloa, Cyperus sedge, Pre-emergence"
+                    className="w-full rounded-lg border border-stone-300 dark:border-stone-700 p-2 text-xs bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-stone-600 dark:text-stone-400 mb-1">
+                    {lang === "te" ? "పంట వయస్సు (రోజులు)" : "Crop Age (Days After Sowing)"}
+                  </label>
+                  <input
+                    type="number"
+                    value={cropAgeDays}
+                    onChange={(e) => setCropAgeDays(e.target.value)}
+                    placeholder="e.g. 35"
+                    className="w-full rounded-lg border border-stone-300 dark:border-stone-700 p-2 text-xs bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100"
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-[11px] font-semibold text-stone-600 dark:text-stone-400 mb-1">
+                    {lang === "te" ? "పంట ఎదుగుదల దశ" : "Crop Growth Stage"}
+                  </label>
+                  <select
+                    value={growthStage}
+                    onChange={(e) => setGrowthStage(e.target.value)}
+                    className="w-full rounded-lg border border-stone-300 dark:border-stone-700 p-2 text-xs bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100"
+                  >
+                    {GROWTH_STAGES.map((s) => (
+                      <option key={s.value} value={s.value}>
+                        {lang === "te" ? s.labelTe : s.labelEn}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
             )}
-
-            {/* Action Bar */}
-            <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-stone-100 dark:border-stone-800">
-              <span className="text-xs text-stone-500 text-center sm:text-left">
-                {leafPhotoBase64
-                  ? "✓ Photo attached + Symptoms provided"
-                  : symptomText
-                  ? "✓ Symptoms text provided (Text Diagnosis Ready)"
-                  : "Upload photo, enter symptoms, or select a test case below"}
-              </span>
-
-              <button
-                type="button"
-                onClick={() => handleRunDiagnosis()}
-                disabled={isDiagnosing || (!leafPhotoBase64 && !symptomText.trim())}
-                className="w-full sm:w-auto min-h-[48px] flex items-center justify-center gap-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-sm px-6 py-3 shadow-md shadow-emerald-700/20 transition-all hover:scale-[1.02] active:scale-95"
-              >
-                {isDiagnosing ? (
-                  <>
-                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                    <span>Analyzing Pathology...</span>
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-4 h-4 text-amber-300" />
-                    <span>Run AI Disease Diagnosis</span>
-                  </>
-                )}
-              </button>
-            </div>
-          </Card>
-        </div>
-      </div>
-
-      {/* Rate Limit Alert */}
-      {rateLimitSeconds > 0 && (
-        <div className="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-xs font-semibold text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200 flex items-center gap-2">
-          <AlertTriangle className="h-4 w-4 shrink-0 text-amber-600" />
-          <span>
-            {lang === "te"
-              ? `నిర్ధారణ పరిమితి ముగిసింది (10 నిమిషాలకు 10 అభ్యర్థనలు). దయచేసి మరో ${rateLimitSeconds} సెకన్ల తర్వాత ప్రయత్నించండి.`
-              : `Diagnosis rate limit reached (10 requests per 10 minutes). Please wait ${rateLimitSeconds} seconds before submitting another image.`}
-          </span>
-        </div>
-      )}
-
-      {/* Error Message */}
-      {errorMessage && (
-        <div className="rounded-2xl border border-rose-300 bg-rose-50 p-4 text-xs font-semibold text-rose-800 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-300 flex items-center gap-2">
-          <AlertTriangle className="h-4 w-4 shrink-0" />
-          <span>{errorMessage}</span>
-        </div>
-      )}
-
-      {/* Instant 1-Click Reference Test Cases (Demonstration / Evaluation) */}
-      <Card className="p-4 bg-stone-50/70 dark:bg-stone-900/40 border border-stone-200/80 dark:border-stone-800">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <span className="text-base">🧪</span>
-            <span className="text-xs font-bold text-stone-900 dark:text-white uppercase tracking-wider">
-              1-Click Symptom Test Cases (Evaluation & Demonstration)
-            </span>
           </div>
-          <span className="text-[10px] text-stone-500">Click any card to test instant diagnosis</span>
-        </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {REFERENCE_TEST_CASES.map((tc) => (
+          {/* Error Message */}
+          {errorMessage && (
+            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800 dark:bg-rose-950/50 dark:border-rose-900 dark:text-rose-200 flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 shrink-0 text-rose-600" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-2 pt-1">
             <button
-              key={tc.id}
-              onClick={() => handleSelectTestCase(tc)}
-              className="text-left rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-850 p-3 hover:border-emerald-500 hover:shadow-xs transition-all group"
+              type="button"
+              onClick={handleDiagnose}
+              disabled={isDiagnosing}
+              className="flex-1 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md transition flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md">
-                  {tc.crop}
-                </span>
-                <span className="text-[10px] text-rose-600 font-bold uppercase">{tc.severity}</span>
-              </div>
-              <h4 className="text-xs font-bold text-stone-900 dark:text-white group-hover:text-emerald-600 transition-colors">
-                {lang === "te" ? tc.nameTe : tc.nameEn}
-              </h4>
-              <p className="text-[11px] text-stone-500 dark:text-stone-400 line-clamp-2 mt-1 leading-snug">
-                {tc.symptoms}
-              </p>
+              {isDiagnosing ? (
+                <>
+                  <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>{lang === "te" ? "సస్యరక్షణ విశ్లేషణ జరుగుతోంది..." : "Analyzing PJTAU Knowledge Base..."}</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4" />
+                  <span>{lang === "te" ? "సస్యరక్షణ సలహా పొందండి" : "Get Scientific Crop Protection Advisory"}</span>
+                </>
+              )}
             </button>
-          ))}
+            <button
+              type="button"
+              onClick={() => {
+                setSymptomText("");
+                setKnownDisease("");
+                setKnownPest("");
+                setWeedProblem("");
+                setCropAgeDays("");
+                setResult(null);
+                setErrorMessage("");
+              }}
+              className="px-4 py-3 rounded-xl border border-stone-300 dark:border-stone-700 text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 font-semibold text-xs flex items-center justify-center gap-1.5 transition"
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+              <span>{lang === "te" ? "క్లియర్" : "Reset"}</span>
+            </button>
+          </div>
         </div>
       </Card>
 
-      {/* Diagnosis Results Section */}
-      {diagnosisResult && (
-        diagnosisResult.status === "inconclusive" ? (
-          /* INCONCLUSIVE SAFETY STATE (Task 1 & Task 4) */
-          <div className="rounded-3xl border-2 border-amber-300 dark:border-amber-700/80 bg-amber-50/60 dark:bg-amber-950/30 p-6 shadow-xl space-y-5 animate-in fade-in duration-300">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-amber-200 dark:border-amber-900/60">
-              <div className="space-y-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 text-amber-900 dark:bg-amber-900/80 dark:text-amber-200 px-3 py-1 text-xs font-bold border border-amber-300 dark:border-amber-700">
-                    <AlertTriangle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-                    <span>{lang === "te" ? "స్పష్టమైన నిర్ధారణ కాలేదు" : "Unable to Determine / Inconclusive"}</span>
-                  </span>
-                  <span className="rounded-full bg-white dark:bg-stone-850 px-2.5 py-1 text-xs font-semibold text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-800">
-                    {diagnosisResult.confidenceLevel || "Unable to determine"}
-                  </span>
-                  <span className="rounded-full bg-rose-50 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300 px-2.5 py-1 text-xs font-bold border border-rose-200 dark:border-rose-900">
-                    Safety Gate: Misdiagnosis Prevention
-                  </span>
-                </div>
-                <h2 className="text-xl sm:text-2xl font-black text-amber-950 dark:text-amber-100 mt-1">
-                  {lang === "te" ? diagnosisResult.diseaseNameTe : diagnosisResult.diseaseNameEn}
-                </h2>
-                <p className="text-xs text-amber-800 dark:text-amber-300">
-                  {lang === "te"
-                    ? "తప్పుడు లేదా అసంపూర్ణ నిర్ధారణ ఆధారంగా రసాయన మందులు పిచికారీ చేయడం వల్ల పంట నష్టం మరియు ధన నష్టం వాటిల్లే అవకాశం ఉంది."
-                    : "To prevent hazardous chemical sprays and unnecessary expense, a definitive diagnosis was not fabricated."}
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  onClick={toggleSpeech}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-amber-300 dark:border-amber-800 bg-white dark:bg-stone-850 text-xs font-bold text-stone-800 dark:text-stone-200 hover:bg-stone-50 transition shadow-2xs"
-                >
-                  {isSpeaking ? <VolumeX className="w-4 h-4 text-rose-600" /> : <Volume2 className="w-4 h-4 text-amber-600" />}
-                  <span>{isSpeaking ? "Stop Voice" : "Listen Voice"}</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Diagnostic Reason */}
-            <div className="rounded-2xl border border-amber-200 dark:border-amber-900/60 bg-white/90 dark:bg-stone-900 p-4 space-y-1.5">
-              <span className="text-xs font-bold text-amber-900 dark:text-amber-300 uppercase tracking-wider block">
-                📋 Visual Observation &amp; Diagnostic Findings
-              </span>
-              <p className="text-xs text-stone-800 dark:text-stone-200 leading-relaxed font-medium">
-                {lang === "te" ? diagnosisResult.symptomsTe : diagnosisResult.symptomsEn}
+      {/* 3. Advisory Outcome Results */}
+      {result && (
+        <div className="space-y-4">
+          {/* Statutory Confidence & Field Screening Notice */}
+          <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 text-xs text-amber-900 dark:text-amber-200 flex items-start gap-2.5">
+            <Info className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+            <div>
+              <p className="font-bold">
+                {lang === "te" ? "ప్రాథమిక పరిశీలనా మార్గదర్శకం (ప్రయోగశాల నిర్ధారణ కాదు)" : "Indicative Field Screening — Not Laboratory Confirmed"}
               </p>
-            </div>
-
-            {/* Suggested Photographic & Field Actions */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 p-4 space-y-2">
-                <span className="text-xs font-bold text-stone-900 dark:text-stone-100 uppercase tracking-wider block">
-                  📸 Photographic Best Practices for Accurate Diagnosis
-                </span>
-                <ul className="text-xs text-stone-600 dark:text-stone-300 space-y-1.5 list-disc list-inside leading-relaxed">
-                  <li>Capture clear close-up photos in natural morning sunlight.</li>
-                  <li>Ensure the camera focuses directly on the lesion or affected leaf margin.</li>
-                  <li>Photograph both the upper and lower leaf surfaces.</li>
-                  <li>Avoid blurry, out-of-focus, or extreme wide-angle field shots.</li>
-                </ul>
-              </div>
-
-              <div className="rounded-2xl border border-emerald-300 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-950/20 p-4 space-y-2">
-                <span className="text-xs font-bold text-emerald-900 dark:text-emerald-200 uppercase tracking-wider block">
-                  👨‍🌾 Recommended Field Extension Actions
-                </span>
-                <ul className="text-xs text-emerald-950 dark:text-emerald-100 space-y-1.5 list-disc list-inside leading-relaxed">
-                  <li>Inspect surrounding plants to determine if symptoms are isolated or spreading.</li>
-                  <li>Do NOT spray chemical pesticides without verified on-site diagnosis.</li>
-                  <li>Consult your local Mandal Agricultural Extension Officer (AEO) for field inspection.</li>
-                  <li>Call Kisan Toll-Free Helpline: <b>1800-180-1551</b> (6 AM – 10 PM).</li>
-                </ul>
-              </div>
-            </div>
-
-            {/* Safety Footer */}
-            <div className="rounded-2xl bg-white/80 dark:bg-stone-900/80 p-3.5 text-[11px] text-stone-600 dark:text-stone-400 space-y-1 border border-amber-200 dark:border-amber-900/60">
-              <div className="flex items-center gap-1.5 font-bold text-stone-900 dark:text-white">
-                <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                <span>Safety Gate Source: {diagnosticSource}</span>
-              </div>
-              <p className="leading-relaxed">
-                {diagnosisResult.safetyDisclaimer}
+              <p className="mt-0.5 opacity-90">
+                {lang === "te" ? result.confidenceNotice.te : result.confidenceNotice.en}
               </p>
             </div>
           </div>
-        ) : (() => {
-          const item = getActiveItem();
-          if (!item) return null;
-          return (
-          /* INDICATIVE / DIFFERENTIAL DIAGNOSIS RESULT (Draft KB Standard) */
-          <div className="rounded-3xl border-2 border-emerald-500/40 bg-white dark:bg-stone-900 p-6 shadow-xl space-y-6 animate-in fade-in duration-300">
-            {/* Primary Observation Banner if available */}
-            {primaryObservation && (
-              <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50/80 dark:bg-stone-850/80 p-3.5 text-xs text-stone-700 dark:text-stone-300 flex items-start gap-2">
-                <Info className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                <div>
-                  <span className="font-bold text-stone-900 dark:text-white block mb-0.5">
-                    {lang === "te" ? "ప్రాథమిక పరిశీలన సారాంశం (AI విజన్):" : "Diagnostic Observation Summary:"}
-                  </span>
-                  <span>{primaryObservation}</span>
-                </div>
-              </div>
-            )}
 
-            {/* Differential Candidate Tabs (Multi-Candidate Navigation) */}
-            {candidatesList && candidatesList.length > 1 && (
-              <div className="rounded-2xl border border-emerald-500/30 bg-emerald-50/40 dark:bg-emerald-950/20 p-4 space-y-2.5">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                  <span className="text-xs font-bold text-emerald-950 dark:text-emerald-200 flex items-center gap-1.5">
-                    <Layers className="w-4 h-4 text-emerald-600" />
-                    <span>
-                      {lang === "te"
-                        ? "డిఫరెన్షియల్ నిర్ధారణలు (ఒకే రకమైన లక్షణాలు ఉన్న తెగుళ్ళు):"
-                        : "Differential Diagnoses (Multiple Overlapping Conditions Detected):"}
-                    </span>
-                  </span>
-                  <span className="text-[11px] text-emerald-800 dark:text-emerald-300 font-semibold">
-                    {candidatesList.length} possible conditions
-                  </span>
+          {/* Follow-up Clarification Box (If Symptoms Ambiguous) */}
+          {result.needsClarification && result.clarificationQuestions && (
+            <Card className="border-amber-300 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/20">
+              <div className="p-4 sm:p-5">
+                <div className="flex items-center gap-2 mb-2 text-amber-800 dark:text-amber-300 font-bold text-sm">
+                  <HelpCircle className="h-4 w-4" />
+                  <span>{lang === "te" ? "మరింత స్పష్టత కోసం అదనపు పరిశీలనలు:" : "Diagnostic Follow-Up Observations:"}</span>
                 </div>
-                <div className="flex flex-wrap gap-2 pt-1">
-                  {candidatesList.map((cand: any, idx: number) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => setActiveCandidateIdx(idx)}
-                      className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all border ${
-                        activeCandidateIdx === idx
-                          ? "bg-emerald-700 text-white border-emerald-700 shadow-sm scale-102"
-                          : "bg-white dark:bg-stone-850 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-750 hover:border-emerald-500"
-                      }`}
-                    >
-                      <span className="w-5 h-5 rounded-full flex items-center justify-center bg-black/10 dark:bg-white/10 text-[10px]">
-                        {idx + 1}
-                      </span>
-                      <span>{lang === "te" ? (cand.nameTe || cand.commonName) : cand.commonName}</span>
-                      <span className="text-[10px] opacity-75 uppercase tracking-wider">
-                        ({cand.type || "pathology"})
-                      </span>
-                    </button>
+                <ul className="list-disc list-inside space-y-1.5 text-xs text-stone-700 dark:text-stone-300">
+                  {(lang === "te" ? result.clarificationQuestions.te : result.clarificationQuestions.en).map((q, idx) => (
+                    <li key={idx} className="leading-relaxed">
+                      {q}
+                    </li>
                   ))}
+                </ul>
+              </div>
+            </Card>
+          )}
+
+          {/* Primary Condition & Etiology Card */}
+          <Card className="border-stone-200 dark:border-stone-800 overflow-hidden shadow-sm">
+            <div className="p-5 sm:p-6 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-stone-200 dark:border-stone-800 pb-3">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300">
+                      {lang === "te" ? result.etiology.labelTe : result.etiology.labelEn}
+                    </span>
+                    <span className="text-xs text-stone-500 font-medium">
+                      {result.crop} • {result.district}
+                    </span>
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-extrabold text-stone-900 dark:text-stone-50 mt-1">
+                    {lang === "te" ? result.suspectedCondition.nameTe : result.suspectedCondition.nameEn}
+                  </h3>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleToggleSpeech}
+                    className="p-2 rounded-xl border border-stone-200 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300 transition"
+                    title="Listen to advisory"
+                  >
+                    {isSpeaking ? <VolumeX className="h-4 w-4 text-rose-600" /> : <Volume2 className="h-4 w-4 text-emerald-600" />}
+                  </button>
+                  <a
+                    href={generateWhatsAppUrl(
+                      formatPestMessage(
+                        {
+                          crop: selectedCrop,
+                          cropTe: selectedCrop,
+                          pestName: result.suspectedCondition.nameEn,
+                          pestNameTe: result.suspectedCondition.nameTe,
+                          remedy: result.chemicalRecommendation.activeIngredient || "Follow PJTAU Package of Practices",
+                          remedyTe: result.chemicalRecommendation.activeIngredient || "PJTAU సమగ్ర సస్యరక్షణ పాటించండి",
+                          dosage: result.chemicalRecommendation.dosagePerLiterWater || "Follow official label",
+                          dosageTe: result.chemicalRecommendation.dosagePerLiterWater || "అధికారిక లేబుల్ ప్రకారం",
+                          organic: result.ipmGuidance.biological.join("; "),
+                          organicTe: result.ipmGuidance.biological.join("; "),
+                          ppe: "Wear protective face mask and gloves",
+                          ppeTe: "చేతి తొడుగులు, రక్షణ మాస్క్ ధరించండి",
+                        },
+                        lang
+                      )
+                    )}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 rounded-xl border border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 dark:bg-emerald-950 dark:text-emerald-300 transition"
+                    title="Share with fellow farmers on WhatsApp"
+                  >
+                    <Share2 className="h-4 w-4" />
+                  </a>
                 </div>
               </div>
-            )}
 
-            {/* Active Candidate Banner */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-stone-200 dark:border-stone-800">
-              <div className="space-y-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 px-3 py-1 text-xs font-bold border border-emerald-300">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>
-                      {candidatesList.length > 1
-                        ? `Candidate ${activeCandidateIdx + 1} of ${candidatesList.length}`
-                        : lang === "te"
-                        ? "సూచిక నిర్ధారణ (పరిశీలించదగినది)"
-                        : "Indicative Assessment"}
-                    </span>
-                  </span>
-                  <span className="rounded-full bg-stone-100 dark:bg-stone-800 px-2.5 py-1 text-xs font-semibold text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700">
-                    Status: {item.confidenceLevel || "Possible diagnosis"}
-                  </span>
-                  <span className="rounded-full bg-amber-50 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 px-2.5 py-1 text-[11px] font-semibold border border-amber-200 dark:border-amber-800">
-                    {item.verificationStatus || "Draft Knowledge Base (Pending Field Review)"}
-                  </span>
-                  <Badge variant={item.severity === "high" ? "critical" : "warning"}>
-                    Severity: {String(item.severity || "medium").toUpperCase()}
-                  </Badge>
-                  {item.type && (
-                    <span className="rounded-full bg-sky-50 text-sky-800 dark:bg-sky-950/60 dark:text-sky-300 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider border border-sky-200 dark:border-sky-900">
-                      {item.type}
-                    </span>
-                  )}
-                </div>
-
-                <h2 className="text-xl sm:text-2xl font-black text-stone-900 dark:text-white mt-1">
-                  {lang === "te" ? item.diseaseNameTe : item.diseaseNameEn}
-                </h2>
-                <p className="text-xs text-stone-500 dark:text-stone-400 italic">
-                  Organism / Classification: <span className="font-semibold text-stone-700 dark:text-stone-300">{item.scientificName}</span>
+              {/* Symptoms Observed */}
+              <div>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400 mb-1">
+                  {lang === "te" ? "లక్షణాల విశ్లేషణ" : "Agronomic Symptoms Assessed"}
+                </h4>
+                <p className="text-xs sm:text-sm text-stone-800 dark:text-stone-200 leading-relaxed bg-stone-50 dark:bg-stone-800/50 p-3 rounded-xl border border-stone-200 dark:border-stone-700">
+                  {lang === "te" ? result.suspectedCondition.symptomsObservedTe : result.suspectedCondition.symptomsObservedEn}
                 </p>
               </div>
 
-              {/* Quick Actions Bar */}
-              <div className="flex flex-wrap items-center gap-2 shrink-0">
-                <button
-                  onClick={toggleSpeech}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-xs font-bold text-stone-800 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-750 transition shadow-2xs"
-                  title="Listen to prescription in voice audio"
-                >
-                  {isSpeaking ? (
-                    <>
-                      <VolumeX className="w-4 h-4 text-rose-600" />
-                      <span>Stop Voice</span>
-                    </>
+              {/* IPM Guidance Box (FIRST) */}
+              <div className="p-4 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900 space-y-2.5">
+                <div className="flex items-center gap-2 text-emerald-900 dark:text-emerald-200 font-bold text-xs uppercase tracking-wider">
+                  <Sprout className="h-4 w-4 text-emerald-600" />
+                  <span>{lang === "te" ? "సమగ్ర సస్యరక్షణ & జీవ నియంత్రణ (IPM First)" : "Integrated Pest Management (IPM Guidance First)"}</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs text-stone-800 dark:text-stone-200">
+                  <div className="bg-white/80 dark:bg-stone-900/80 p-2.5 rounded-lg border border-emerald-100 dark:border-emerald-900">
+                    <span className="font-bold text-emerald-800 dark:text-emerald-400 block mb-1">
+                      {lang === "te" ? "వ్యవసాయ పద్ధతులు:" : "Cultural Practices:"}
+                    </span>
+                    <ul className="list-disc list-inside space-y-0.5 text-[11px]">
+                      {result.ipmGuidance.cultural.map((c, i) => (
+                        <li key={i}>{c}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="bg-white/80 dark:bg-stone-900/80 p-2.5 rounded-lg border border-emerald-100 dark:border-emerald-900">
+                    <span className="font-bold text-emerald-800 dark:text-emerald-400 block mb-1">
+                      {lang === "te" ? "యాంత్రిక పద్ధతులు:" : "Mechanical Controls:"}
+                    </span>
+                    <ul className="list-disc list-inside space-y-0.5 text-[11px]">
+                      {result.ipmGuidance.mechanical.map((m, i) => (
+                        <li key={i}>{m}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="bg-white/80 dark:bg-stone-900/80 p-2.5 rounded-lg border border-emerald-100 dark:border-emerald-900">
+                    <span className="font-bold text-emerald-800 dark:text-emerald-400 block mb-1">
+                      {lang === "te" ? "జీవ నియంత్రణ:" : "Biological Controls:"}
+                    </span>
+                    <ul className="list-disc list-inside space-y-0.5 text-[11px]">
+                      {result.ipmGuidance.biological.map((b, i) => (
+                        <li key={i}>{b}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Chemical Recommendation (Strict Safety Gated) */}
+              <div className="border border-stone-200 dark:border-stone-800 rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  {result.chemicalRecommendation.isActionable ? (
+                    <ShieldCheck className="h-4 w-4 text-emerald-600" />
                   ) : (
-                    <>
-                      <Volume2 className="w-4 h-4 text-emerald-600" />
-                      <span>Listen Voice</span>
-                    </>
+                    <ShieldAlert className="h-4 w-4 text-amber-600" />
                   )}
-                </button>
-
-                <button
-                  onClick={handleCopyPrescription}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-xs font-bold text-stone-800 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-750 transition shadow-2xs"
-                  title="Copy full assessment to clipboard"
-                >
-                  {isCopied ? (
-                    <>
-                      <Check className="w-4 h-4 text-emerald-600" />
-                      <span>Copied!</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-4 h-4 text-stone-600" />
-                      <span>Copy</span>
-                    </>
-                  )}
-                </button>
-
-                <button
-                  onClick={handleShareWhatsApp}
-                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold shadow-md shadow-emerald-700/20 transition hover:scale-[1.02]"
-                  title="Share assessment to WhatsApp"
-                >
-                  <Share2 className="w-4 h-4" />
-                  <span>Share WhatsApp</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Core Findings Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Box 1: Symptoms Observed */}
-              <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50/60 dark:bg-stone-850/60 p-4 space-y-2">
-                <span className="text-xs font-bold text-stone-700 dark:text-stone-300 uppercase tracking-wider block">
-                  🔍 Visible Foliage Symptoms
-                </span>
-                <p className="text-xs text-stone-800 dark:text-stone-200 leading-relaxed font-medium">
-                  {lang === "te" ? item.symptomsTe : item.symptomsEn}
-                </p>
-                {item.unconfirmedSymptoms && (
-                  <div className="rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50/50 dark:bg-amber-950/20 p-2.5 text-[11px] text-amber-900 dark:text-amber-200 leading-snug">
-                    <span className="font-bold">⚠️ Unconfirmed Signs in Current Photo:</span> {item.unconfirmedSymptoms}
-                  </div>
-                )}
-                {item.favourableConditions && (
-                  <div className="pt-1 text-[11px] text-stone-500">
-                    <b>Favourable Weather:</b> {item.favourableConditions}
-                  </div>
-                )}
-              </div>
-
-              {/* Box 2: Differential Clues & Field Checks */}
-              <div className="rounded-2xl border border-blue-200 dark:border-blue-900/60 bg-blue-50/30 dark:bg-blue-950/20 p-4 space-y-2">
-                <span className="text-xs font-bold text-blue-900 dark:text-blue-300 uppercase tracking-wider block">
-                  🔬 Differential Clues &amp; Farmer Field Check
-                </span>
-                {item.differentialClues && (
-                  <div className="text-xs text-stone-800 dark:text-stone-200 leading-relaxed font-medium">
-                    <span className="font-bold text-blue-900 dark:text-blue-300 block mb-0.5">
-                      Key Distinguishing Features:
-                    </span>
-                    {item.differentialClues}
-                  </div>
-                )}
-                {item.fieldCheck && (
-                  <div className="rounded-xl border border-blue-200 dark:border-blue-900/50 bg-white dark:bg-stone-900 p-2.5 text-[11px] text-blue-950 dark:text-blue-200 leading-snug">
-                    <span className="font-bold block text-blue-700 dark:text-blue-300 mb-0.5">
-                      👨‍🌾 Recommended Field Check for Farmer:
-                    </span>
-                    {item.fieldCheck}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Organic, Cultural & Chemical Notice */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Box 1: Cultural Management */}
-              <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50/40 dark:bg-stone-850/40 p-4 space-y-1.5">
-                <span className="text-xs font-bold text-stone-700 dark:text-stone-300 uppercase tracking-wider block">
-                  🌾 Cultural Agronomy
-                </span>
-                <p className="text-xs text-stone-800 dark:text-stone-200 leading-relaxed">
-                  {lang === "te" ? item.preventiveMeasuresTe : item.preventiveMeasuresEn}
-                </p>
-              </div>
-
-              {/* Box 2: Organic & Biological */}
-              <div className="rounded-2xl border border-teal-200 dark:border-teal-900/60 bg-teal-50/40 dark:bg-teal-950/20 p-4 space-y-1.5">
-                <span className="text-xs font-bold text-teal-900 dark:text-teal-300 uppercase tracking-wider block">
-                  🌿 Organic &amp; Biological
-                </span>
-                <p className="text-xs text-teal-950 dark:text-teal-100 leading-relaxed">
-                  {lang === "te" ? item.organicControlTe : item.organicControlEn}
-                </p>
-              </div>
-
-              {/* Box 3: Indicative Chemical Guidance */}
-              <div className="rounded-2xl border border-amber-300 dark:border-amber-800 bg-amber-50/40 dark:bg-amber-950/20 p-4 space-y-1.5">
-                <span className="text-xs font-bold text-amber-900 dark:text-amber-300 uppercase tracking-wider block">
-                  ⚠️ Chemical Guidance (Indicative Only)
-                </span>
-                <p className="text-xs font-semibold text-stone-900 dark:text-stone-100 leading-relaxed">
-                  {lang === "te" ? item.chemicalSprayTe : item.chemicalSprayEn}
-                </p>
-                <div className="text-[10px] text-amber-800 dark:text-amber-300 font-medium pt-1 border-t border-amber-200 dark:border-amber-900/50">
-                  Dosage: Confirm with Mandal AEO before purchase. Never apply without CIB&amp;RC container label verification.
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-stone-700 dark:text-stone-300">
+                    {lang === "te" ? "రసాయన సస్యరక్షణ మార్గదర్శకం (CIBRC ధృవీకరించిన రికార్డు)" : "Statutory Chemical Safety Gate (CIBRC Label Verification)"}
+                  </h4>
                 </div>
-              </div>
-            </div>
 
-            {/* Safety Disclaimer & Source Footnote */}
-            <div className="rounded-2xl bg-stone-100 dark:bg-stone-850 p-4 text-[11px] text-stone-600 dark:text-stone-400 space-y-1 border border-stone-200 dark:border-stone-800">
-              <div className="flex items-center gap-1.5 font-bold text-stone-900 dark:text-white">
-                <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                <span>Diagnostic Assessment Source: {diagnosticSource}</span>
+                {result.chemicalRecommendation.isActionable ? (
+                  <div className="space-y-2 text-xs">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-emerald-50/50 dark:bg-emerald-950/20 p-3 rounded-lg border border-emerald-200 dark:border-emerald-900">
+                      <div>
+                        <span className="text-stone-500 block text-[11px]">{lang === "te" ? "సిఫారసు చేసిన రసాయన ఫార్ములేషన్:" : "Approved Active Ingredient & Formulation:"}</span>
+                        <span className="font-bold text-stone-900 dark:text-stone-100 text-sm">
+                          {result.chemicalRecommendation.activeIngredient}
+                        </span>
+                        {result.chemicalRecommendation.brands && result.chemicalRecommendation.brands.length > 0 && (
+                          <span className="text-[11px] text-stone-500 block">
+                            Trade Names: {result.chemicalRecommendation.brands.join(", ")}
+                          </span>
+                        )}
+                      </div>
+                      <div>
+                        <span className="text-stone-500 block text-[11px]">{lang === "te" ? "అధికారిక మోతాదు:" : "Approved Statutory Dosage:"}</span>
+                        <span className="font-bold text-emerald-700 dark:text-emerald-400 text-sm">
+                          {result.chemicalRecommendation.dosagePerLiterWater}
+                        </span>
+                        <span className="text-[11px] text-stone-500 block">
+                          ({result.chemicalRecommendation.dosagePerAcre} in {result.chemicalRecommendation.dilutionWaterLiters || 200} L water/acre)
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-stone-500 block text-[11px]">{lang === "te" ? "కోతకు ముందు వేచి ఉండే వ్యవధి (PHI):" : "Pre-Harvest Interval (PHI):"}</span>
+                        <span className="font-semibold text-stone-800 dark:text-stone-200">
+                          {result.chemicalRecommendation.waitingPeriodDaysPHI} {lang === "te" ? "రోజులు" : "days"}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-stone-500 block text-[11px]">{lang === "te" ? "భద్రతా సూచన:" : "Safety & PPE Precautions:"}</span>
+                        <span className="text-[11px] text-stone-700 dark:text-stone-300">
+                          {lang === "te"
+                            ? result.chemicalRecommendation.safetyPrecautions?.te
+                            : result.chemicalRecommendation.safetyPrecautions?.en}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 text-xs text-amber-800 dark:text-amber-200">
+                    <p className="font-semibold">
+                      {lang === "te" ? "రసాయన పిచికారీ మోతాదు నిలిపివేయబడింది" : "Actionable Chemical Spray Withheld"}
+                    </p>
+                    <p className="mt-0.5 text-[11px] opacity-90">
+                      {lang === "te"
+                        ? result.chemicalRecommendation.withholdingReason?.te
+                        : result.chemicalRecommendation.withholdingReason?.en}
+                    </p>
+                  </div>
+                )}
               </div>
-              <p className="leading-relaxed">
-                {item.safetyDisclaimer || diagnosisResult.safetyDisclaimer}
-              </p>
+
+              {/* Expandable Source Citation */}
+              <div className="pt-2 border-t border-stone-200 dark:border-stone-800">
+                <button
+                  type="button"
+                  onClick={() => setShowCitations(!showCitations)}
+                  className="flex items-center gap-1.5 text-xs font-semibold text-stone-500 hover:text-emerald-600 transition"
+                >
+                  <BookOpen className="h-3.5 w-3.5" />
+                  <span>
+                    {showCitations
+                      ? (lang === "te" ? "ఆధార గ్రంథ వివరాలను దాచు" : "Hide Source Citation")
+                      : (lang === "te" ? "ఆధార గ్రంథ వివరాలను చూడండి (పేజీ నంబర్ తో సహా)" : "View Supporting PJTAU Citation & Page Numbers")}
+                  </span>
+                  {showCitations ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                </button>
+
+                {showCitations && (
+                  <div className="mt-2.5 p-3 rounded-xl bg-stone-50 dark:bg-stone-800 text-xs space-y-1 border border-stone-200 dark:border-stone-700">
+                    <p>
+                      <strong className="text-stone-700 dark:text-stone-200">Document:</strong> {result.citation.documentTitle} ({result.citation.publicationMonthYear})
+                    </p>
+                    <p>
+                      <strong className="text-stone-700 dark:text-stone-200">Publisher:</strong> {result.citation.publisher}
+                    </p>
+                    <p>
+                      <strong className="text-stone-700 dark:text-stone-200">PDF Reference:</strong> {result.citation.filename} &bull; PDF Page: {result.citation.pdfPage} &bull; Printed Page: {result.citation.printedPage}
+                    </p>
+                    {result.citation.sectionHeader && (
+                      <p>
+                        <strong className="text-stone-700 dark:text-stone-200">Section:</strong> {result.citation.sectionHeader}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-          );
-        })()
+          </Card>
+        </div>
       )}
     </div>
   );

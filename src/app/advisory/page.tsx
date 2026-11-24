@@ -467,6 +467,10 @@ export default function AdvisoryPage() {
             district: profile.district,
             primaryCrop: profile.primaryCrop,
             areaAcre: profile.areaAcre,
+            soilType: profile.soilType,
+            sowingDate: profile.sowingDate,
+            mandal: profile.mandal,
+            village: profile.village,
           },
         }),
       });

@@ -10,6 +10,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "test:kb": "node scripts/run_kb_tests.cjs",
     "test:safety": "node --experimental-strip-types --test test/phase-a-safety.test.mjs",
     "test:validation": "node --experimental-strip-types --test test/phase-b-validation.test.mjs",
     "test:diagnosis": "node --experimental-strip-types --test test/phase-c-diagnosis.test.mjs",

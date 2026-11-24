@@ -47,6 +47,7 @@ import {
   AnalyticsSummary,
 } from "@/lib/analytics/analyticsStore";
 import CropDiseaseDatasetManager from "@/components/admin/CropDiseaseDatasetManager";
+import AgriculturalKnowledgeManager from "@/components/admin/AgriculturalKnowledgeManager";
 import { useFarmerProfile } from "@/components/common/FarmerProfileContext";
 import { ADMIN_EMAIL, isAuthorizedAdmin } from "@/lib/auth/adminAuth";
 
@@ -62,7 +63,7 @@ export default function AdminPortalPage() {
   const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false);
 
   // Active section tab
-  const [adminTab, setAdminTab] = useState<"diagnostics" | "analytics" | "dataset">("diagnostics");
+  const [adminTab, setAdminTab] = useState<"diagnostics" | "analytics" | "dataset" | "knowledge">("diagnostics");
 
   // Analytics states
   const [stats, setStats] = useState<AnalyticsSummary | null>(null);
@@ -539,12 +540,24 @@ export default function AdminPortalPage() {
           >
             🌱 Crop Disease Dataset
           </button>
+          <button
+            onClick={() => setAdminTab("knowledge")}
+            className={`px-3.5 py-1.5 text-xs font-bold rounded-xl transition whitespace-nowrap ${
+              adminTab === "knowledge"
+                ? "bg-indigo-600 text-white shadow-sm"
+                : "text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800"
+            }`}
+          >
+            📚 Agricultural Knowledge Base
+          </button>
         </div>
       </div>
 
       {/* Main Dashboard Content */}
       <main className="max-w-7xl mx-auto px-4 md:px-8 pt-6 space-y-6">
-        {adminTab === "dataset" ? (
+        {adminTab === "knowledge" ? (
+          <AgriculturalKnowledgeManager />
+        ) : adminTab === "dataset" ? (
           <CropDiseaseDatasetManager />
         ) : adminTab === "diagnostics" ? (
           <div className="space-y-6">
