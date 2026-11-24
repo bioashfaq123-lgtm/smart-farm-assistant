@@ -28,6 +28,10 @@ import {
   Calendar,
   MapPin,
   ExternalLink,
+  Camera,
+  UploadCloud,
+  X,
+  Image as ImageIcon,
 } from "lucide-react";
 import { useLanguage } from "@/components/common/LanguageContext";
 import { useFarmerProfile } from "@/components/common/FarmerProfileContext";
@@ -98,6 +102,41 @@ export default function DiagnosisPage() {
   const [growthStage, setGrowthStage] = useState<string>("Active Tillering / Branching");
   const [district, setDistrict] = useState<string>(profile.district || "Jagtial");
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
+
+  // Photo Upload State
+  const [photoBase64, setPhotoBase64] = useState<string | null>(null);
+  const [photoFileName, setPhotoFileName] = useState<string | null>(null);
+  const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string | null>(null);
+
+  const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setErrorMessage(lang === "te" ? "దయచేసి సరైన ఫోటో ఫైల్ ఎంచుకోండి." : "Please select an image file.");
+      return;
+    }
+
+    if (file.size > 8 * 1024 * 1024) {
+      setErrorMessage(lang === "te" ? "ఫోటో పరిమాణం 8MB లోపు ఉండాలి." : "Image size must be under 8MB.");
+      return;
+    }
+
+    setPhotoFileName(file.name);
+    const reader = new FileReader();
+    reader.onload = () => {
+      const resultStr = reader.result as string;
+      setPhotoPreviewUrl(resultStr);
+      setPhotoBase64(resultStr);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handlePhotoRemove = () => {
+    setPhotoBase64(null);
+    setPhotoFileName(null);
+    setPhotoPreviewUrl(null);
+  };
 
   // States
   const [isDiagnosing, setIsDiagnosing] = useState<boolean>(false);
@@ -173,11 +212,11 @@ export default function DiagnosisPage() {
 
   // Run Crop Protection Advisory
   const handleDiagnose = async () => {
-    if (!symptomText.trim() && !knownDisease.trim() && !knownPest.trim() && !weedProblem.trim()) {
+    if (!symptomText.trim() && !knownDisease.trim() && !knownPest.trim() && !weedProblem.trim() && !photoBase64) {
       setErrorMessage(
         lang === "te"
-          ? "దయచేసి పంట లక్షణాలు లేదా సమస్యను వివరించండి."
-          : "Please describe the symptoms or select a known problem to begin advisory."
+          ? "దయచేసి పంట లక్షణాలు వివరించండి లేదా ఫోటోను జతచేయండి."
+          : "Please describe the symptoms or attach a crop photo to begin advisory."
       );
       return;
     }
@@ -200,6 +239,7 @@ export default function DiagnosisPage() {
           growthStage,
           district,
           lang,
+          image: photoBase64 || undefined,
         }),
       });
 
@@ -366,6 +406,75 @@ export default function DiagnosisPage() {
             </div>
           </div>
 
+          {/* Row 2.5: Optional Photo Upload Section */}
+          <div className="rounded-2xl border-2 border-dashed border-emerald-300 dark:border-emerald-800/80 bg-emerald-50/40 dark:bg-emerald-950/20 p-4 transition-all">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="space-y-0.5">
+                <label className="text-xs font-bold text-stone-900 dark:text-stone-100 flex items-center gap-1.5">
+                  <Camera className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                  <span>
+                    {lang === "te"
+                      ? "పంట / ఆకు ఫోటో అప్‌లోడ్ (ఐచ్ఛికం - మెరుగైన ఫలితాల కొరకు)"
+                      : "Attach Crop Photo (Optional — Highly Recommended for Accurate Diagnosis)"}
+                  </span>
+                </label>
+                <p className="text-[11px] text-stone-500 dark:text-stone-400">
+                  {lang === "te"
+                    ? "తెగులు లేదా కీటకం ఆశించిన ఆకు లేదా మొక్క భాగాన్ని స్పష్టంగా ఫోటో తీయండి."
+                    : "Upload a daylight close-up of the affected leaf, stem, or damage pattern to assist screening."}
+                </p>
+              </div>
+
+              {/* Upload & Camera Buttons */}
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <label className="cursor-pointer flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold shadow-xs transition active:scale-95">
+                  <UploadCloud className="h-3.5 w-3.5" />
+                  <span>{lang === "te" ? "ఫోటో ఎంచుకోండి" : "Upload Photo"}</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handlePhotoSelect}
+                  />
+                </label>
+
+                {photoPreviewUrl && (
+                  <button
+                    type="button"
+                    onClick={handlePhotoRemove}
+                    className="px-2.5 py-2 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 dark:border-rose-900 dark:text-rose-400 dark:hover:bg-rose-950 text-xs font-semibold flex items-center gap-1 transition"
+                    title="Remove photo"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                    <span>{lang === "te" ? "తొలగించు" : "Remove"}</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Photo Preview Thumbnail */}
+            {photoPreviewUrl && (
+              <div className="mt-3 flex items-center gap-3 p-2.5 rounded-xl bg-white dark:bg-stone-900 border border-emerald-200 dark:border-emerald-800 shadow-2xs animate-in fade-in duration-200">
+                <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-stone-200 dark:border-stone-700">
+                  <img
+                    src={photoPreviewUrl}
+                    alt="Uploaded plant specimen preview"
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-bold text-stone-900 dark:text-stone-100 truncate">
+                    {photoFileName || "crop-specimen.jpg"}
+                  </p>
+                  <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-semibold flex items-center gap-1 mt-0.5">
+                    <CheckCircle2 className="h-3 w-3" />
+                    <span>{lang === "te" ? "ఫోటో జతచేయబడింది • విశ్లేషణకు సిద్ధం" : "Photo attached & ready for analysis"}</span>
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Row 3: Collapsible Advanced Agronomy Parameters */}
           <div className="border border-stone-200 dark:border-stone-800 rounded-xl overflow-hidden">
             <button
@@ -486,6 +595,9 @@ export default function DiagnosisPage() {
                 setKnownPest("");
                 setWeedProblem("");
                 setCropAgeDays("");
+                setPhotoBase64(null);
+                setPhotoFileName(null);
+                setPhotoPreviewUrl(null);
                 setResult(null);
                 setErrorMessage("");
               }}
@@ -501,6 +613,24 @@ export default function DiagnosisPage() {
       {/* 3. Advisory Outcome Results */}
       {result && (
         <div className="space-y-4">
+          {/* Photo Analysis Badge (If image was attached) */}
+          {result.imageAnalysis?.hasImage && (
+            <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-xs text-emerald-950 dark:text-emerald-200 flex items-start gap-2.5 animate-in fade-in duration-200">
+              <Camera className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-bold flex items-center gap-1.5">
+                  <span>{lang === "te" ? "📸 పంట ఫోటో దృశ్య నిర్ధారణ విజయవంతమైంది" : "📸 Visual Plant Photo Analyzed"}</span>
+                  <span className="text-[10px] bg-emerald-200 dark:bg-emerald-800 px-1.5 py-0.2 rounded font-bold uppercase tracking-wider">
+                    Verified
+                  </span>
+                </p>
+                <p className="mt-0.5 text-stone-700 dark:text-stone-300 leading-relaxed">
+                  {lang === "te" ? result.imageAnalysis.imageSummaryTe : result.imageAnalysis.imageSummaryEn}
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Statutory Confidence & Field Screening Notice */}
           <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 text-xs text-amber-900 dark:text-amber-200 flex items-start gap-2.5">
             <Info className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />

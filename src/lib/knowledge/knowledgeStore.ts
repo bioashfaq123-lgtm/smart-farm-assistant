@@ -668,4 +668,129 @@ export const AGRICULTURAL_KNOWLEDGE_STORE: KnowledgeRecord[] = [
     lastReviewDate: "2026-11-20",
     dosageConfidence: "high_verified",
   },
+
+  // ==========================================
+  // 12. ADVANCED BIOLOGICAL CONTROL & BIO-INPUTS
+  // ==========================================
+  {
+    id: "rec_bio_trichoderma_biocontrol",
+    title: "ట్రైకోడెర్మా విరిడే / హార్జియానమ్ జీవ శిలీంద్ర నాశిని (Trichoderma Bio-Fungicide)",
+    crop: "All",
+    category: "biological_ipm",
+    originalTeluguText: `ట్రైకోడెర్మా విరిడే (Trichoderma viride) మరియు ట్రైకోడెర్మా హార్జియానమ్ (Trichoderma harzianum) పంటలలో నేల మరియు విత్తన సంక్రమణ తెగుళ్ళను అరికట్టే అత్యంత శక్తివంతమైన మిత్ర జీవ శిలీంద్రాలు (Antagonistic Beneficial Fungi).
+లక్ష్యం:
+శనగ, కంది, వేరుశనగ, పత్తి, మిరప, టమాటా మరియు పసుపు పంటలలో వచ్చే వేరు కుళ్ళు (Root Rot), మొవ్వు కుళ్ళు (Collar Rot), నారుకుళ్ళు (Damping Off), కాండం కుళ్ళు (Stem Rot), మరియు ఎండు తెగులు / విల్ట్ (Fusarium Wilt) లను సమర్థవంతంగా నివారిస్తుంది.
+
+వినియోగ పద్ధతులు & మోతాదులు (PJTAU సిఫారసులు):
+1. విత్తన శుద్ధి (Seed Treatment): కిలో విత్తనానికి 4 నుండి 5 గ్రాముల ట్రైకోడెర్మా పొడిని కొద్దిగా గంజి లేదా బెల్లం ద్రావణంలో కలిపి విత్తనాలకు పట్టించి, 30 నిమిషాలు నీడలో ఆరబెట్టి విత్తుకోవాలి.
+2. నారు వేర్ల శుద్ధి (Root Dip): మిరప, టమాటా కూరగాయ నారు నాటడానికి ముందు లీటరు నీటికి 10 గ్రాముల ట్రైకోడెర్మా కలిపి నారు వేర్లను 15-20 నిమిషాలు నానబెట్టి నాటాలి.
+3. నేల యాజమాన్యం (Soil Application - అత్యుత్తమ ఫలితం): ఎకరానికి 1 నుండి 2 కిలోల ట్రైకోడెర్మా పొడిని 50-100 కిలోల బాగా మాగిన పశువుల ఎరువు (FYM) లేదా వర్మీకంపోస్ట్ + 5 కిలోల వేప పిండితో కలపాలి. మిశ్రమంపై నీరు చల్లి 30% తేమ ఉండేలా చూసి, నీడలో గోనె సంచులతో కప్పి 7-10 రోజులు నిల్వ ఉంచాలి (ఈ సమయంలో పచ్చని ట్రైకోడెర్మా శిలీంద్ర బీజాలు విపరీతంగా వృద్ధి చెందుతాయి). దీనిని ఆఖరి దుక్కిలో లేదా మొక్కల మొదళ్ళలో తేమ ఉన్నప్పుడు వేయాలి.
+
+ముఖ్య గమనిక & జాగ్రత్తలు:
+- ట్రైకోడెర్మాను రసాయన శిలీంద్ర నాశినులతో (ఉదా: కార్బండిజమ్, మాంకోజెబ్, హెక్సాకొనజోల్) ఎప్పుడూ కలపరాదు.
+- రసాయన మందుల వాడకానికి, ట్రైకోడెర్మా వాడకానికి మధ్య కనీసం 10-14 రోజుల వ్యవధి ఉండాలి.`,
+    normalizedTeluguText: `ట్రైకోడెర్మా విరిడే: వేరుకుళ్ళు, ఎండుతెగులు, నారుకుళ్ళు నివారణకు మిత్ర శిలీంద్రం. విత్తనశుద్ధి: కిలో విత్తనానికి 4-5 గ్రాములు. నేల అప్లికేషన్: ఎకరానికి 1-2 కిలోలు 100 కిలోల పశువుల ఎరువులో 7-10 రోజులు వృద్ధి చేసి దుక్కిలో చల్లాలి. రసాయన మందులతో కలపరాదు.`,
+    englishText: `Trichoderma (Trichoderma viride & Trichoderma harzianum) Bio-Fungicide:
+An antagonistic beneficial biocontrol fungus that actively suppresses soil-borne and seed-borne plant pathogens (Fusarium, Rhizoctonia, Pythium, Sclerotium) responsible for Root Rot, Collar Rot, Stem Rot, Damping Off, and Vascular Wilt in Cotton, Chilli, Bengalgram, Redgram, Groundnut, Turmeric, and Vegetables.
+
+Application Methods & Dosages (PJTAU Package of Practices):
+1. Seed Treatment: 4–5 grams per kg seed (or 8–10 g/kg for pulses). Slurry with starch or 10% jaggery solution, coat seeds evenly, and shade dry for 30 minutes before sowing.
+2. Seedling Root Dip: Dissolve 10 g/L water; dip roots of Chilli, Tomato, or Brinjal seedlings for 15–20 minutes prior to transplanting.
+3. Soil Application (Recommended for Field Protection): Mix 1–2 kg Trichoderma powder with 50–100 kg well-decomposed FYM (Farmyard Manure) or Vermicompost + 5 kg Neem Cake. Maintain 30% moisture by sprinkling water and incubate under shade covered with moist gunny bags for 7–10 days. The fungal mycelium turns powdery green. Broadcast across 1 acre during final land preparation or top-dress along root zones with adequate soil moisture.
+
+Critical Precautions:
+- Never mix Trichoderma directly with chemical fungicides (Carbendazim, Mancozeb, Hexaconazole).
+- Maintain an interval of at least 10–14 days between chemical fungicide spraying and biological applications.`,
+    keywords: [
+      "trichoderma",
+      "ట్రైకోడెర్మా",
+      "trichoderma viride",
+      "trichoderma harzianum",
+      "bio-fungicide",
+      "biological control",
+      "root rot",
+      "collar rot",
+      "wilt",
+      "fusarium",
+      "damping off",
+      "నారుకుళ్ళు",
+      "వేరు కుళ్ళు",
+      "ఎండు తెగులు",
+      "seed treatment",
+      "జీవ శిలీంద్ర నాశిని"
+    ],
+    citation: {
+      documentTitle: "PJTAU Vyavasayam Monthly Magazine & Diksoochi Reference",
+      publisher: "PJTAU",
+      publicationMonthYear: "August 2024",
+      filename: "vyavasayam-August-2024.pdf",
+      pdfPage: 14,
+      printedPage: 12,
+      sectionHeader: "సస్యరక్షణలో ట్రైకోడెర్మా జీవ శిలీంద్ర నాశిని ప్రాముఖ్యత",
+      sourcePriority: "pjtau_magazine_recent",
+    },
+    qualityStatus: "verified_agricultural_record",
+    lastReviewDate: "2026-11-24",
+    dosageConfidence: "high_verified",
+  },
+  {
+    id: "rec_bio_pseudomonas_fluorescens",
+    title: "సూడోమోనాస్ ఫ్లోరోసెన్స్ జీవ బాక్టీరియా నాశిని (Pseudomonas fluorescens)",
+    crop: "All",
+    category: "biological_ipm",
+    originalTeluguText: `సూడోమోనాస్ ఫ్లోరోసెన్స్ (Pseudomonas fluorescens) ఒక ప్రయోజనకరమైన మిత్ర బాక్టీరియా. ఇది బాక్టీరియా మరియు శిలీంద్రాల వల్ల వచ్చే తెగుళ్ళను అరికట్టడమే కాకుండా మొక్కల వేర్ల పెరుగుదలను ప్రేరేపిస్తుంది (PGPR).
+ఉపయోగాలు:
+- వరిలో బాక్టీరియా ఆకు ఎండు తెగులు (BLB), తొడుగు ఎండు తెగులు (Sheath Blight).
+- మిరప, పత్తి, కూరగాయల్లో ఎండు తెగులు (Bacterial Wilt).
+
+వాడుక పద్ధతులు:
+1. విత్తన శుద్ధి: కిలో విత్తనానికి 10 గ్రాములు.
+2. నారు శుద్ధి: లీటరు నీటికి 10 గ్రాములు (20 నిమిషాలు).
+3. ఆకులపై పిచికారీ: లీటరు నీటికి 5 గ్రాములు లేదా 2.5 మి.లీ ద్రావణం కలిపి పిచికారీ చేయాలి.`,
+    normalizedTeluguText: `సూడోమోనాస్ ఫ్లోరోసెన్స్: బాక్టీరియా ఆకు ఎండు తెగులు, షీత్ బ్లైట్ నివారణకు జీవ బాక్టీరియా. విత్తనశుద్ధికి 10 గ్రా/కిలో, పిచికారీకి 5 గ్రా/లీటర్.`,
+    englishText: `Pseudomonas fluorescens: Beneficial plant growth-promoting rhizobacteria (PGPR) and biocontrol agent against Bacterial Leaf Blight (BLB), Sheath Blight in Paddy, and Bacterial Wilt in Chilli and Vegetables. Induces systemic resistance in plants. Application: Seed treatment @ 10 g/kg seed; Foliar spray @ 5 g/L or 2.5 mL/L water at early disease initiation.`,
+    keywords: ["pseudomonas", "సూడోమోనాస్", "pseudomonas fluorescens", "bio bactericide", "blb biocontrol", "pgpr", "జీవ బాక్టీరియా"],
+    citation: {
+      documentTitle: "Telangana Vyavasaayam Diksoochi 2019–2020",
+      publisher: "PJTAU",
+      publicationMonthYear: "2019-2020",
+      filename: "Vyavasaayam-Diksoochi-2019-2020.pdf",
+      pdfPage: 112,
+      printedPage: 85,
+      sectionHeader: "జీవ నియంత్రణ కారకాలు — సూడోమోనాస్",
+      sourcePriority: "pjtau_diksoochi_baseline",
+    },
+    qualityStatus: "verified_agricultural_record",
+    lastReviewDate: "2026-11-24",
+    dosageConfidence: "high_verified",
+  },
+  {
+    id: "rec_bio_neem_nske_azadirachtin",
+    title: "వేప నూనె, వేప గింజల కషాయం (NSKE 5%) & అజాడిరక్తిన్ జీవ పురుగుల నివారణ",
+    crop: "All",
+    category: "biological_ipm",
+    originalTeluguText: `రసాయన పురుగు మందుల వాడకాన్ని తగ్గించి, రసం పీల్చే పురుగులను నివారించడానికి వేప ఉత్పత్తులు అత్యుత్తమమైనవి.
+వాడుక:
+1. వేప గింజల కషాయం (NSKE 5%): 10 కిలోల తాజా వేప గింజల పొడిని 200 లీటర్ల నీటిలో రాత్రంతా నానబెట్టి, మరుసటి రోజు వడకట్టి, 100 గ్రాముల సబ్బు పొడి కలిపి ఎకరానికి పిచికారీ చేయాలి.
+2. అజాడిరక్తిన్ (Azadirachtin 10,000 ppm / 1% EC): లీటరు నీటికి 1.0 నుండి 1.5 మి.లీ కలిపి పిచికారీ చేయాలి (లేదా 1500 ppm @ 3–5 మి.లీ/లీ).
+ప్రయోజనాలు: పురుగుల గుడ్లను నాశనం చేస్తుంది, ఆకులను చేదుగా మార్చి పురుగులు తినకుండా ఆపుతుంది (Anti-feedant & Oviposition Deterrent). మిత్ర పురుగులకు ఏ విధమైన హాని కలిగించదు.`,
+    normalizedTeluguText: `వేప కషాయం (NSKE 5%) & అజాడిరక్తిన్: రసం పీల్చే పురుగులు, పురుగుల గుడ్ల నివారణకు ఎకరానికి 5% వేప కషాయం లేదా అజాడిరక్తిన్ 10000 ppm @ 1 మి.లీ/లీ పిచికారీ చేయాలి.`,
+    englishText: `Neem Formulations (NSKE 5% & Azadirachtin Botanical Pesticide):
+Primary botanical pesticide for eco-friendly IPM. Controls early-stage sucking pests (thrips, aphids, whitefly, jassids, mites) and acts as an oviposition deterrent and anti-feedant.
+Dosage: 5% Neem Seed Kernel Extract (NSKE @ 10 kg/acre in 200 L water) or Azadirachtin 10,000 ppm @ 1.0–1.5 mL/L (or 1,500 ppm @ 3–5 mL/L). Completely safe for natural predators, honeybees, and spider populations.`,
+    keywords: ["neem", "nske", "azadirachtin", "వేప నూనె", "వేప కషాయం", "botanical pesticide", "organic pest control"],
+    citation: {
+      documentTitle: "PJTAU Vyavasayam Monthly Magazine",
+      publisher: "PJTAU",
+      publicationMonthYear: "May 2024",
+      filename: "vyavasayam-may-2024.pdf",
+      pdfPage: 17,
+      printedPage: 15,
+      sectionHeader: "సస్యరక్షణలో వేప ఆధారిత ఉత్పత్తుల ప్రాముఖ్యత",
+      sourcePriority: "pjtau_magazine_recent",
+    },
+    qualityStatus: "verified_agricultural_record",
+    lastReviewDate: "2026-11-24",
+    dosageConfidence: "high_verified",
+  },
 ];

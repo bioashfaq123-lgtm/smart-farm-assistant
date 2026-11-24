@@ -336,8 +336,16 @@ assert(
   `Target N: ${fertCheck.adjustedNutrientRequirementKg.n}, Actual N: ${(nFromDap + nFromUrea).toFixed(1)}`
 );
 
+// Case 35: Trichoderma Biocontrol Retrieval
+const res35 = searchKnowledgeBase({ query: "Explain about trichoderma", crop: "Paddy" });
+assert(
+  res35.records.some(r => r.id === "rec_bio_trichoderma_biocontrol") && res35.records[0].englishText.includes("Trichoderma"),
+  "Case 35: Biocontrol query for Trichoderma retrieves Trichoderma viride biocontrol record even with Paddy profile",
+  res35.records[0]?.title
+);
+
 console.log("\n===============================================================");
-console.log(`TEST RUN COMPLETED: ${passedCount} PASSED, ${failedCount} FAILED out of 34`);
+console.log(`TEST RUN COMPLETED: ${passedCount} PASSED, ${failedCount} FAILED out of 35`);
 console.log("===============================================================");
 
 if (failedCount > 0) {

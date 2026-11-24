@@ -38,6 +38,10 @@ const TRANSLITERATION_MAP: Record<string, string[]> = {
   zinc: ["జింక్", "ఖైరా తెగులు", "khaira", "zinc sulphate"],
   weeds: ["కలుపు", "kalupu", "pretilachlor", "nominee gold", "herbicide"],
   drone: ["డ్రోన్", "drone spraying", "kisan drone", "ulv"],
+  trichoderma: ["ట్రైకోడెర్మా", "trichoderma viride", "trichoderma harzianum", "bio-fungicide", "జీవ శిలీంద్ర"],
+  pseudomonas: ["సూడోమోనాస్", "pseudomonas fluorescens", "bio bactericide", "జీవ బాక్టీరియా"],
+  neem: ["వేప", "neem oil", "nske", "azadirachtin", "వేప నూనె", "వేప కషాయం", "botanical"],
+  biocontrol: ["జీవ నియంత్రణ", "biological control", "bio control", "మిత్రపురుగులు"],
 };
 
 /**
@@ -66,7 +70,13 @@ export function searchKnowledgeBase(filter: KnowledgeSearchFilter): KnowledgeSea
     // Crop filter
     if (targetCrop && targetCrop !== "all" && targetCrop !== "general") {
       const recCrop = record.crop.toLowerCase();
-      if (recCrop !== "general" && !recCrop.includes(targetCrop) && !targetCrop.includes(recCrop)) {
+      if (
+        recCrop !== "general" &&
+        recCrop !== "all" &&
+        !recCrop.includes("all") &&
+        !recCrop.includes(targetCrop) &&
+        !targetCrop.includes(recCrop)
+      ) {
         continue; // Skip irrelevant crop records
       }
     }
@@ -102,15 +112,22 @@ export function searchKnowledgeBase(filter: KnowledgeSearchFilter): KnowledgeSea
     });
 
     // Source priority weighting (CIBRC Statutory > PJTAU Recent Magazine > Diksoochi Baseline)
-    if (record.citation.sourcePriority === "pjtau_magazine_recent") {
-      score += 4; // Recent field advisory boost
-    } else if (record.citation.sourcePriority === "cibrc_statutory") {
-      score += 8; // Statutory regulatory priority
-    }
-
-    if (score > 0 || !query) {
+    // IMPORTANT: Only boost priority if there was an actual query relevance match (score > 0)!
+    if (score > 0) {
+      if (record.citation.sourcePriority === "pjtau_magazine_recent") {
+        score += 4; // Recent field advisory boost
+      } else if (record.citation.sourcePriority === "cibrc_statutory") {
+        score += 8; // Statutory regulatory priority
+      }
       scoredRecords.push({ record, score });
+    } else if (!query) {
+      scoredRecords.push({ record, score: 1 });
     }
+  }
+
+  // If crop-specific search found no matches, perform second pass across all crops for cross-crop agronomic topics
+  if (scoredRecords.length === 0 && query && targetCrop && targetCrop !== "all" && targetCrop !== "general") {
+    return searchKnowledgeBase({ ...filter, crop: "all" });
   }
 
   // Sort descending by score
