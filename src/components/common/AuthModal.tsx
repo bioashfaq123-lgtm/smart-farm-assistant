@@ -15,14 +15,12 @@ import {
   CheckCircle,
   LogIn,
   AlertCircle,
-  Sparkles,
   ArrowRight,
   ShieldCheck,
 } from "lucide-react";
 import { useFarmerProfile } from "./FarmerProfileContext";
 import { useLanguage } from "./LanguageContext";
 import { TELANGANA_DISTRICTS } from "@/lib/profile/farmerProfile";
-import { QUICK_DEMO_FARMERS, DemoFarmer } from "@/lib/auth/demoProfiles";
 import {
   findUserByEmail,
   authenticateWithPassword,
@@ -43,7 +41,7 @@ export function AuthModal({
   initialTab = "login",
   hasRegistered = false,
 }: AuthModalProps) {
-  const { profile, updateProfile, loginWithDemo, logout } = useFarmerProfile();
+  const { profile, updateProfile, logout } = useFarmerProfile();
   const { lang, setLang } = useLanguage();
 
   const isAlreadyRegistered =
@@ -88,9 +86,6 @@ export function AuthModal({
   const [showGoogleAccounts, setShowGoogleAccounts] = useState(false);
   const [customGoogleEmail, setCustomGoogleEmail] = useState("");
   const [showCustomGoogleInput, setShowCustomGoogleInput] = useState(false);
-
-  // Quick Demo Dropdown toggle
-  const [showDemoList, setShowDemoList] = useState(false);
 
   // Messages
   const [errorMsg, setErrorMsg] = useState("");
@@ -221,23 +216,6 @@ export function AuthModal({
     setTimeout(() => {
       onClose();
     }, 800);
-  };
-
-  // 1-Click Demo Login selection
-  const handleDemoSelect = (farmer: DemoFarmer) => {
-    loginWithDemo(farmer);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("smartfarm_has_registered", "true");
-    }
-    if (farmer.languageBadge.includes("Telugu")) {
-      setLang("te");
-    } else {
-      setLang("en");
-    }
-    setSuccessMsg(`Logged in as demo farmer: ${farmer.name}`);
-    setTimeout(() => {
-      onClose();
-    }, 600);
   };
 
   return (
@@ -470,46 +448,6 @@ export function AuthModal({
                 </button>
               </div>
             )}
-
-            {/* 1-Click Demo Profiles Accordion */}
-            <div className="pt-2 border-t border-stone-200 dark:border-stone-800">
-              <button
-                type="button"
-                onClick={() => setShowDemoList(!showDemoList)}
-                className="w-full flex items-center justify-between text-xs font-semibold text-stone-500 dark:text-stone-400 py-1 hover:text-stone-800 dark:hover:text-stone-200"
-              >
-                <span className="flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>1-Click Test Demo Farmers</span>
-                </span>
-                <ChevronDown className={`w-4 h-4 transition-transform ${showDemoList ? "rotate-180" : ""}`} />
-              </button>
-
-              {showDemoList && (
-                <div className="mt-2 space-y-1.5 max-h-48 overflow-y-auto pr-1">
-                  {QUICK_DEMO_FARMERS.map((farmer) => (
-                    <button
-                      key={farmer.id}
-                      type="button"
-                      onClick={() => handleDemoSelect(farmer)}
-                      className="w-full text-left p-2.5 rounded-xl border border-stone-200 dark:border-stone-800 hover:border-emerald-500/80 hover:bg-emerald-50/50 dark:hover:bg-stone-800 text-xs transition flex items-center justify-between"
-                    >
-                      <div className="min-w-0">
-                        <span className="font-bold text-stone-900 dark:text-white block truncate">
-                          {farmer.nameDisplay}
-                        </span>
-                        <span className="text-[11px] text-stone-500 block truncate">
-                          {farmer.district}, {farmer.state} &bull; {farmer.primaryCrop}
-                        </span>
-                      </div>
-                      <span className="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-md bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300">
-                        {farmer.languageBadge}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
           </div>
         )}
 

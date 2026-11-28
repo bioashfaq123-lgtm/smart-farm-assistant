@@ -103,8 +103,14 @@ export function recordClientPageview(path: string): void {
 
   const sessionId = getOrCreateSessionId();
   const device = detectDevice();
-  const district =
-    TELANGANA_DISTRICTS[Math.floor(Math.random() * TELANGANA_DISTRICTS.length)];
+  let district = "Jagtial";
+  try {
+    const raw = localStorage.getItem("smartfarm_farmer_profile");
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed?.district) district = parsed.district;
+    }
+  } catch {}
 
   const event: VisitorEvent = {
     id: "evt_" + Math.random().toString(36).substring(2, 9),
@@ -119,8 +125,8 @@ export function recordClientPageview(path: string): void {
     const raw = localStorage.getItem(STORAGE_EVENTS_KEY);
     const events: VisitorEvent[] = raw ? JSON.parse(raw) : [];
     events.unshift(event);
-    // Keep max 200 events
-    if (events.length > 200) events.length = 200;
+    // Keep max 100 actual events
+    if (events.length > 100) events.length = 100;
     localStorage.setItem(STORAGE_EVENTS_KEY, JSON.stringify(events));
   } catch (err) {
     console.warn("Could not write analytics event to localStorage:", err);
@@ -128,10 +134,6 @@ export function recordClientPageview(path: string): void {
 }
 
 export function getAnalyticsSummary(): AnalyticsSummary {
-  // Base realistic metrics from conference launch
-  const BASE_VISITORS = 1248;
-  const BASE_TODAY = 184;
-
   let localEvents: VisitorEvent[] = [];
   if (typeof window !== "undefined") {
     try {
@@ -142,7 +144,6 @@ export function getAnalyticsSummary(): AnalyticsSummary {
     }
   }
 
-  // Active users in the last 15 minutes
   const fifteenMinsAgo = Date.now() - 15 * 60 * 1000;
   const recentSessions = new Set(
     localEvents
@@ -150,9 +151,9 @@ export function getAnalyticsSummary(): AnalyticsSummary {
       .map((e) => e.sessionId)
   );
 
-  const activeUsersNow = Math.max(7, recentSessions.size + Math.floor(Math.random() * 5) + 8);
-  const totalVisitors = BASE_VISITORS + localEvents.length;
-  const todayVisits = BASE_TODAY + localEvents.filter((e) => {
+  const activeUsersNow = Math.max(1, recentSessions.size);
+  const totalVisitors = localEvents.length;
+  const todayVisits = localEvents.filter((e) => {
     const d = new Date(e.timestamp);
     const now = new Date();
     return d.toDateString() === now.toDateString();
@@ -162,97 +163,17 @@ export function getAnalyticsSummary(): AnalyticsSummary {
     totalVisitors,
     activeUsersNow,
     todayVisits,
-    todayGrowthPercent: 24.6,
+    todayGrowthPercent: 0,
     deviceBreakdown: {
-      mobile: 78,
-      desktop: 18,
-      tablet: 4,
+      mobile: 100,
+      desktop: 0,
+      tablet: 0,
     },
-    topPages: [
-      { name: "Live Dashboard & Weather", path: "/", visits: Math.floor(totalVisitors * 0.38), percentage: 38 },
-      { name: "AI Crop Disease Doctor", path: "/advisory", visits: Math.floor(totalVisitors * 0.24), percentage: 24 },
-      { name: "Telangana APMC Mandi Rates", path: "/market", visits: Math.floor(totalVisitors * 0.17), percentage: 17 },
-      { name: "Smart IoT Soil & Pump Control", path: "/iot", visits: Math.floor(totalVisitors * 0.11), percentage: 11 },
-      { name: "PJTAU Fertilizer Calculator", path: "/tools", visits: Math.floor(totalVisitors * 0.07), percentage: 7 },
-      { name: "Rythu Insights & Analytics", path: "/insights", visits: Math.floor(totalVisitors * 0.03), percentage: 3 },
-    ],
-    hourlyTraffic: [
-      { hour: "06:00", visitors: 42, pageviews: 98 },
-      { hour: "08:00", visitors: 118, pageviews: 290 },
-      { hour: "10:00", visitors: 195, pageviews: 480 },
-      { hour: "12:00", visitors: 160, pageviews: 390 },
-      { hour: "14:00", visitors: 142, pageviews: 340 },
-      { hour: "16:00", visitors: 220, pageviews: 560 },
-      { hour: "18:00", visitors: 285, pageviews: 710 },
-      { hour: "20:00", visitors: 190, pageviews: 450 },
-    ],
-    dailyTrend: [
-      { day: "Mon", visits: 180, farmers: 142 },
-      { day: "Tue", visits: 215, farmers: 178 },
-      { day: "Wed", visits: 240, farmers: 195 },
-      { day: "Thu", visits: 290, farmers: 230 },
-      { day: "Fri", visits: 310, farmers: 260 },
-      { day: "Sat", visits: 385, farmers: 320 },
-      { day: "Sun (Today)", visits: todayVisits, farmers: Math.floor(todayVisits * 0.85) },
-    ],
-    districts: [
-      { district: "Jagtial (జగిత్యాల)", farmers: 412, percentage: 33 },
-      { district: "Karimnagar (కరీంనగర్)", farmers: 284, percentage: 23 },
-      { district: "Nizamabad (నిజామాబాద్)", farmers: 198, percentage: 16 },
-      { district: "Warangal (వరంగల్)", farmers: 165, percentage: 13 },
-      { district: "Nalgonda (నల్గొండ)", farmers: 112, percentage: 9 },
-      { district: "Others (ఇతర ప్రాంతాలు)", farmers: 77, percentage: 6 },
-    ],
-    recentActivity: [
-      {
-        id: "rec_1",
-        timeAgo: "Just now",
-        action: "Inspected Paddy Blast disease via AI camera",
-        page: "/advisory",
-        device: "Mobile",
-        district: "Jagtial",
-      },
-      {
-        id: "rec_2",
-        timeAgo: "1m ago",
-        action: "Checked live Paddy Grade-A mandi price & MSP",
-        page: "/market",
-        device: "Mobile",
-        district: "Karimnagar",
-      },
-      {
-        id: "rec_3",
-        timeAgo: "3m ago",
-        action: "Monitored ESP32 field soil moisture (24.2%)",
-        page: "/iot",
-        device: "Desktop",
-        district: "Hyderabad",
-      },
-      {
-        id: "rec_4",
-        timeAgo: "6m ago",
-        action: "Calculated PJTAU Urea & SSP dose for 2.5 acres",
-        page: "/tools",
-        device: "Mobile",
-        district: "Nizamabad",
-      },
-      {
-        id: "rec_5",
-        timeAgo: "9m ago",
-        action: "Viewed 5-day Jagtial rain forecast & rain-skip alert",
-        page: "/",
-        device: "Mobile",
-        district: "Warangal",
-      },
-      {
-        id: "rec_6",
-        timeAgo: "14m ago",
-        action: "Shared Mandi summary on WhatsApp to Rythu group",
-        page: "/market",
-        device: "Mobile",
-        district: "Siddipet",
-      },
-    ],
+    topPages: [],
+    hourlyTraffic: [],
+    dailyTrend: [],
+    districts: [],
+    recentActivity: [],
   };
 }
 

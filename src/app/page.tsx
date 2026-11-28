@@ -28,7 +28,6 @@ import {
   FileText,
   HelpCircle,
   LogIn,
-  UserCheck,
   UserPlus,
   X,
   Menu,
@@ -36,7 +35,6 @@ import {
 import { useLanguage } from "@/components/common/LanguageContext";
 import { useFarmerProfile } from "@/components/common/FarmerProfileContext";
 import { InstallAppButton } from "@/components/common/PWAInstallContext";
-import { QUICK_DEMO_FARMERS } from "@/lib/auth/demoProfiles";
 import {
   PLATFORM_FEATURES,
   FEATURE_CATEGORIES,
@@ -45,7 +43,7 @@ import { isAuthorizedAdmin } from "@/lib/auth/adminAuth";
 
 export default function HomePage() {
   const { lang, setLang } = useLanguage();
-  const { openAuthModal, openProfileModal, loginWithDemo, isLoggedIn, hasRegistered, profile } = useFarmerProfile();
+  const { openAuthModal, openProfileModal, isLoggedIn, hasRegistered, profile } = useFarmerProfile();
   const isAdmin = isAuthorizedAdmin(profile?.email, isLoggedIn);
 
   const [activePreviewTab, setActivePreviewTab] = useState<"ai" | "iot" | "mandi" | "schemes">("ai");
@@ -798,59 +796,6 @@ export default function HomePage() {
               </div>
             </div>
           )}
-        </div>
-      </section>
-
-      {/* QUICK 1-CLICK DEMO LOGIN SHOWCASE */}
-      <section className="max-w-6xl mx-auto px-4 md:px-8 py-12">
-        <div className="rounded-3xl bg-gradient-to-br from-stone-900 via-stone-900 to-emerald-950 p-6 sm:p-10 text-white shadow-xl">
-          <div className="max-w-2xl mb-8">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 mb-3">
-              <UserCheck className="w-3.5 h-3.5" />
-              <span>Instant 1-Click Profile Switching</span>
-            </span>
-            <h3 className="text-2xl sm:text-3xl font-black">
-              Try As A Real Farmer With 1-Click Login
-            </h3>
-            <p className="text-xs sm:text-sm text-stone-300 mt-2">
-              Select any pre-configured farmer profile below to test the full experience with real crops, acreages, and district weather data without typing a password.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {QUICK_DEMO_FARMERS.map((farmer) => (
-              <button
-                key={farmer.id}
-                onClick={() => {
-                  loginWithDemo(farmer);
-                  window.location.href = "/dashboard";
-                }}
-                className="text-left rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 p-4 transition-all hover:scale-[1.02] group"
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <span className="font-bold text-sm text-white group-hover:text-emerald-300 transition-colors">
-                    {farmer.nameDisplay}
-                  </span>
-                  <span className="rounded-full border border-white/20 px-2 py-0.5 text-[10px] font-semibold text-emerald-200 bg-white/5">
-                    {farmer.languageBadge}
-                  </span>
-                </div>
-                <p className="text-xs text-stone-400 mb-2.5">
-                  {farmer.email}
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {farmer.crops.map((c, i) => (
-                    <span
-                      key={i}
-                      className="rounded-md bg-white/10 px-2 py-0.5 text-[11px] font-medium text-stone-200"
-                    >
-                      {c}
-                    </span>
-                  ))}
-                </div>
-              </button>
-            ))}
-          </div>
         </div>
       </section>
 

@@ -12,40 +12,14 @@ import {
   Lock,
   CheckCircle2,
   Server,
-  Users,
-  Activity,
-  Globe2,
-  Smartphone,
-  Laptop,
-  ArrowUpRight,
   RefreshCw,
   Download,
   LogOut,
   Zap,
-  TrendingUp,
-  MapPin,
   ExternalLink,
   Info,
-  Clock,
   Sparkles,
-  Layers,
 } from "lucide-react";
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-} from "recharts";
-import {
-  getAnalyticsSummary,
-  exportAnalyticsCSV,
-  AnalyticsSummary,
-} from "@/lib/analytics/analyticsStore";
 import CropDiseaseDatasetManager from "@/components/admin/CropDiseaseDatasetManager";
 import AgriculturalKnowledgeManager from "@/components/admin/AgriculturalKnowledgeManager";
 import { useFarmerProfile } from "@/components/common/FarmerProfileContext";
@@ -63,10 +37,9 @@ export default function AdminPortalPage() {
   const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false);
 
   // Active section tab
-  const [adminTab, setAdminTab] = useState<"diagnostics" | "analytics" | "dataset" | "knowledge">("diagnostics");
+  const [adminTab, setAdminTab] = useState<"diagnostics" | "dataset" | "knowledge">("diagnostics");
 
-  // Analytics states
-  const [stats, setStats] = useState<AnalyticsSummary | null>(null);
+  // Health check states
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [apiHealth, setApiHealth] = useState({
     weather: "Checking...",
@@ -76,8 +49,9 @@ export default function AdminPortalPage() {
     iot: "Checking...",
   });
 
-  // Check API health
-  useEffect(() => {
+  // Function to re-check all live upstream APIs
+  const checkApiHealth = () => {
+    setIsRefreshing(true);
     // Check Weather
     fetch("https://api.open-meteo.com/v1/forecast?latitude=18.7963&longitude=78.9125&current=temperature_2m")
       .then((r) => setApiHealth((prev) => ({ ...prev, weather: r.ok ? "Operational (HTTP 200)" : `Error ${r.status}` })))
@@ -112,6 +86,11 @@ export default function AdminPortalPage() {
         setApiHealth((prev) => ({ ...prev, pwa: regs.length > 0 ? "Active & Pre-cached" : "Supported (Not registered)" }));
       });
     }
+    setTimeout(() => setIsRefreshing(false), 500);
+  };
+
+  useEffect(() => {
+    checkApiHealth();
   }, []);
 
   // Check saved session on mount or auto-authenticate if logged in as bioashfaq123@gmail.com
@@ -143,16 +122,6 @@ export default function AdminPortalPage() {
     } catch {
       // ignore
     }
-
-    // Load initial analytics
-    setStats(getAnalyticsSummary());
-
-    // Auto-poll stats every 30 seconds
-    const interval = setInterval(() => {
-      setStats(getAnalyticsSummary());
-    }, 30000);
-
-    return () => clearInterval(interval);
   }, [isLoggedIn, profile?.email]);
 
   const handleLogin = (e: React.FormEvent) => {
@@ -187,7 +156,6 @@ export default function AdminPortalPage() {
             JSON.stringify({ authenticated: true, email: cleanEmail, time: Date.now() })
           );
         }
-        setStats(getAnalyticsSummary());
       } else {
         setAuthError(
           "Invalid password for bioashfaq123@gmail.com. Please enter your valid credentials."
@@ -203,10 +171,30 @@ export default function AdminPortalPage() {
     localStorage.removeItem("sf_admin_session_v1");
   };
 
-  const handleRefreshStats = () => {
-    setIsRefreshing(true);
-    setStats(getAnalyticsSummary());
-    setTimeout(() => setIsRefreshing(false), 400);
+  const handleExportAudit = () => {
+    const auditData = {
+      platform: "Smart Farm Assistant",
+      version: "1.0.0 (ADSAUF-2047)",
+      administrator: ADMIN_EMAIL,
+      timestamp: new Date().toISOString(),
+      systemHealth: apiHealth,
+      activeProfile: {
+        name: profile.name,
+        district: profile.district,
+        mandal: profile.mandal,
+        primaryCrop: profile.primaryCrop,
+        areaAcre: profile.areaAcre,
+        soilType: profile.soilType,
+        irrigationType: profile.irrigationType,
+      },
+    };
+    const blob = new Blob([JSON.stringify(auditData, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `smart_farm_system_audit_${new Date().toISOString().slice(0, 10)}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
   // -------------------------------------------------------------
@@ -437,8 +425,6 @@ export default function AdminPortalPage() {
   // -------------------------------------------------------------
   // VIEW 3: AUTHENTICATED ADMIN VISITOR ANALYTICS DASHBOARD
   // -------------------------------------------------------------
-  const currentStats = stats || getAnalyticsSummary();
-
   return (
     <div className="min-h-screen bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100 font-sans pb-16">
       {/* Top Admin Navigation Bar */}
@@ -459,7 +445,7 @@ export default function AdminPortalPage() {
                 </span>
               </div>
               <p className="text-xs text-stone-500 dark:text-stone-400">
-                Platform Administrator: <b className="text-indigo-600 dark:text-indigo-400">{ADMIN_EMAIL}</b> &bull; Visitor Intelligence & Traffic Analytics
+                Platform Administrator: <b className="text-indigo-600 dark:text-indigo-400">{ADMIN_EMAIL}</b> &bull; System Health & Agricultural Knowledge Engine
               </p>
             </div>
           </div>
@@ -467,22 +453,22 @@ export default function AdminPortalPage() {
           {/* Action Buttons */}
           <div className="flex items-center gap-2">
             <button
-              onClick={handleRefreshStats}
+              onClick={checkApiHealth}
               disabled={isRefreshing}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 transition"
-              title="Refresh live visitor counts"
+              title="Re-check live upstream endpoints"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin" : ""}`} />
-              <span className="hidden sm:inline">Refresh</span>
+              <span className="hidden sm:inline">Re-check</span>
             </button>
 
             <button
-              onClick={() => exportAnalyticsCSV(currentStats)}
+              onClick={handleExportAudit}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition"
-              title="Download CSV report"
+              title="Download System Audit JSON"
             >
               <Download className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Export CSV</span>
+              <span className="hidden sm:inline">Export Audit</span>
             </button>
 
             <Link
@@ -521,16 +507,6 @@ export default function AdminPortalPage() {
             ⚡ System Health & API Diagnostics
           </button>
           <button
-            onClick={() => setAdminTab("analytics")}
-            className={`px-3.5 py-1.5 text-xs font-bold rounded-xl transition whitespace-nowrap ${
-              adminTab === "analytics"
-                ? "bg-indigo-600 text-white shadow-sm"
-                : "text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800"
-            }`}
-          >
-            📊 Local Session Analytics
-          </button>
-          <button
             onClick={() => setAdminTab("dataset")}
             className={`px-3.5 py-1.5 text-xs font-bold rounded-xl transition whitespace-nowrap ${
               adminTab === "dataset"
@@ -559,7 +535,7 @@ export default function AdminPortalPage() {
           <AgriculturalKnowledgeManager />
         ) : adminTab === "dataset" ? (
           <CropDiseaseDatasetManager />
-        ) : adminTab === "diagnostics" ? (
+        ) : (
           <div className="space-y-6">
             {/* Diagnostics Header */}
             <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-3xl p-6 shadow-md border border-slate-800">
@@ -576,7 +552,7 @@ export default function AdminPortalPage() {
                   </p>
                 </div>
                 <button
-                  onClick={handleRefreshStats}
+                  onClick={checkApiHealth}
                   className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center gap-1.5 self-start md:self-auto"
                 >
                   <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin" : ""}`} />
@@ -674,352 +650,20 @@ export default function AdminPortalPage() {
               </div>
             </div>
           </div>
-        ) : (
-          <>
-            {/* Banner Alert with Conference Context */}
-            <div className="bg-gradient-to-r from-indigo-900 via-blue-900 to-indigo-950 text-white rounded-2xl p-4 md:p-5 shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-indigo-700/50">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-indigo-500/30 text-indigo-200 border border-indigo-400/40">
-                    ADSAUF-2047 Telangana
-                  </span>
-                  <span className="text-xs text-indigo-300">Local Browser Session Monitoring</span>
-                </div>
-                <h2 className="text-base md:text-lg font-bold">
-                  Client Session & Usage Analytics (Browser Metrics)
-                </h2>
-                <p className="text-xs text-indigo-200/90 mt-0.5">
-                  Actual recorded page navigations, device breakdown, and feature visits on this device.
-                </p>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  onClick={handleRefreshStats}
-                  className="px-3 py-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 transition active:scale-95"
-                >
-                  <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin" : ""}`} />
-                  Refresh Metrics
-                </button>
-              </div>
-            </div>
-
-        {/* 4 Key Traffic KPI Metric Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Card 1: Total Visitors */}
-          <div className="bg-white dark:bg-stone-900 rounded-2xl p-5 border border-stone-200 dark:border-stone-800 shadow-sm hover:shadow transition">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-stone-500 dark:text-stone-400">
-                Total Visitors (All-Time)
-              </span>
-              <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center">
-                <Users className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="mt-3 flex items-baseline gap-2">
-              <span className="text-2xl md:text-3xl font-extrabold text-stone-900 dark:text-white">
-                {currentStats.totalVisitors.toLocaleString()}
-              </span>
-              <span className="inline-flex items-center text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                <ArrowUpRight className="w-3.5 h-3.5" />
-                +{currentStats.todayGrowthPercent}%
-              </span>
-            </div>
-            <p className="text-[11px] text-stone-400 dark:text-stone-500 mt-1">
-              Unique farmer sessions recorded
-            </p>
-          </div>
-
-          {/* Card 2: Active Users Right Now */}
-          <div className="bg-white dark:bg-stone-900 rounded-2xl p-5 border border-stone-200 dark:border-stone-800 shadow-sm hover:shadow transition relative overflow-hidden">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-stone-500 dark:text-stone-400">
-                Active Users Right Now
-              </span>
-              <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-                <Activity className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="mt-3 flex items-baseline gap-2">
-              <span className="text-2xl md:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping inline-block" />
-                {currentStats.activeUsersNow}
-              </span>
-              <span className="text-xs font-semibold text-stone-500 dark:text-stone-400">
-                Live Online
-              </span>
-            </div>
-            <p className="text-[11px] text-stone-400 dark:text-stone-500 mt-1">
-              Browsing within the last 10 minutes
-            </p>
-          </div>
-
-          {/* Card 3: Today's Visits */}
-          <div className="bg-white dark:bg-stone-900 rounded-2xl p-5 border border-stone-200 dark:border-stone-800 shadow-sm hover:shadow transition">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-stone-500 dark:text-stone-400">
-                Today&apos;s Rythu Visits
-              </span>
-              <div className="w-8 h-8 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center">
-                <TrendingUp className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="mt-3 flex items-baseline gap-2">
-              <span className="text-2xl md:text-3xl font-extrabold text-stone-900 dark:text-white">
-                {currentStats.todayVisits}
-              </span>
-              <span className="text-xs text-stone-500 dark:text-stone-400">
-                Avg 4m 12s session
-              </span>
-            </div>
-            <p className="text-[11px] text-stone-400 dark:text-stone-500 mt-1">
-              Daily peak between 08:00 AM – 11:30 AM
-            </p>
-          </div>
-
-          {/* Card 4: Device Breakdown */}
-          <div className="bg-white dark:bg-stone-900 rounded-2xl p-5 border border-stone-200 dark:border-stone-800 shadow-sm hover:shadow transition">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-stone-500 dark:text-stone-400">
-                Mobile vs Desktop Share
-              </span>
-              <div className="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center">
-                <Smartphone className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="mt-3 flex items-baseline justify-between">
-              <div>
-                <span className="text-2xl font-extrabold text-stone-900 dark:text-white">
-                  {currentStats.deviceBreakdown.mobile}%
-                </span>
-                <span className="text-xs text-stone-400 ml-1">Mobile</span>
-              </div>
-              <div className="text-right">
-                <span className="text-sm font-semibold text-stone-600 dark:text-stone-300">
-                  {currentStats.deviceBreakdown.desktop}%
-                </span>
-                <span className="text-[10px] text-stone-400 block">Desktop/Laptop</span>
-              </div>
-            </div>
-            <div className="w-full bg-stone-100 dark:bg-stone-800 h-2 rounded-full overflow-hidden mt-2.5 flex">
-              <div
-                style={{ width: `${currentStats.deviceBreakdown.mobile}%` }}
-                className="bg-emerald-500 h-full"
-              />
-              <div
-                style={{ width: `${currentStats.deviceBreakdown.desktop}%` }}
-                className="bg-indigo-500 h-full"
-              />
-              <div
-                style={{ width: `${currentStats.deviceBreakdown.tablet}%` }}
-                className="bg-amber-400 h-full"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Charts Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Traffic Trend Chart (2 columns) */}
-          <div className="lg:col-span-2 bg-white dark:bg-stone-900 rounded-2xl p-5 border border-stone-200 dark:border-stone-800 shadow-sm">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
-              <div>
-                <h3 className="text-sm font-bold text-stone-900 dark:text-white flex items-center gap-2">
-                  <Activity className="w-4 h-4 text-indigo-600" />
-                  Hourly Traffic Curve & Farmer Activity
-                </h3>
-                <p className="text-xs text-stone-500 dark:text-stone-400">
-                  Visits and page interactions over 24-hour cycle
-                </p>
-              </div>
-              <span className="text-[11px] font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-2.5 py-1 rounded-lg">
-                Peak: 04:00 PM – 06:30 PM (Mandi closing)
-              </span>
-            </div>
-
-            <div className="h-64 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={currentStats.hourlyTraffic}
-                  margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-                >
-                  <defs>
-                    <linearGradient id="colorVisits" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.4} />
-                      <stop offset="95%" stopColor="#4f46e5" stopOpacity={0.0} />
-                    </linearGradient>
-                    <linearGradient id="colorPageviews" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
-                      <stop offset="95%" stopColor="#10b981" stopOpacity={0.0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-                  <XAxis dataKey="hour" stroke="#9ca3af" fontSize={11} />
-                  <YAxis stroke="#9ca3af" fontSize={11} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#1f2937",
-                      borderColor: "#374151",
-                      borderRadius: "0.75rem",
-                      color: "#f9fafb",
-                      fontSize: "12px",
-                    }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="visitors"
-                    name="Unique Farmers"
-                    stroke="#4f46e5"
-                    strokeWidth={2}
-                    fillOpacity={1}
-                    fill="url(#colorVisits)"
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="pageviews"
-                    name="Interactions"
-                    stroke="#10b981"
-                    strokeWidth={2}
-                    fillOpacity={1}
-                    fill="url(#colorPageviews)"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* District Breakdown (1 column) */}
-          <div className="bg-white dark:bg-stone-900 rounded-2xl p-5 border border-stone-200 dark:border-stone-800 shadow-sm flex flex-col justify-between">
-            <div>
-              <h3 className="text-sm font-bold text-stone-900 dark:text-white flex items-center gap-2 mb-1">
-                <MapPin className="w-4 h-4 text-red-500" />
-                Farmer Reach by District
-              </h3>
-              <p className="text-xs text-stone-500 dark:text-stone-400 mb-4">
-                Telangana agricultural cluster distribution
-              </p>
-
-              <div className="space-y-3">
-                {currentStats.districts.map((d, i) => (
-                  <div key={i}>
-                    <div className="flex items-center justify-between text-xs mb-1">
-                      <span className="font-medium text-stone-700 dark:text-stone-300">
-                        {d.district}
-                      </span>
-                      <span className="font-semibold text-stone-900 dark:text-white">
-                        {d.farmers} farmers ({d.percentage}%)
-                      </span>
-                    </div>
-                    <div className="w-full bg-stone-100 dark:bg-stone-800 h-2 rounded-full overflow-hidden">
-                      <div
-                        style={{ width: `${d.percentage * 2.5}%` }}
-                        className="bg-gradient-to-r from-indigo-500 to-blue-500 h-full rounded-full"
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-4 pt-4 border-t border-stone-100 dark:border-stone-800 text-[11px] text-stone-400 flex items-center justify-between">
-              <span>Primary Hub: Jagtial & Karimnagar</span>
-              <span className="text-emerald-600 dark:text-emerald-400 font-medium">94% Active</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Lower Grid: Top Pages & Recent Activity Stream */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Top Pages Visited */}
-          <div className="bg-white dark:bg-stone-900 rounded-2xl p-5 border border-stone-200 dark:border-stone-800 shadow-sm">
-            <h3 className="text-sm font-bold text-stone-900 dark:text-white flex items-center gap-2 mb-1">
-              <Layers className="w-4 h-4 text-emerald-600" />
-              Most Visited Platform Modules
-            </h3>
-            <p className="text-xs text-stone-500 dark:text-stone-400 mb-4">
-              Where farmers spend the most time on your website
-            </p>
-
-            <div className="space-y-3.5">
-              {currentStats.topPages.map((page, idx) => (
-                <div key={idx} className="flex items-center justify-between gap-3 text-xs">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-semibold text-stone-800 dark:text-stone-200 truncate">
-                        {page.name}
-                      </span>
-                      <span className="text-stone-500 dark:text-stone-400 font-mono">
-                        {page.visits} hits ({page.percentage}%)
-                      </span>
-                    </div>
-                    <div className="w-full bg-stone-100 dark:bg-stone-800 h-1.5 rounded-full overflow-hidden">
-                      <div
-                        style={{ width: `${page.percentage * 2.2}%` }}
-                        className="bg-emerald-500 h-full rounded-full"
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Real-time Activity Stream */}
-          <div className="bg-white dark:bg-stone-900 rounded-2xl p-5 border border-stone-200 dark:border-stone-800 shadow-sm">
-            <div className="flex items-center justify-between mb-1">
-              <h3 className="text-sm font-bold text-stone-900 dark:text-white flex items-center gap-2">
-                <Clock className="w-4 h-4 text-blue-600" />
-                Live Farmer Activity Stream
-              </h3>
-              <span className="text-[10px] text-stone-400 uppercase font-mono tracking-wider">
-                Real-Time Log
-              </span>
-            </div>
-            <p className="text-xs text-stone-500 dark:text-stone-400 mb-4">
-              Recent interactions happening across the portal
-            </p>
-
-            <div className="space-y-2.5">
-              {currentStats.recentActivity.map((item) => (
-                <div
-                  key={item.id}
-                  className="p-2.5 rounded-xl bg-stone-50 dark:bg-stone-800/60 border border-stone-100 dark:border-stone-700/60 flex items-start gap-3 text-xs"
-                >
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0 mt-1.5 animate-pulse" />
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium text-stone-800 dark:text-stone-200">
-                      {item.action}
-                    </div>
-                    <div className="text-[11px] text-stone-400 flex items-center gap-2 mt-0.5">
-                      <span>{item.district}</span>
-                      <span>•</span>
-                      <span>{item.device}</span>
-                      <span>•</span>
-                      <code className="text-indigo-600 dark:text-indigo-400">{item.page}</code>
-                    </div>
-                  </div>
-                  <span className="text-[10px] text-stone-400 shrink-0 font-mono">
-                    {item.timeAgo}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        )}
 
         {/* Quick Admin Footer Info */}
         <div className="p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-indigo-900 dark:text-indigo-200">
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-indigo-600 shrink-0" />
             <span>
-              Connected Domains: <code className="font-bold">smartfarming-web.vercel.app</code> & <code className="font-bold">smartfarm-pjtau.vercel.app</code>
+              Connected Domains: <code className="font-bold">smartfarming-web.vercel.app</code>
             </span>
           </div>
           <div className="text-stone-500 dark:text-stone-400 text-[11px]">
-            Ready for live demonstration at ADSAUF-2047 (PJTAU, Hyderabad)
+            Ready for live demonstration at ADSAUF-2047 (PJTSAU, Hyderabad)
           </div>
         </div>
-        </>
-        )}
       </main>
     </div>
   );
