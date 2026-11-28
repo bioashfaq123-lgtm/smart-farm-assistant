@@ -109,34 +109,52 @@ export default function HomePage() {
 
   const faqs = [
     {
+      qEn: "What is Smart Farm Assistant and what features does it offer?",
+      qTe: "స్మార్ట్ ఫార్మ్ అసిస్టెంట్ అంటే ఏమిటి మరియు ఇందులో ఏయే సేవలు ఉన్నాయి?",
+      aEn: "Smart Farm Assistant is an integrated digital agriculture platform engineered for Telangana rythus. It brings together 10 precision farming modules in Telugu and English: AI Crop Disease Diagnosis, Krishi Sahayak research-grounded advisory, live ESP32 IoT soil moisture & pump automation, real-time APMC Mandi rates with ₹500 fine rice bonus, scientific NPK fertilizer calculators, and government scheme eligibility guides.",
+      aTe: "స్మార్ట్ ఫార్మ్ అసిస్టెంట్ అనేది తెలంగాణ రైతుల కోసం రూపొందించబడిన సమగ్ర డిజిటల్ వ్యవసాయ వేదిక. ఇందులో 10 ముఖ్య సేవలు ఉన్నాయి: ఏఐ పంట తెగుళ్ళ నిర్ధారణ, పరిశోధనా ఆధారిత కృషి సహాయక్ సలహాలు, ఈఎస్పీ32 ఐఓటీ ఆటోమేటిక్ నీటి పారుదల, లైవ్ మార్కెట్ ధరలు & ₹500 సన్న బియ్యం బోనస్ లెక్కలు, శాస్త్రీయ ఎరువుల కాలిక్యులేటర్లు మరియు ప్రభుత్వ పథకాల మార్గదర్శిని.",
+    },
+    {
+      qEn: "How does the AI Crop Disease Diagnosis (Plant Doctor) diagnose diseases?",
+      qTe: "ఏఐ పంట రోగ నిర్ధారణ (ప్లాంట్ డాక్టర్) తెగుళ్ళను ఎలా గుర్తిస్తుంది?",
+      aEn: "Farmers can upload or snap a leaf photo, or describe symptoms in Telugu or English. The vision model analyzes foliar lesions across 16 major regional crop diseases (Paddy Blast, Sheath Blight, Cotton Pink Bollworm, Chilli Anthracnose, etc.), cross-checks with CIBRC statutory safety guidelines, and recommends verified chemical dilutions, biological controls (Trichoderma), and mandatory Pre-Harvest Intervals (PHI).",
+      aTe: "రైతులు తెగులు సోకిన ఆకు ఫోటో తీసి అప్‌లోడ్ చేయవచ్చు లేదా లక్షణాలను వివరించవచ్చు. ఏఐ మోడల్ 16 రకాల ప్రధాన పంట తెగుళ్ళను (వరి అగ్గితెగులు, పొడతెగులు, పత్తి గులాబీ రంగు పురుగు, మిర్చి కొమ్మకుళ్లు మొదలైనవి) ఖచ్చితంగా గుర్తించి, సీఐబీఆర్‌సీ ఆమోదిత మందుల మోతాదులు, ట్రైకోడెర్మా వంటి జీవ నియంత్రణ మరియు కోత ముందు వ్యవధి (PHI) సూచిస్తుంది.",
+    },
+    {
+      qEn: "How is AI Krishi Sahayak different from generic chatbots?",
+      qTe: "ఏఐ కృషి సహాయక్ సాధారణ చాట్‌బాట్‌ల కంటే ఎలా భిన్నమైనది?",
+      aEn: "Unlike generic AI models that hallucinate unverified or unsafe chemicals, Krishi Sahayak is strictly grounded in 3,689 pages of verified PJTSAU research literature, including 56 monthly issues of Vyavasayam (2022–2026) and the Telangana Vyavasaayam Diksoochi. Every recommendation cites the exact publication issue and page number, ensuring 100% scientific credibility.",
+      aTe: "సాధారణ ఏఐ చాట్‌బాట్‌ల వలె తప్పుడు మందులను సూచించకుండా, కృషి సహాయక్ 3,689 పేజీల విశ్వవిద్యాలయ వ్యవసాయ పరిశోధనా ప్రచురణలు మరియు వ్యవసాయం మాసపత్రికల ఆధారంగా పనిచేస్తుంది. ప్రతి సలహాకు ఆధారమైన ప్రచురణ మరియు పేజీ సంఖ్యను సైటేషన్ రూపంలో అందిస్తుంది.",
+    },
+    {
+      qEn: "How does the ESP32 IoT Soil Telemetry automate irrigation and protect borewells?",
+      qTe: "ఈఎస్పీ32 ఐఓటీ సెన్సార్లు సాగునీటి పంపును ఎలా ఆటోమేట్ చేస్తాయి?",
+      aEn: "Field-edge capacitive soil moisture sensors (v1.2) continuously sample root-zone volumetric water content (VWC %). When moisture drops below 30%, a 30A optocoupled relay automatically turns ON the borewell pump. Once optimal field capacity reaches 55%, it automatically cuts off. This saves 25–30% water, prevents dangerous midnight field visits, and includes dry-run and rain-skip protection.",
+      aTe: "నేలలో అమర్చిన సెన్సార్లు వేరు మండలంలోని తేమను నిరంతరం కొలుస్తాయి. తేమ 30% కంటే తగ్గితే 30A రిలే ద్వారా బోరుబావి మోటార్ ఆటోమేటిక్‌గా ఆన్ అవుతుంది; 55% తగినంత తేమ చేరగానే దానంతటదే ఆగిపోతుంది. ఇది 25-30% నీటిని ఆదా చేయడంతో పాటు, అర్ధరాత్రి పొలాలకు వెళ్లే ప్రమాదాన్ని నివారిస్తుంది.",
+    },
+    {
+      qEn: "How does the Fertilizer Calculator solve the 'DAP Nitrogen Trap' to save money?",
+      qTe: "ఎరువుల కాలిక్యులేటర్ 'డీఏపీ నత్రజని లోపం' సరిచేసి డబ్బును ఎలా ఆదా చేస్తుంది?",
+      aEn: "Farmers often apply full urea alongside Di-Ammonium Phosphate (DAP), forgetting that each 50 kg bag of DAP already supplies 9.4 kg of elemental Nitrogen. Our calculator uses stoichiometric deduction: it subtracts the Nitrogen supplied by DAP from the urea requirement, saving approximately 1 full bag (~21 kg) of urea per acre while preventing blast outbreaks and lodging.",
+      aTe: "రైతులు డీఏపీతో పాటు పూర్తి మోతాదు యూరియాను వేస్తుంటారు. కానీ 50 కిలోల డీఏపీ బస్తాలో 9.4 కిలోల స్వచ్ఛమైన నత్రజని ఉంటుందని గమనించరు. మన కాలిక్యులేటర్ డీఏపీలోని నత్రజనిని లెక్కించి, యూరియా మోతాదు నుండి తీసివేస్తుంది. దీనివల్ల ఎకరాకు దాదాపు 1 బస్తా యూరియా ఆదా అవ్వడమే కాక, పైరు పడిపోకుండా మరియు అగ్గితెగులు రాకుండా కాపాడుతుంది.",
+    },
+    {
+      qEn: "How does the Telangana ₹500/quintal Fine Rice bonus work in Mandi Rates?",
+      qTe: "తెలంగాణ ₹500 సన్న బియ్యం బోనస్ లైవ్ మార్కెట్‌లో ఎలా లెక్కించబడుతుంది?",
+      aEn: "The Government of Telangana provides an additional ₹500/Qtl incentive bonus over the Central Minimum Support Price (MSP of ₹2,320) for 33 notified fine paddy varieties (such as RNR 15048 / Telangana Sona, BPT 5204). The live Mandi module tracks daily arrival prices across 12 Telangana APMC markets and instantly computes total earnings with the ₹500 bonus (₹2,820/Qtl total).",
+      aTe: "తెలంగాణ ప్రభుత్వం 33 రకాల సన్న వరి రకాలకు (RNR 15048 తెలంగాణ సోనా, BPT 5204 వంటివి) కేంద్ర కనీస మద్దతు ధర ₹2,320కి అదనంగా ₹500 బోనస్ అందిస్తుంది. మన మార్కెట్ విభాగం 12 వ్యవసాయ మార్కెట్ల ధరలను ట్రాక్ చేస్తూ, ఈ బోనస్‌తో కలిపి వచ్చే మొత్తం ఆదాయాన్ని (క్వింటాలుకు ₹2,820) తక్షణమే లెక్కిస్తుంది.",
+    },
+    {
+      qEn: "Can the platform work in remote fields without internet connectivity?",
+      qTe: "మారుమూల గ్రామీణ పొలాల్లో ఇంటర్నెట్ లేకపోయినా పనిచేస్తుందా?",
+      aEn: "Yes! Smart Farm Assistant is an offline-capable Progressive Web App (PWA). Once opened, critical agronomic Package of Practices, fertilizer calculators, and emergency diagnostic reference tables are pre-cached and operate seamlessly offline even in remote fields without mobile signal.",
+      aTe: "ఖచ్చితంగా! పీడబ్ల్యూఏ (PWA) ఆఫ్‌లైన్ టెక్నాలజీ ద్వారా ఇంటర్నెట్ సిగ్నల్ లేని మారుమూల చేలలో కూడా వ్యవసాయ సలహాలు, ఎరువుల కాలిక్యులేటర్లు మరియు అత్యవసర పంట రక్షణ సమాచారం అందుబాటులో ఉంటాయి.",
+    },
+    {
       qEn: "Is Smart Farm Assistant free for farmers to use?",
       qTe: "స్మార్ట్ ఫార్మ్ అసిస్టెంట్ రైతులకు ఉచితంగా లభిస్తుందా?",
-      aEn: "Yes, 100% free open advisory platform. Farmers can access AI crop disease diagnosis, live APMC Mandi rates, and government scheme eligibility guides without any subscription fee.",
-      aTe: "అవును, రైతులందరికీ 100% ఉచితం. ఏఐ పంట వ్యాధి నిర్ధారణ, లైవ్ మార్కెట్ ధరలు మరియు ప్రభుత్వ పథకాల సమాచారం ఉచితంగా పొందవచ్చు.",
-    },
-    {
-      qEn: "Why should I register my farm profile first?",
-      qTe: "ముందుగా నా రైతు ప్రొఫైల్‌ను ఎందుకు నమోదు చేసుకోవాలి?",
-      aEn: "Registering takes just 30 seconds. It unlocks personalized AI agronomic advice, live weather forecasts for your specific district, local APMC Mandi price tracking, and automated IoT pump synchronization.",
-      aTe: "నమోదు చేసుకోవడానికి 30 సెకన్లు మాత్రమే పడుతుంది. ఇది మీ జిల్లా వాతావరణం, పంట వ్యాధి నివారణ సలహాలు, సమీప మార్కెట్ యార్డ్ ధరలు మరియు ఆటోమేటిక్ నీటి పారుదల నియంత్రణను అందిస్తుంది.",
-    },
-    {
-      qEn: "How does the Telangana ₹500/quintal Fine Rice bonus work?",
-      qTe: "తెలంగాణ ₹500 సన్న బియ్యం బోనస్ ఎలా లభిస్తుంది?",
-      aEn: "The Government of Telangana pays an additional ₹500/Qtl incentive bonus over the Central MSP (₹2,320) for 33 certified fine paddy varieties (like RNR 15048 / Telangana Sona, BPT 5204). Total farmer rate is ₹2,820/Qtl disbursed directly via DBT.",
-      aTe: "కేంద్ర మద్దతు ధర ₹2,320కి అదనంగా ప్రభుత్వం క్వింటాలుకు ₹500 బోనస్ అందిస్తుంది (మొత్తం ₹2,820/క్వింటాల్). RNR 15048, BPT 5204 వంటి 33 సన్న వరి రకాలకు కొనుగోలు కేంద్రాల ద్వారా ఇది నేరుగా డీబీటీలో జమవుతుంది.",
-    },
-    {
-      qEn: "Can the platform work without internet connectivity in remote fields?",
-      qTe: "మారుమూల గ్రామీణ పొలాల్లో ఇంటర్నెట్ లేకపోయినా పనిచేస్తుందా?",
-      aEn: "Yes! The platform includes full PWA offline caching with pre-loaded scientific Package of Practices agronomic rules and emergency offline diagnostics.",
-      aTe: "ఖచ్చితంగా! పీడబ్ల్యూఏ (PWA) ఆఫ్‌లైన్ టెక్నాలజీ ద్వారా ఇంటర్నెట్ సిగ్నల్ లేని మారుమూల చేలలో కూడా వ్యవసాయ సలహాలు, పంట రక్షణ విధానాలు అందుబాటులో ఉంటాయి.",
-    },
-    {
-      qEn: "How does the ESP32 IoT Soil Telemetry automate irrigation?",
-      qTe: "ఈఎస్పీ32 (ESP32) సెన్సార్లు సాగునీటి పంపును ఎలా ఆటోమేట్ చేస్తాయి?",
-      aEn: "Capacitive soil moisture sensors continuously measure Volumetric Water Content (VWC %). When soil drops below your threshold, an automated relay triggers the pump, and automatically turns off when optimal soil saturation is reached.",
-      aTe: "భూమిలోని తేమ శాతాన్ని సెన్సార్లు నిరంతరం పర్యవేక్షిస్తాయి. తేమ సెట్ చేసిన శాతం కంటే తగ్గితే మోటార్ ఆన్ అవ్వడం, సరైన తేమ రాగానే ఆటోమేటిక్‌గా మోటార్ ఆగిపోవడం జరుగుతుంది.",
+      aEn: "Yes, 100% free open advisory platform. Farmers can access AI crop disease diagnosis, bilingual voice chat with Krishi Sahayak, live APMC Mandi rates, scientific calculators, and government scheme guides without any subscription fee or hidden charges.",
+      aTe: "అవును, రైతులందరికీ 100% ఉచితం. ఏఐ పంట వ్యాధి నిర్ధారణ, కృషి సహాయక్ వాయిస్ చాట్, లైవ్ మార్కెట్ ధరలు, సైంటిఫిక్ కాలిక్యులేటర్లు మరియు ప్రభుత్వ పథకాల సమాచారం ఎటువంటి రుసుము లేకుండా ఉచితంగా పొందవచ్చు.",
     },
   ];
 
@@ -810,26 +828,26 @@ export default function HomePage() {
           </h3>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-3.5">
           {faqs.map((faq, index) => (
             <div
               key={index}
-              className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 overflow-hidden shadow-2xs"
+              className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 overflow-hidden shadow-xs transition hover:border-emerald-500/40"
             >
               <button
                 type="button"
                 onClick={() => toggleFaq(index)}
-                className="w-full text-left p-4.5 flex items-center justify-between font-bold text-sm text-stone-900 dark:text-white"
+                className="w-full text-left py-4 px-5 flex items-center justify-between font-bold text-sm sm:text-base text-stone-900 dark:text-white hover:bg-stone-50/70 dark:hover:bg-stone-800/40 transition-colors"
               >
-                <span>{lang === "te" ? faq.qTe : faq.qEn}</span>
+                <span className="pr-4 leading-snug">{lang === "te" ? faq.qTe : faq.qEn}</span>
                 <ChevronRight
-                  className={`w-4 h-4 text-stone-400 transition-transform ${
-                    openFaqIndex === index ? "rotate-90 text-emerald-600" : ""
+                  className={`w-5 h-5 shrink-0 text-emerald-600 transition-transform duration-200 ${
+                    openFaqIndex === index ? "rotate-90 text-emerald-700" : "text-stone-400"
                   }`}
                 />
               </button>
               {openFaqIndex === index && (
-                <div className="px-4.5 pb-4.5 text-xs text-stone-600 dark:text-stone-300 leading-relaxed border-t border-stone-100 dark:border-stone-800 pt-3">
+                <div className="px-5 pb-5 pt-3.5 text-xs sm:text-sm text-stone-600 dark:text-stone-300 leading-relaxed border-t border-stone-100 dark:border-stone-800 bg-stone-50/60 dark:bg-stone-850/40">
                   <p>{lang === "te" ? faq.aTe : faq.aEn}</p>
                 </div>
               )}
